@@ -640,6 +640,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('home',this)">🏠 الرئيسية</button>
     <button class="nav-tab" onclick="showPage('records',this)">📊 السجلات</button>
+    <button class="nav-tab" onclick="showPage('archive',this)">🗂️ الأرشيف</button>
+    <button class="nav-tab" onclick="showAttendancePage(this)">📅 الحضور</button>
+    <button class="nav-tab" onclick="showTopEmployeePage(this)">⭐ الأعلى تقييم</button>
   </div>
   <div class="nav-logo">
     <div id="navUser"></div>
@@ -1079,14 +1082,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
             <option>احمد الحماد</option><option>احمد سحاب</option><option>ابراهيم الحمد</option>
           </select>
         </div>
-        <div class="sep"></div>
-        <div class="slabel">صورة المشكلة / Photo</div>
-        <div class="file-upload" onclick="document.getElementById('fImgs').click()">
-          <input type="file" id="fImgs" accept="image/*" multiple onchange="previewImgs(this)">
-          <div style="font-size:26px;margin-bottom:5px">📷</div>
-          <p style="font-size:12px;color:var(--text-dim)">اضغط لإضافة صورة / Tap to add photo</p>
-        </div>
-        <div class="file-preview" id="fPrev"></div>
         <button class="submit-btn" id="fBtn" onclick="submitFacility()" style="margin-top:13px">🔧 تسجيل الملاحظة / Submit Report</button>
       </div>
       <div class="success-msg" id="fOk">
@@ -4038,6 +4033,10 @@ function doLogin(){
       if(s.startsWith('__admin_')){
         const sec=s.replace('__admin_','');
         adminOnly(sec);
+      }else if(s==='__att__'){
+        showAttendancePage(null);
+      }else if(s==='__top__'){
+        showTopEmployeePage(null);
       }else{
         openSec(s);
       }
@@ -4125,7 +4124,7 @@ function updateNav(){
 
 // NAVIGATION
 function showPage(name,el){
-  if(name==='records'&&!currentUser){pendingSec='__rec__';showLM();return;}
+  if((name==='records'||name==='archive')&&!currentUser){pendingSec='__rec__';showLM();return;}
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
@@ -4325,35 +4324,16 @@ async function submitFacility(){
   const timeVal=document.getElementById('fTime').value;
   const desc=document.getElementById('fDesc').value;
 
-  // ── رفع الصور لـ Supabase Storage ──
-  const fileInput=document.getElementById('fImgs');
-  const files=[...fileInput.files].slice(0,3);
-  const photoUrls=[];
-  if(files.length){
-    btn.textContent='⏳ جاري رفع الصور...';
-    for(const file of files){
-      const ext=file.name.split('.').pop();
-      const path=`facility/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-      const{data:upData,error:upErr}=await db.storage.from('buket').upload(path,file,{cacheControl:'3600',upsert:false});
-      if(upErr){toast('❌ خطأ في رفع الصورة: '+upErr.message);btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';return;}
-      const{data:urlData}=db.storage.from('buket').getPublicUrl(path);
-      photoUrls.push(urlData.publicUrl);
-    }
-    btn.textContent='⏳ جاري الحفظ...';
-  }
-
-  // ── حفظ السجل مع روابط الصور ──
+  // ── حفظ السجل ──
   const{error}=await db.from('facility_reports').insert([{
     problem_type:type,location:loc,date:dateVal,time:timeVal,
-    description:desc,observer:obs,
-    photo_urls:photoUrls.length?photoUrls:null
+    description:desc,observer:obs
   }]);
   if(error){toast('❌ '+error.message);btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';return;}
 
   // ── إرسال إيميل تنبيه للمدير مع روابط الصور ──
   const subject='🔧 ملاحظة مرافق جديدة — '+type;
   let body='السلام عليكم،\n\nتم تسجيل ملاحظة مرافق جديدة:\n\nالنوع: '+type+'\nالموقع: '+loc+'\nالتاريخ: '+dateVal+'\nالوقت: '+timeVal+'\nالراصد: '+obs+'\nالتفاصيل: '+(desc||'—');
-  if(photoUrls.length) body+='\n\nروابط الصور:\n'+photoUrls.map((u,i)=>(i+1)+'. '+u).join('\n');
   body+='\n\nمنصة إدارة الجودة — نورة لتعليم القيادة';
   sendEmailNotification(subject,body,ADMIN_EMAIL);
 
@@ -4362,7 +4342,6 @@ async function submitFacility(){
 function resetF(){
   ['fType','fObs'].forEach(id=>document.getElementById(id).value='');
   ['fLoc','fDesc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fPrev').innerHTML='';document.getElementById('fImgs').value='';
   const btn=document.getElementById('fBtn');btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';
   document.getElementById('fForm').style.display='block';document.getElementById('fOk').style.display='none';setDT();
 }
@@ -4525,14 +4504,6 @@ function renderF(recs){
   const l=document.getElementById('fList');
   if(!recs.length){l.innerHTML='<div class="empty"><div class="em">📭</div><p>لا توجد ملاحظات / No reports</p></div>';return;}
   l.innerHTML=recs.map(r=>{
-    const photos=Array.isArray(r.photo_urls)?r.photo_urls:(r.photo_urls?[r.photo_urls]:[]);
-    const photosHtml=photos.length?`
-      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
-        ${photos.map(url=>`
-          <a href="${url}" target="_blank" title="عرض الصورة">
-            <img src="${url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:.2s;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
-          </a>`).join('')}
-      </div>`:'';
     return`<div class="facility-rec">
       <div class="f-thumb">🔧</div>
       <div style="flex:1">
@@ -4540,8 +4511,6 @@ function renderF(recs){
         <div style="font-size:11px;color:var(--text-dim);margin-top:3px">📍 ${r.location||'-'}</div>
         <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${r.date||''} ${r.time||''} · ${r.observer||''}</div>
         ${r.description?`<div style="font-size:11px;margin-top:5px;color:var(--text)">${r.description}</div>`:''}
-        ${photosHtml}
-        ${photos.length?`<div style="font-size:9px;color:var(--accent);margin-top:4px;">📷 ${photos.length} صورة — اضغط للتكبير</div>`:''}
       </div>
     </div>`;
   }).join('');
@@ -6018,7 +5987,380 @@ function renderBuildingDash(){
 }
 loadSummaryWidgets();
 setDT();updateNav();
+// Set today's date for attendance
+(function(){const today=new Date().toISOString().split('T')[0];['attDate','otDate'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today;});})();
 setTimeout(()=>{ if(currentUser){loadActiveStaffHome();renderHomeWidgets();} },300);
+
+// ══════════════════════════════════════════════════
+// الأرشيف — Archive
+// ══════════════════════════════════════════════════
+async function loadArchive(section){
+  const el=document.getElementById('archiveContent');
+  el.innerHTML='<div class="loading"><div class="spin"></div>جاري التحميل...</div>';
+  let data=[],error=null;
+  if(section==='violations'){
+    ({data,error}=await db.from('violations').select('*').order('created_at',{ascending:false}));
+    if(error){el.innerHTML='<p style="color:red">خطأ في التحميل</p>';return;}
+    el.innerHTML=!data.length?'<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>':
+      data.map(r=>`<div class="facility-rec"><div class="f-thumb">⚠️</div><div style="flex:1">
+        <div style="font-weight:700">${r.violation_type||r.type||'-'}</div>
+        <div style="font-size:11px;color:var(--text-dim)">${r.date||r.created_at?.split('T')[0]||''} · ${r.observer||r.staff||''}</div>
+        ${r.description||r.notes?`<div style="font-size:11px;margin-top:4px">${r.description||r.notes||''}</div>`:''}
+      </div></div>`).join('');
+  } else if(section==='facility'){
+    ({data,error}=await db.from('facility_reports').select('*').order('created_at',{ascending:false}));
+    if(error){el.innerHTML='<p style="color:red">خطأ في التحميل</p>';return;}
+    el.innerHTML=!data.length?'<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>':
+      data.map(r=>`<div class="facility-rec"><div class="f-thumb">🔧</div><div style="flex:1">
+        <div style="font-weight:700">${r.problem_type||'-'}</div>
+        <div style="font-size:11px;color:var(--text-dim)">📍 ${r.location||'-'}</div>
+        <div style="font-size:10px;color:var(--text-dim)">${r.date||''} ${r.time||''} · ${r.observer||''}</div>
+        ${r.description?`<div style="font-size:11px;margin-top:4px">${r.description}</div>`:''}
+      </div></div>`).join('');
+  } else if(section==='survey'){
+    ({data,error}=await db.from('surveys').select('*').order('created_at',{ascending:false}));
+    if(error){el.innerHTML='<p style="color:red">خطأ في التحميل</p>';return;}
+    el.innerHTML=!data.length?'<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>':
+      data.map(r=>`<div class="facility-rec"><div class="f-thumb">⭐</div><div style="flex:1">
+        <div style="font-weight:700">${r.client_name||r.client||'-'}</div>
+        <div style="font-size:11px;color:var(--text-dim)">${r.date||r.created_at?.split('T')[0]||''} · ${r.observer||r.staff||''}</div>
+        ${r.notes||r.comments?`<div style="font-size:11px;margin-top:4px">${r.notes||r.comments||''}</div>`:''}
+      </div></div>`).join('');
+  } else if(section==='attendance'){
+    ({data,error}=await db.from('attendance').select('*').order('date',{ascending:false}));
+    if(error){el.innerHTML='<p style="color:red">خطأ في التحميل</p>';return;}
+    const statusEmoji={'حضور':'✅','تأخير بعذر':'⏰','خروج مبكر':'🚪','إجازة':'🏖️','حالة وفاة':'🕊️','إجازة اختبارات':'📚','استئذان':'🤚'};
+    el.innerHTML=!data.length?'<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>':
+      data.map(r=>`<div class="facility-rec"><div class="f-thumb">${statusEmoji[r.status]||'📋'}</div><div style="flex:1">
+        <div style="font-weight:700">${r.employee_name||'-'}</div>
+        <div style="font-size:11px;color:var(--text-dim)">${r.date||''}</div>
+        <div style="font-size:12px;color:var(--accent);margin-top:3px">${r.status||''}</div>
+        ${r.notes?`<div style="font-size:11px;margin-top:3px;color:var(--text-dim)">${r.notes}</div>`:''}
+      </div></div>`).join('');
+  } else if(section==='building'){
+    ({data,error}=await db.from('building_reports').select('*').order('created_at',{ascending:false}));
+    if(error){el.innerHTML='<p style="color:red">خطأ في التحميل</p>';return;}
+    el.innerHTML=!data.length?'<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>':
+      data.map(r=>`<div class="facility-rec"><div class="f-thumb">🏢</div><div style="flex:1">
+        <div style="font-weight:700">${r.date||r.created_at?.split('T')[0]||''} ${r.time||''}</div>
+        <div style="font-size:11px;color:var(--text-dim)">👤 ${r.observer||''}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+          <span style="font-size:10px;background:rgba(0,168,150,0.1);padding:2px 6px;border-radius:4px">استقبال: ${r.recep_crowd||'-'}</span>
+          <span style="font-size:10px;background:rgba(0,168,150,0.1);padding:2px 6px;border-radius:4px">انتظار: ${r.wait_time||'-'}</span>
+          <span style="font-size:10px;background:rgba(0,168,150,0.1);padding:2px 6px;border-radius:4px">قاعات: ${r.exam_halls||'-'}</span>
+        </div>
+      </div></div>`).join('');
+  }
+}
+
+// ══════════════════════════════════════════════════
+// الحضور والانصراف — Attendance
+// ══════════════════════════════════════════════════
+function showAttendancePage(el){
+  if(!currentUser){pendingSec='__att__';showLM();return;}
+  if(currentUser.role!=='admin'){toast('🔒 هذا القسم للإدارة فقط');return;}
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-attendance').classList.add('active');
+  if(el)el.classList.add('active');
+  loadAttendanceToday();
+}
+
+const EMPLOYEES=['شهد المقرن','سمية الخضيري','امجاد ابانمي','احمد الحماد','احمد سحاب','ابراهيم الحمد'];
+
+function toggleAttStatus(val){
+  document.getElementById('attExitTimeRow').style.display=(val==='خروج مبكر')?'flex':'none';
+  document.getElementById('attDaysRow').style.display=(val==='إجازة'||val==='إجازة اختبارات')?'flex':'none';
+  document.getElementById('attPermTimeRow').style.display=(val==='استئذان')?'flex':'none';
+}
+
+async function submitAttendance(){
+  if(!currentUser||currentUser.role!=='admin'){toast('❌ للإدارة فقط');return;}
+  const emp=document.getElementById('attEmp').value;
+  const status=document.getElementById('attStatus').value;
+  const date=document.getElementById('attDate').value;
+  if(!emp){toast('⚠️ اختر الموظف');return;}
+  if(!status){toast('⚠️ اختر الحالة');return;}
+  const notes=document.getElementById('attNotes').value.trim();
+  const extraTime=document.getElementById('attExitTime').value;
+  const extraDays=document.getElementById('attDays').value;
+  const extraPermTime=document.getElementById('attPermTime').value;
+  let noteFull=notes;
+  if(status==='خروج مبكر'&&extraTime) noteFull=(noteFull?noteFull+' | ':'')+'وقت الخروج: '+extraTime;
+  if((status==='إجازة'||status==='إجازة اختبارات')&&extraDays) noteFull=(noteFull?noteFull+' | ':'')+'عدد الأيام: '+extraDays;
+  if(status==='استئذان'&&extraPermTime) noteFull=(noteFull?noteFull+' | ':'')+'وقت الاستئذان: '+extraPermTime;
+
+  const{error}=await db.from('attendance').insert([{
+    employee_name:emp,status,date,notes:noteFull||null,recorded_by:currentUser.name
+  }]);
+  if(error){toast('❌ '+error.message);return;}
+  toast('✅ تم تسجيل الحضور');
+  document.getElementById('attStatus').value='';
+  document.getElementById('attNotes').value='';
+  toggleAttStatus('');
+  loadAttendanceToday();
+}
+
+async function submitOvertime(){
+  if(!currentUser||currentUser.role!=='admin'){toast('❌ للإدارة فقط');return;}
+  const emp=document.getElementById('otEmp').value;
+  const date=document.getElementById('otDate').value;
+  const from=document.getElementById('otFrom').value;
+  const to=document.getElementById('otTo').value;
+  if(!emp||!date||!from||!to){toast('⚠️ أكمل جميع الحقول');return;}
+  const{error}=await db.from('attendance').insert([{
+    employee_name:emp,status:'عمل إضافي',date,notes:`من ${from} إلى ${to}`,recorded_by:currentUser.name
+  }]);
+  if(error){toast('❌ '+error.message);return;}
+  toast('✅ تم تسجيل العمل الإضافي');
+}
+
+async function loadAttendanceToday(){
+  const today=new Date().toISOString().split('T')[0];
+  const{data}=await db.from('attendance').select('*').eq('date',today).order('created_at',{ascending:false});
+  const el=document.getElementById('attTodayList');
+  const statusEmoji={'حضور':'✅','تأخير بعذر':'⏰','خروج مبكر':'🚪','إجازة':'🏖️','حالة وفاة':'🕊️','إجازة اختبارات':'📚','استئذان':'🤚','عمل إضافي':'💪'};
+  const recorded=data||[];
+  const recordedNames=recorded.map(r=>r.employee_name);
+  const present=EMPLOYEES.filter(n=>!recordedNames.includes(n));
+  let html='';
+  if(recorded.length){
+    html+=recorded.map(r=>`<div class="facility-rec" style="padding:10px 12px">
+      <div class="f-thumb" style="width:34px;height:34px;font-size:18px">${statusEmoji[r.status]||'📋'}</div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:12px">${r.employee_name}</div>
+        <div style="font-size:11px;color:var(--accent)">${r.status}</div>
+        ${r.notes?`<div style="font-size:10px;color:var(--text-dim)">${r.notes}</div>`:''}
+      </div>
+    </div>`).join('');
+  }
+  if(present.length){
+    html+=present.map(n=>`<div class="facility-rec" style="padding:10px 12px">
+      <div class="f-thumb" style="width:34px;height:34px;font-size:18px">✅</div>
+      <div style="flex:1"><div style="font-weight:700;font-size:12px">${n}</div><div style="font-size:11px;color:var(--text-dim)">حضور (افتراضي)</div></div>
+    </div>`).join('');
+  }
+  el.innerHTML=html||'<div class="empty"><div class="em">📭</div><p>لا توجد سجلات اليوم</p></div>';
+}
+
+async function exportAttendanceExcel(){
+  if(!currentUser||currentUser.role!=='admin'){toast('❌ للإدارة فقط');return;}
+  const month=document.getElementById('attExportMonth').value;
+  if(!month){toast('⚠️ اختر الشهر');return;}
+  const[yr,mo]=month.split('-');
+  const from=`${yr}-${mo}-01`;
+  const last=new Date(yr,mo,0).getDate();
+  const to=`${yr}-${mo}-${String(last).padStart(2,'0')}`;
+  const{data}=await db.from('attendance').select('*').gte('date',from).lte('date',to).order('date');
+  if(!data||!data.length){toast('⚠️ لا توجد سجلات لهذا الشهر');return;}
+  const rows=[['اسم الموظف','التاريخ','الحالة','ملاحظات','مسجّل بواسطة']];
+  data.forEach(r=>rows.push([r.employee_name,r.date,r.status,r.notes||'',r.recorded_by||'']));
+  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const bom='\uFEFF';
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`حضور_${month}.csv`;a.click();
+  toast('✅ تم تصدير ملف Excel');
+}
+
+// ══════════════════════════════════════════════════
+// الموظف الأعلى تقييم — Top Employee
+// ══════════════════════════════════════════════════
+function showTopEmployeePage(el){
+  if(!currentUser){pendingSec='__top__';showLM();return;}
+  if(currentUser.role!=='admin'){toast('🔒 هذا القسم للإدارة فقط');return;}
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-top-employee').classList.add('active');
+  if(el)el.classList.add('active');
+  loadTopEmployee();
+}
+
+async function loadTopEmployee(){
+  const el=document.getElementById('topEmpContent');
+  el.innerHTML='<div class="loading"><div class="spin"></div>جاري التحميل...</div>';
+  const{data,error}=await db.from('surveys').select('*').order('created_at',{ascending:false});
+  if(error||!data||!data.length){
+    el.innerHTML='<div class="empty"><div class="em">📊</div><p>لا توجد بيانات استبيان حتى الآن</p><p style="font-size:11px;color:var(--text-dim);margin-top:8px">سيتم ربط Google Sheets لاحقاً</p></div>';
+    return;
+  }
+  const empScores={};
+  const empComments={};
+  data.forEach(r=>{
+    const obs=r.observer||r.staff;
+    if(!obs)return;
+    if(!empScores[obs]){empScores[obs]=[];empComments[obs]=[];}
+    const scores=[r.q1,r.q2,r.q3,r.q4,r.q5].filter(v=>v!=null).map(Number);
+    if(scores.length) empScores[obs].push(scores.reduce((a,b)=>a+b,0)/scores.length);
+    if(r.notes||r.comments) empComments[obs].push(r.notes||r.comments);
+  });
+  const ranked=Object.entries(empScores)
+    .map(([name,scores])=>({name,avg:scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:0,count:scores.length,comments:empComments[name]||[]}))
+    .sort((a,b)=>b.avg-a.avg);
+  if(!ranked.length){el.innerHTML='<div class="empty"><div class="em">📊</div><p>لا توجد بيانات كافية</p></div>';return;}
+  const medals=['🥇','🥈','🥉'];
+  el.innerHTML=ranked.map((e,i)=>`
+    <div class="facility-rec" style="padding:14px 16px;${i===0?'border:2px solid var(--accent);':''}">
+      <div class="f-thumb" style="width:40px;height:40px;font-size:22px;background:${i===0?'rgba(0,168,150,0.15)':'transparent'}">${medals[i]||'👤'}</div>
+      <div style="flex:1">
+        <div style="font-weight:800;font-size:14px">${e.name}</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+          <span style="font-size:18px;color:var(--accent);font-weight:900">${e.avg.toFixed(1)}</span>
+          <span style="font-size:11px;color:var(--text-dim)">/ 5 · ${e.count} تقييم</span>
+        </div>
+        ${'⭐'.repeat(Math.round(e.avg))}
+        ${e.comments.length?`<div style="margin-top:8px;padding:8px;background:rgba(0,168,150,0.07);border-radius:8px;">
+          <div style="font-size:10px;color:var(--accent);margin-bottom:4px">💬 تعليقات العملاء</div>
+          ${e.comments.slice(0,3).map(c=>`<div style="font-size:11px;color:var(--text);margin-bottom:2px">• ${c}</div>`).join('')}
+        </div>`:''}
+      </div>
+    </div>`).join('');
+}
+
 </script>
+
+<!-- ══ ARCHIVE PAGE ══ -->
+<div id="page-archive" class="page">
+  <div style="padding:16px;max-width:600px;margin:0 auto;">
+    <div class="page-header">
+      <div class="p-icon" style="font-size:28px">🗂️</div>
+      <h1>الأرشيف</h1>
+      <p class="sub">ARCHIVE — ALL RECORDS</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+      <button class="nav-card-btn" onclick="loadArchive('violations')" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;color:var(--text)">⚠️ المخالفات</button>
+      <button class="nav-card-btn" onclick="loadArchive('facility')" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;color:var(--text)">🔧 تقرير النظافة</button>
+      <button class="nav-card-btn" onclick="loadArchive('attendance')" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;color:var(--text)">📅 الحضور والانصراف</button>
+      <button class="nav-card-btn" onclick="loadArchive('building')" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;color:var(--text)">🏢 تقرير الإشراف الميداني</button>
+      <button class="nav-card-btn" onclick="loadArchive('survey')" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;color:var(--text);grid-column:1/-1">⭐ الاستبيان</button>
+    </div>
+    <div id="archiveContent"></div>
+  </div>
+</div>
+
+<!-- ══ ATTENDANCE PAGE ══ -->
+<div id="page-attendance" class="page">
+  <div style="padding:16px;max-width:600px;margin:0 auto;">
+    <div class="page-header">
+      <div class="p-icon" style="font-size:28px">📅</div>
+      <h1>الحضور والانصراف</h1>
+      <p class="sub">ATTENDANCE — ADMIN ONLY 🔒</p>
+    </div>
+    <!-- تسجيل الحضور -->
+    <div class="card" style="padding:16px;margin-bottom:16px;">
+      <div class="slabel" style="margin-bottom:12px">تسجيل حضور / غياب</div>
+      <div class="srow">
+        <div class="slabel">الموظف</div>
+        <select id="attEmp" class="sinput">
+          <option value="">اختر الموظف...</option>
+          <option>شهد المقرن</option>
+          <option>سمية الخضيري</option>
+          <option>امجاد ابانمي</option>
+          <option>احمد الحماد</option>
+          <option>احمد سحاب</option>
+          <option>ابراهيم الحمد</option>
+        </select>
+      </div>
+      <div class="srow">
+        <div class="slabel">التاريخ</div>
+        <input type="date" id="attDate" class="sinput">
+      </div>
+      <div class="srow">
+        <div class="slabel">الحالة</div>
+        <select id="attStatus" class="sinput" onchange="toggleAttStatus(this.value)">
+          <option value="">اختر الحالة...</option>
+          <option>حضور</option>
+          <option>تأخير بعذر</option>
+          <option>خروج مبكر</option>
+          <option>إجازة</option>
+          <option>حالة وفاة</option>
+          <option>إجازة اختبارات</option>
+          <option>استئذان</option>
+        </select>
+      </div>
+      <div class="srow" id="attExitTimeRow" style="display:none">
+        <div class="slabel">وقت الخروج</div>
+        <input type="time" id="attExitTime" class="sinput">
+      </div>
+      <div class="srow" id="attDaysRow" style="display:none">
+        <div class="slabel">عدد الأيام</div>
+        <input type="number" id="attDays" class="sinput" min="1" placeholder="عدد أيام الإجازة">
+      </div>
+      <div class="srow" id="attPermTimeRow" style="display:none">
+        <div class="slabel">وقت الاستئذان</div>
+        <input type="time" id="attPermTime" class="sinput">
+      </div>
+      <div class="srow">
+        <div class="slabel">ملاحظات</div>
+        <input type="text" id="attNotes" class="sinput" placeholder="ملاحظات إضافية (اختياري)">
+      </div>
+      <button class="submit-btn" onclick="submitAttendance()" style="margin-top:10px">📥 تسجيل</button>
+    </div>
+
+    <!-- العمل الإضافي -->
+    <div class="card" style="padding:16px;margin-bottom:16px;">
+      <div class="slabel" style="margin-bottom:12px">العمل الإضافي</div>
+      <div class="srow">
+        <div class="slabel">الموظف</div>
+        <select id="otEmp" class="sinput">
+          <option value="">اختر الموظف...</option>
+          <option>شهد المقرن</option>
+          <option>سمية الخضيري</option>
+          <option>امجاد ابانمي</option>
+          <option>احمد الحماد</option>
+          <option>احمد سحاب</option>
+          <option>ابراهيم الحمد</option>
+        </select>
+      </div>
+      <div class="srow">
+        <div class="slabel">التاريخ</div>
+        <input type="date" id="otDate" class="sinput">
+      </div>
+      <div class="srow">
+        <div class="slabel">من</div>
+        <input type="time" id="otFrom" class="sinput">
+      </div>
+      <div class="srow">
+        <div class="slabel">إلى</div>
+        <input type="time" id="otTo" class="sinput">
+      </div>
+      <button class="submit-btn" onclick="submitOvertime()" style="margin-top:10px;background:linear-gradient(135deg,#f59e0b,#d97706)">💪 تسجيل العمل الإضافي</button>
+    </div>
+
+    <!-- سجل اليوم -->
+    <div class="card" style="padding:16px;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="slabel">سجل اليوم</div>
+        <button onclick="loadAttendanceToday()" style="font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--accent);cursor:pointer;font-family:'Cairo',sans-serif">🔄 تحديث</button>
+      </div>
+      <div id="attTodayList"><div class="loading"><div class="spin"></div>جاري التحميل...</div></div>
+    </div>
+
+    <!-- تصدير شهري -->
+    <div class="card" style="padding:16px;">
+      <div class="slabel" style="margin-bottom:12px">📊 تصدير شهري لـ HR</div>
+      <div class="srow">
+        <div class="slabel">الشهر</div>
+        <input type="month" id="attExportMonth" class="sinput">
+      </div>
+      <button class="submit-btn" onclick="exportAttendanceExcel()" style="margin-top:10px;background:linear-gradient(135deg,#10b981,#059669)">📥 تصدير Excel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOP EMPLOYEE PAGE ══ -->
+<div id="page-top-employee" class="page">
+  <div style="padding:16px;max-width:600px;margin:0 auto;">
+    <div class="page-header">
+      <div class="p-icon" style="font-size:28px">⭐</div>
+      <h1>الموظف الأعلى تقييم</h1>
+      <p class="sub">TOP RATED EMPLOYEE — ADMIN ONLY 🔒</p>
+    </div>
+    <div style="background:rgba(0,168,150,0.07);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--text-dim);text-align:center">
+      📌 التحليل مبني على بيانات الاستبيان الداخلي — سيتم ربط Google Sheets قريباً
+    </div>
+    <div id="topEmpContent"><div class="loading"><div class="spin"></div>جاري التحليل...</div></div>
+  </div>
+</div>
+
 </body>
 </html>
