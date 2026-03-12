@@ -6,6 +6,7 @@
 <title>منصة إدارة الجودة | Noura Quality</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <style>
 :root{
   --primary:#F4F7F9; --primary2:#E8F2F5; --card:#FFFFFF; --card2:#EEF6F7;
@@ -388,6 +389,18 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 .section-card.incentives:hover{border-color:rgba(245,197,24,0.4);}
 .section-card.incentives .s-icon{background:rgba(245,197,24,0.12);}
 
+.section-card.archive::before{background:linear-gradient(90deg,#7B61FF,#4A3AAA);}
+.section-card.archive:hover{border-color:rgba(123,97,255,0.4);}
+.section-card.archive .s-icon{background:rgba(123,97,255,0.12);}
+
+.section-card.rating::before{background:linear-gradient(90deg,#FF6B35,#F7C59F);}
+.section-card.rating:hover{border-color:rgba(255,107,53,0.4);}
+.section-card.rating .s-icon{background:rgba(255,107,53,0.12);}
+
+.section-card.attend::before{background:linear-gradient(90deg,#11998E,#38EF7D);}
+.section-card.attend:hover{border-color:rgba(17,153,142,0.4);}
+.section-card.attend .s-icon{background:rgba(17,153,142,0.12);}
+
 /* ── SUMMARY WIDGETS ── */
 .summary-widget{background:#FFFFFF;border:1px solid rgba(0,168,150,0.15);border-radius:18px;
   overflow:hidden;transition:all .25s ease;display:flex;flex-direction:column;box-shadow:0 2px 12px rgba(0,168,150,0.07);}
@@ -640,16 +653,11 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('home',this)">🏠 الرئيسية</button>
     <button class="nav-tab" onclick="showPage('records',this)">📊 السجلات</button>
-    <button class="nav-tab" onclick="showPage('archive',this)">🗂️ الأرشيف</button>
-    <button class="nav-tab" onclick="showAttendancePage(this)">📅 الحضور</button>
-    <button class="nav-tab" onclick="showTopEmployeePage(this)">⭐ الأعلى تقييم</button>
   </div>
   <div class="nav-logo">
     <div id="navUser"></div>
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="تبديل الوضع">🌙</button>
-    <div class="nav-logo-text">
-      <span class="t2" style="font-size:8px;color:var(--accent);letter-spacing:1.5px;">QUALITY MANAGEMENT</span>
-    </div>
+    <div class="nav-logo-text"></div>
   </div>
 </nav>
 
@@ -734,6 +742,27 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
       </div>
     </div>
+    <!-- Archive Card — Admin Only -->
+    <div class="section-card archive" onclick="adminOnly('archive')">
+      <div class="s-icon">🗂️</div>
+      <div class="s-title-ar">الأرشيف <span style="font-size:11px;">🔒</span></div>
+      <div class="s-title-en">ARCHIVE</div>
+      <div class="s-desc">للمدير فقط | Admin Only</div>
+    </div>
+    <!-- Top Rated Trainers Card — Admin Only -->
+    <div class="section-card rating" onclick="adminOnly('rating')">
+      <div class="s-icon">🌟</div>
+      <div class="s-title-ar">الأعلى بالتقييم <span style="font-size:11px;">🔒</span></div>
+      <div class="s-title-en">TOP RATED TRAINERS</div>
+      <div class="s-desc">للمدير فقط | Admin Only</div>
+    </div>
+    <!-- Staff Attendance Card — Admin Only -->
+    <div class="section-card attend" onclick="adminOnly('attend')">
+      <div class="s-icon">🕐</div>
+      <div class="s-title-ar">الحضور والانصراف <span style="font-size:11px;">🔒</span></div>
+      <div class="s-title-en">STAFF ATTENDANCE</div>
+      <div class="s-desc">للمدير فقط | Admin Only</div>
+    </div>
   </div>
 
 <!-- WEEKLY TASKS MODAL -->
@@ -764,6 +793,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div id="wtBody"></div>
   </div>
 </div>
+
+  <!-- ══ DAILY BULLETIN BANNER ══ -->
+  <div id="dailyBulletin" style="max-width:780px;margin:0 auto;padding:0 18px 12px;position:relative;z-index:1;display:none;"></div>
 
   <!-- Active Staff Widget -->
   <div style="max-width:780px;margin:0 auto;padding:0 18px 16px;position:relative;z-index:1;">
@@ -1082,6 +1114,14 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
             <option>احمد الحماد</option><option>احمد سحاب</option><option>ابراهيم الحمد</option>
           </select>
         </div>
+        <div class="sep"></div>
+        <div class="slabel">صورة المشكلة / Photo</div>
+        <div class="file-upload" onclick="document.getElementById('fImgs').click()">
+          <input type="file" id="fImgs" accept="image/*" multiple onchange="previewImgs(this)">
+          <div style="font-size:26px;margin-bottom:5px">📷</div>
+          <p style="font-size:12px;color:var(--text-dim)">اضغط لإضافة صورة / Tap to add photo</p>
+        </div>
+        <div class="file-preview" id="fPrev"></div>
         <button class="submit-btn" id="fBtn" onclick="submitFacility()" style="margin-top:13px">🔧 تسجيل الملاحظة / Submit Report</button>
       </div>
       <div class="success-msg" id="fOk">
@@ -3804,6 +3844,285 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════ -->
+<!-- PAGE: ARCHIVE -->
+<!-- ══════════════════════════════════════════ -->
+<div id="page-archive" class="page">
+  <div class="container-wide">
+    <div class="page-header">
+      <div class="p-icon" style="background:rgba(123,97,255,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">🗂️</div>
+      <h1>الأرشيف</h1>
+      <div class="sub">ARCHIVE — ALL RECORDS</div>
+    </div>
+
+    <!-- Archive Tabs -->
+    <div class="section-tabs">
+      <button class="stab active" onclick="archiveTab('vt',this)">👥 المخالفات</button>
+      <button class="stab" onclick="archiveTab('st',this)">⭐ الاستطلاعات</button>
+      <button class="stab" onclick="archiveTab('ft',this)">🔧 المرافق</button>
+      <button class="stab" onclick="archiveTab('bt',this)">🏢 المبنى</button>
+    </div>
+
+    <!-- ── VIOLATIONS ARCHIVE ── -->
+    <div id="arch-vt">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <div style="display:flex;gap:6px;">
+          <button class="vsec-btn active" id="avsbAll" onclick="setArchVSection('')">الكل</button>
+          <button class="vsec-btn" id="avsbF" onclick="setArchVSection('female')">👩 نسائي</button>
+          <button class="vsec-btn" id="avsbM" onclick="setArchVSection('male')">👨 رجالي</button>
+        </div>
+        <select class="filter-select" id="archGr" onchange="filterArchV()" style="max-width:150px;">
+          <option value="">كل الدرجات</option>
+          <option value="A">A — جسيمة</option><option value="B">B — متوسطة</option><option value="C">C — بسيطة</option>
+        </select>
+        <select class="filter-select" id="archMonth" onchange="filterArchV()" style="max-width:150px;">
+          <option value="">كل الأشهر</option>
+        </select>
+        <button class="export-btn" onclick="exportArchiveExcel()" style="margin-right:auto;">⬇ تصدير Excel</button>
+      </div>
+      <div class="records-table">
+        <div class="table-header">
+          <span>Grade</span><span>المدرب</span><span>القسم</span>
+          <span>المخالفة</span><span>Date</span><span>Time</span><span>Observer</span><span>إجراء</span>
+        </div>
+        <div id="archVList"><div class="loading"><div class="spin"></div>جاري التحميل...</div></div>
+      </div>
+    </div>
+
+    <!-- ── SURVEYS ARCHIVE ── -->
+    <div id="arch-st" style="display:none;">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="export-btn" onclick="exportArchiveExcel()">⬇ تصدير Excel</button>
+      </div>
+      <div class="records-table">
+        <div class="table-header" style="grid-template-columns:repeat(5,1fr);">
+          <span>المحور</span><span>العميل</span><span>الملاحظة</span><span>التاريخ</span><span>التقييم</span>
+        </div>
+        <div id="archSList"><div class="loading"><div class="spin"></div>جاري التحميل...</div></div>
+      </div>
+    </div>
+
+    <!-- ── FACILITY ARCHIVE ── -->
+    <div id="arch-ft" style="display:none;">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="export-btn" onclick="exportArchiveExcel()">⬇ تصدير Excel</button>
+      </div>
+      <div class="records-table">
+        <div class="table-header" style="grid-template-columns:repeat(4,1fr);">
+          <span>المرفق</span><span>الملاحظة</span><span>التاريخ</span><span>الراصد</span>
+        </div>
+        <div id="archFList"><div class="loading"><div class="spin"></div>جاري التحميل...</div></div>
+      </div>
+    </div>
+
+    <!-- ── BUILDING ARCHIVE ── -->
+    <div id="arch-bt" style="display:none;">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="export-btn" onclick="exportArchiveExcel()">⬇ تصدير Excel</button>
+      </div>
+      <div class="records-table">
+        <div class="table-header" style="grid-template-columns:repeat(5,1fr);">
+          <span>التاريخ</span><span>الوقت</span><span>الراصد</span><span>الاستقبال</span><span>الطوابير</span>
+        </div>
+        <div id="archBList"><div class="loading"><div class="spin"></div>جاري التحميل...</div></div>
+      </div>
+    </div>
+
+    <div style="height:30px;"></div>
+    <button class="back-btn" onclick="goHome()">← رجوع / Back</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- PAGE: TOP RATED TRAINERS -->
+<!-- ══════════════════════════════════════════ -->
+<div id="page-rating" class="page">
+  <div class="container-wide">
+    <div class="page-header">
+      <div class="p-icon" style="background:rgba(255,107,53,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">🌟</div>
+      <h1>الأعلى بالتقييم</h1>
+      <div class="sub">TOP RATED TRAINERS ANALYSIS</div>
+    </div>
+
+    <!-- Upload Area -->
+    <div id="ratingUploadArea" style="background:var(--card);border:2px dashed var(--border);border-radius:16px;padding:32px;text-align:center;margin-bottom:24px;cursor:pointer;" onclick="document.getElementById('ratingFileInput').click()">
+      <div style="font-size:40px;margin-bottom:12px;">📊</div>
+      <div style="font-size:15px;font-weight:900;margin-bottom:6px;">رفع ملف Excel / Google Sheets</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">ارفع ملف xlsx يحتوي على أعمدة: اسم المدرب، القسم، نسبة التقييم (%)</div>
+      <button class="export-btn" style="pointer-events:none;">📂 اختر ملف Excel</button>
+      <input type="file" id="ratingFileInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleRatingFile(this)">
+    </div>
+
+    <!-- Column Mapping (shown after upload) -->
+    <div id="ratingMappingArea" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:900;margin-bottom:16px;">⚙️ ربط الأعمدة — Column Mapping</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div class="field">
+          <label>اسم المدرب / Trainer Name</label>
+          <select id="colName" class="filter-select"></select>
+        </div>
+        <div class="field">
+          <label>القسم / Section</label>
+          <select id="colSection" class="filter-select"></select>
+        </div>
+        <div class="field">
+          <label>التقييم % / Rating</label>
+          <select id="colRating" class="filter-select"></select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button class="submit-btn" onclick="analyzeRating()" style="padding:10px 24px;">✦ تحليل البيانات</button>
+        <button onclick="resetRating()" style="background:rgba(224,82,82,0.1);border:1px solid rgba(224,82,82,0.2);color:var(--red);padding:10px 18px;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;font-size:12px;">إعادة تعيين</button>
+      </div>
+    </div>
+
+    <!-- Results Area -->
+    <div id="ratingResults" style="display:none;">
+      <!-- Filter -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+        <select class="filter-select" id="ratingSectionFilter" onchange="renderRatingResults()" style="max-width:160px;">
+          <option value="">كل الأقسام</option>
+        </select>
+        <select class="filter-select" id="ratingTopN" onchange="renderRatingResults()" style="max-width:130px;">
+          <option value="10">أعلى 10</option>
+          <option value="20">أعلى 20</option>
+          <option value="30">أعلى 30</option>
+          <option value="0">الكل</option>
+        </select>
+        <button class="export-btn" onclick="exportRatingExcel()" style="margin-right:auto;">⬇ تصدير التحليل Excel</button>
+      </div>
+
+      <!-- KPI Row -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;" id="ratingKPIs"></div>
+
+      <!-- Top / Bottom tables -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+        <div>
+          <div style="font-weight:900;font-size:13px;color:var(--green);margin-bottom:10px;">🏅 الأعلى تقييماً</div>
+          <div id="ratingTopList"></div>
+        </div>
+        <div>
+          <div style="font-weight:900;font-size:13px;color:var(--red);margin-bottom:10px;">⚠️ يحتاجون تطوير</div>
+          <div id="ratingLowList"></div>
+        </div>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="dash-card dash-rec">
+        <div class="dash-card-title">💡 توصيات التحليل</div>
+        <div id="ratingRec"></div>
+      </div>
+    </div>
+
+    <div style="height:30px;"></div>
+    <button class="back-btn" onclick="goHome()">← رجوع / Back</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- PAGE: STAFF ATTENDANCE -->
+<!-- ══════════════════════════════════════════ -->
+<div id="page-attend" class="page">
+  <div class="container-wide">
+    <div class="page-header">
+      <div class="p-icon" style="background:rgba(17,153,142,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">🕐</div>
+      <h1>الحضور والانصراف</h1>
+      <div class="sub">STAFF ATTENDANCE — إدارة حضور الموظفين</div>
+    </div>
+
+    <!-- Registration Form -->
+    <div id="attendFormArea" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:900;margin-bottom:16px;color:var(--accent);">✦ تسجيل حضور / انصراف موظف</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field">
+          <label><span class="req">* </span>الموظف / Employee</label>
+          <select id="attStaff" class="filter-select">
+            <option value="">اختر موظف...</option>
+            <option value="محمد محمد الجمعان">محمد محمد الجمعان</option>
+            <option value="شهد المقرن">شهد المقرن</option>
+            <option value="سمية الخضيري">سمية الخضيري</option>
+            <option value="امجاد ابانمي">امجاد ابانمي</option>
+            <option value="احمد الحماد">احمد الحماد</option>
+            <option value="ابراهيم الحمد">ابراهيم الحمد</option>
+            <option value="احمد سحاب">احمد سحاب</option>
+          </select>
+        </div>
+        <div class="field">
+          <label><span class="req">* </span>التاريخ / Date</label>
+          <input type="date" id="attDate">
+        </div>
+        <div class="field">
+          <label><span class="req">* </span>الحالة / Status</label>
+          <select id="attStatus" class="filter-select" onchange="toggleAttendFields()">
+            <option value="">اختر الحالة...</option>
+            <option value="حضور">✅ حضور</option>
+            <option value="غياب">❌ غياب</option>
+            <option value="تأخير">⏰ تأخير</option>
+            <option value="استئذان">🟡 استئذان</option>
+            <option value="خروج مبكر">🔶 خروج مبكر</option>
+            <option value="إجازة">🔵 إجازة</option>
+          </select>
+        </div>
+        <div class="field" id="attTimeField" style="display:none;">
+          <label>وقت الحضور / Check-in</label>
+          <input type="time" id="attCheckIn">
+        </div>
+        <div class="field" id="attOutField" style="display:none;">
+          <label>وقت الانصراف / Check-out</label>
+          <input type="time" id="attCheckOut">
+        </div>
+        <div class="field" id="attReasonField" style="display:none;">
+          <label>السبب / Reason</label>
+          <input type="text" id="attReason" placeholder="أدخل السبب...">
+        </div>
+      </div>
+      <div class="field" style="margin-top:8px;">
+        <label>ملاحظات / Notes</label>
+        <textarea id="attNotes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
+      </div>
+      <button class="submit-btn" id="attBtn" onclick="submitAttendance()">✦ تسجيل / Submit</button>
+    </div>
+
+    <!-- Filter & Export -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+      <select class="filter-select" id="attFilterStaff" onchange="renderAttendList()" style="max-width:180px;">
+        <option value="">كل الموظفين</option>
+        <option value="محمد محمد الجمعان">محمد محمد الجمعان</option>
+        <option value="شهد المقرن">شهد المقرن</option>
+        <option value="سمية الخضيري">سمية الخضيري</option>
+        <option value="امجاد ابانمي">امجاد ابانمي</option>
+        <option value="احمد الحماد">احمد الحماد</option>
+        <option value="ابراهيم الحمد">ابراهيم الحمد</option>
+        <option value="احمد سحاب">احمد سحاب</option>
+      </select>
+      <select class="filter-select" id="attFilterStatus" onchange="renderAttendList()" style="max-width:140px;">
+        <option value="">كل الحالات</option>
+        <option value="حضور">حضور</option>
+        <option value="غياب">غياب</option>
+        <option value="تأخير">تأخير</option>
+        <option value="استئذان">استئذان</option>
+        <option value="خروج مبكر">خروج مبكر</option>
+        <option value="إجازة">إجازة</option>
+      </select>
+      <button class="export-btn" onclick="exportAttendExcel()" style="margin-right:auto;">⬇ تصدير Excel + تحليل</button>
+    </div>
+
+    <!-- Stats Row -->
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:18px;" id="attKPIs"></div>
+
+    <!-- Table -->
+    <div class="records-table">
+      <div class="table-header" style="grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 0.7fr;">
+        <span>الموظف</span><span>التاريخ</span><span>الحالة</span><span>الحضور</span><span>الانصراف</span><span>حذف</span>
+      </div>
+      <div id="attList"><div class="loading"><div class="spin"></div>جاري التحميل...</div></div>
+    </div>
+
+    <div style="height:30px;"></div>
+    <button class="back-btn" onclick="goHome()">← رجوع / Back</button>
+  </div>
+</div>
+
 <!-- VIOLATIONS REFERENCE MODAL -->
 <div id="vrefModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);z-index:9000;overflow-y:auto;padding:20px;">
   <div style="max-width:800px;margin:0 auto;background:#FFFFFF;border-radius:18px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,0.3);">
@@ -4028,15 +4347,12 @@ function doLogin(){
     currentUser={username:u,...usr};hideLM();updateNav();
     loadActiveStaffHome();
     renderHomeWidgets();
+    renderDailyBulletin();
     if(pendingSec){
       const s=pendingSec;pendingSec=null;
       if(s.startsWith('__admin_')){
         const sec=s.replace('__admin_','');
         adminOnly(sec);
-      }else if(s==='__att__'){
-        showAttendancePage(null);
-      }else if(s==='__top__'){
-        showTopEmployeePage(null);
       }else{
         openSec(s);
       }
@@ -4124,13 +4440,13 @@ function updateNav(){
 
 // NAVIGATION
 function showPage(name,el){
-  if((name==='records'||name==='archive')&&!currentUser){pendingSec='__rec__';showLM();return;}
+  if(name==='records'&&!currentUser){pendingSec='__rec__';showLM();return;}
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   if(el)el.classList.add('active');
   if(name==='records')loadAll();
-  if(name==='home'){loadActiveStaffHome();renderHomeWidgets();}
+  if(name==='home'){loadActiveStaffHome();renderHomeWidgets();renderDailyBulletin();}
 }
 
 // ── صلاحيات الجنس ──
@@ -4184,6 +4500,16 @@ function openSec(type){
     document.getElementById('page-ops').classList.add('active');
   }else if(type==='incentives'){
     document.getElementById('page-incentives').classList.add('active');
+  }else if(type==='archive'){
+    document.getElementById('page-archive').classList.add('active');
+    loadArchiveTab('vt');
+  }else if(type==='rating'){
+    document.getElementById('page-rating').classList.add('active');
+  }else if(type==='attend'){
+    document.getElementById('page-attend').classList.add('active');
+    const today=new Date().toISOString().split('T')[0];
+    document.getElementById('attDate').value=today;
+    renderAttendList();renderAttendKPIs();
   }else{
     document.getElementById('page-facility').classList.add('active');autoObs('fObs');
   }
@@ -4209,6 +4535,8 @@ function goHome(){
   document.getElementById('page-home').classList.add('active');
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.querySelector('.nav-tab').classList.add('active');
+  renderDailyBulletin();
+  loadActiveStaffHome();
 }
 function setDT(){
   const now=new Date(),d=now.toISOString().split('T')[0];
@@ -4324,16 +4652,35 @@ async function submitFacility(){
   const timeVal=document.getElementById('fTime').value;
   const desc=document.getElementById('fDesc').value;
 
-  // ── حفظ السجل ──
+  // ── رفع الصور لـ Supabase Storage ──
+  const fileInput=document.getElementById('fImgs');
+  const files=[...fileInput.files].slice(0,3);
+  const photoUrls=[];
+  if(files.length){
+    btn.textContent='⏳ جاري رفع الصور...';
+    for(const file of files){
+      const ext=file.name.split('.').pop();
+      const path=`facility/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const{data:upData,error:upErr}=await db.storage.from('buket').upload(path,file,{cacheControl:'3600',upsert:false});
+      if(upErr){toast('❌ خطأ في رفع الصورة: '+upErr.message);btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';return;}
+      const{data:urlData}=db.storage.from('buket').getPublicUrl(path);
+      photoUrls.push(urlData.publicUrl);
+    }
+    btn.textContent='⏳ جاري الحفظ...';
+  }
+
+  // ── حفظ السجل مع روابط الصور ──
   const{error}=await db.from('facility_reports').insert([{
     problem_type:type,location:loc,date:dateVal,time:timeVal,
-    description:desc,observer:obs
+    description:desc,observer:obs,
+    photo_urls:photoUrls.length?photoUrls:null
   }]);
   if(error){toast('❌ '+error.message);btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';return;}
 
   // ── إرسال إيميل تنبيه للمدير مع روابط الصور ──
   const subject='🔧 ملاحظة مرافق جديدة — '+type;
   let body='السلام عليكم،\n\nتم تسجيل ملاحظة مرافق جديدة:\n\nالنوع: '+type+'\nالموقع: '+loc+'\nالتاريخ: '+dateVal+'\nالوقت: '+timeVal+'\nالراصد: '+obs+'\nالتفاصيل: '+(desc||'—');
+  if(photoUrls.length) body+='\n\nروابط الصور:\n'+photoUrls.map((u,i)=>(i+1)+'. '+u).join('\n');
   body+='\n\nمنصة إدارة الجودة — نورة لتعليم القيادة';
   sendEmailNotification(subject,body,ADMIN_EMAIL);
 
@@ -4342,6 +4689,7 @@ async function submitFacility(){
 function resetF(){
   ['fType','fObs'].forEach(id=>document.getElementById(id).value='');
   ['fLoc','fDesc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fPrev').innerHTML='';document.getElementById('fImgs').value='';
   const btn=document.getElementById('fBtn');btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';
   document.getElementById('fForm').style.display='block';document.getElementById('fOk').style.display='none';setDT();
 }
@@ -4504,6 +4852,14 @@ function renderF(recs){
   const l=document.getElementById('fList');
   if(!recs.length){l.innerHTML='<div class="empty"><div class="em">📭</div><p>لا توجد ملاحظات / No reports</p></div>';return;}
   l.innerHTML=recs.map(r=>{
+    const photos=Array.isArray(r.photo_urls)?r.photo_urls:(r.photo_urls?[r.photo_urls]:[]);
+    const photosHtml=photos.length?`
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+        ${photos.map(url=>`
+          <a href="${url}" target="_blank" title="عرض الصورة">
+            <img src="${url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:.2s;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+          </a>`).join('')}
+      </div>`:'';
     return`<div class="facility-rec">
       <div class="f-thumb">🔧</div>
       <div style="flex:1">
@@ -4511,6 +4867,8 @@ function renderF(recs){
         <div style="font-size:11px;color:var(--text-dim);margin-top:3px">📍 ${r.location||'-'}</div>
         <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${r.date||''} ${r.time||''} · ${r.observer||''}</div>
         ${r.description?`<div style="font-size:11px;margin-top:5px;color:var(--text)">${r.description}</div>`:''}
+        ${photosHtml}
+        ${photos.length?`<div style="font-size:9px;color:var(--accent);margin-top:4px;">📷 ${photos.length} صورة — اضغط للتكبير</div>`:''}
       </div>
     </div>`;
   }).join('');
@@ -4848,6 +5206,20 @@ function dlCSV(rows,fname){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=fname+'.csv';a.click();
   URL.revokeObjectURL(url);
+}
+
+// Wrapper: try SheetJS XLSX, fallback to CSV
+function downloadXLSX(rows,fname){
+  if(typeof XLSX !== 'undefined'){
+    try{
+      const wb=XLSX.utils.book_new();
+      const ws=XLSX.utils.aoa_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb,ws,'البيانات');
+      XLSX.writeFile(wb,fname+'.xlsx');
+      return;
+    }catch(e){}
+  }
+  dlCSV(rows,fname);
 }
 
 async function loadSummaryWidgets(){
@@ -5611,6 +5983,504 @@ function adminOnly(sec){
   setTimeout(()=>msg.remove(),2000);
 }
 
+// ════════════════════════════════════════════════
+// ARCHIVE SECTION
+// ════════════════════════════════════════════════
+let archCurTab = 'vt';
+let archVSec = '';
+let archAllV = [], archAllS = [], archAllF = [], archAllB = [];
+
+function archiveTab(tab, el){
+  archCurTab = tab;
+  ['vt','st','ft','bt'].forEach(t=>{
+    const d=document.getElementById('arch-'+t);
+    if(d) d.style.display=(t===tab)?'':'none';
+  });
+  document.querySelectorAll('#page-archive .stab').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  loadArchiveTab(tab);
+}
+
+async function loadArchiveTab(tab){
+  if(tab==='vt'){
+    if(!archAllV.length){
+      const{data}=await db.from('violations').select('*').order('created_at',{ascending:false});
+      archAllV=data||[];
+      populateArchMonths();
+    }
+    filterArchV();
+  }else if(tab==='st'){
+    if(!archAllS.length){
+      const{data}=await db.from('surveys').select('*').order('created_at',{ascending:false});
+      archAllS=data||[];
+    }
+    renderArchSurveys();
+  }else if(tab==='ft'){
+    if(!archAllF.length){
+      const{data}=await db.from('facility_reports').select('*').order('created_at',{ascending:false});
+      archAllF=data||[];
+    }
+    renderArchFacility();
+  }else if(tab==='bt'){
+    if(!archAllB.length){
+      const{data}=await db.from('building_reports').select('*').order('created_at',{ascending:false});
+      archAllB=data||[];
+    }
+    renderArchBuilding();
+  }
+}
+
+function populateArchMonths(){
+  const sel=document.getElementById('archMonth');
+  if(!sel) return;
+  const months=[...new Set(archAllV.map(r=>r.date?r.date.substring(0,7):null).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+  sel.innerHTML='<option value="">كل الأشهر</option>'+months.map(m=>`<option value="${m}">${m}</option>`).join('');
+}
+
+function setArchVSection(sec){
+  archVSec=sec;
+  document.getElementById('avsbAll').classList.toggle('active',sec==='');
+  document.getElementById('avsbF').classList.toggle('active',sec==='female');
+  document.getElementById('avsbM').classList.toggle('active',sec==='male');
+  filterArchV();
+}
+
+function filterArchV(){
+  const gr=document.getElementById('archGr').value;
+  const mo=document.getElementById('archMonth').value;
+  let data=archAllV;
+  if(archVSec) data=data.filter(r=>r.section===archVSec);
+  if(gr) data=data.filter(r=>r.grade===gr);
+  if(mo) data=data.filter(r=>r.date&&r.date.startsWith(mo));
+  const l=document.getElementById('archVList');
+  if(!data.length){l.innerHTML='<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>';return;}
+  l.innerHTML=data.map(r=>`<div class="table-row">
+    <span><span class="grade-badge grade-${r.grade}">${r.grade}</span></span>
+    <span>${r.trainer||'-'}</span>
+    <span>${r.section==='female'?'👩 نسائي':'👨 رجالي'}</span>
+    <span style="font-size:11px">${r.violation||'-'}</span>
+    <span>${r.date||''}</span>
+    <span>${r.time||''}</span>
+    <span style="font-size:11px">${r.observer||''}</span>
+    <span><button onclick="delViolation('${r.id}')" style="background:rgba(224,82,82,0.1);border:1px solid rgba(224,82,82,0.2);color:var(--red);padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;">حذف</button></span>
+  </div>`).join('');
+}
+
+function renderArchSurveys(){
+  const l=document.getElementById('archSList');
+  if(!archAllS.length){l.innerHTML='<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>';return;}
+  l.innerHTML=archAllS.map(r=>`<div class="table-row" style="grid-template-columns:repeat(5,1fr);">
+    <span>${r.axis||'-'}</span>
+    <span>${r.customer||'-'}</span>
+    <span style="font-size:11px">${r.note||'-'}</span>
+    <span>${r.date||''}</span>
+    <span>${'⭐'.repeat(Math.min(5,parseInt(r.score)||0))}</span>
+  </div>`).join('');
+}
+
+function renderArchFacility(){
+  const l=document.getElementById('archFList');
+  if(!archAllF.length){l.innerHTML='<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>';return;}
+  l.innerHTML=archAllF.map(r=>`<div class="table-row" style="grid-template-columns:repeat(4,1fr);">
+    <span>${r.facility||'-'}</span>
+    <span style="font-size:11px">${r.note||'-'}</span>
+    <span>${r.date||''}</span>
+    <span>${r.observer||''}</span>
+  </div>`).join('');
+}
+
+function renderArchBuilding(){
+  const l=document.getElementById('archBList');
+  if(!archAllB.length){l.innerHTML='<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>';return;}
+  l.innerHTML=archAllB.map(r=>`<div class="table-row" style="grid-template-columns:repeat(5,1fr);">
+    <span>${r.date||''}</span>
+    <span>${r.time||''}</span>
+    <span>${r.observer||''}</span>
+    <span>${r.recep_crowd||''}</span>
+    <span>${r.exam_crowd||''}</span>
+  </div>`).join('');
+}
+
+function exportArchiveExcel(){
+  // Ask section choice for violations
+  if(archCurTab==='vt'){
+    const modal=document.createElement('div');
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML=`<div style="background:var(--card);border-radius:18px;padding:28px 24px;max-width:360px;width:90%;text-align:center;">
+      <div style="font-size:30px;margin-bottom:12px;">📊</div>
+      <div style="font-size:15px;font-weight:900;margin-bottom:8px;">تصدير الأرشيف</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:20px;">اختر القسم للتصدير</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="doExportArchV('');this.closest('[style*=fixed]').remove()" style="background:var(--accent);color:#fff;border:none;padding:10px;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;font-size:13px;">📋 الكل</button>
+        <button onclick="doExportArchV('female');this.closest('[style*=fixed]').remove()" style="background:rgba(224,114,176,0.15);border:1px solid rgba(224,114,176,0.3);color:#C84590;padding:10px;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;font-size:13px;">👩 نسائي فقط</button>
+        <button onclick="doExportArchV('male');this.closest('[style*=fixed]').remove()" style="background:rgba(82,153,224,0.12);border:1px solid rgba(82,153,224,0.25);color:#3070C0;padding:10px;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;font-size:13px;">👨 رجالي فقط</button>
+        <button onclick="this.closest('[style*=fixed]').remove()" style="background:rgba(0,0,0,0.06);border:none;padding:8px;border-radius:10px;font-family:'Cairo',sans-serif;cursor:pointer;font-size:12px;">إلغاء</button>
+      </div>
+    </div>`;
+    document.body.appendChild(modal);
+  } else {
+    doExportArchOther(archCurTab);
+  }
+}
+
+function doExportArchV(sec){
+  let data=archAllV;
+  if(sec) data=data.filter(r=>r.section===sec);
+  const rows=[['الدرجة','المدرب','القسم','المخالفة','التاريخ','الوقت','الراصد']];
+  data.forEach(r=>rows.push([r.grade,r.trainer,r.section==='female'?'نسائي':'رجالي',r.violation,r.date,r.time,r.observer]));
+  downloadXLSX(rows,`أرشيف_المخالفات${sec?'_'+sec:''}`);
+}
+
+function doExportArchOther(tab){
+  let rows,name;
+  if(tab==='st'){
+    rows=[['المحور','العميل','الملاحظة','التاريخ','التقييم']];
+    archAllS.forEach(r=>rows.push([r.axis,r.customer,r.note,r.date,r.score]));
+    name='أرشيف_الاستطلاعات';
+  }else if(tab==='ft'){
+    rows=[['المرفق','الملاحظة','التاريخ','الراصد']];
+    archAllF.forEach(r=>rows.push([r.facility,r.note,r.date,r.observer]));
+    name='أرشيف_المرافق';
+  }else{
+    rows=[['التاريخ','الوقت','الراصد','حشد الاستقبال','حشد القاعات']];
+    archAllB.forEach(r=>rows.push([r.date,r.time,r.observer,r.recep_crowd,r.exam_crowd]));
+    name='أرشيف_المبنى';
+  }
+  downloadXLSX(rows,name);
+}
+
+// ════════════════════════════════════════════════
+// TOP RATED TRAINERS SECTION
+// ════════════════════════════════════════════════
+let ratingRawData = [];
+let ratingHeaders = [];
+
+function handleRatingFile(input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    try{
+      const ab=e.target.result;
+      // Try parsing as CSV or XLSX
+      if(file.name.endsWith('.csv')){
+        const text=new TextDecoder().decode(ab);
+        const lines=text.split('\n').filter(l=>l.trim());
+        ratingHeaders=lines[0].split(',').map(h=>h.trim().replace(/"/g,''));
+        ratingRawData=lines.slice(1).map(l=>{
+          const vals=l.split(',').map(v=>v.trim().replace(/"/g,''));
+          const obj={};
+          ratingHeaders.forEach((h,i)=>obj[h]=vals[i]||'');
+          return obj;
+        });
+      } else {
+        // Simple XLSX parsing using SheetJS (if available)
+        if(typeof XLSX !== 'undefined'){
+          const wb=XLSX.read(ab,{type:'array'});
+          const ws=wb.Sheets[wb.SheetNames[0]];
+          const json=XLSX.utils.sheet_to_json(ws,{header:1});
+          ratingHeaders=(json[0]||[]).map(h=>String(h).trim());
+          ratingRawData=json.slice(1).filter(r=>r.some(v=>v)).map(r=>{
+            const obj={};
+            ratingHeaders.forEach((h,i)=>obj[h]=r[i]!=null?String(r[i]):'');
+            return obj;
+          });
+        } else {
+          toast('❌ يرجى رفع ملف CSV أو تحميل SheetJS');
+          return;
+        }
+      }
+      if(!ratingHeaders.length){toast('❌ لم يتم العثور على أعمدة في الملف');return;}
+      // Show mapping
+      const opts=ratingHeaders.map(h=>`<option value="${h}">${h}</option>`).join('');
+      ['colName','colSection','colRating'].forEach(id=>{
+        document.getElementById(id).innerHTML=`<option value="">-- اختر --</option>`+opts;
+      });
+      document.getElementById('ratingUploadArea').style.display='none';
+      document.getElementById('ratingMappingArea').style.display='block';
+      toast(`✅ تم رفع الملف — ${ratingRawData.length} صف`);
+    }catch(err){toast('❌ خطأ في قراءة الملف: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function analyzeRating(){
+  const cn=document.getElementById('colName').value;
+  const cs=document.getElementById('colSection').value;
+  const cr=document.getElementById('colRating').value;
+  if(!cn||!cr){toast('❌ يرجى تحديد عمود الاسم والتقييم على الأقل');return;}
+
+  // Parse and process
+  const parsed=ratingRawData.map(r=>{
+    const name=r[cn]||'';
+    const section=cs?r[cs]||'':'-';
+    let rating=parseFloat(String(r[cr]).replace('%','').replace(',','.'));
+    if(isNaN(rating)) rating=0;
+    return{name,section,rating};
+  }).filter(r=>r.name&&r.rating>0);
+
+  if(!parsed.length){toast('❌ لم يتم العثور على بيانات صالحة');return;}
+
+  window._ratingParsed=parsed;
+
+  // Populate section filter
+  const sections=[...new Set(parsed.map(r=>r.section))].sort();
+  const sf=document.getElementById('ratingSectionFilter');
+  sf.innerHTML='<option value="">كل الأقسام</option>'+sections.map(s=>`<option value="${s}">${s}</option>`).join('');
+
+  document.getElementById('ratingMappingArea').style.display='none';
+  document.getElementById('ratingResults').style.display='block';
+  renderRatingResults();
+}
+
+function renderRatingResults(){
+  const data=window._ratingParsed||[];
+  const secF=document.getElementById('ratingSectionFilter').value;
+  const topN=parseInt(document.getElementById('ratingTopN').value)||0;
+  let filtered=data;
+  if(secF) filtered=filtered.filter(r=>r.section===secF);
+  const sorted=[...filtered].sort((a,b)=>b.rating-a.rating);
+  const topList=topN>0?sorted.slice(0,topN):sorted;
+  const lowList=[...filtered].sort((a,b)=>a.rating-b.rating).slice(0,10);
+  const avg=filtered.length?Math.round(filtered.reduce((s,r)=>s+r.rating,0)/filtered.length):0;
+  const above70=filtered.filter(r=>r.rating>=70).length;
+  const below50=filtered.filter(r=>r.rating<50).length;
+
+  // KPIs
+  document.getElementById('ratingKPIs').innerHTML=`
+    <div class="dash-kpi"><div class="dk-icon">👥</div><div class="dk-num">${filtered.length}</div><div class="dk-label">إجمالي المدربين</div></div>
+    <div class="dash-kpi"><div class="dk-icon">📊</div><div class="dk-num">${avg}%</div><div class="dk-label">متوسط التقييم</div></div>
+    <div class="dash-kpi"><div class="dk-icon" style="color:var(--green)">✅</div><div class="dk-num" style="color:var(--green)">${above70}</div><div class="dk-label">فوق 70%</div></div>
+    <div class="dash-kpi"><div class="dk-icon" style="color:var(--red)">⚠️</div><div class="dk-num" style="color:var(--red)">${below50}</div><div class="dk-label">أقل من 50%</div></div>
+  `;
+
+  // Top list
+  document.getElementById('ratingTopList').innerHTML=topList.map((r,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:${i<3?'rgba(0,168,150,0.06)':'transparent'};border-radius:8px;margin-bottom:4px;">
+      <span style="font-weight:900;color:var(--accent);min-width:26px;">${i+1}</span>
+      <span style="flex:1;font-size:12px;font-weight:700;">${r.name}</span>
+      <span style="font-size:10px;color:var(--text-dim);">${r.section}</span>
+      <span style="font-weight:900;color:${r.rating>=70?'var(--green)':r.rating>=50?'var(--orange)':'var(--red)'};">${r.rating}%</span>
+    </div>`).join('');
+
+  document.getElementById('ratingLowList').innerHTML=lowList.map((r,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;margin-bottom:4px;">
+      <span style="font-weight:900;color:var(--red);min-width:26px;">!</span>
+      <span style="flex:1;font-size:12px;font-weight:700;">${r.name}</span>
+      <span style="font-size:10px;color:var(--text-dim);">${r.section}</span>
+      <span style="font-weight:900;color:var(--red);">${r.rating}%</span>
+    </div>`).join('');
+
+  // Recommendations
+  const recs=[];
+  if(avg<60) recs.push(`📌 متوسط التقييم الكلي (${avg}%) أقل من المستهدف — يُنصح بمراجعة برامج التدريب`);
+  if(below50>0) recs.push(`🔴 ${below50} مدرب/ة أقل من 50% — يحتاجون خطة تطوير فورية`);
+  if(above70/filtered.length<0.5) recs.push(`⚠️ أقل من نصف المدربين فوق 70% — راجع معايير التقييم`);
+  if(topList[0]) recs.push(`🏆 أعلى مدرب/ة: ${topList[0].name} بتقييم ${topList[0].rating}%`);
+  document.getElementById('ratingRec').innerHTML=recs.map(r=>`<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;">${r}</div>`).join('')||'<div style="font-size:12px;color:var(--text-dim);">لا توصيات حالياً</div>';
+}
+
+function exportRatingExcel(){
+  const data=window._ratingParsed||[];
+  const secF=document.getElementById('ratingSectionFilter').value;
+  const filtered=secF?data.filter(r=>r.section===secF):data;
+  const sorted=[...filtered].sort((a,b)=>b.rating-a.rating);
+  const avg=Math.round(sorted.reduce((s,r)=>s+r.rating,0)/(sorted.length||1));
+  const rows=[['الترتيب','اسم المدرب/ة','القسم','التقييم %','التصنيف']];
+  sorted.forEach((r,i)=>{
+    const tag=r.rating>=70?'ممتاز':r.rating>=60?'جيد جداً':r.rating>=50?'جيد':r.rating>=40?'مقبول':'يحتاج تطوير';
+    rows.push([i+1,r.name,r.section,r.rating+'%',tag]);
+  });
+  rows.push([]);
+  rows.push(['المتوسط العام','','',avg+'%','']);
+  downloadXLSX(rows,'تحليل_تقييم_المدربين');
+}
+
+function resetRating(){
+  ratingRawData=[];ratingHeaders=[];
+  window._ratingParsed=null;
+  document.getElementById('ratingUploadArea').style.display='block';
+  document.getElementById('ratingMappingArea').style.display='none';
+  document.getElementById('ratingResults').style.display='none';
+  document.getElementById('ratingFileInput').value='';
+}
+
+// ════════════════════════════════════════════════
+// STAFF ATTENDANCE SECTION
+// ════════════════════════════════════════════════
+const ATT_KEY = 'nq_attendance_v2';
+
+function getAttendRecords(){
+  try{
+    const raw=localStorage.getItem(ATT_KEY);
+    return raw?JSON.parse(raw):[];
+  }catch(e){return[];}
+}
+function saveAttendRecords(recs){
+  localStorage.setItem(ATT_KEY,JSON.stringify(recs));
+}
+
+function toggleAttendFields(){
+  const status=document.getElementById('attStatus').value;
+  const timeF=document.getElementById('attTimeField');
+  const outF=document.getElementById('attOutField');
+  const reasonF=document.getElementById('attReasonField');
+  const needsTime=['حضور','تأخير','خروج مبكر'];
+  const needsOut=['حضور','خروج مبكر'];
+  const needsReason=['غياب','تأخير','استئذان','خروج مبكر','إجازة'];
+  timeF.style.display=needsTime.includes(status)?'':'none';
+  outF.style.display=needsOut.includes(status)?'':'none';
+  reasonF.style.display=needsReason.includes(status)?'':'none';
+}
+
+function submitAttendance(){
+  const staff=document.getElementById('attStaff').value;
+  const date=document.getElementById('attDate').value;
+  const status=document.getElementById('attStatus').value;
+  if(!staff||!date||!status){toast('❌ يرجى تعبئة الموظف والتاريخ والحالة');return;}
+  const rec={
+    id:Date.now()+'_'+Math.random().toString(36).substr(2,6),
+    staff,date,status,
+    checkIn:document.getElementById('attCheckIn').value||'',
+    checkOut:document.getElementById('attCheckOut').value||'',
+    reason:document.getElementById('attReason').value||'',
+    notes:document.getElementById('attNotes').value||'',
+    registeredBy:currentUser?currentUser.name:'admin',
+    createdAt:new Date().toISOString()
+  };
+  const recs=getAttendRecords();
+  recs.unshift(rec);
+  saveAttendRecords(recs);
+  // Reset fields
+  ['attStaff','attStatus','attCheckIn','attCheckOut','attReason','attNotes'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  toggleAttendFields();
+  renderAttendList();
+  renderAttendKPIs();
+  // Trigger bulletin refresh
+  renderDailyBulletin();
+  toast('✅ تم تسجيل الحضور بنجاح');
+}
+
+function deleteAttendRecord(id){
+  const recs=getAttendRecords().filter(r=>r.id!==id);
+  saveAttendRecords(recs);
+  renderAttendList();
+  renderAttendKPIs();
+  renderDailyBulletin();
+}
+
+function renderAttendList(){
+  const recs=getAttendRecords();
+  const fs=document.getElementById('attFilterStaff')?.value||'';
+  const fst=document.getElementById('attFilterStatus')?.value||'';
+  let data=recs;
+  if(fs) data=data.filter(r=>r.staff===fs);
+  if(fst) data=data.filter(r=>r.status===fst);
+  const l=document.getElementById('attList');
+  if(!l) return;
+  if(!data.length){l.innerHTML='<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>';return;}
+  const statusColor={
+    'حضور':'var(--green)','غياب':'var(--red)','تأخير':'var(--orange)',
+    'استئذان':'#E0A800','خروج مبكر':'#F7A030','إجازة':'#5299E0'
+  };
+  const statusIcon={'حضور':'✅','غياب':'❌','تأخير':'⏰','استئذان':'🟡','خروج مبكر':'🔶','إجازة':'🔵'};
+  l.innerHTML=data.map(r=>`<div class="table-row" style="grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 0.7fr;">
+    <span style="font-weight:700;font-size:12px;">${r.staff}</span>
+    <span>${r.date}</span>
+    <span style="color:${statusColor[r.status]||'var(--text)'};font-weight:700;">${statusIcon[r.status]||''} ${r.status}</span>
+    <span>${r.checkIn||'-'}</span>
+    <span>${r.checkOut||'-'}</span>
+    <span><button onclick="deleteAttendRecord('${r.id}')" style="background:rgba(224,82,82,0.1);border:1px solid rgba(224,82,82,0.2);color:var(--red);padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;">حذف</button></span>
+  </div>`).join('');
+}
+
+function renderAttendKPIs(){
+  const recs=getAttendRecords();
+  const today=new Date().toISOString().split('T')[0];
+  const todayRecs=recs.filter(r=>r.date===today);
+  const counts={};
+  ['حضور','غياب','تأخير','استئذان','خروج مبكر','إجازة'].forEach(s=>{
+    counts[s]=todayRecs.filter(r=>r.status===s).length;
+  });
+  const el=document.getElementById('attKPIs');
+  if(!el) return;
+  const items=[
+    {label:'حضور اليوم',val:counts['حضور'],color:'var(--green)',icon:'✅'},
+    {label:'غياب',val:counts['غياب'],color:'var(--red)',icon:'❌'},
+    {label:'تأخير',val:counts['تأخير'],color:'var(--orange)',icon:'⏰'},
+    {label:'استئذان',val:counts['استئذان'],color:'#E0A800',icon:'🟡'},
+    {label:'خروج مبكر',val:counts['خروج مبكر'],color:'#F7A030',icon:'🔶'},
+    {label:'إجازة',val:counts['إجازة'],color:'#5299E0',icon:'🔵'},
+  ];
+  el.innerHTML=items.map(i=>`<div class="dash-kpi" style="padding:10px 8px;">
+    <div class="dk-icon">${i.icon}</div>
+    <div class="dk-num" style="color:${i.color}">${i.val}</div>
+    <div class="dk-label" style="font-size:9px;">${i.label}</div>
+  </div>`).join('');
+}
+
+function exportAttendExcel(){
+  const recs=getAttendRecords();
+  if(!recs.length){toast('لا توجد سجلات للتصدير');return;}
+  // Sheet 1: raw data
+  const rows=[['الموظف','التاريخ','الحالة','وقت الحضور','وقت الانصراف','السبب','الملاحظات','سجل بواسطة']];
+  recs.forEach(r=>rows.push([r.staff,r.date,r.status,r.checkIn,r.checkOut,r.reason,r.notes,r.registeredBy]));
+  rows.push([]);
+  rows.push(['═══ تحليل الحضور ════════════════════════']);
+  rows.push([]);
+  // Per-employee stats
+  const staffList=['محمد محمد الجمعان','شهد المقرن','سمية الخضيري','امجاد ابانمي','احمد الحماد','ابراهيم الحمد','احمد سحاب'];
+  rows.push(['الموظف','أيام حضور','غياب','تأخير','استئذان','خروج مبكر','إجازة','نسبة الحضور %']);
+  staffList.forEach(name=>{
+    const sr=recs.filter(r=>r.staff===name);
+    if(!sr.length) return;
+    const cnt=s=>sr.filter(r=>r.status===s).length;
+    const total=sr.length;
+    const pct=total?Math.round((cnt('حضور')/total)*100):0;
+    rows.push([name,cnt('حضور'),cnt('غياب'),cnt('تأخير'),cnt('استئذان'),cnt('خروج مبكر'),cnt('إجازة'),pct+'%']);
+  });
+  rows.push([]);
+  rows.push(['الأكثر حضوراً:']);
+  const staffPresence=staffList.map(n=>({n,c:recs.filter(r=>r.staff===n&&r.status==='حضور').length})).sort((a,b)=>b.c-a.c);
+  staffPresence.forEach((s,i)=>rows.push([`${i+1}. ${s.n}`,s.c+' يوم حضور']));
+  rows.push([]);
+  rows.push(['الأسباب الأكثر تكراراً:']);
+  const reasons={};
+  recs.filter(r=>r.reason).forEach(r=>{reasons[r.reason]=(reasons[r.reason]||0)+1;});
+  Object.entries(reasons).sort((a,b)=>b[1]-a[1]).forEach(([r,c])=>rows.push([r,c+' مرة']));
+  downloadXLSX(rows,'سجل_الحضور_والانصراف');
+}
+
+// ════════════════════════════════════════════════
+// DAILY BULLETIN (Staff absence notification)
+// ════════════════════════════════════════════════
+function renderDailyBulletin(){
+  if(!currentUser) return;
+  const el=document.getElementById('dailyBulletin');
+  if(!el) return;
+  const today=new Date().toISOString().split('T')[0];
+  const recs=getAttendRecords().filter(r=>r.date===today);
+  const absentStatuses=['غياب','إجازة','استئذان'];
+  const absent=recs.filter(r=>absentStatuses.includes(r.status));
+  if(!absent.length){el.style.display='none';return;}
+  el.style.display='block';
+  el.innerHTML=`<div style="background:linear-gradient(135deg,rgba(255,193,7,0.1),rgba(255,152,0,0.07));border:1.5px solid rgba(255,193,7,0.3);border-radius:16px;padding:16px 20px;position:relative;">
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#E0A800;margin-bottom:8px;">📢 نشرة يومية — TODAY'S BULLETIN</div>
+    ${absent.map(r=>`
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,193,7,0.15);">
+        <span style="font-size:20px;">${r.status==='غياب'?'❌':r.status==='إجازة'?'🔵':'🟡'}</span>
+        <div>
+          <div style="font-size:13px;font-weight:900;">${r.staff} — ${r.status} اليوم</div>
+          ${r.reason?`<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">السبب: ${r.reason}</div>`:''}
+          <div style="font-size:11px;color:var(--accent);margin-top:4px;font-weight:700;">نرجو التكرم باستلام مهام الموظف إن وجد لحين عودته</div>
+        </div>
+      </div>`).join('')}
+  </div>`;
+}
+
 // ── BUILDING SUBMIT ──
 async function submitBuilding(){
   const obs=document.getElementById('bObs').value;
@@ -5987,380 +6857,7 @@ function renderBuildingDash(){
 }
 loadSummaryWidgets();
 setDT();updateNav();
-// Set today's date for attendance
-(function(){const today=new Date().toISOString().split('T')[0];['attDate','otDate'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today;});})();
-setTimeout(()=>{ if(currentUser){loadActiveStaffHome();renderHomeWidgets();} },300);
-
-// ══════════════════════════════════════════════════
-// الأرشيف — Archive
-// ══════════════════════════════════════════════════
-async function loadArchive(section){
-  const el=document.getElementById('archiveContent');
-  el.innerHTML='<div class="loading"><div class="spin"></div>جاري التحميل...</div>';
-  let data=[],error=null;
-  if(section==='violations'){
-    ({data,error}=await db.from('violations').select('*').order('created_at',{ascending:false}));
-    if(error){el.innerHTML='<p style="color:red">خطأ في التحميل</p>';return;}
-    el.innerHTML=!data.length?'<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>':
-      data.map(r=>`<div class="facility-rec"><div class="f-thumb">⚠️</div><div style="flex:1">
-        <div style="font-weight:700">${r.violation_type||r.type||'-'}</div>
-        <div style="font-size:11px;color:var(--text-dim)">${r.date||r.created_at?.split('T')[0]||''} · ${r.observer||r.staff||''}</div>
-        ${r.description||r.notes?`<div style="font-size:11px;margin-top:4px">${r.description||r.notes||''}</div>`:''}
-      </div></div>`).join('');
-  } else if(section==='facility'){
-    ({data,error}=await db.from('facility_reports').select('*').order('created_at',{ascending:false}));
-    if(error){el.innerHTML='<p style="color:red">خطأ في التحميل</p>';return;}
-    el.innerHTML=!data.length?'<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>':
-      data.map(r=>`<div class="facility-rec"><div class="f-thumb">🔧</div><div style="flex:1">
-        <div style="font-weight:700">${r.problem_type||'-'}</div>
-        <div style="font-size:11px;color:var(--text-dim)">📍 ${r.location||'-'}</div>
-        <div style="font-size:10px;color:var(--text-dim)">${r.date||''} ${r.time||''} · ${r.observer||''}</div>
-        ${r.description?`<div style="font-size:11px;margin-top:4px">${r.description}</div>`:''}
-      </div></div>`).join('');
-  } else if(section==='survey'){
-    ({data,error}=await db.from('surveys').select('*').order('created_at',{ascending:false}));
-    if(error){el.innerHTML='<p style="color:red">خطأ في التحميل</p>';return;}
-    el.innerHTML=!data.length?'<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>':
-      data.map(r=>`<div class="facility-rec"><div class="f-thumb">⭐</div><div style="flex:1">
-        <div style="font-weight:700">${r.client_name||r.client||'-'}</div>
-        <div style="font-size:11px;color:var(--text-dim)">${r.date||r.created_at?.split('T')[0]||''} · ${r.observer||r.staff||''}</div>
-        ${r.notes||r.comments?`<div style="font-size:11px;margin-top:4px">${r.notes||r.comments||''}</div>`:''}
-      </div></div>`).join('');
-  } else if(section==='attendance'){
-    ({data,error}=await db.from('attendance').select('*').order('date',{ascending:false}));
-    if(error){el.innerHTML='<p style="color:red">خطأ في التحميل</p>';return;}
-    const statusEmoji={'حضور':'✅','تأخير بعذر':'⏰','خروج مبكر':'🚪','إجازة':'🏖️','حالة وفاة':'🕊️','إجازة اختبارات':'📚','استئذان':'🤚'};
-    el.innerHTML=!data.length?'<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>':
-      data.map(r=>`<div class="facility-rec"><div class="f-thumb">${statusEmoji[r.status]||'📋'}</div><div style="flex:1">
-        <div style="font-weight:700">${r.employee_name||'-'}</div>
-        <div style="font-size:11px;color:var(--text-dim)">${r.date||''}</div>
-        <div style="font-size:12px;color:var(--accent);margin-top:3px">${r.status||''}</div>
-        ${r.notes?`<div style="font-size:11px;margin-top:3px;color:var(--text-dim)">${r.notes}</div>`:''}
-      </div></div>`).join('');
-  } else if(section==='building'){
-    ({data,error}=await db.from('building_reports').select('*').order('created_at',{ascending:false}));
-    if(error){el.innerHTML='<p style="color:red">خطأ في التحميل</p>';return;}
-    el.innerHTML=!data.length?'<div class="empty"><div class="em">📭</div><p>لا توجد سجلات</p></div>':
-      data.map(r=>`<div class="facility-rec"><div class="f-thumb">🏢</div><div style="flex:1">
-        <div style="font-weight:700">${r.date||r.created_at?.split('T')[0]||''} ${r.time||''}</div>
-        <div style="font-size:11px;color:var(--text-dim)">👤 ${r.observer||''}</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
-          <span style="font-size:10px;background:rgba(0,168,150,0.1);padding:2px 6px;border-radius:4px">استقبال: ${r.recep_crowd||'-'}</span>
-          <span style="font-size:10px;background:rgba(0,168,150,0.1);padding:2px 6px;border-radius:4px">انتظار: ${r.wait_time||'-'}</span>
-          <span style="font-size:10px;background:rgba(0,168,150,0.1);padding:2px 6px;border-radius:4px">قاعات: ${r.exam_halls||'-'}</span>
-        </div>
-      </div></div>`).join('');
-  }
-}
-
-// ══════════════════════════════════════════════════
-// الحضور والانصراف — Attendance
-// ══════════════════════════════════════════════════
-function showAttendancePage(el){
-  if(!currentUser){pendingSec='__att__';showLM();return;}
-  if(currentUser.role!=='admin'){toast('🔒 هذا القسم للإدارة فقط');return;}
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-attendance').classList.add('active');
-  if(el)el.classList.add('active');
-  loadAttendanceToday();
-}
-
-const EMPLOYEES=['شهد المقرن','سمية الخضيري','امجاد ابانمي','احمد الحماد','احمد سحاب','ابراهيم الحمد'];
-
-function toggleAttStatus(val){
-  document.getElementById('attExitTimeRow').style.display=(val==='خروج مبكر')?'flex':'none';
-  document.getElementById('attDaysRow').style.display=(val==='إجازة'||val==='إجازة اختبارات')?'flex':'none';
-  document.getElementById('attPermTimeRow').style.display=(val==='استئذان')?'flex':'none';
-}
-
-async function submitAttendance(){
-  if(!currentUser||currentUser.role!=='admin'){toast('❌ للإدارة فقط');return;}
-  const emp=document.getElementById('attEmp').value;
-  const status=document.getElementById('attStatus').value;
-  const date=document.getElementById('attDate').value;
-  if(!emp){toast('⚠️ اختر الموظف');return;}
-  if(!status){toast('⚠️ اختر الحالة');return;}
-  const notes=document.getElementById('attNotes').value.trim();
-  const extraTime=document.getElementById('attExitTime').value;
-  const extraDays=document.getElementById('attDays').value;
-  const extraPermTime=document.getElementById('attPermTime').value;
-  let noteFull=notes;
-  if(status==='خروج مبكر'&&extraTime) noteFull=(noteFull?noteFull+' | ':'')+'وقت الخروج: '+extraTime;
-  if((status==='إجازة'||status==='إجازة اختبارات')&&extraDays) noteFull=(noteFull?noteFull+' | ':'')+'عدد الأيام: '+extraDays;
-  if(status==='استئذان'&&extraPermTime) noteFull=(noteFull?noteFull+' | ':'')+'وقت الاستئذان: '+extraPermTime;
-
-  const{error}=await db.from('attendance').insert([{
-    employee_name:emp,status,date,notes:noteFull||null,recorded_by:currentUser.name
-  }]);
-  if(error){toast('❌ '+error.message);return;}
-  toast('✅ تم تسجيل الحضور');
-  document.getElementById('attStatus').value='';
-  document.getElementById('attNotes').value='';
-  toggleAttStatus('');
-  loadAttendanceToday();
-}
-
-async function submitOvertime(){
-  if(!currentUser||currentUser.role!=='admin'){toast('❌ للإدارة فقط');return;}
-  const emp=document.getElementById('otEmp').value;
-  const date=document.getElementById('otDate').value;
-  const from=document.getElementById('otFrom').value;
-  const to=document.getElementById('otTo').value;
-  if(!emp||!date||!from||!to){toast('⚠️ أكمل جميع الحقول');return;}
-  const{error}=await db.from('attendance').insert([{
-    employee_name:emp,status:'عمل إضافي',date,notes:`من ${from} إلى ${to}`,recorded_by:currentUser.name
-  }]);
-  if(error){toast('❌ '+error.message);return;}
-  toast('✅ تم تسجيل العمل الإضافي');
-}
-
-async function loadAttendanceToday(){
-  const today=new Date().toISOString().split('T')[0];
-  const{data}=await db.from('attendance').select('*').eq('date',today).order('created_at',{ascending:false});
-  const el=document.getElementById('attTodayList');
-  const statusEmoji={'حضور':'✅','تأخير بعذر':'⏰','خروج مبكر':'🚪','إجازة':'🏖️','حالة وفاة':'🕊️','إجازة اختبارات':'📚','استئذان':'🤚','عمل إضافي':'💪'};
-  const recorded=data||[];
-  const recordedNames=recorded.map(r=>r.employee_name);
-  const present=EMPLOYEES.filter(n=>!recordedNames.includes(n));
-  let html='';
-  if(recorded.length){
-    html+=recorded.map(r=>`<div class="facility-rec" style="padding:10px 12px">
-      <div class="f-thumb" style="width:34px;height:34px;font-size:18px">${statusEmoji[r.status]||'📋'}</div>
-      <div style="flex:1">
-        <div style="font-weight:700;font-size:12px">${r.employee_name}</div>
-        <div style="font-size:11px;color:var(--accent)">${r.status}</div>
-        ${r.notes?`<div style="font-size:10px;color:var(--text-dim)">${r.notes}</div>`:''}
-      </div>
-    </div>`).join('');
-  }
-  if(present.length){
-    html+=present.map(n=>`<div class="facility-rec" style="padding:10px 12px">
-      <div class="f-thumb" style="width:34px;height:34px;font-size:18px">✅</div>
-      <div style="flex:1"><div style="font-weight:700;font-size:12px">${n}</div><div style="font-size:11px;color:var(--text-dim)">حضور (افتراضي)</div></div>
-    </div>`).join('');
-  }
-  el.innerHTML=html||'<div class="empty"><div class="em">📭</div><p>لا توجد سجلات اليوم</p></div>';
-}
-
-async function exportAttendanceExcel(){
-  if(!currentUser||currentUser.role!=='admin'){toast('❌ للإدارة فقط');return;}
-  const month=document.getElementById('attExportMonth').value;
-  if(!month){toast('⚠️ اختر الشهر');return;}
-  const[yr,mo]=month.split('-');
-  const from=`${yr}-${mo}-01`;
-  const last=new Date(yr,mo,0).getDate();
-  const to=`${yr}-${mo}-${String(last).padStart(2,'0')}`;
-  const{data}=await db.from('attendance').select('*').gte('date',from).lte('date',to).order('date');
-  if(!data||!data.length){toast('⚠️ لا توجد سجلات لهذا الشهر');return;}
-  const rows=[['اسم الموظف','التاريخ','الحالة','ملاحظات','مسجّل بواسطة']];
-  data.forEach(r=>rows.push([r.employee_name,r.date,r.status,r.notes||'',r.recorded_by||'']));
-  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
-  const bom='\uFEFF';
-  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`حضور_${month}.csv`;a.click();
-  toast('✅ تم تصدير ملف Excel');
-}
-
-// ══════════════════════════════════════════════════
-// الموظف الأعلى تقييم — Top Employee
-// ══════════════════════════════════════════════════
-function showTopEmployeePage(el){
-  if(!currentUser){pendingSec='__top__';showLM();return;}
-  if(currentUser.role!=='admin'){toast('🔒 هذا القسم للإدارة فقط');return;}
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-top-employee').classList.add('active');
-  if(el)el.classList.add('active');
-  loadTopEmployee();
-}
-
-async function loadTopEmployee(){
-  const el=document.getElementById('topEmpContent');
-  el.innerHTML='<div class="loading"><div class="spin"></div>جاري التحميل...</div>';
-  const{data,error}=await db.from('surveys').select('*').order('created_at',{ascending:false});
-  if(error||!data||!data.length){
-    el.innerHTML='<div class="empty"><div class="em">📊</div><p>لا توجد بيانات استبيان حتى الآن</p><p style="font-size:11px;color:var(--text-dim);margin-top:8px">سيتم ربط Google Sheets لاحقاً</p></div>';
-    return;
-  }
-  const empScores={};
-  const empComments={};
-  data.forEach(r=>{
-    const obs=r.observer||r.staff;
-    if(!obs)return;
-    if(!empScores[obs]){empScores[obs]=[];empComments[obs]=[];}
-    const scores=[r.q1,r.q2,r.q3,r.q4,r.q5].filter(v=>v!=null).map(Number);
-    if(scores.length) empScores[obs].push(scores.reduce((a,b)=>a+b,0)/scores.length);
-    if(r.notes||r.comments) empComments[obs].push(r.notes||r.comments);
-  });
-  const ranked=Object.entries(empScores)
-    .map(([name,scores])=>({name,avg:scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:0,count:scores.length,comments:empComments[name]||[]}))
-    .sort((a,b)=>b.avg-a.avg);
-  if(!ranked.length){el.innerHTML='<div class="empty"><div class="em">📊</div><p>لا توجد بيانات كافية</p></div>';return;}
-  const medals=['🥇','🥈','🥉'];
-  el.innerHTML=ranked.map((e,i)=>`
-    <div class="facility-rec" style="padding:14px 16px;${i===0?'border:2px solid var(--accent);':''}">
-      <div class="f-thumb" style="width:40px;height:40px;font-size:22px;background:${i===0?'rgba(0,168,150,0.15)':'transparent'}">${medals[i]||'👤'}</div>
-      <div style="flex:1">
-        <div style="font-weight:800;font-size:14px">${e.name}</div>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
-          <span style="font-size:18px;color:var(--accent);font-weight:900">${e.avg.toFixed(1)}</span>
-          <span style="font-size:11px;color:var(--text-dim)">/ 5 · ${e.count} تقييم</span>
-        </div>
-        ${'⭐'.repeat(Math.round(e.avg))}
-        ${e.comments.length?`<div style="margin-top:8px;padding:8px;background:rgba(0,168,150,0.07);border-radius:8px;">
-          <div style="font-size:10px;color:var(--accent);margin-bottom:4px">💬 تعليقات العملاء</div>
-          ${e.comments.slice(0,3).map(c=>`<div style="font-size:11px;color:var(--text);margin-bottom:2px">• ${c}</div>`).join('')}
-        </div>`:''}
-      </div>
-    </div>`).join('');
-}
-
+setTimeout(()=>{ if(currentUser){loadActiveStaffHome();renderHomeWidgets();renderDailyBulletin();} },300);
 </script>
-
-<!-- ══ ARCHIVE PAGE ══ -->
-<div id="page-archive" class="page">
-  <div style="padding:16px;max-width:600px;margin:0 auto;">
-    <div class="page-header">
-      <div class="p-icon" style="font-size:28px">🗂️</div>
-      <h1>الأرشيف</h1>
-      <p class="sub">ARCHIVE — ALL RECORDS</p>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
-      <button class="nav-card-btn" onclick="loadArchive('violations')" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;color:var(--text)">⚠️ المخالفات</button>
-      <button class="nav-card-btn" onclick="loadArchive('facility')" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;color:var(--text)">🔧 تقرير النظافة</button>
-      <button class="nav-card-btn" onclick="loadArchive('attendance')" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;color:var(--text)">📅 الحضور والانصراف</button>
-      <button class="nav-card-btn" onclick="loadArchive('building')" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;color:var(--text)">🏢 تقرير الإشراف الميداني</button>
-      <button class="nav-card-btn" onclick="loadArchive('survey')" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;color:var(--text);grid-column:1/-1">⭐ الاستبيان</button>
-    </div>
-    <div id="archiveContent"></div>
-  </div>
-</div>
-
-<!-- ══ ATTENDANCE PAGE ══ -->
-<div id="page-attendance" class="page">
-  <div style="padding:16px;max-width:600px;margin:0 auto;">
-    <div class="page-header">
-      <div class="p-icon" style="font-size:28px">📅</div>
-      <h1>الحضور والانصراف</h1>
-      <p class="sub">ATTENDANCE — ADMIN ONLY 🔒</p>
-    </div>
-    <!-- تسجيل الحضور -->
-    <div class="card" style="padding:16px;margin-bottom:16px;">
-      <div class="slabel" style="margin-bottom:12px">تسجيل حضور / غياب</div>
-      <div class="srow">
-        <div class="slabel">الموظف</div>
-        <select id="attEmp" class="sinput">
-          <option value="">اختر الموظف...</option>
-          <option>شهد المقرن</option>
-          <option>سمية الخضيري</option>
-          <option>امجاد ابانمي</option>
-          <option>احمد الحماد</option>
-          <option>احمد سحاب</option>
-          <option>ابراهيم الحمد</option>
-        </select>
-      </div>
-      <div class="srow">
-        <div class="slabel">التاريخ</div>
-        <input type="date" id="attDate" class="sinput">
-      </div>
-      <div class="srow">
-        <div class="slabel">الحالة</div>
-        <select id="attStatus" class="sinput" onchange="toggleAttStatus(this.value)">
-          <option value="">اختر الحالة...</option>
-          <option>حضور</option>
-          <option>تأخير بعذر</option>
-          <option>خروج مبكر</option>
-          <option>إجازة</option>
-          <option>حالة وفاة</option>
-          <option>إجازة اختبارات</option>
-          <option>استئذان</option>
-        </select>
-      </div>
-      <div class="srow" id="attExitTimeRow" style="display:none">
-        <div class="slabel">وقت الخروج</div>
-        <input type="time" id="attExitTime" class="sinput">
-      </div>
-      <div class="srow" id="attDaysRow" style="display:none">
-        <div class="slabel">عدد الأيام</div>
-        <input type="number" id="attDays" class="sinput" min="1" placeholder="عدد أيام الإجازة">
-      </div>
-      <div class="srow" id="attPermTimeRow" style="display:none">
-        <div class="slabel">وقت الاستئذان</div>
-        <input type="time" id="attPermTime" class="sinput">
-      </div>
-      <div class="srow">
-        <div class="slabel">ملاحظات</div>
-        <input type="text" id="attNotes" class="sinput" placeholder="ملاحظات إضافية (اختياري)">
-      </div>
-      <button class="submit-btn" onclick="submitAttendance()" style="margin-top:10px">📥 تسجيل</button>
-    </div>
-
-    <!-- العمل الإضافي -->
-    <div class="card" style="padding:16px;margin-bottom:16px;">
-      <div class="slabel" style="margin-bottom:12px">العمل الإضافي</div>
-      <div class="srow">
-        <div class="slabel">الموظف</div>
-        <select id="otEmp" class="sinput">
-          <option value="">اختر الموظف...</option>
-          <option>شهد المقرن</option>
-          <option>سمية الخضيري</option>
-          <option>امجاد ابانمي</option>
-          <option>احمد الحماد</option>
-          <option>احمد سحاب</option>
-          <option>ابراهيم الحمد</option>
-        </select>
-      </div>
-      <div class="srow">
-        <div class="slabel">التاريخ</div>
-        <input type="date" id="otDate" class="sinput">
-      </div>
-      <div class="srow">
-        <div class="slabel">من</div>
-        <input type="time" id="otFrom" class="sinput">
-      </div>
-      <div class="srow">
-        <div class="slabel">إلى</div>
-        <input type="time" id="otTo" class="sinput">
-      </div>
-      <button class="submit-btn" onclick="submitOvertime()" style="margin-top:10px;background:linear-gradient(135deg,#f59e0b,#d97706)">💪 تسجيل العمل الإضافي</button>
-    </div>
-
-    <!-- سجل اليوم -->
-    <div class="card" style="padding:16px;margin-bottom:16px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div class="slabel">سجل اليوم</div>
-        <button onclick="loadAttendanceToday()" style="font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--accent);cursor:pointer;font-family:'Cairo',sans-serif">🔄 تحديث</button>
-      </div>
-      <div id="attTodayList"><div class="loading"><div class="spin"></div>جاري التحميل...</div></div>
-    </div>
-
-    <!-- تصدير شهري -->
-    <div class="card" style="padding:16px;">
-      <div class="slabel" style="margin-bottom:12px">📊 تصدير شهري لـ HR</div>
-      <div class="srow">
-        <div class="slabel">الشهر</div>
-        <input type="month" id="attExportMonth" class="sinput">
-      </div>
-      <button class="submit-btn" onclick="exportAttendanceExcel()" style="margin-top:10px;background:linear-gradient(135deg,#10b981,#059669)">📥 تصدير Excel</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ TOP EMPLOYEE PAGE ══ -->
-<div id="page-top-employee" class="page">
-  <div style="padding:16px;max-width:600px;margin:0 auto;">
-    <div class="page-header">
-      <div class="p-icon" style="font-size:28px">⭐</div>
-      <h1>الموظف الأعلى تقييم</h1>
-      <p class="sub">TOP RATED EMPLOYEE — ADMIN ONLY 🔒</p>
-    </div>
-    <div style="background:rgba(0,168,150,0.07);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--text-dim);text-align:center">
-      📌 التحليل مبني على بيانات الاستبيان الداخلي — سيتم ربط Google Sheets قريباً
-    </div>
-    <div id="topEmpContent"><div class="loading"><div class="spin"></div>جاري التحليل...</div></div>
-  </div>
-</div>
-
 </body>
 </html>
