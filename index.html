@@ -4311,6 +4311,21 @@ const STAFF_EMAILS = {
   'محمد':           'mialjamaan@nouradriving.sa',
 };
 const ADMIN_EMAIL = 'mialjamaan@nouradriving.sa';
+const GS_URL = 'https://script.google.com/macros/s/AKfycbwhdohTNfytA6ltivB-65kaVWBJkj_zLXQtOjBGSRo4rE8UO6XTFtNcvOohYJyWEbWQ/exec';
+
+// ── إرسال البيانات لـ Google Sheets (fire & forget) ──
+async function sendToSheets(type, rows) {
+  if(!rows || !rows.length) return;
+  try {
+    await fetch(GS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({type, rows})
+    });
+  } catch(e) { console.log('GS:', e.message); }
+}
+
 
 // ── EMAIL via mailto (no server needed) ──
 function sendEmailNotification(subject, body, to){
@@ -4582,6 +4597,10 @@ async function submitViolation(){
   const btn=document.getElementById('vBtn');btn.disabled=true;btn.textContent='⏳ جاري الحفظ...';
   const{error}=await db.from('violations').insert(rows);
   if(error){toast('❌ '+error.message);btn.disabled=false;btn.textContent='✦ تسجيل المخالفة / Submit';return;}
+  // GS sync
+  const _gsType = curSec==='male'?'violations_male':'violations_female';
+  const _gsRows = rows.map(r=>[r.date,r.time||'',r.observer,r.trainer_name,r.zone||'',r.violation_type,r.grade,'',r.description||'']);
+  sendToSheets(_gsType, _gsRows);
   document.getElementById('vForm').style.display='none';
   document.getElementById('vOk').style.display='block';
 }
@@ -4626,6 +4645,9 @@ async function submitSurvey(){
     note5:document.getElementById('sN5').value,
   }]);
   if(error){alert('❌ '+error.message);btn.disabled=false;btn.textContent='⭐ إرسال الاستطلاع / Submit Survey';return;}
+  // GS sync
+  const _sTotal=scores.reduce((a,b)=>a+b,0);
+  sendToSheets('surveys',[[date,document.getElementById('sDate')?.value||'',obs,'استطلاع',document.getElementById('sClient')?.value||'',document.getElementById('sN1')?.value||'',Math.round((_sTotal/25)*100)+'%']]);
   document.getElementById('sForm').style.display='none';document.getElementById('sOk').style.display='block';
 }
 function resetS(){
@@ -4677,6 +4699,8 @@ async function submitFacility(){
   }]);
   if(error){toast('❌ '+error.message);btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';return;}
 
+  // GS sync
+  sendToSheets('facility',[[dateVal,timeVal,obs,loc,type,'',desc||'']]);
   // ── إرسال إيميل تنبيه للمدير مع روابط الصور ──
   const subject='🔧 ملاحظة مرافق جديدة — '+type;
   let body='السلام عليكم،\n\nتم تسجيل ملاحظة مرافق جديدة:\n\nالنوع: '+type+'\nالموقع: '+loc+'\nالتاريخ: '+dateVal+'\nالوقت: '+timeVal+'\nالراصد: '+obs+'\nالتفاصيل: '+(desc||'—');
@@ -6128,6 +6152,9 @@ function doExportArchV(sec){
   if(sec) data=data.filter(r=>r.section===sec);
   const rows=[['الدرجة','المدرب','القسم','المخالفة','التاريخ','الوقت','الراصد']];
   data.forEach(r=>rows.push([r.grade,r.trainer,r.section==='female'?'نسائي':'رجالي',r.violation,r.date,r.time,r.observer]));
+  // GS sync
+  const _archRows=data.map(r=>[r.date||'','violations',r.section||'',JSON.stringify({trainer:r.trainer,violation:r.violation,grade:r.grade})]);
+  sendToSheets('archive',_archRows);
   downloadXLSX(rows,`أرشيف_المخالفات${sec?'_'+sec:''}`);
 }
 
@@ -6293,6 +6320,9 @@ function exportRatingExcel(){
   });
   rows.push([]);
   rows.push(['المتوسط العام','','',avg+'%','']);
+  // GS sync
+  const _ratRows=sorted.map((r,i)=>{const t=r.rating>=70?'ممتاز':r.rating>=60?'جيد جداً':r.rating>=50?'جيد':'يحتاج تطوير';return[new Date().toISOString().split('T')[0],r.name,r.section,r.rating+'%',t];});
+  sendToSheets('rating',_ratRows);
   downloadXLSX(rows,'تحليل_تقييم_المدربين');
 }
 
@@ -6351,6 +6381,8 @@ function submitAttendance(){
   const recs=getAttendRecords();
   recs.unshift(rec);
   saveAttendRecords(recs);
+  // GS sync
+  sendToSheets('attendance',[[rec.date,rec.staff,rec.status,rec.checkIn||'',rec.checkOut||'',rec.reason||'',rec.notes||'']]);
   // Reset fields
   ['attStaff','attStatus','attCheckIn','attCheckOut','attReason','attNotes'].forEach(id=>{
     const el=document.getElementById(id);
@@ -6451,6 +6483,9 @@ function exportAttendExcel(){
   const reasons={};
   recs.filter(r=>r.reason).forEach(r=>{reasons[r.reason]=(reasons[r.reason]||0)+1;});
   Object.entries(reasons).sort((a,b)=>b[1]-a[1]).forEach(([r,c])=>rows.push([r,c+' مرة']));
+  // GS sync - full dump
+  const _allAtt=getAttendRecords().map(r=>[r.date,r.staff,r.status,r.checkIn||'',r.checkOut||'',r.reason||'',r.notes||'']);
+  sendToSheets('attendance',_allAtt);
   downloadXLSX(rows,'سجل_الحضور_والانصراف');
 }
 
@@ -6504,6 +6539,8 @@ async function submitBuilding(){
   try{
     const{error}=await db.from('building_reports').insert([data]);
     if(error)throw error;
+    // GS sync
+    sendToSheets('building',[[data.date,data.time||'',data.observer,data.recep_crowd||'',data.recep_staff||'',data.wait_time||'',data.counter_staff||'',data.info_given||'',data.exam_staff||'',data.exam_halls||'',data.general_notes||'']]);
     // Build analysis
     const analysis=buildingAnalysis(data);
     document.getElementById('bAnalysis').innerHTML=analysis;
