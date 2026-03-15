@@ -1,1 +1,5 @@
-{}
+{
+  "rewrites": [
+    { "source": "/api/export", "destination": "/api/export.py" }
+  ]
+}
