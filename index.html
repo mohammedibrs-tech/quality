@@ -1199,7 +1199,13 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <!-- ══ VIOLATIONS TAB ══ -->
     <div id="tab-vt">
       <!-- سجلك الشهري - أول شيء يظهر -->
-      <div id="mylog-section-vt" style="margin-bottom:20px;"></div>
+      <div style="margin-bottom:20px;">
+        <div onclick="toggleMyLogSection()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 14px;background:rgba(0,168,150,0.06);border:1px solid rgba(0,168,150,0.15);border-radius:12px;margin-bottom:8px;">
+          <span style="font-size:12px;font-weight:900;color:var(--accent);">📝 سجلك الشهري — آخر 30 يوم</span>
+          <span id="mylogToggleIcon" style="font-size:14px;color:var(--accent);">▲</span>
+        </div>
+        <div id="mylog-section-vt" style="margin-bottom:8px;"></div>
+      </div>
       <!-- Section filter (affects dashboard + list) -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <div style="display:flex;gap:6px;">
@@ -1504,12 +1510,28 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 <!-- OPS EFFICIENCY PAGE -->
 <div id="page-ops" class="page">
   <div class="container-wide">
-    <button class="back-btn" onclick="goHome()">← الرئيسية / Home</button>
     <div class="page-header">
-      <div class="p-icon" style="background:rgba(102,126,234,0.12);border:1px solid rgba(102,126,234,0.2);">⚙️</div>
+      <div class="p-icon" style="background:rgba(102,126,234,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">⚙️</div>
       <h1>كفاءة التشغيل</h1>
-      <div class="sub">OPERATIONAL EFFICIENCY</div>
+      <div class="sub">OPERATIONAL EFFICIENCY — رفع تقارير Excel/PDF</div>
     </div>
+
+    <!-- رفع ملف جديد -->
+    <div id="opsUploadArea" style="background:var(--card);border:2px dashed var(--border);border-radius:16px;padding:28px;text-align:center;margin-bottom:20px;cursor:pointer;" onclick="document.getElementById('opsFileInput').click()">
+      <div style="font-size:36px;margin-bottom:10px;">📊</div>
+      <div style="font-size:14px;font-weight:900;margin-bottom:6px;">رفع تقرير كفاءة التشغيل</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">Excel أو PDF — يتم حفظ البيانات في Supabase تلقائياً</div>
+      <div style="font-size:11px;color:var(--accent);font-weight:700;">الأعمدة: اسم المدرب | الزون | الساعات المتاحة | الحصص | المتدربين</div>
+      <input type="file" id="opsFileInput" accept=".xlsx,.xls,.csv,.pdf" style="display:none;" onchange="handleOpsFile(this)">
+    </div>
+    <div id="opsUploadStatus" style="display:none;background:rgba(0,168,150,0.08);border:1px solid rgba(0,168,150,0.2);border-radius:12px;padding:12px 16px;margin-bottom:20px;font-size:12px;font-weight:700;color:var(--accent);text-align:center;"></div>
+
+    <!-- زر تحميل آخر تقرير محفوظ -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+      <button onclick="loadOpsFromSupabase()" style="padding:9px 16px;background:rgba(102,126,234,0.1);border:1px solid rgba(102,126,234,0.2);color:#667EEA;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🔄 تحميل آخر تقرير محفوظ</button>
+      <button onclick="exportOpsFromSupabase()" class="export-btn">⬇ تصدير Excel</button>
+    </div>
+
     <!-- OPS PAGE CONTENT - AUTO GENERATED -->
     <!-- Sub-tabs for 3 sections -->
     <div class="section-tabs" style="margin-bottom:20px;">
@@ -3881,26 +3903,83 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 <!-- INCENTIVES PAGE -->
 <div id="page-incentives" class="page">
-  <div class="container">
-    <button class="back-btn" onclick="goHome()">← الرئيسية / Home</button>
+  <div class="container-wide">
     <div class="page-header">
-      <div class="p-icon" style="background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.25);">🏆</div>
+      <div class="p-icon" style="background:rgba(255,215,0,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">🏆</div>
       <h1>الحوافز الشهرية</h1>
-      <div class="sub">MONTHLY INCENTIVES</div>
+      <div class="sub">MONTHLY INCENTIVES — مبني على بيانات Supabase</div>
     </div>
-    <div class="card">
-      <div class="coming-soon-wrap">
-        <div class="coming-soon-icon">🏆</div>
-        <div class="coming-soon-title">قريباً / Coming Soon</div>
-        <div class="coming-soon-sub">
-          سيتم ربط هذا القسم قريباً بمصدر البيانات<br>
-          <strong>يشمل:</strong> تقييم الأداء الشهري · الحوافز والمكافآت · تصنيف الموظفين · التوصيات
-          <br><br>
-          <span style="font-size:11px;color:var(--text-dim);">This section will be connected to your data source</span>
+
+    <!-- نموذج إضافة حافز -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:14px;">✦ إضافة حافز شهري</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field">
+          <label>الشهر <span class="req">*</span></label>
+          <select id="incMonth" class="filter-select">
+            <option value="">اختر...</option>
+            <option>يناير</option><option>فبراير</option><option>مارس</option>
+            <option>أبريل</option><option>مايو</option><option>يونيو</option>
+            <option>يوليو</option><option>أغسطس</option><option>سبتمبر</option>
+            <option>أكتوبر</option><option>نوفمبر</option><option>ديسمبر</option>
+          </select>
         </div>
-        <div class="coming-badge">🔗 جاهز للربط / Ready to Connect</div>
+        <div class="field">
+          <label>السنة <span class="req">*</span></label>
+          <input type="number" id="incYear" value="2026" min="2024" max="2030">
+        </div>
+        <div class="field">
+          <label>اسم الموظف <span class="req">*</span></label>
+          <select id="incStaff" class="filter-select">
+            <option value="">اختر...</option>
+            <option>شهد المقرن</option><option>سمية الخضيري</option>
+            <option>امجاد ابانمي</option><option>احمد الحماد</option>
+            <option>ابراهيم الحمد</option><option>احمد سحاب</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>القسم</label>
+          <select id="incSection" class="filter-select">
+            <option value="">اختر...</option>
+            <option>نسائي</option><option>رجالي</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>النقاط / التقييم</label>
+          <input type="number" id="incScore" placeholder="0-100" min="0" max="100">
+        </div>
+        <div class="field">
+          <label>عدد المخالفات</label>
+          <input type="number" id="incViolations" value="0" min="0">
+        </div>
+        <div class="field" style="grid-column:1/-1;">
+          <label>ملاحظات</label>
+          <textarea id="incNotes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
+        </div>
       </div>
+      <button class="submit-btn" onclick="submitIncentive()" style="margin-top:12px;">✦ حفظ الحافز</button>
     </div>
+
+    <!-- فلتر وتصدير -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+      <select class="filter-select" id="incFilterMonth" onchange="loadIncentives()" style="max-width:140px;">
+        <option value="">كل الأشهر</option>
+        <option>يناير</option><option>فبراير</option><option>مارس</option>
+        <option>أبريل</option><option>مايو</option><option>يونيو</option>
+        <option>يوليو</option><option>أغسطس</option><option>سبتمبر</option>
+        <option>أكتوبر</option><option>نوفمبر</option><option>ديسمبر</option>
+      </select>
+      <select class="filter-select" id="incFilterYear" onchange="loadIncentives()" style="max-width:100px;">
+        <option>2026</option><option>2025</option><option>2024</option>
+      </select>
+      <button class="export-btn" onclick="exportIncentivesExcel()" style="margin-right:auto;">⬇ تصدير Excel</button>
+    </div>
+
+    <!-- قائمة الحوافز -->
+    <div id="incList"><div class="loading"><div class="spin"></div>جاري التحميل...</div></div>
+
+    <div style="height:30px;"></div>
+    <button class="back-btn" onclick="goHome()">← رجوع / Back</button>
   </div>
 </div>
 
@@ -4257,6 +4336,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         <option value="إجازة">إجازة</option>
       </select>
       <button class="export-btn" onclick="exportAttendExcel()" style="margin-right:auto;">⬇ تصدير Excel + تحليل</button>
+      <button onclick="exportAttendanceMonthly()" style="padding:7px 14px;border:1.5px solid rgba(0,168,150,0.3);border-radius:9px;background:rgba(0,168,150,0.08);color:var(--accent);font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">📅 كشف شهري للـ HR</button>
     </div>
 
     <!-- Stats Row -->
@@ -4618,7 +4698,7 @@ function showPage(name,el){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   if(el)el.classList.add('active');
-  if(name==='records')loadAll();
+  if(name==='records')loadAll().then(()=>{ const activeTab=document.querySelector('.stab.active'); if(activeTab)activeTab.click(); });
   if(name==='home'){loadActiveStaffHome();renderHomeWidgets();renderDailyBulletin();}
 }
 
@@ -4649,7 +4729,7 @@ function openSec(type){
     document.getElementById('page-records').classList.add('active');
     document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
     document.querySelectorAll('.nav-tab')[1].classList.add('active');
-    loadAll();return;
+    loadAll().then(()=>{ const activeTab=document.querySelector('.stab.active'); if(activeTab)activeTab.click(); });return;
   }
   if(type==='female'||type==='male'){
     document.getElementById('page-violations').classList.add('active');
@@ -4673,6 +4753,7 @@ function openSec(type){
     document.getElementById('page-ops').classList.add('active');
   }else if(type==='incentives'){
     document.getElementById('page-incentives').classList.add('active');
+    loadIncentives();
   }else if(type==='archive'){
     document.getElementById('page-archive').classList.add('active');
     loadArchiveTab('vt');
@@ -6113,6 +6194,8 @@ function showViolationsRef(){
 function adminOnly(sec){
   if(!currentUser){pendingSec='__admin_'+sec;showLM();return;}
   if(currentUser.role==='admin'){openSec(sec);return;}
+  // شهد تقدر ترى كفاءة التشغيل
+  if(sec==='ops' && currentUser.username==='shahad'){openSec(sec);return;}
   // Show lock message
   const msg=document.createElement('div');
   msg.className='admin-lock-toast';
@@ -6531,7 +6614,7 @@ function classifyType(notes,reason){
   return 'استرداد';
 }
 
-function analyzeSales(){
+async function analyzeSales(){
   const cn=document.getElementById('scColName').value;
   const cf=document.getElementById('scColFees').value;
   const cd=document.getElementById('scColDate').value;
@@ -6552,20 +6635,33 @@ function analyzeSales(){
   document.getElementById('salesMappingArea').style.display='none';
   document.getElementById('salesResults').style.display='block';
   renderSalesResults();
+  // حفظ في Supabase
+  saveSalesToSupabase(window._salesData);
 }
 
-function addSalesManual(){
+async function addSalesManual(){
   const name=document.getElementById('smName').value.trim();
   const type=document.getElementById('smType').value;
   if(!name||!type){toast('❌ الاسم ونوع الطلب مطلوبان');return;}
-  salesManualData.push({
+  const newRec={
     name,
     fees:parseFloat(document.getElementById('smFees').value)||0,
     date:document.getElementById('smDate').value||new Date().toISOString().split('T')[0],
     reason:document.getElementById('smReason').value||'',
     notes:document.getElementById('smNotes').value||'',
     type
-  });
+  };
+  salesManualData.push(newRec);
+  // حفظ في Supabase
+  try{
+    await db.from('sales_reports').insert([{
+      client_name:newRec.name, request_type:newRec.type,
+      fees:newRec.fees||null, request_date:newRec.date,
+      client_reason:newRec.reason||null, sales_notes:newRec.notes||null,
+      week_label:new Date().toLocaleDateString('ar-SA'),
+      uploaded_by:currentUser?.name||'admin'
+    }]);
+  }catch(e){ console.log('sales err',e); }
   ['smName','smFees','smDate','smReason','smNotes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('smType').value='';
   renderSalesManualList();
@@ -7019,6 +7115,317 @@ async function renderMyLogRecords(tab){
   }catch(e){ container.innerHTML = '<div style="color:var(--red);font-size:12px;">خطأ في تحميل السجل</div>'; }
 }
 
+
+// ════════════════════════════════════════════════
+// SALES → SUPABASE
+// ════════════════════════════════════════════════
+async function saveSalesToSupabase(data){
+  if(!data||!data.length) return;
+  try{
+    const rows = data.map(r=>({
+      client_name:r.name||null,
+      request_type:r.type||null,
+      fees:r.fees||null,
+      request_date:r.date||null,
+      client_reason:r.reason||null,
+      sales_notes:r.notes||null,
+      week_label:new Date().toLocaleDateString('ar-SA'),
+      uploaded_by:currentUser?.name||'admin'
+    }));
+    await db.from('sales_reports').insert(rows);
+    toast('✅ تم حفظ التقرير في قاعدة البيانات');
+  }catch(e){ console.log('sales supabase err:',e); }
+}
+
+async function loadSalesFromSupabase(){
+  try{
+    const {data} = await db.from('sales_reports')
+      .select('*').order('created_at',{ascending:false}).limit(500);
+    if(data&&data.length){
+      return data.map(r=>({
+        name:r.client_name||'—', type:r.request_type||'—',
+        fees:r.fees||0, date:r.request_date||'',
+        reason:r.client_reason||'', notes:r.sales_notes||''
+      }));
+    }
+  }catch(e){}
+  return [];
+}
+
+
+// ════════════════════════════════════════════════
+// INCENTIVES — الحوافز الشهرية
+// ════════════════════════════════════════════════
+async function submitIncentive(){
+  const month = document.getElementById('incMonth').value;
+  const year = document.getElementById('incYear').value;
+  const staff = document.getElementById('incStaff').value;
+  if(!month||!year||!staff){toast('❌ الشهر والسنة والموظف مطلوبون');return;}
+  try{
+    const {error} = await db.from('incentives').insert([{
+      month, year, staff_name:staff,
+      section: document.getElementById('incSection').value||null,
+      score: parseFloat(document.getElementById('incScore').value)||null,
+      violations_count: parseInt(document.getElementById('incViolations').value)||0,
+      notes: document.getElementById('incNotes').value||null,
+      created_by: currentUser?.name||'admin'
+    }]);
+    if(error) throw error;
+    toast('✅ تم حفظ الحافز');
+    ['incMonth','incStaff','incSection','incScore','incNotes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('incViolations').value='0';
+    loadIncentives();
+  }catch(e){toast('❌ '+e.message);}
+}
+
+async function loadIncentives(){
+  const el = document.getElementById('incList');
+  if(!el) return;
+  el.innerHTML = '<div class="loading"><div class="spin"></div>جاري التحميل...</div>';
+  try{
+    const month = document.getElementById('incFilterMonth')?.value||'';
+    const year = document.getElementById('incFilterYear')?.value||'2026';
+    let q = db.from('incentives').select('*').eq('year',year).order('created_at',{ascending:false});
+    if(month) q = q.eq('month',month);
+    const {data,error} = await q;
+    if(error) throw error;
+    const recs = data||[];
+    if(!recs.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--text-dim);">لا توجد بيانات</div>';return;}
+    el.innerHTML = recs.map(r=>`
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <div>
+          <div style="font-size:13px;font-weight:900;">${r.staff_name} <span style="color:var(--text-dim);font-size:11px;">${r.section||''}</span></div>
+          <div style="font-size:11px;color:var(--text-dim);">${r.month} ${r.year} | نقاط: ${r.score??'—'} | مخالفات: ${r.violations_count||0}</div>
+          ${r.notes?`<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${r.notes}</div>`:''}
+        </div>
+        <button onclick="deleteIncentive('${r.id}')" style="background:rgba(217,79,79,0.1);border:1px solid rgba(217,79,79,0.2);color:var(--red);padding:6px 10px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">🗑</button>
+      </div>`).join('');
+  }catch(e){el.innerHTML=`<div style="color:var(--red);padding:20px;">${e.message}</div>`;}
+}
+
+async function deleteIncentive(id){
+  if(!confirm('حذف هذا الحافز؟')) return;
+  try{
+    await db.from('incentives').delete().eq('id',id);
+    toast('✅ تم الحذف');
+    loadIncentives();
+  }catch(e){toast('❌ '+e.message);}
+}
+
+async function exportIncentivesExcel(){
+  const month = document.getElementById('incFilterMonth')?.value||'';
+  const year = document.getElementById('incFilterYear')?.value||'2026';
+  let q = db.from('incentives').select('*').eq('year',year).order('staff_name',{ascending:true});
+  if(month) q = q.eq('month',month);
+  const {data} = await q;
+  const rows=[['الشهر','السنة','الموظف','القسم','النقاط','المخالفات','ملاحظات']];
+  (data||[]).forEach(r=>rows.push([r.month,r.year,r.staff_name,r.section||'',r.score||'',r.violations_count||0,r.notes||'']));
+  downloadXLSX(rows,`الحوافز_الشهرية_${year}`);
+}
+
+
+// ════════════════════════════════════════════════
+// OPS REPORTS → SUPABASE
+// ════════════════════════════════════════════════
+async function saveOpsToSupabase(data, section){
+  if(!data||!data.length) return;
+  try{
+    const now = new Date();
+    const rows = data.map(r=>({
+      report_month: String(now.getMonth()+1),
+      report_year: String(now.getFullYear()),
+      section: section||'—',
+      trainer_name: r.name||r.trainer_name||'—',
+      zone: r.zone||r.section||'—',
+      available_hours: parseFloat(r.availableHours||r.available_hours||0)||null,
+      sessions: parseInt(r.sessions||0)||null,
+      trainees: parseInt(r.trainees||0)||null,
+      efficiency_pct: parseFloat(r.efficiency||r.efficiency_pct||0)||null,
+      uploaded_by: currentUser?.name||'admin'
+    }));
+    await db.from('ops_reports').insert(rows);
+    toast('✅ تم حفظ بيانات الكفاءة في قاعدة البيانات');
+  }catch(e){ console.log('ops err:',e); }
+}
+
+
+// ════════════════════════════════════════════════
+// OPS FILE UPLOAD + ATTENDANCE MONTHLY EXPORT
+// ════════════════════════════════════════════════
+function handleOpsFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  const statusEl = document.getElementById('opsUploadStatus');
+  statusEl.style.display = 'block';
+  statusEl.textContent = '⏳ جاري قراءة الملف...';
+
+  if(file.name.toLowerCase().endsWith('.pdf')){
+    statusEl.textContent = '✅ تم استلام ملف PDF — يتم حفظه كمرجع';
+    saveOpsPdfRef(file.name);
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try{
+      let rows = [];
+      if(typeof XLSX !== 'undefined'){
+        const wb = XLSX.read(e.target.result, {type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(ws, {header:1, raw:false});
+        const headers = (json[0]||[]).map(h=>String(h).trim());
+        rows = json.slice(1).filter(r=>r.some(v=>v)).map(r=>{
+          const obj={};
+          headers.forEach((h,i)=>obj[h]=r[i]!=null?String(r[i]):'');
+          return obj;
+        });
+      }
+      if(!rows.length){ statusEl.textContent='❌ لم يتم قراءة بيانات'; return; }
+      statusEl.textContent = `⏳ جاري حفظ ${rows.length} صف في Supabase...`;
+      
+      // حدد الأعمدة تلقائياً
+      const headers = Object.keys(rows[0]);
+      const nameCol = headers.find(h=>h.includes('اسم')||h.includes('مدرب')||h.toLowerCase().includes('name'))||headers[0];
+      const zoneCol = headers.find(h=>h.includes('زون')||h.includes('zone')||h.toLowerCase().includes('zone'))||'';
+      const hoursCol = headers.find(h=>h.includes('ساعة')||h.includes('ساعات')||h.toLowerCase().includes('hour'))||'';
+      const sessCol = headers.find(h=>h.includes('حصة')||h.includes('حصص')||h.toLowerCase().includes('session'))||'';
+      const trainCol = headers.find(h=>h.includes('متدرب')||h.toLowerCase().includes('trainee'))||'';
+      
+      const now = new Date();
+      const opsRows = rows.map(r=>({
+        report_month: String(now.getMonth()+1),
+        report_year: String(now.getFullYear()),
+        trainer_name: r[nameCol]||'—',
+        zone: zoneCol?r[zoneCol]||'':'—',
+        available_hours: parseFloat(r[hoursCol])||null,
+        sessions: parseInt(r[sessCol])||null,
+        trainees: parseInt(r[trainCol])||null,
+        efficiency_pct: hoursCol&&sessCol ? Math.round(((parseInt(r[sessCol])||0)*1.67/(parseFloat(r[hoursCol])||1))*100) : null,
+        uploaded_by: currentUser?.name||'admin'
+      }));
+
+      await db.from('ops_reports').insert(opsRows);
+      statusEl.textContent = `✅ تم حفظ ${opsRows.length} مدرب في Supabase بنجاح`;
+      toast('✅ تم حفظ تقرير الكفاءة');
+    }catch(err){
+      statusEl.textContent = '❌ خطأ: ' + err.message;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function loadOpsFromSupabase(){
+  try{
+    const now = new Date();
+    const {data} = await db.from('ops_reports')
+      .select('*')
+      .eq('report_year', String(now.getFullYear()))
+      .order('efficiency_pct', {ascending:false})
+      .limit(300);
+    if(!data||!data.length){ toast('لا توجد بيانات محفوظة'); return; }
+    const statusEl = document.getElementById('opsUploadStatus');
+    statusEl.style.display = 'block';
+    statusEl.textContent = `✅ تم تحميل ${data.length} سجل من Supabase`;
+    toast(`✅ ${data.length} سجل`);
+  }catch(e){ toast('❌ '+e.message); }
+}
+
+async function exportOpsFromSupabase(){
+  try{
+    const {data} = await db.from('ops_reports').select('*').order('created_at',{ascending:false}).limit(500);
+    if(!data||!data.length){ toast('لا توجد بيانات'); return; }
+    const rows=[['الشهر','السنة','اسم المدرب/ة','الزون','الساعات المتاحة','الحصص','المتدربين','نسبة الكفاءة%']];
+    data.forEach(r=>rows.push([r.report_month,r.report_year,r.trainer_name,r.zone||'',r.available_hours||'',r.sessions||'',r.trainees||'',r.efficiency_pct||'']));
+    downloadXLSX(rows,'تقرير_كفاءة_التشغيل');
+  }catch(e){ toast('❌ '+e.message); }
+}
+
+function saveOpsPdfRef(filename){
+  toast('✅ تم تسجيل الملف: '+filename);
+}
+
+// ════════════════════════════════════════════════
+// ATTENDANCE MONTHLY EXCEL EXPORT
+// ════════════════════════════════════════════════
+const ALL_STAFF = ['شهد المقرن','سمية الخضيري','امجاد ابانمي','احمد الحماد','ابراهيم الحمد','احمد سحاب','محمد محمد الجمعان'];
+const WORK_DAYS = [0,1,2,3,4]; // الأحد إلى الخميس (0=الأحد)
+
+function getWorkDaysInMonth(year, month){
+  // month: 0-indexed
+  const days=[];
+  const date=new Date(year,month,1);
+  while(date.getMonth()===month){
+    const day=date.getDay();
+    if(WORK_DAYS.includes(day)) days.push(new Date(date));
+    date.setDate(date.getDate()+1);
+  }
+  return days;
+}
+
+async function exportAttendanceMonthly(year, month){
+  // year: 2026, month: 0-indexed
+  if(!year){
+    const now=new Date();
+    year=now.getFullYear(); month=now.getMonth();
+  }
+  const workDays = getWorkDaysInMonth(year, month);
+  const allRecs = await loadAttendFromSupabase();
+  
+  // فلتر الشهر
+  const monthStr = String(year)+'-'+String(month+1).padStart(2,'0');
+  const monthRecs = allRecs.filter(r=>(r.date||'').startsWith(monthStr));
+  
+  // بناء جدول: موظف × أيام
+  const headers = ['الموظف', ...workDays.map(d=>d.toLocaleDateString('ar-SA',{day:'2-digit',month:'2-digit'})), 'أيام الحضور','أيام الغياب','أيام الاستئذان','إجازات','نسبة الحضور%'];
+  const rows = [headers];
+  
+  ALL_STAFF.forEach(staff=>{
+    const staffRecs = monthRecs.filter(r=>r.staff===staff);
+    const row = [staff];
+    let present=0, absent=0, permission=0, leave=0;
+    
+    workDays.forEach(day=>{
+      const dateStr = day.toISOString().split('T')[0];
+      const rec = staffRecs.find(r=>r.date===dateStr);
+      if(!rec){
+        // لا يوجد سجل = حضور افتراضي
+        row.push('✅');
+        present++;
+      } else {
+        const statusMap={'غياب':'❌','إجازة':'🔵','استئذان':'🟡','خروج مبكر':'🔶','تأخير':'⏰'};
+        row.push(statusMap[rec.status]||'✅');
+        if(rec.status==='غياب') absent++;
+        else if(rec.status==='إجازة') leave++;
+        else if(rec.status==='استئذان'||rec.status==='خروج مبكر'||rec.status==='تأخير') permission++;
+        else present++;
+      }
+    });
+    
+    const total=workDays.length;
+    const pct=Math.round((present/total)*100);
+    row.push(present,absent,permission,leave,pct+'%');
+    rows.push(row);
+  });
+  
+  // إضافة ملاحظات
+  rows.push([]);
+  rows.push(['ملاحظة: ✅ = حضور | ❌ = غياب | 🟡 = استئذان | 🔵 = إجازة | 🔶 = خروج مبكر | ⏰ = تأخير']);
+  
+  const monthName=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'][month];
+  downloadXLSX(rows,`كشف_الحضور_${monthName}_${year}`);
+  toast('✅ تم تصدير كشف الحضور');
+}
+
+
+function toggleMyLogSection(){
+  const el = document.getElementById('mylog-section-vt');
+  const icon = document.getElementById('mylogToggleIcon');
+  if(!el) return;
+  const visible = el.style.display !== 'none';
+  el.style.display = visible ? 'none' : 'block';
+  if(icon) icon.textContent = visible ? '▼' : '▲';
+}
+
 // TOP RATED TRAINERS SECTION
 // ════════════════════════════════════════════════
 let ratingRawData = [];
@@ -7182,7 +7589,7 @@ function renderRatingResults(){
   document.getElementById('ratingRec').innerHTML=recs.map(r=>`<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;line-height:1.6;">${r}</div>`).join('')||'<div style="font-size:12px;color:var(--text-dim);">لا توصيات</div>';
 }
 
-function exportRatingExcel(){
+async function exportRatingExcel(){
   const data=window._ratingParsed||[];
   const total=window._ratingTotal||0;
   const rows=[['الترتيب','اسم المدرب/ة','عدد مرات الذكر','النسبة من الآراء%','التصنيف']];
@@ -7193,6 +7600,22 @@ function exportRatingExcel(){
   rows.push([]);
   rows.push(['إجمالي الآراء المحللة','',total,'','']);
   downloadXLSX(rows,'تحليل_الأعلى_بالتقييم_'+new Date().toISOString().split('T')[0]);
+  // حفظ في Supabase
+  try{
+    const uploadDate = new Date().toISOString().split('T')[0];
+    // احذف القديم لنفس التاريخ أولاً
+    await db.from('trainer_ratings').delete().eq('upload_date', uploadDate);
+    const ratingRows = data.map((r,i)=>({
+      upload_date: uploadDate,
+      trainer_name: r.name,
+      mention_count: r.count,
+      mention_pct: r.pct,
+      rank_position: i+1,
+      uploaded_by: currentUser?.name||'admin'
+    }));
+    await db.from('trainer_ratings').insert(ratingRows);
+    toast('✅ تم حفظ نتائج التقييم في قاعدة البيانات');
+  }catch(e){ console.log('rating err:',e); }
 }
 
 function resetRating(){
@@ -7305,14 +7728,17 @@ async function submitAttendance(){
 
 async function deleteAttendRecord(id){
   try{ await db.from('attendance').delete().eq('id',id); }catch(e){}
+  // حدّث localStorage
   saveAttendRecords(getAttendRecords().filter(r=>r.id!=id));
-  renderAttendList();
-  renderAttendKPIs();
-  renderDailyBulletin();
+  await renderAttendList();
+  await renderAttendKPIs();
+  await renderDailyBulletin();
 }
 
-function renderAttendList(){
-  const recs=getAttendRecords();
+async function renderAttendList(){
+  // دائماً اجلب من Supabase أولاً
+  const supaRecs = await loadAttendFromSupabase();
+  const recs = supaRecs;
   const fs=document.getElementById('attFilterStaff')?.value||'';
   const fst=document.getElementById('attFilterStatus')?.value||'';
   let data=recs;
@@ -7336,8 +7762,8 @@ function renderAttendList(){
   </div>`).join('');
 }
 
-function renderAttendKPIs(){
-  const recs=getAttendRecords();
+async function renderAttendKPIs(){
+  const recs=await loadAttendFromSupabase();
   const today=new Date().toISOString().split('T')[0];
   const todayRecs=recs.filter(r=>r.date===today);
   const counts={};
@@ -7399,12 +7825,12 @@ function exportAttendExcel(){
 // ════════════════════════════════════════════════
 // DAILY BULLETIN (Staff absence notification)
 // ════════════════════════════════════════════════
-function renderDailyBulletin(){
+async function renderDailyBulletin(){
   if(!currentUser) return;
   const el=document.getElementById('dailyBulletin');
   if(!el) return;
   const today=new Date().toISOString().split('T')[0];
-  const allRecs=getAttendRecords();
+  const allRecs=await loadAttendFromSupabase();
   const todayRecs=allRecs.filter(r=>r.date===today);
   const absentStatuses=['غياب','إجازة','استئذان','خروج مبكر'];
   const absent=todayRecs.filter(r=>absentStatuses.includes(r.status));
