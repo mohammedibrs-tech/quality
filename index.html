@@ -1493,7 +1493,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
               <option value="استكمال">✅ استكمال</option>
               <option value="تأجيل">⏸ تأجيل</option>
             </select>
-            <button class="export-btn" onclick="exportSalesExcel()">⬇ تصدير Excel</button>
+            <button class="export-btn" onclick="exportSalesStyled()">⬇ تصدير Excel</button>
           </div>
         </div>
         <div id="salesTable" style="overflow-x:auto;"></div>
@@ -1529,7 +1529,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <!-- زر تحميل آخر تقرير محفوظ -->
     <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
       <button onclick="loadOpsFromSupabase()" style="padding:9px 16px;background:rgba(102,126,234,0.1);border:1px solid rgba(102,126,234,0.2);color:#667EEA;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🔄 تحميل آخر تقرير محفوظ</button>
-      <button onclick="exportOpsFromSupabase()" class="export-btn">⬇ تصدير Excel</button>
+      <button onclick="exportOpsStyled()" class="export-btn">⬇ تصدير Excel</button>
     </div>
 
     <!-- OPS PAGE CONTENT - AUTO GENERATED -->
@@ -3972,7 +3972,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <select class="filter-select" id="incFilterYear" onchange="loadIncentives()" style="max-width:100px;">
         <option>2026</option><option>2025</option><option>2024</option>
       </select>
-      <button class="export-btn" onclick="exportIncentivesExcel()" style="margin-right:auto;">⬇ تصدير Excel</button>
+      <button class="export-btn" onclick="exportIncentivesStyled()" style="margin-right:auto;">⬇ تصدير Excel</button>
     </div>
 
     <!-- قائمة الحوافز -->
@@ -4214,7 +4214,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <option value="30">أعلى 30</option>
           <option value="0">الكل</option>
         </select>
-        <button class="export-btn" onclick="exportRatingExcel()" style="margin-right:auto;">⬇ تصدير التحليل Excel</button>
+        <button class="export-btn" onclick="exportRatingsStyled()" style="margin-right:auto;">⬇ تصدير التحليل Excel</button>
       </div>
 
       <!-- KPI Row -->
@@ -4336,7 +4336,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         <option value="إجازة">إجازة</option>
       </select>
       <button class="export-btn" onclick="exportAttendExcel()" style="margin-right:auto;">⬇ تصدير Excel + تحليل</button>
-      <button onclick="exportAttendanceMonthly()" style="padding:7px 14px;border:1.5px solid rgba(0,168,150,0.3);border-radius:9px;background:rgba(0,168,150,0.08);color:var(--accent);font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">📅 كشف شهري للـ HR</button>
+      <button onclick="exportAttendanceStyled()" style="padding:7px 14px;border:1.5px solid rgba(0,168,150,0.3);border-radius:9px;background:rgba(0,168,150,0.08);color:var(--accent);font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">📅 كشف شهري للـ HR</button>
     </div>
 
     <!-- Stats Row -->
@@ -7647,6 +7647,137 @@ async function exportBuildingStyled(){
   XLSX.utils.book_append_sheet(wb,'سجل التقارير',ws);
   XLSX.writeFile(wb,`تقرير_المبنى_${now.getFullYear()}.xlsx`);
   toast(`✅ تم تصدير ${recs.length} تقرير`);
+}
+
+
+// ════════════════════════════════════════════════
+// EXPORT API — يستدعي Vercel API لبناء Excel منسّق
+// ════════════════════════════════════════════════
+const EXPORT_API = '/api/export';
+
+async function callExportAPI(type, data, options={}){
+  const btn = options.btn;
+  if(btn){ btn.disabled=true; btn.textContent='⏳ جاري بناء الملف...'; }
+  try{
+    const resp = await fetch(EXPORT_API, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        type, data,
+        year: options.year || new Date().getFullYear(),
+        month: options.month || new Date().getMonth()+1,
+        section_name: options.section_name || ''
+      })
+    });
+    if(!resp.ok) throw new Error('API error: '+resp.status);
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download=options.filename||'report.xlsx'; a.click();
+    URL.revokeObjectURL(url);
+    toast('✅ تم تحميل الملف بنجاح');
+  }catch(e){
+    toast('❌ '+e.message);
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent=options.btnText||'⬇ تصدير Excel'; }
+  }
+}
+
+// دوال التصدير المنسّق لكل خانة
+async function exportViolationsStyled(section){
+  const secName = section==='female'?'القسم النسائي':'القسم الرجالي';
+  const year = new Date().getFullYear();
+  let q = db.from('violations').select('*').order('date',{ascending:true});
+  if(section) q = q.eq('section',section);
+  const {data} = await q;
+  const btn = event?.target;
+  await callExportAPI('violations', data||[], {
+    year, section_name: secName,
+    filename: `سجل_المخالفات_${secName}_${year}.xlsx`,
+    btn, btnText:'⬇ تصدير Excel'
+  });
+}
+
+async function exportSurveysStyled(){
+  const year = new Date().getFullYear();
+  const {data} = await db.from('surveys').select('*').order('date',{ascending:false}).limit(500);
+  const btn = event?.target;
+  await callExportAPI('surveys', data||[], {
+    year, filename:`استطلاع_رضا_العملاء_${year}.xlsx`,
+    btn, btnText:'⬇ تصدير Excel'
+  });
+}
+
+async function exportFacilityStyled(){
+  const year = new Date().getFullYear();
+  const {data} = await db.from('facility_reports').select('*').order('date',{ascending:false}).limit(500);
+  const btn = event?.target;
+  await callExportAPI('facility', data||[], {
+    year, filename:`تقرير_المرافق_${year}.xlsx`,
+    btn, btnText:'⬇ تصدير Excel'
+  });
+}
+
+async function exportBuildingStyled(){
+  const year = new Date().getFullYear();
+  const {data} = await db.from('building_reports').select('*').order('date',{ascending:false}).limit(500);
+  const btn = event?.target;
+  await callExportAPI('building', data||[], {
+    year, filename:`تقرير_المبنى_${year}.xlsx`,
+    btn, btnText:'⬇ تصدير Excel'
+  });
+}
+
+async function exportAttendanceStyled(yearIn, monthIn){
+  const now=new Date();
+  const year=yearIn||now.getFullYear(); const month=monthIn||(now.getMonth()+1);
+  const allRecs = await loadAttendFromSupabase();
+  const monthNames=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const btn = event?.target;
+  await callExportAPI('attendance', allRecs, {
+    year, month,
+    filename:`كشف_الحضور_${monthNames[month-1]}_${year}.xlsx`,
+    btn, btnText:'📅 كشف شهري للـ HR'
+  });
+}
+
+async function exportIncentivesStyled(){
+  const year = new Date().getFullYear();
+  const {data} = await db.from('incentives').select('*').eq('year',String(year)).order('created_at',{ascending:false});
+  const btn = event?.target;
+  await callExportAPI('incentives', data||[], {
+    year, filename:`تقرير_الحوافز_${year}.xlsx`,
+    btn, btnText:'⬇ تصدير Excel'
+  });
+}
+
+async function exportOpsStyled(){
+  const year = new Date().getFullYear();
+  const {data} = await db.from('ops_reports').select('*').order('created_at',{ascending:false}).limit(500);
+  const btn = event?.target;
+  await callExportAPI('ops', data||[], {
+    year, filename:`تقرير_كفاءة_التشغيل_${year}.xlsx`,
+    btn, btnText:'⬇ تصدير Excel'
+  });
+}
+
+async function exportSalesStyled(){
+  const year = new Date().getFullYear();
+  const {data} = await db.from('sales_reports').select('*').order('created_at',{ascending:false}).limit(500);
+  const btn = event?.target;
+  await callExportAPI('sales', data||[], {
+    year, filename:`تقرير_المبيعات_${year}.xlsx`,
+    btn, btnText:'⬇ تصدير Excel'
+  });
+}
+
+async function exportRatingsStyled(){
+  const {data} = await db.from('trainer_ratings').select('*').order('rank_position',{ascending:true}).limit(100);
+  const btn = event?.target;
+  await callExportAPI('ratings', data||[], {
+    filename:`تقرير_الأعلى_بالتقييم_${new Date().getFullYear()}.xlsx`,
+    btn, btnText:'⬇ تصدير Excel'
+  });
 }
 
 // TOP RATED TRAINERS SECTION
