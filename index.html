@@ -779,13 +779,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="s-title-en">VIOLATIONS TABLE</div>
       <div class="s-desc">اضغط للعرض</div>
     </div>
-    <!-- My Daily Log Card -->
-    <div class="section-card mylog" onclick="showSection('mylog')">
-      <div class="s-icon" style="background:rgba(82,153,224,0.1);">📝</div>
-      <div class="s-title-ar">سجلي اليومي</div>
-      <div class="s-title-en">MY DAILY LOG</div>
-      <div class="s-desc">عدّل أو احذف سجلاتك</div>
-    </div>
+
   </div>
 
 <!-- PAGE: MY DAILY LOG -->
@@ -4272,7 +4266,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     </div>
 
     <div style="height:30px;"></div>
-    <button class="back-btn" onclick="goHome()">← رجوع / Back</button>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+    <button class="back-btn" onclick="goHome()" style="flex:1;">← رجوع / Back</button>
+    <button onclick="showMyLogInRecords('building')" style="flex:1;padding:10px;background:rgba(82,153,224,0.1);border:1px solid rgba(82,153,224,0.2);color:#5299E0;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">📝 سجلي</button>
+  </div>
   </div>
 </div>
 
@@ -4683,7 +4680,7 @@ function openSec(type){
     document.getElementById('page-attend').classList.add('active');
     const today=new Date().toISOString().split('T')[0];
     document.getElementById('attDate').value=today;
-    renderAttendList();renderAttendKPIs();
+    loadAttendFromSupabase().then(()=>{renderAttendList();renderAttendKPIs();});
   }else{
     document.getElementById('page-facility').classList.add('active');autoObs('fObs');
   }
@@ -4833,22 +4830,16 @@ async function submitFacility(){
   const timeVal=document.getElementById('fTime').value;
   const desc=document.getElementById('fDesc').value;
 
-  // ── حفظ السجل ──
   const{error}=await db.from('facility_reports').insert([{
     problem_type:type,location:loc,date:dateVal,time:timeVal,
     description:desc,observer:obs
   }]);
   if(error){toast('❌ '+error.message);btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';return;}
 
-  // GS sync
   sendToSheets('facility',[[dateVal,timeVal,obs,loc,type,'',desc||'']]);
-  // ── إرسال إيميل تنبيه للمدير مع روابط الصور ──
   const subject='🔧 ملاحظة مرافق جديدة — '+type;
-  let body='السلام عليكم،\n\nتم تسجيل ملاحظة مرافق جديدة:\n\nالنوع: '+type+'\nالموقع: '+loc+'\nالتاريخ: '+dateVal+'\nالوقت: '+timeVal+'\nالراصد: '+obs+'\nالتفاصيل: '+(desc||'—');
-  if(photoUrls.length) body+='\n\nروابط الصور:\n'+photoUrls.map((u,i)=>(i+1)+'. '+u).join('\n');
-  body+='\n\nمنصة إدارة الجودة — نورة لتعليم القيادة';
+  const body='النوع: '+type+'\nالموقع: '+loc+'\nالتاريخ: '+dateVal+'\nالراصد: '+obs+'\nالتفاصيل: '+(desc||'—')+'\n\nمنصة إدارة الجودة — نورة لتعليم القيادة';
   sendEmailNotification(subject,body,ADMIN_EMAIL);
-
   document.getElementById('fForm').style.display='none';document.getElementById('fOk').style.display='block';
 }
 function resetF(){
@@ -4867,10 +4858,10 @@ function switchTab(tab,el){
   document.querySelectorAll('[id^="tab-"]').forEach(t=>t.style.display='none');
   document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+tab).style.display='block';el.classList.add('active');
-  if(tab==='st'){renderS(allS);renderSurveyDash();}
-  else if(tab==='ft'){renderF(allF);renderFacilityDash();}
-  else if(tab==='bt'){renderB(allB);renderBuildingDash();}
-  else if(tab==='vt'){renderV(allV);renderViolationsDash();}
+  if(tab==='st'){renderS(allS);renderSurveyDash();renderMyLogRecords('surveys');}
+  else if(tab==='ft'){renderF(allF);renderFacilityDash();renderMyLogRecords('facilities');}
+  else if(tab==='bt'){renderB(allB);renderBuildingDash();renderMyLogRecords('building');}
+  else if(tab==='vt'){renderV(allV);renderViolationsDash();renderMyLogRecords('violations');}
 }
 function getQ(d){if(!d)return 1;const m=new Date(d).getMonth()+1;return m<=3?1:m<=6?2:m<=9?3:4;}
 
@@ -6298,7 +6289,28 @@ function doExportArchOther(tab){
 
 // ════════════════════════════════════════════════
 // ════════════════════════════════════════════════
-// MY DAILY LOG — سجلي اليومي
+// MY DAILY LOG — سجلي الشهري
+// ════════════════════════════════════════════════
+function showMyLogInRecords(tab){
+  // افتح صفحة السجلات على التبويب المناسب
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-records').classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab')[1]?.classList.add('active');
+  loadAll().then(()=>{
+    // بعد تحميل البيانات، اضغط على التبويب المناسب
+    const tabMap = {'violations':'vt','facilities':'ft','building':'bt','surveys':'st'};
+    const stab = document.querySelector(`.stab[onclick*="${tabMap[tab]||'vt'}"]`);
+    if(stab) stab.click();
+    // scroll للسجل الشهري
+    setTimeout(()=>{
+      const mylogSection = document.getElementById('myLogRecordsSection');
+      if(mylogSection) mylogSection.scrollIntoView({behavior:'smooth'});
+    }, 500);
+  });
+}
+
+
 // ════════════════════════════════════════════════
 let myLogCurrentTab = 'violations';
 
@@ -6913,6 +6925,104 @@ async function saveEditBuilding(id){
   }catch(e){ toast('❌ '+e.message); }
 }
 
+
+// ════════════════════════════════════════════════
+// سجلي الشهري في صفحة السجلات
+// ════════════════════════════════════════════════
+async function renderMyLogRecords(tab){
+  const containerId = 'myLogRecordsSection_'+tab;
+  // ابحث عن container في التبويب الحالي
+  const tabEl = document.getElementById('tab-'+(tab==='violations'?'vt':tab==='surveys'?'st':tab==='facilities'?'ft':'bt'));
+  if(!tabEl) return;
+  
+  // أضف container إذا ما فيه
+  let container = tabEl.querySelector('.mylog-records-section');
+  if(!container){
+    container = document.createElement('div');
+    container.className = 'mylog-records-section';
+    container.style.marginTop = '20px';
+    tabEl.appendChild(container);
+  }
+
+  const user = currentUser ? currentUser.name : '';
+  const isAdmin = currentUser?.role === 'admin';
+  
+  container.innerHTML = '<div style="font-size:12px;font-weight:900;color:var(--accent);letter-spacing:1.5px;margin-bottom:12px;">📝 سجلك الشهري — آخر 30 يوم</div><div class="spin" style="margin:0 auto;"></div>';
+
+  let recs = [];
+  try{
+    if(tab === 'violations'){
+      let q = db.from('violations').select('*').order('created_at',{ascending:false}).limit(100);
+      if(!isAdmin) q = q.eq('observer', user);
+      const {data} = await q;
+      recs = data||[];
+      if(!recs.length){ container.innerHTML += '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:20px;">لا توجد مخالفات مسجلة</div>'; return; }
+      container.innerHTML = '<div style="font-size:12px;font-weight:900;color:var(--accent);letter-spacing:1.5px;margin-bottom:12px;">📝 سجلك الشهري — آخر 30 يوم</div>' +
+        recs.map(r=>{
+          const bc=r.grade==='A'?'var(--red)':r.grade==='B'?'var(--orange)':'var(--green)';
+          const d=(r.date||r.created_at||'').split('T')[0];
+          return `<div style="background:var(--card);border:1px solid var(--border);border-right:4px solid ${bc};border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                <span style="background:${bc}22;color:${bc};padding:1px 8px;border-radius:20px;font-size:11px;font-weight:900;">${r.grade||'—'}</span>
+                <span style="font-size:12px;font-weight:900;">${r.trainer_name||'—'}</span>
+              </div>
+              <div style="font-size:11px;color:var(--text-dim);">${r.section==='female'?'👩':'👨'} ${r.zone||''} | ${r.violation_type||''}</div>
+              <div style="font-size:10px;color:var(--text-dim);">📅 ${d} · ${r.observer||''}</div>
+            </div>
+            <div style="display:flex;gap:4px;flex-shrink:0;">
+              <button onclick="openEditModal('${r.id}')" style="background:rgba(0,168,150,0.1);border:1px solid rgba(0,168,150,0.2);color:var(--accent);padding:5px 8px;border-radius:7px;font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">✏️</button>
+              <button onclick="deleteMyViolation('${r.id}')" style="background:rgba(217,79,79,0.1);border:1px solid rgba(217,79,79,0.2);color:var(--red);padding:5px 8px;border-radius:7px;font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">🗑</button>
+            </div>
+          </div>`;
+        }).join('');
+
+    } else if(tab === 'facilities'){
+      let q = db.from('facility_reports').select('*').order('created_at',{ascending:false}).limit(100);
+      if(!isAdmin) q = q.eq('observer', user);
+      const {data} = await q;
+      recs = data||[];
+      if(!recs.length){ container.innerHTML = '<div style="font-size:12px;font-weight:900;color:var(--accent);margin-bottom:12px;">📝 سجلك الشهري</div><div style="color:var(--text-dim);font-size:12px;text-align:center;padding:20px;">لا توجد ملاحظات مسجلة</div>'; return; }
+      container.innerHTML = '<div style="font-size:12px;font-weight:900;color:var(--accent);letter-spacing:1.5px;margin-bottom:12px;">📝 سجلك الشهري — آخر 30 يوم</div>' +
+        recs.map(r=>{
+          const d=(r.date||r.created_at||'').split('T')[0];
+          return `<div style="background:var(--card);border:1px solid var(--border);border-right:4px solid var(--orange);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:900;margin-bottom:3px;">🔧 ${r.problem_type||'—'}</div>
+              <div style="font-size:11px;color:var(--text-dim);">${r.location||''} | 📅 ${d} · ${r.observer||''}</div>
+              ${r.description?`<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${r.description}</div>`:''}
+            </div>
+            <div style="display:flex;gap:4px;flex-shrink:0;">
+              <button onclick="openEditFacility('${r.id}','${(r.problem_type||'').replace(/'/g,'')}','${(r.location||'').replace(/'/g,'')}','${(r.description||'').replace(/'/g,'')}','${r.date||''}')" style="background:rgba(0,168,150,0.1);border:1px solid rgba(0,168,150,0.2);color:var(--accent);padding:5px 8px;border-radius:7px;font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">✏️</button>
+              <button onclick="deleteMyFacility('${r.id}')" style="background:rgba(217,79,79,0.1);border:1px solid rgba(217,79,79,0.2);color:var(--red);padding:5px 8px;border-radius:7px;font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">🗑</button>
+            </div>
+          </div>`;
+        }).join('');
+
+    } else if(tab === 'building'){
+      let q = db.from('building_reports').select('*').order('created_at',{ascending:false}).limit(100);
+      if(!isAdmin) q = q.eq('observer', user);
+      const {data} = await q;
+      recs = data||[];
+      if(!recs.length){ container.innerHTML = '<div style="font-size:12px;font-weight:900;color:var(--accent);margin-bottom:12px;">📝 سجلك الشهري</div><div style="color:var(--text-dim);font-size:12px;text-align:center;padding:20px;">لا توجد تقارير مسجلة</div>'; return; }
+      container.innerHTML = '<div style="font-size:12px;font-weight:900;color:var(--accent);letter-spacing:1.5px;margin-bottom:12px;">📝 سجلك الشهري — آخر 30 يوم</div>' +
+        recs.map(r=>{
+          const d=(r.date||r.created_at||'').split('T')[0];
+          return `<div style="background:var(--card);border:1px solid var(--border);border-right:4px solid var(--accent);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:900;margin-bottom:3px;">🏢 تقرير المبنى — ${d}</div>
+              <div style="font-size:11px;color:var(--text-dim);">استقبال: ${r.recep_crowd||'—'} | قاعات: ${r.exam_crowd||'—'} · ${r.observer||''}</div>
+            </div>
+            <div style="display:flex;gap:4px;flex-shrink:0;">
+              <button onclick="openEditBuilding('${r.id}')" style="background:rgba(0,168,150,0.1);border:1px solid rgba(0,168,150,0.2);color:var(--accent);padding:5px 8px;border-radius:7px;font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">✏️</button>
+              <button onclick="deleteMyBuilding('${r.id}')" style="background:rgba(217,79,79,0.1);border:1px solid rgba(217,79,79,0.2);color:var(--red);padding:5px 8px;border-radius:7px;font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">🗑</button>
+            </div>
+          </div>`;
+        }).join('');
+    }
+  }catch(e){ container.innerHTML = '<div style="color:var(--red);font-size:12px;">خطأ في تحميل السجل</div>'; }
+}
+
 // TOP RATED TRAINERS SECTION
 // ════════════════════════════════════════════════
 let ratingRawData = [];
@@ -7106,22 +7216,45 @@ function resetRating(){
 // ════════════════════════════════════════════════
 // STAFF ATTENDANCE SECTION
 // ════════════════════════════════════════════════
-const ATT_KEY = 'nq_attendance_v2'; // backup localStorage key
+const ATT_KEY = 'nq_attendance_v2';
 
-// الحضور محفوظ في Supabase + نسخة احتياطية localStorage
 function getAttendRecords(){
-  try{
-    const raw=localStorage.getItem(ATT_KEY);
-    return raw?JSON.parse(raw):[];
-  }catch(e){return[];}
+  try{ return JSON.parse(localStorage.getItem(ATT_KEY)||'[]'); }
+  catch(e){ return []; }
 }
 function saveAttendRecords(recs){
-  localStorage.setItem(ATT_KEY,JSON.stringify(recs));
+  localStorage.setItem(ATT_KEY, JSON.stringify(recs));
 }
-function saveAttendRecord(rec){
-  const recs=getAttendRecords();
+async function saveAttendRecord(rec){
+  try{
+    const {data,error} = await db.from('attendance').insert([{
+      staff:rec.staff, date:rec.date, status:rec.status,
+      check_in:rec.checkIn||null, check_out:rec.checkOut||null,
+      reason:rec.reason||null, notes:rec.notes||null,
+      registered_by:rec.registeredBy||null
+    }]).select();
+    if(!error && data && data[0]) rec.id = data[0].id;
+  }catch(e){ console.log('att supabase err:',e); }
+  // نسخة احتياطية دائمة في localStorage
+  const recs = getAttendRecords();
   recs.unshift(rec);
   saveAttendRecords(recs);
+}
+async function loadAttendFromSupabase(){
+  try{
+    const {data,error} = await db.from('attendance').select('*').order('date',{ascending:false});
+    if(!error && data && data.length){
+      const mapped = data.map(r=>({
+        id:r.id, staff:r.staff, date:r.date, status:r.status,
+        checkIn:r.check_in||'', checkOut:r.check_out||'',
+        reason:r.reason||'', notes:r.notes||'',
+        registeredBy:r.registered_by||'', createdAt:r.created_at
+      }));
+      saveAttendRecords(mapped);
+      return mapped;
+    }
+  }catch(e){}
+  return getAttendRecords();
 }
 
 function toggleAttendFields(){
@@ -7141,7 +7274,7 @@ function toggleAttendFields(){
   if(leaveToF) leaveToF.style.display=status==='إجازة'?'':'none';
 }
 
-function submitAttendance(){
+async function submitAttendance(){
   const staff=document.getElementById('attStaff').value;
   const date=document.getElementById('attDate').value;
   const status=document.getElementById('attStatus').value;
@@ -7158,7 +7291,7 @@ function submitAttendance(){
     registeredBy:currentUser?currentUser.name:'admin',
     createdAt:new Date().toISOString()
   };
-  saveAttendRecord(rec);
+  await saveAttendRecord(rec);
   // GS sync
   sendToSheets('attendance',[[rec.date,rec.staff,rec.status,rec.checkIn||'',rec.checkOut||'',rec.reason||'',rec.notes||'']]);
   // Reset fields
@@ -7174,9 +7307,9 @@ function submitAttendance(){
   toast('✅ تم تسجيل الحضور بنجاح');
 }
 
-function deleteAttendRecord(id){
-  const recs=getAttendRecords().filter(r=>r.id!==id);
-  saveAttendRecords(recs);
+async function deleteAttendRecord(id){
+  try{ await db.from('attendance').delete().eq('id',id); }catch(e){}
+  saveAttendRecords(getAttendRecords().filter(r=>r.id!=id));
   renderAttendList();
   renderAttendKPIs();
   renderDailyBulletin();
