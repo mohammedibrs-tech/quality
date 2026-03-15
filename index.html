@@ -4874,7 +4874,7 @@ function switchTab(tab,el){
 }
 function getQ(d){if(!d)return 1;const m=new Date(d).getMonth()+1;return m<=3?1:m<=6?2:m<=9?3:4;}
 
-async async function loadAll(){
+async function loadAll(){
   const{data:vd}=await db.from('violations').select('*').order('created_at',{ascending:false});
   allV=vd||[];window._cachedViolations=allV;updateVStats();renderV(allV);
   const{data:sd}=await db.from('surveys').select('*').order('created_at',{ascending:false});
