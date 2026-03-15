@@ -6348,12 +6348,13 @@ async function renderMyLog(){
   if(!el) return;
   const user = currentUser ? currentUser.name : '';
   const isAdmin = currentUser?.role === 'admin';
+  // آخر 30 يوم
+  const monthAgo = new Date(Date.now()-30*24*60*60*1000).toISOString().split('T')[0];
   
   el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-dim);"><div class="spin" style="margin:0 auto 10px;"></div>جاري التحميل...</div>';
 
   if(myLogCurrentTab === 'violations'){
-    // جلب من Supabase مباشرة
-    let q = db.from('violations').select('*').order('created_at',{ascending:false}).limit(30);
+    let q = db.from('violations').select('*').order('created_at',{ascending:false}).limit(100);
     if(!isAdmin) q = q.eq('observer', user);
     const {data} = await q;
     const recs = data||[];
@@ -6384,7 +6385,7 @@ async function renderMyLog(){
     }).join('');
       
   } else if(myLogCurrentTab === 'facilities'){
-    let q = db.from('facility_reports').select('*').order('created_at',{ascending:false}).limit(30);
+    let q = db.from('facility_reports').select('*').order('created_at',{ascending:false}).limit(100);
     if(!isAdmin) q = q.eq('observer', user);
     const {data} = await q;
     const recs = data||[];
@@ -6402,13 +6403,16 @@ async function renderMyLog(){
             <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">📅 ${d} · ${r.observer||''}</div>
             ${r.description?`<div style="font-size:11px;color:var(--text-dim);margin-top:4px;padding:6px 8px;background:var(--card2);border-radius:8px;">${r.description}</div>`:''}
           </div>
-          <button onclick="deleteMyFacility('${r.id}')" style="background:rgba(217,79,79,0.1);border:1px solid rgba(217,79,79,0.2);color:var(--red);padding:6px 10px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">🗑 حذف</button>
+          <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+            <button onclick="openEditFacility('${r.id}','${(r.problem_type||'').replace(/'/g,'')  }','${(r.location||'').replace(/'/g,'')}','${(r.description||'').replace(/'/g,'')}','${r.date||''}')" style="background:rgba(0,168,150,0.1);border:1px solid rgba(0,168,150,0.2);color:var(--accent);padding:6px 10px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✏️ تعديل</button>
+            <button onclick="deleteMyFacility('${r.id}')" style="background:rgba(217,79,79,0.1);border:1px solid rgba(217,79,79,0.2);color:var(--red);padding:6px 10px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">🗑 حذف</button>
+          </div>
         </div>
       </div>`;
     }).join('');
       
   } else if(myLogCurrentTab === 'building'){
-    let q = db.from('building_reports').select('*').order('created_at',{ascending:false}).limit(30);
+    let q = db.from('building_reports').select('*').order('created_at',{ascending:false}).limit(100);
     if(!isAdmin) q = q.eq('observer', user);
     const {data} = await q;
     const recs = data||[];
@@ -6427,7 +6431,10 @@ async function renderMyLog(){
             <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">📅 ${r.time||''} · ${r.observer||''}</div>
             ${r.general_notes?`<div style="font-size:11px;color:var(--text-dim);margin-top:4px;padding:6px 8px;background:var(--card2);border-radius:8px;">${r.general_notes}</div>`:''}
           </div>
-          <button onclick="deleteMyBuilding('${r.id}')" style="background:rgba(217,79,79,0.1);border:1px solid rgba(217,79,79,0.2);color:var(--red);padding:6px 10px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">🗑 حذف</button>
+          <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+            <button onclick="openEditBuilding('${r.id}')" style="background:rgba(0,168,150,0.1);border:1px solid rgba(0,168,150,0.2);color:var(--accent);padding:6px 10px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✏️ تعديل</button>
+            <button onclick="deleteMyBuilding('${r.id}')" style="background:rgba(217,79,79,0.1);border:1px solid rgba(217,79,79,0.2);color:var(--red);padding:6px 10px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">🗑 حذف</button>
+          </div>
         </div>
       </div>`;
     }).join('');
@@ -6814,6 +6821,79 @@ function selectPhoneObs(idx, n){
   }
 }
 
+
+// ── تعديل ملاحظة مرفق ──
+function openEditFacility(id, type, loc, desc, date){
+  const modal = document.createElement('div');
+  modal.id = 'editFacilityModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:9100;display:flex;align-items:center;justify-content:center;padding:18px;';
+  modal.innerHTML = `<div style="background:var(--card);border-radius:18px;padding:24px;width:100%;max-width:440px;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+    <div style="font-size:14px;font-weight:900;margin-bottom:16px;color:var(--accent);">✏️ تعديل ملاحظة مرفق</div>
+    <div class="field"><label>نوع المشكلة</label><input type="text" id="efType" value="${type}" class=""></div>
+    <div class="field"><label>الموقع</label><input type="text" id="efLoc" value="${loc}"></div>
+    <div class="field"><label>الوصف</label><textarea id="efDesc" rows="3">${desc}</textarea></div>
+    <div class="field"><label>التاريخ</label><input type="date" id="efDate" value="${date}"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button onclick="saveEditFacility('${id}')" style="flex:1;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;">حفظ</button>
+      <button onclick="document.getElementById('editFacilityModal').remove()" style="flex:1;padding:12px;background:rgba(0,0,0,0.05);border:1px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;color:var(--text);">إلغاء</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+
+async function saveEditFacility(id){
+  const updates = {
+    problem_type: document.getElementById('efType').value,
+    location: document.getElementById('efLoc').value,
+    description: document.getElementById('efDesc').value,
+    date: document.getElementById('efDate').value,
+  };
+  try{
+    const {error} = await db.from('facility_reports').update(updates).eq('id', id);
+    if(error) throw error;
+    document.getElementById('editFacilityModal')?.remove();
+    toast('✅ تم التعديل');
+    renderMyLog();
+  }catch(e){ toast('❌ '+e.message); }
+}
+
+// ── تعديل تقرير مبنى ──
+async function openEditBuilding(id){
+  const {data} = await db.from('building_reports').select('*').eq('id',id).single();
+  if(!data){ toast('❌ لم يوجد التقرير'); return; }
+  const modal = document.createElement('div');
+  modal.id = 'editBuildingModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:9100;display:flex;align-items:center;justify-content:center;padding:18px;overflow-y:auto;';
+  modal.innerHTML = `<div style="background:var(--card);border-radius:18px;padding:24px;width:100%;max-width:440px;box-shadow:0 20px 50px rgba(0,0,0,0.3);margin:auto;">
+    <div style="font-size:14px;font-weight:900;margin-bottom:16px;color:var(--accent);">✏️ تعديل تقرير المبنى</div>
+    <div class="field"><label>التاريخ</label><input type="date" id="ebDate" value="${data.date||''}"></div>
+    <div class="field"><label>ازدحام الاستقبال</label><input type="text" id="ebRecepCrowd" value="${data.recep_crowd||''}"></div>
+    <div class="field"><label>ازدحام قاعات الاختبار</label><input type="text" id="ebExamCrowd" value="${data.exam_crowd||''}"></div>
+    <div class="field"><label>ملاحظات عامة</label><textarea id="ebNotes" rows="3">${data.general_notes||''}</textarea></div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button onclick="saveEditBuilding('${id}')" style="flex:1;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;">حفظ</button>
+      <button onclick="document.getElementById('editBuildingModal').remove()" style="flex:1;padding:12px;background:rgba(0,0,0,0.05);border:1px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;color:var(--text);">إلغاء</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+
+async function saveEditBuilding(id){
+  const updates = {
+    date: document.getElementById('ebDate').value,
+    recep_crowd: document.getElementById('ebRecepCrowd').value,
+    exam_crowd: document.getElementById('ebExamCrowd').value,
+    general_notes: document.getElementById('ebNotes').value,
+  };
+  try{
+    const {error} = await db.from('building_reports').update(updates).eq('id', id);
+    if(error) throw error;
+    document.getElementById('editBuildingModal')?.remove();
+    toast('✅ تم التعديل');
+    renderMyLog();
+  }catch(e){ toast('❌ '+e.message); }
+}
+
 // TOP RATED TRAINERS SECTION
 // ════════════════════════════════════════════════
 let ratingRawData = [];
@@ -7007,16 +7087,62 @@ function resetRating(){
 // ════════════════════════════════════════════════
 // STAFF ATTENDANCE SECTION
 // ════════════════════════════════════════════════
-const ATT_KEY = 'nq_attendance_v2';
+const ATT_KEY = 'nq_attendance_v2'; // backup localStorage key
 
-function getAttendRecords(){
+// الحضور محفوظ في Supabase + نسخة احتياطية localStorage
+let _attCache = null;
+
+async function getAttendRecords(){
+  if(_attCache !== null) return _attCache;
   try{
-    const raw=localStorage.getItem(ATT_KEY);
-    return raw?JSON.parse(raw):[];
-  }catch(e){return[];}
+    const {data} = await db.from('attendance').select('*').order('created_at',{ascending:false});
+    if(data && data.length){
+      _attCache = data;
+      // حفظ نسخة احتياطية
+      localStorage.setItem(ATT_KEY, JSON.stringify(data));
+      return data;
+    }
+  }catch(e){}
+  // fallback للـ localStorage
+  try{
+    const raw = localStorage.getItem(ATT_KEY);
+    _attCache = raw ? JSON.parse(raw) : [];
+    return _attCache;
+  }catch(e){ return []; }
 }
-function saveAttendRecords(recs){
-  localStorage.setItem(ATT_KEY,JSON.stringify(recs));
+
+async function saveAttendRecord(rec){
+  _attCache = null; // clear cache
+  try{
+    // حفظ في Supabase
+    const {data, error} = await db.from('attendance').insert([{
+      staff: rec.staff,
+      date: rec.date,
+      status: rec.status,
+      check_in: rec.checkIn||null,
+      check_out: rec.checkOut||null,
+      reason: rec.reason||null,
+      notes: rec.notes||null,
+      registered_by: rec.registeredBy||null,
+      created_at: rec.createdAt||new Date().toISOString()
+    }]).select();
+    if(!error && data) rec.id = data[0].id;
+  }catch(e){}
+  // احتياطي في localStorage دائماً
+  try{
+    const existing = JSON.parse(localStorage.getItem(ATT_KEY)||'[]');
+    existing.unshift(rec);
+    localStorage.setItem(ATT_KEY, JSON.stringify(existing));
+  }catch(e){}
+}
+
+async function deleteAttendRecord(id){
+  _attCache = null;
+  try{ await db.from('attendance').delete().eq('id', id); }catch(e){}
+  try{
+    const existing = JSON.parse(localStorage.getItem(ATT_KEY)||'[]');
+    localStorage.setItem(ATT_KEY, JSON.stringify(existing.filter(r=>r.id!=id)));
+  }catch(e){}
 }
 
 function toggleAttendFields(){
@@ -7036,7 +7162,7 @@ function toggleAttendFields(){
   if(leaveToF) leaveToF.style.display=status==='إجازة'?'':'none';
 }
 
-function submitAttendance(){
+async function submitAttendance(){
   const staff=document.getElementById('attStaff').value;
   const date=document.getElementById('attDate').value;
   const status=document.getElementById('attStatus').value;
@@ -7053,9 +7179,7 @@ function submitAttendance(){
     registeredBy:currentUser?currentUser.name:'admin',
     createdAt:new Date().toISOString()
   };
-  const recs=getAttendRecords();
-  recs.unshift(rec);
-  saveAttendRecords(recs);
+  await saveAttendRecord(rec);
   // GS sync
   sendToSheets('attendance',[[rec.date,rec.staff,rec.status,rec.checkIn||'',rec.checkOut||'',rec.reason||'',rec.notes||'']]);
   // Reset fields
@@ -7071,16 +7195,20 @@ function submitAttendance(){
   toast('✅ تم تسجيل الحضور بنجاح');
 }
 
-function deleteAttendRecord(id){
-  const recs=getAttendRecords().filter(r=>r.id!==id);
-  saveAttendRecords(recs);
+async function deleteAttendRecord(id){
+  _attCache = null;
+  try{ await db.from('attendance').delete().eq('id', id); }catch(e){}
+  try{
+    const existing = JSON.parse(localStorage.getItem(ATT_KEY)||'[]');
+    localStorage.setItem(ATT_KEY, JSON.stringify(existing.filter(r=>r.id!=id)));
+  }catch(e){}
   renderAttendList();
   renderAttendKPIs();
   renderDailyBulletin();
 }
 
-function renderAttendList(){
-  const recs=getAttendRecords();
+async function renderAttendList(){
+  const recs=await getAttendRecords();
   const fs=document.getElementById('attFilterStaff')?.value||'';
   const fst=document.getElementById('attFilterStatus')?.value||'';
   let data=recs;
@@ -7104,8 +7232,8 @@ function renderAttendList(){
   </div>`).join('');
 }
 
-function renderAttendKPIs(){
-  const recs=getAttendRecords();
+async function renderAttendKPIs(){
+  const recs=await getAttendRecords();
   const today=new Date().toISOString().split('T')[0];
   const todayRecs=recs.filter(r=>r.date===today);
   const counts={};
@@ -7167,12 +7295,12 @@ function exportAttendExcel(){
 // ════════════════════════════════════════════════
 // DAILY BULLETIN (Staff absence notification)
 // ════════════════════════════════════════════════
-function renderDailyBulletin(){
+async function renderDailyBulletin(){
   if(!currentUser) return;
   const el=document.getElementById('dailyBulletin');
   if(!el) return;
   const today=new Date().toISOString().split('T')[0];
-  const allRecs=getAttendRecords();
+  const allRecs=await getAttendRecords();
   const todayRecs=allRecs.filter(r=>r.date===today);
   const absentStatuses=['غياب','إجازة','استئذان','خروج مبكر'];
   const absent=todayRecs.filter(r=>absentStatuses.includes(r.status));
@@ -7227,10 +7355,10 @@ function renderDailyBulletin(){
 }
 
 // popup التنويه عند فتح التطبيق
-function showBulletinPopup(){
+async function showBulletinPopup(){
   if(!currentUser) return;
   const today=new Date().toISOString().split('T')[0];
-  const recs=getAttendRecords().filter(r=>r.date===today);
+  const recs=await getAttendRecords().filter(r=>r.date===today);
   const absentStatuses=['غياب','إجازة','استئذان','خروج مبكر'];
   const absent=recs.filter(r=>absentStatuses.includes(r.status));
   if(!absent.length) return;
