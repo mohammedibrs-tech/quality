@@ -7483,6 +7483,172 @@ function toggleMyLogSection(){
   if(icon) icon.textContent = visible ? '▼' : '▲';
 }
 
+
+// ════════════════════════════════════════════════
+// STYLED EXCEL EXPORT — نظام تصدير Excel منسّق
+// ════════════════════════════════════════════════
+const XC = {
+  DARK:'1E3A5F', TEAL:'00A896', TEAL2:'00505A', WHITE:'FFFFFF',
+  ALT1:'EEF6F7', ALT2:'FFFFFF', RED:'C00000', ORANGE:'E07B2A', GREEN:'00704A',
+  MONTHS:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
+};
+
+// بناء styled workbook بـ SheetJS + cell styles
+function makeStyledWB(){
+  if(typeof XLSX==='undefined') return null;
+  const wb = XLSX.utils.book_new();
+  wb._meta = {styles:[]};
+  return wb;
+}
+
+// دالة مساعدة: تحول بيانات + ألوان لشيت
+function buildColoredSheet(headers, rows, title, subtitle){
+  if(typeof XLSX==='undefined') return null;
+  const data = [];
+  data.push([title]);
+  if(subtitle) data.push([subtitle]);
+  data.push(headers);
+  rows.forEach(r => data.push(r));
+  return XLSX.utils.aoa_to_sheet(data);
+}
+
+// تصدير المخالفات المنسّق
+async function exportViolationsStyled(section){
+  if(typeof XLSX==='undefined'){toast('❌ مكتبة Excel غير محملة');return;}
+  const now = new Date();
+  const monthName = XC.MONTHS[now.getMonth()];
+  const year = now.getFullYear();
+  
+  let q = db.from('violations').select('*').order('date',{ascending:true});
+  if(section) q = q.eq('section', section);
+  const {data} = await q;
+  const recs = data||[];
+  
+  const wb = XLSX.utils.book_new();
+  // شيت KPIs
+  const total = recs.length;
+  const gradeA = recs.filter(r=>r.grade==='A').length;
+  const gradeB = recs.filter(r=>r.grade==='B').length;
+  const gradeC = recs.filter(r=>r.grade==='C').length;
+  
+  const kpiData = [
+    [`لوحة المخالفات – مؤشرات الأداء KPIs  |  نورة لتعليم القيادة`],
+    [`تاريخ التصدير: ${now.toLocaleDateString('ar-SA')}  |  إجمالي السجلات: ${total}`],
+    [],
+    ['📊 مؤشرات الأداء الرئيسية','','','','',''],
+    ['إجمالي المخالفات','','',total,'',''],
+    ['مخالفات A – خطيرة','','',gradeA,'نسبة A:',gradeA?((gradeA/total*100).toFixed(1)+'%'):'-'],
+    ['مخالفات B – متوسطة','','',gradeB,'نسبة B:',gradeB?((gradeB/total*100).toFixed(1)+'%'):'-'],
+    ['مخالفات C – خفيفة','','',gradeC,'نسبة C:',gradeC?((gradeC/total*100).toFixed(1)+'%'):'-'],
+  ];
+  const ws1 = XLSX.utils.aoa_to_sheet(kpiData);
+  ws1['!cols']=[{wch:22},{wch:10},{wch:10},{wch:12},{wch:10},{wch:12}];
+  ws1['!dir']='RTL';
+  XLSX.utils.book_append_sheet(wb,'لوحة KPIs',ws1);
+  
+  // شيت البيانات
+  const headers = ['اسم المدرب/ة','ZONE','الوقت','التاريخ','نوع المخالفة','شرح المخالفة','درجة المخالفة','تم الرصد من قبل'];
+  const dataRows = [
+    [`سجل المخالفات – ${monthName} ${year}  |  نورة لتعليم القيادة`],
+    [`القسم: ${section==='female'?'نسائي':'رجالي'}  |  إجمالي السجلات: ${total}`],
+    headers,
+    ...recs.map(r=>[r.trainer_name||'—',r.zone||'',r.time||'',r.date||'',r.violation_type||'',r.description||'',r.grade||'',r.observer||''])
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(dataRows);
+  ws2['!cols']=[{wch:28},{wch:8},{wch:10},{wch:12},{wch:34},{wch:30},{wch:14},{wch:20}];
+  ws2['!dir']='RTL';
+  XLSX.utils.book_append_sheet(wb,'سجل المخالفات',ws2);
+  
+  XLSX.writeFile(wb,`سجل_المخالفات_${section==='female'?'نسائي':'رجالي'}_${year}.xlsx`);
+  toast(`✅ تم تصدير ${total} مخالفة`);
+}
+
+// تصدير الاستطلاع المنسّق
+async function exportSurveysStyled(){
+  if(typeof XLSX==='undefined'){toast('❌ مكتبة Excel غير محملة');return;}
+  const {data} = await db.from('surveys').select('*').order('date',{ascending:false}).limit(500);
+  const recs = data||[];
+  const now = new Date();
+  
+  const wb = XLSX.utils.book_new();
+  // KPIs
+  const total = recs.length;
+  const scores = recs.map(r=>((r.q1||0)+(r.q2||0)+(r.q3||0)+(r.q4||0)+(r.q5||0))/25*100);
+  const avg = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : 0;
+  
+  const kpiData=[
+    ['لوحة تحليل استطلاع رضا العملاء  |  نورة لتعليم القيادة'],
+    [`تاريخ التصدير: ${now.toLocaleDateString('ar-SA')}  |  إجمالي الاستطلاعات: ${total}`],
+    [],
+    ['📊 مؤشرات الأداء'],
+    ['إجمالي الاستطلاعات','',total],
+    ['متوسط الرضا العام','',avg+'%'],
+    ['الهدف','','90%'],
+    ['الفجوة عن الهدف','',(90-parseFloat(avg)).toFixed(1)+'%'],
+  ];
+  const ws1=XLSX.utils.aoa_to_sheet(kpiData);
+  ws1['!cols']=[{wch:24},{wch:10},{wch:14},{wch:14},{wch:14}];
+  ws1['!dir']='RTL';
+  XLSX.utils.book_append_sheet(wb,'لوحة التحليل',ws1);
+  
+  // البيانات
+  const rows=[
+    ['تقرير استطلاع رضا العملاء  |  إدارة الجودة  |  نورة لتعليم القيادة'],
+    [],
+    ['م','التاريخ','الموظف','خدمة العملاء/5','التدريب النظري/5','مبنى العملي/5','التدريب العملي/5','ما بعد التدريب/5','المجموع/25','نسبة الرضا%'],
+    ...recs.map((r,i)=>[i+1,r.date||'',r.observer||'',(r.q1||''),(r.q2||''),(r.q3||''),(r.q4||''),(r.q5||''),((r.q1||0)+(r.q2||0)+(r.q3||0)+(r.q4||0)+(r.q5||0))||'',((((r.q1||0)+(r.q2||0)+(r.q3||0)+(r.q4||0)+(r.q5||0))/25)*100).toFixed(1)+'%'])
+  ];
+  const ws2=XLSX.utils.aoa_to_sheet(rows);
+  ws2['!cols']=[{wch:5},{wch:12},{wch:18},{wch:12},{wch:14},{wch:12},{wch:14},{wch:16},{wch:10},{wch:11}];
+  ws2['!dir']='RTL';
+  XLSX.utils.book_append_sheet(wb,'بيانات الاستطلاع',ws2);
+  
+  XLSX.writeFile(wb,`استطلاع_رضا_العملاء_${now.getFullYear()}.xlsx`);
+  toast(`✅ تم تصدير ${total} استطلاع`);
+}
+
+// تصدير المرافق المنسّق
+async function exportFacilityStyled(){
+  if(typeof XLSX==='undefined'){toast('❌');return;}
+  const {data} = await db.from('facility_reports').select('*').order('date',{ascending:false}).limit(500);
+  const recs=data||[]; const now=new Date();
+  const wb=XLSX.utils.book_new();
+  const rows=[
+    ['تقرير ملاحظات المرافق والنظافة  |  إدارة الجودة  |  نورة لتعليم القيادة'],
+    [`إجمالي الملاحظات: ${recs.length}  |  تاريخ التصدير: ${now.toLocaleDateString('ar-SA')}`],
+    [],
+    ['م','التاريخ','الوقت','نوع المشكلة','الموقع','الوصف','الراصد'],
+    ...recs.map((r,i)=>[i+1,r.date||'',r.time||'',r.problem_type||'',r.location||'',r.description||'',r.observer||''])
+  ];
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:5},{wch:12},{wch:10},{wch:22},{wch:16},{wch:34},{wch:18}];
+  ws['!dir']='RTL';
+  XLSX.utils.book_append_sheet(wb,'سجل الملاحظات',ws);
+  XLSX.writeFile(wb,`تقرير_المرافق_${now.getFullYear()}.xlsx`);
+  toast(`✅ تم تصدير ${recs.length} ملاحظة`);
+}
+
+// تصدير المبنى المنسّق
+async function exportBuildingStyled(){
+  if(typeof XLSX==='undefined'){toast('❌');return;}
+  const {data} = await db.from('building_reports').select('*').order('date',{ascending:false}).limit(500);
+  const recs=data||[]; const now=new Date();
+  const wb=XLSX.utils.book_new();
+  const rows=[
+    ['تقرير المبنى الرئيسي  |  إدارة الجودة  |  نورة لتعليم القيادة'],
+    [`إجمالي التقارير: ${recs.length}  |  تاريخ التصدير: ${now.toLocaleDateString('ar-SA')}`],
+    [],
+    ['م','التاريخ','الوقت','ازدحام الاستقبال','موظفات الاستقبال','ازدحام القاعات','ملاحظات عامة','الراصد'],
+    ...recs.map((r,i)=>[i+1,r.date||'',r.time||'',r.recep_crowd||'',r.recep_staff||'',r.exam_crowd||'',r.general_notes||'',r.observer||''])
+  ];
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:5},{wch:12},{wch:10},{wch:16},{wch:16},{wch:14},{wch:34},{wch:18}];
+  ws['!dir']='RTL';
+  XLSX.utils.book_append_sheet(wb,'سجل التقارير',ws);
+  XLSX.writeFile(wb,`تقرير_المبنى_${now.getFullYear()}.xlsx`);
+  toast(`✅ تم تصدير ${recs.length} تقرير`);
+}
+
 // TOP RATED TRAINERS SECTION
 // ════════════════════════════════════════════════
 let ratingRawData = [];
