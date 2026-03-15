@@ -401,6 +401,9 @@ display:flex; flex-direction:column;
 .section-card.attend::before{background:linear-gradient(90deg,#11998E,#38EF7D);}
 .section-card.attend:hover{border-color:rgba(17,153,142,0.4);}
 .section-card.attend .s-icon{background:rgba(17,153,142,0.12);}
+.section-card.mylog::before{background:linear-gradient(90deg,#5299E0,#7AB8F5);}
+.section-card.mylog:hover{border-color:rgba(82,153,224,0.4);}
+.section-card.mylog .s-icon{background:rgba(82,153,224,0.12);}
 
 /* ── SUMMARY WIDGETS ── */
 .summary-widget{background:#FFFFFF;border:1px solid rgba(0,168,150,0.15);border-radius:18px;
@@ -764,7 +767,7 @@ background:rgba(0,200,180,0.05);border-color:rgba(0,200,180,0.15);color:var(–t
       <div class="s-desc">اضغط للعرض</div>
     </div>
     <!-- My Daily Log Card -->
-    <div class="section-card" style="border-top:3px solid #5299E0;" onclick="showSection('mylog')">
+    <div class="section-card mylog" onclick="showSection('mylog')">
       <div class="s-icon" style="background:rgba(82,153,224,0.1);">📝</div>
       <div class="s-title-ar">سجلي اليومي</div>
       <div class="s-title-en">MY DAILY LOG</div>
@@ -7357,7 +7360,13 @@ if(recEl) recEl.innerHTML=recs.map(r=>`<div class="rec-item"><div class="rec-dot
 }
 loadSummaryWidgets();
 setDT();updateNav();
-setTimeout(()=>{ if(currentUser){loadActiveStaffHome();renderHomeWidgets();renderDailyBulletin();showBulletinPopup();} },300);
+setTimeout(()=>{
+if(currentUser){
+loadActiveStaffHome();renderHomeWidgets();renderDailyBulletin();showBulletinPopup();
+} else {
+showLM();
+}
+},300);
 </script>
 
 </body>
