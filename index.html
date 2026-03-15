@@ -989,10 +989,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
                   <option value="الخروج عن سياق التدريب (بمواضيع سياسية - دينية)|A">الخروج عن سياق التدريب (بمواضيع سياسية - دينية)</option>
                   <option value="الخروج بمركبة التدريب والذهاب بها لأغراض شخصية|A">الخروج بمركبة التدريب والذهاب بها لأغراض شخصية</option>
                   <option value="التدخين داخل المركبة أثناء الحصة التدريبية|B">التدخين داخل المركبة أثناء الحصة التدريبية</option>
-                  <option value="__phone__" disabled style="font-weight:900;color:#888;">── استخدام الجوال (تراكمي) ──</option>
-                  <option value="phone_obs_1">📱 استخدام الجوال — مشاهدة 1 من 3</option>
-                  <option value="phone_obs_2">📱 استخدام الجوال — مشاهدة 2 من 3</option>
-                  <option value="phone_obs_3|B">📱 استخدام الجوال — مشاهدة 3 (مخالفة رسمية)</option>
+                  <option value="استخدام الجوال اثناء الحصة التدريبية|B">استخدام الجوال اثناء الحصة التدريبية</option>
                   <option value="قيادة المدرب/ة بشكل متهور مع العميل|B">قيادة المدرب/ة بشكل متهور مع العميل</option>
                   <option value="ترك العميل بالمركبة وهي تعمل أثناء الحصة التدريبية|B">ترك العميل بالمركبة وهي تعمل أثناء الحصة التدريبية</option>
                   <option value="السرعة الزائده داخل الميدان او اثناء الحصة (تتجاوز 35 كم/س)|B">السرعة الزائده داخل الميدان او اثناء الحصة (تتجاوز 35 كم/س)</option>
@@ -1015,6 +1012,14 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
               <div class="field">
                 <label>درجة المخالفة (تلقائية) / Grade (Auto)</label>
                 <div id="vAutoGrade0" class="auto-grade-display">—</div>
+              </div>
+            </div>
+            <!-- خانة عداد مشاهدات الجوال — تظهر فقط عند اختيار مخالفة الجوال -->
+            <div id="phoneObsField0" style="display:none;margin-top:10px;">
+              <div style="background:rgba(224,123,42,0.06);border:1.5px solid rgba(224,123,42,0.25);border-radius:12px;padding:14px 16px;">
+                <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--orange);margin-bottom:12px;">📱 عدد مرات مشاهدة استخدام الجوال</div>
+                <div id="phoneObsBtns0" style="display:flex;gap:10px;justify-content:center;"></div>
+                <div id="phoneObsMsg0" style="font-size:11px;text-align:center;margin-top:10px;color:var(--text-dim);min-height:16px;"></div>
               </div>
             </div>
             <div class="field"><label>شرح إضافي / Additional Notes</label><textarea id="vDesc0" placeholder="تفاصيل إضافية..."></textarea></div>
@@ -4738,30 +4743,6 @@ async function submitViolation(){
     if(!trainer&&!typeVal) continue; // skip empty rows
     if(!trainer){toast('⚠️ أدخل اسم المدرب '+(parseInt(id)+1));return;}
     if(!typeVal){toast('⚠️ اختر نوع المخالفة للمدرب '+(parseInt(id)+1));return;}
-    // مشاهدات الجوال التراكمية — مش مخالفة فعلية
-    if(typeVal.startsWith('phone_obs_')){
-      const obsNum = parseInt(typeVal.replace('phone_obs_','').replace('|B',''));
-      if(obsNum < 3){
-        // سجّل المشاهدة محلياً فقط
-        const pData = getPhoneObs();
-        pData[trainer.trim()] = { count: obsNum, lastUpdate: Date.now() };
-        savePhoneObs(pData);
-        toast('👁 مشاهدة '+obsNum+'/3 مسجلة للمدرب '+trainer+' — متبقي '+(3-obsNum)+' للمخالفة');
-        continue;
-      }
-      // obsNum === 3 — مخالفة رسمية، احذف السجل وأكمل
-      const pData2 = getPhoneObs();
-      delete pData2[trainer.trim()];
-      savePhoneObs(pData2);
-      // أكمل كمخالفة B عادية
-      const zone2 = zoneRaw.replace('ZONE ','');
-      rows.push({trainer_name:trainer,zone:zone2,date,time,
-        violation_type:'استخدام الجوال اثناء الحصة التدريبية',grade:'B',
-        observer:coworker ? obs+' / '+coworker : obs,
-        description:'تكرار استخدام الجوال — المشاهدة الثالثة، '+( document.getElementById('vDesc'+id)?.value||''),
-        section:curSec});
-      continue;
-    }
     const parts=typeVal.split('|');
     const grade=parts[1]||'';
     const zone=zoneRaw.replace('ZONE ','');
@@ -5662,34 +5643,24 @@ function autoGrade(idx){
   const sel=document.getElementById('vType'+idx);
   const val=sel.value;
   const el=document.getElementById('vAutoGrade'+idx);
-  if(!val||val==='__phone__'){el.textContent='—';el.className='auto-grade-display';return;}
-
-  // خيارات الجوال التراكمية
-  if(val.startsWith('phone_obs_')){
-    const obsNum = parseInt(val.replace('phone_obs_','').replace('|B',''));
-    if(obsNum < 3){
-      // تسجيل مشاهدة فقط — مش مخالفة
-      el.textContent='👁 مشاهدة '+obsNum+'/3 — لا تسجيل بعد';
-      el.className='auto-grade-display';
-      el.style.color='var(--orange)';
-      el.style.fontSize='11px';
+  if(!val){el.textContent='—';el.className='auto-grade-display';return;}
+  
+  // خانة عداد الجوال
+  const phoneField=document.getElementById('phoneObsField'+idx);
+  if(phoneField){
+    if(val.includes('استخدام الجوال')){
+      phoneField.style.display='block';
+      renderPhoneObsButtons(idx);
     } else {
-      // مخالفة رسمية
-      el.textContent='B — متوسطة';
-      el.className='auto-grade-display ag-B';
-      el.style.color='';
-      el.style.fontSize='';
+      phoneField.style.display='none';
     }
-    return;
   }
-
+  
   const parts=val.split('|');
   const grade=parts[1]||'';
   const labels={A:'A — جسيمة',B:'B — متوسطة',C:'C — بسيطة'};
   el.textContent=labels[grade]||'—';
   el.className='auto-grade-display ag-'+grade;
-  el.style.color='';
-  el.style.fontSize='';
 }
 
 // ── ADD TRAINER ENTRY ──
@@ -5726,10 +5697,7 @@ function addTrainerEntry(){
           <option value="الخروج عن سياق التدريب (بمواضيع سياسية - دينية)|A">الخروج عن سياق التدريب (بمواضيع سياسية - دينية)</option>
           <option value="الخروج بمركبة التدريب والذهاب بها لأغراض شخصية|A">الخروج بمركبة التدريب والذهاب بها لأغراض شخصية</option>
           <option value="التدخين داخل المركبة أثناء الحصة التدريبية|B">التدخين داخل المركبة أثناء الحصة التدريبية</option>
-          <option value="__phone__" disabled style="font-weight:900;color:#888;">── استخدام الجوال (تراكمي) ──</option>
-                  <option value="phone_obs_1">📱 استخدام الجوال — مشاهدة 1 من 3</option>
-                  <option value="phone_obs_2">📱 استخدام الجوال — مشاهدة 2 من 3</option>
-                  <option value="phone_obs_3|B">📱 استخدام الجوال — مشاهدة 3 (مخالفة رسمية)</option>
+          <option value="استخدام الجوال اثناء الحصة التدريبية|B">استخدام الجوال اثناء الحصة التدريبية</option>
           <option value="قيادة المدرب/ة بشكل متهور مع العميل|B">قيادة المدرب/ة بشكل متهور مع العميل</option>
           <option value="ترك العميل بالمركبة وهي تعمل أثناء الحصة التدريبية|B">ترك العميل بالمركبة وهي تعمل أثناء الحصة التدريبية</option>
           <option value="السرعة الزائده داخل الميدان او اثناء الحصة (تتجاوز 35 كم/س)|B">السرعة الزائده داخل الميدان او اثناء الحصة (تتجاوز 35 كم/س)</option>
@@ -5748,6 +5716,13 @@ function addTrainerEntry(){
       <div class="field">
         <label>درجة المخالفة (تلقائية)</label>
         <div id="vAutoGrade${idx}" class="auto-grade-display">—</div>
+      </div>
+    </div>
+    <div id="phoneObsField${idx}" style="display:none;margin-top:10px;">
+      <div style="background:rgba(224,123,42,0.06);border:1.5px solid rgba(224,123,42,0.25);border-radius:12px;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--orange);margin-bottom:12px;">📱 عدد مرات مشاهدة استخدام الجوال</div>
+        <div id="phoneObsBtns${idx}" style="display:flex;gap:10px;justify-content:center;"></div>
+        <div id="phoneObsMsg${idx}" style="font-size:11px;text-align:center;margin-top:10px;color:var(--text-dim);min-height:16px;"></div>
       </div>
     </div>
     <div class="field"><label>شرح إضافي</label><textarea id="vDesc${idx}" placeholder="تفاصيل إضافية..."></textarea></div>`;
@@ -6747,9 +6722,6 @@ function resetSales(){
 // PHONE VIOLATION TRACKER — نظام رصد استخدام الجوال
 // ════════════════════════════════════════════════
 const PHONE_KEY = 'nq_phone_obs_v1';
-let ptCurrentTrainer = '';
-let ptCurrentSection = '';
-let ptTrainerEntryIdx = 0;
 
 function getPhoneObs(){
   try{ return JSON.parse(localStorage.getItem(PHONE_KEY)||'{}'); }
@@ -6761,131 +6733,84 @@ function getTrainerPhoneCount(name){
   const data = getPhoneObs();
   const rec = data[name.trim()];
   if(!rec) return 0;
-  // انتهت الصلاحية بعد أسبوع
   if(Date.now() - rec.lastUpdate > 7*24*60*60*1000){
     delete data[name.trim()];
     savePhoneObs(data);
     return 0;
   }
-  return rec.count||0;
+  return rec.count || 0;
 }
 
-function openPhoneTracker(trainerName, section, entryIdx){
-  if(!trainerName){ toast('⚠️ أدخل اسم المدرب أولاً'); return; }
-  ptCurrentTrainer = trainerName;
-  ptCurrentSection = section;
-  ptTrainerEntryIdx = entryIdx;
-
-  document.getElementById('ptTrainerName').textContent = trainerName;
-  document.getElementById('phoneTrackerModal').style.display = 'flex';
-  renderPhoneTimeline();
-}
-
-function renderPhoneTimeline(){
-  const count = getTrainerPhoneCount(ptCurrentTrainer);
-  const nextStep = count + 1;
-  const area = document.getElementById('ptTimelineArea');
-  const btn = document.getElementById('ptConfirmBtn');
-
-  // بناء Timeline
-  const steps = [
-    {n:1, label:'المشاهدة الأولى',   icon:'👁'},
-    {n:2, label:'المشاهدة الثانية',  icon:'👁'},
-    {n:3, label:'المخالفة الرسمية',  icon:'⚠️'},
-  ];
-
-  let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
-  steps.forEach(step => {
-    const done   = step.n <= count;
-    const active = step.n === nextStep;
-    const locked = step.n > nextStep;
-
-    let bg, border, textColor, badge;
-    if(done){
-      bg='rgba(0,168,150,0.08)'; border='rgba(0,168,150,0.3)'; textColor='var(--accent)';
-      badge=`<span style="background:rgba(0,168,150,0.15);color:var(--accent);padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">✓ مسجلة</span>`;
-    } else if(active && step.n < 3){
-      bg='rgba(255,193,7,0.08)'; border='rgba(255,193,7,0.4)'; textColor='#B8860B';
-      badge=`<span style="background:rgba(255,193,7,0.15);color:#B8860B;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">الحالية ← اضغط تأكيد</span>`;
-    } else if(active && step.n === 3){
-      bg='rgba(217,79,79,0.08)'; border='rgba(217,79,79,0.35)'; textColor='var(--red)';
-      badge=`<span style="background:rgba(217,79,79,0.15);color:var(--red);padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">⚠️ ستُسجَّل مخالفة</span>`;
-    } else {
-      bg='rgba(0,0,0,0.02)'; border='rgba(0,0,0,0.08)'; textColor='var(--text-dim)';
-      badge=`<span style="color:var(--text-dim);font-size:10px;">🔒 مقفلة</span>`;
-    }
-
-    html += `<div style="background:${bg};border:1.5px solid ${border};border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;opacity:${locked?'0.5':'1'};">
-      <div style="font-size:22px;min-width:32px;text-align:center;">${step.icon}</div>
-      <div style="flex:1;">
-        <div style="font-size:13px;font-weight:900;color:${textColor};">${step.n}. ${step.label}</div>
-      </div>
-      ${badge}
-    </div>`;
-  });
-  html += '</div>';
-
-  // ملاحظة التنبيه
-  if(nextStep === 3){
-    html += `<div style="background:rgba(217,79,79,0.07);border:1px solid rgba(217,79,79,0.2);border-radius:10px;padding:10px 14px;margin-top:12px;font-size:11px;color:var(--red);text-align:center;font-weight:700;">
-      هذه المرة الثالثة — ستُسجَّل مخالفة درجة B على المدرب فور الضغط على تأكيد
-    </div>`;
-  }
-
-  area.innerHTML = html;
-
-  // زر التأكيد
-  if(nextStep === 3){
-    btn.textContent = '⚠️ تسجيل مخالفة رسمية';
-    btn.style.cssText = 'width:100%;padding:14px;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;background:var(--red);color:#fff;';
-  } else {
-    btn.textContent = `✓ تسجيل المشاهدة ${nextStep}/3`;
-    btn.style.cssText = 'width:100%;padding:14px;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;background:var(--accent);color:#fff;';
-  }
-}
-
-function confirmPhoneStep(){
-  const count = getTrainerPhoneCount(ptCurrentTrainer);
-  const nextStep = count + 1;
-  const data = getPhoneObs();
-  const key = ptCurrentTrainer.trim();
-
-  if(nextStep === 3){
-    // مخالفة رسمية
-    delete data[key];
-    savePhoneObs(data);
-    closePhoneTracker();
-    const typeEl = document.getElementById('vType'+ptTrainerEntryIdx);
-    if(typeEl){
-      typeEl.value = 'استخدام الجوال اثناء الحصة التدريبية|B';
-      autoGrade(ptTrainerEntryIdx);
-    }
-    toast('⚠️ المخالفة جاهزة — أكمل النموذج واضغط تسجيل');
-  } else {
-    // تسجيل مشاهدة
-    data[key] = { count: nextStep, lastUpdate: Date.now() };
-    savePhoneObs(data);
-    closePhoneTracker();
-    const remaining = 3 - nextStep;
-    toast(`✅ مشاهدة ${nextStep}/3 مسجلة — ${remaining} مشاهدة متبقية للمخالفة`);
-  }
-}
-
-function closePhoneTracker(){
-  document.getElementById('phoneTrackerModal').style.display = 'none';
-}
-
-function checkPhoneViolation(idx, section){
-  const typeEl = document.getElementById('vType'+idx);
+function renderPhoneObsButtons(idx){
   const trainerEl = document.getElementById('vTrainer'+idx);
-  if(!typeEl || !trainerEl) return;
-  const val = typeEl.value;
-  if(val && val.includes('استخدام الجوال')){
-    const trainerName = trainerEl.value.trim();
-    typeEl.value = '';
+  const btnsEl = document.getElementById('phoneObsBtns'+idx);
+  const msgEl = document.getElementById('phoneObsMsg'+idx);
+  if(!btnsEl) return;
+
+  const trainerName = trainerEl ? trainerEl.value.trim() : '';
+  const count = trainerName ? getTrainerPhoneCount(trainerName) : 0;
+  // next = الرقم المتاح الحين
+  const next = count + 1;
+
+  let html = '';
+  for(let n = 1; n <= 3; n++){
+    const done    = n <= count;
+    const active  = n === next;
+    const locked  = n > next;
+
+    let bg, border, color, cursor, label;
+    if(done){
+      bg='rgba(0,168,150,0.1)'; border='rgba(0,168,150,0.35)'; color='var(--accent)'; cursor='default';
+      label = '✓';
+    } else if(active){
+      bg='rgba(224,123,42,0.12)'; border='rgba(224,123,42,0.5)'; color='var(--orange)'; cursor='pointer';
+      label = n === 3 ? '⚠️' : n;
+    } else {
+      bg='rgba(0,0,0,0.04)'; border='rgba(0,0,0,0.1)'; color='var(--text-dim)'; cursor='not-allowed';
+      label = '🔒';
+    }
+
+    const onclick = active ? `selectPhoneObs(${idx},${n})` : '';
+    html += `<div onclick="${onclick}" style="width:64px;height:64px;border-radius:50%;background:${bg};border:2.5px solid ${border};color:${color};cursor:${cursor};display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;transition:all .2s;${active?'box-shadow:0 4px 12px rgba(224,123,42,0.2);':''}">
+      <span style="font-size:${done||locked?'18':'22'}px;font-weight:900;line-height:1;">${label}</span>
+      <span style="font-size:9px;margin-top:2px;font-weight:700;">${done?'مسجل':active&&n<3?'الحالي':active&&n===3?'مخالفة':'مقفل'}</span>
+    </div>`;
+  }
+  btnsEl.innerHTML = html;
+
+  // رسالة
+  if(count === 0)      msgEl.innerHTML = 'أول مشاهدة — اضغط <b>1</b> لتسجيلها';
+  else if(count === 1) msgEl.innerHTML = '✅ مشاهدة 1 مسجلة — اضغط <b>2</b> للثانية';
+  else if(count === 2) msgEl.innerHTML = '⚠️ مشاهدتان مسجلتان — اضغط <b>3</b> لتسجيل المخالفة';
+}
+
+function selectPhoneObs(idx, n){
+  const trainerEl = document.getElementById('vTrainer'+idx);
+  const trainerName = trainerEl ? trainerEl.value.trim() : '';
+  if(!trainerName){ toast('⚠️ أدخل اسم المدرب أولاً'); return; }
+
+  const data = getPhoneObs();
+  const key = trainerName.trim();
+
+  if(n < 3){
+    // سجّل المشاهدة محلياً
+    data[key] = { count: n, lastUpdate: Date.now() };
+    savePhoneObs(data);
+    renderPhoneObsButtons(idx);
+    // أخفِ الخانة وأعد الـ select — مش مخالفة بعد
+    document.getElementById('phoneObsField'+idx).style.display = 'none';
+    document.getElementById('vType'+idx).value = '';
     document.getElementById('vAutoGrade'+idx).textContent = '—';
     document.getElementById('vAutoGrade'+idx).className = 'auto-grade-display';
-    openPhoneTracker(trainerName, section, idx);
+    toast('👁 مشاهدة ' + n + '/3 سُجِّلت للمدرب ' + trainerName + ' — متبقي ' + (3-n) + ' للمخالفة');
+  } else {
+    // مخالفة رسمية — احذف السجل وابقِ الـ select
+    delete data[key];
+    savePhoneObs(data);
+    // أخفِ الخانة — المخالفة جاهزة في النموذج
+    document.getElementById('phoneObsField'+idx).style.display = 'none';
+    // الـ select يبقى على قيمته (استخدام الجوال|B)
+    toast('⚠️ المخالفة جاهزة — اضغط تسجيل لإتمامها');
   }
 }
 
