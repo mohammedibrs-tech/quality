@@ -823,32 +823,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
-<!-- PHONE VIOLATION TRACKER MODAL -->
-<div id="phoneTrackerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9500;align-items:center;justify-content:center;padding:18px;">
-  <div style="background:var(--card);border-radius:22px;padding:24px 20px;width:100%;max-width:400px;box-shadow:0 30px 60px rgba(0,0,0,0.4);">
-
-    <!-- Header -->
-    <div style="text-align:center;margin-bottom:20px;">
-      <div style="font-size:30px;margin-bottom:8px;">📱</div>
-      <div style="font-size:15px;font-weight:900;">رصد استخدام الجوال</div>
-      <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">تُسجَّل المخالفة عند المشاهدة الثالثة فقط</div>
-    </div>
-
-    <!-- اسم المدرب -->
-    <div style="background:rgba(0,168,150,0.08);border:1px solid rgba(0,168,150,0.15);border-radius:12px;padding:10px 16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-size:11px;color:var(--text-dim);">المدرب/ة:</span>
-      <span id="ptTrainerName" style="font-size:14px;font-weight:900;color:var(--accent);">—</span>
-    </div>
-
-    <!-- سجل المشاهدات -->
-    <div id="ptTimelineArea" style="margin-bottom:20px;"></div>
-
-    <!-- زر التأكيد -->
-    <button id="ptConfirmBtn" onclick="confirmPhoneStep()" style="width:100%;padding:14px;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;transition:all .2s;">تأكيد</button>
-    <button onclick="closePhoneTracker()" style="width:100%;margin-top:8px;padding:10px;background:transparent;border:1px solid var(--border);border-radius:12px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text-dim);">إلغاء</button>
-  </div>
-</div>
-
 <!-- WEEKLY TASKS MODAL -->
 <div id="weeklyTasksModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);z-index:9200;overflow-y:auto;padding:20px 12px;">
   <div style="background:var(--card);border-radius:20px;max-width:700px;margin:0 auto;padding:24px 20px;position:relative;">
@@ -1008,14 +982,17 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
             <div class="grid-2">
               <div class="field">
                 <label><span class="req">* </span>نوع المخالفة / Violation Type</label>
-                <select id="vType0" onchange="autoGrade(0);checkPhoneViolation(0,curSec)">
+                <select id="vType0" onchange="autoGrade(0)">
                   <option value="">اختر / Select</option>
                   <option value="تلفظ المدرب/ة امام العملاء بخصوص التدريب|A">تلفظ المدرب/ة امام العملاء بخصوص التدريب</option>
                   <option value="التجاوز على العميل بأي طريقة كانت (لفظي-جسدي)|A">التجاوز على العميل بأي طريقة كانت (لفظي-جسدي)</option>
                   <option value="الخروج عن سياق التدريب (بمواضيع سياسية - دينية)|A">الخروج عن سياق التدريب (بمواضيع سياسية - دينية)</option>
                   <option value="الخروج بمركبة التدريب والذهاب بها لأغراض شخصية|A">الخروج بمركبة التدريب والذهاب بها لأغراض شخصية</option>
                   <option value="التدخين داخل المركبة أثناء الحصة التدريبية|B">التدخين داخل المركبة أثناء الحصة التدريبية</option>
-                  <option value="استخدام الجوال اثناء الحصة التدريبية|B">استخدام الجوال اثناء الحصة التدريبية</option>
+                  <option value="__phone__" disabled style="font-weight:900;color:#888;">── استخدام الجوال (تراكمي) ──</option>
+                  <option value="phone_obs_1">📱 استخدام الجوال — مشاهدة 1 من 3</option>
+                  <option value="phone_obs_2">📱 استخدام الجوال — مشاهدة 2 من 3</option>
+                  <option value="phone_obs_3|B">📱 استخدام الجوال — مشاهدة 3 (مخالفة رسمية)</option>
                   <option value="قيادة المدرب/ة بشكل متهور مع العميل|B">قيادة المدرب/ة بشكل متهور مع العميل</option>
                   <option value="ترك العميل بالمركبة وهي تعمل أثناء الحصة التدريبية|B">ترك العميل بالمركبة وهي تعمل أثناء الحصة التدريبية</option>
                   <option value="السرعة الزائده داخل الميدان او اثناء الحصة (تتجاوز 35 كم/س)|B">السرعة الزائده داخل الميدان او اثناء الحصة (تتجاوز 35 كم/س)</option>
@@ -4761,6 +4738,30 @@ async function submitViolation(){
     if(!trainer&&!typeVal) continue; // skip empty rows
     if(!trainer){toast('⚠️ أدخل اسم المدرب '+(parseInt(id)+1));return;}
     if(!typeVal){toast('⚠️ اختر نوع المخالفة للمدرب '+(parseInt(id)+1));return;}
+    // مشاهدات الجوال التراكمية — مش مخالفة فعلية
+    if(typeVal.startsWith('phone_obs_')){
+      const obsNum = parseInt(typeVal.replace('phone_obs_','').replace('|B',''));
+      if(obsNum < 3){
+        // سجّل المشاهدة محلياً فقط
+        const pData = getPhoneObs();
+        pData[trainer.trim()] = { count: obsNum, lastUpdate: Date.now() };
+        savePhoneObs(pData);
+        toast('👁 مشاهدة '+obsNum+'/3 مسجلة للمدرب '+trainer+' — متبقي '+(3-obsNum)+' للمخالفة');
+        continue;
+      }
+      // obsNum === 3 — مخالفة رسمية، احذف السجل وأكمل
+      const pData2 = getPhoneObs();
+      delete pData2[trainer.trim()];
+      savePhoneObs(pData2);
+      // أكمل كمخالفة B عادية
+      const zone2 = zoneRaw.replace('ZONE ','');
+      rows.push({trainer_name:trainer,zone:zone2,date,time,
+        violation_type:'استخدام الجوال اثناء الحصة التدريبية',grade:'B',
+        observer:coworker ? obs+' / '+coworker : obs,
+        description:'تكرار استخدام الجوال — المشاهدة الثالثة، '+( document.getElementById('vDesc'+id)?.value||''),
+        section:curSec});
+      continue;
+    }
     const parts=typeVal.split('|');
     const grade=parts[1]||'';
     const zone=zoneRaw.replace('ZONE ','');
@@ -5661,12 +5662,34 @@ function autoGrade(idx){
   const sel=document.getElementById('vType'+idx);
   const val=sel.value;
   const el=document.getElementById('vAutoGrade'+idx);
-  if(!val){el.textContent='—';el.className='auto-grade-display';return;}
+  if(!val||val==='__phone__'){el.textContent='—';el.className='auto-grade-display';return;}
+
+  // خيارات الجوال التراكمية
+  if(val.startsWith('phone_obs_')){
+    const obsNum = parseInt(val.replace('phone_obs_','').replace('|B',''));
+    if(obsNum < 3){
+      // تسجيل مشاهدة فقط — مش مخالفة
+      el.textContent='👁 مشاهدة '+obsNum+'/3 — لا تسجيل بعد';
+      el.className='auto-grade-display';
+      el.style.color='var(--orange)';
+      el.style.fontSize='11px';
+    } else {
+      // مخالفة رسمية
+      el.textContent='B — متوسطة';
+      el.className='auto-grade-display ag-B';
+      el.style.color='';
+      el.style.fontSize='';
+    }
+    return;
+  }
+
   const parts=val.split('|');
   const grade=parts[1]||'';
   const labels={A:'A — جسيمة',B:'B — متوسطة',C:'C — بسيطة'};
   el.textContent=labels[grade]||'—';
   el.className='auto-grade-display ag-'+grade;
+  el.style.color='';
+  el.style.fontSize='';
 }
 
 // ── ADD TRAINER ENTRY ──
@@ -5696,14 +5719,17 @@ function addTrainerEntry(){
     <div class="grid-2">
       <div class="field">
         <label>نوع المخالفة / Violation Type</label>
-        <select id="vType${idx}" onchange="autoGrade(${idx});checkPhoneViolation(${idx},curSec)">
+        <select id="vType${idx}" onchange="autoGrade(${idx})">
           <option value="">اختر / Select</option>
           <option value="تلفظ المدرب/ة امام العملاء بخصوص التدريب|A">تلفظ المدرب/ة امام العملاء بخصوص التدريب</option>
           <option value="التجاوز على العميل بأي طريقة كانت (لفظي-جسدي)|A">التجاوز على العميل بأي طريقة كانت (لفظي-جسدي)</option>
           <option value="الخروج عن سياق التدريب (بمواضيع سياسية - دينية)|A">الخروج عن سياق التدريب (بمواضيع سياسية - دينية)</option>
           <option value="الخروج بمركبة التدريب والذهاب بها لأغراض شخصية|A">الخروج بمركبة التدريب والذهاب بها لأغراض شخصية</option>
           <option value="التدخين داخل المركبة أثناء الحصة التدريبية|B">التدخين داخل المركبة أثناء الحصة التدريبية</option>
-          <option value="استخدام الجوال اثناء الحصة التدريبية|B">استخدام الجوال اثناء الحصة التدريبية</option>
+          <option value="__phone__" disabled style="font-weight:900;color:#888;">── استخدام الجوال (تراكمي) ──</option>
+                  <option value="phone_obs_1">📱 استخدام الجوال — مشاهدة 1 من 3</option>
+                  <option value="phone_obs_2">📱 استخدام الجوال — مشاهدة 2 من 3</option>
+                  <option value="phone_obs_3|B">📱 استخدام الجوال — مشاهدة 3 (مخالفة رسمية)</option>
           <option value="قيادة المدرب/ة بشكل متهور مع العميل|B">قيادة المدرب/ة بشكل متهور مع العميل</option>
           <option value="ترك العميل بالمركبة وهي تعمل أثناء الحصة التدريبية|B">ترك العميل بالمركبة وهي تعمل أثناء الحصة التدريبية</option>
           <option value="السرعة الزائده داخل الميدان او اثناء الحصة (تتجاوز 35 كم/س)|B">السرعة الزائده داخل الميدان او اثناء الحصة (تتجاوز 35 كم/س)</option>
