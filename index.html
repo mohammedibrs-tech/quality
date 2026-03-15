@@ -1198,6 +1198,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
     <!-- ══ VIOLATIONS TAB ══ -->
     <div id="tab-vt">
+      <!-- سجلك الشهري - أول شيء يظهر -->
+      <div id="mylog-section-vt" style="margin-bottom:20px;"></div>
       <!-- Section filter (affects dashboard + list) -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <div style="display:flex;gap:6px;">
@@ -1278,6 +1280,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
     <!-- ══ SURVEYS TAB ══ -->
     <div id="tab-st" style="display:none">
+      <div id="mylog-section-tab-st" style="margin-bottom:20px;"></div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
         <button class="export-btn" onclick="exportSurvey()">⬇ تقرير تحليلي Excel</button>
       </div>
@@ -1309,6 +1312,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
     <!-- ══ FACILITY TAB ══ -->
     <div id="tab-ft" style="display:none">
+      <div id="mylog-section-tab-ft" style="margin-bottom:20px;"></div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
         <button class="export-btn" onclick="exportFacility()">⬇ تصدير Excel</button>
       </div>
@@ -1338,6 +1342,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
     <!-- ══ BUILDING TAB ══ -->
     <div id="tab-bt" style="display:none">
+      <div id="mylog-section-tab-bt" style="margin-bottom:20px;"></div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
         <button class="export-btn" onclick="exportBuilding()">⬇ تصدير Excel</button>
       </div>
@@ -4858,10 +4863,10 @@ function switchTab(tab,el){
   document.querySelectorAll('[id^="tab-"]').forEach(t=>t.style.display='none');
   document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+tab).style.display='block';el.classList.add('active');
-  if(tab==='st'){renderS(allS);renderSurveyDash();renderMyLogRecords('surveys');}
-  else if(tab==='ft'){renderF(allF);renderFacilityDash();renderMyLogRecords('facilities');}
-  else if(tab==='bt'){renderB(allB);renderBuildingDash();renderMyLogRecords('building');}
-  else if(tab==='vt'){renderV(allV);renderViolationsDash();renderMyLogRecords('violations');}
+  if(tab==='st'){renderMyLogRecords('surveys');renderS(allS);renderSurveyDash();}
+  else if(tab==='ft'){renderMyLogRecords('facilities');renderF(allF);renderFacilityDash();}
+  else if(tab==='bt'){renderMyLogRecords('building');renderB(allB);renderBuildingDash();}
+  else if(tab==='vt'){renderMyLogRecords('violations');renderV(allV);renderViolationsDash();}
 }
 function getQ(d){if(!d)return 1;const m=new Date(d).getMonth()+1;return m<=3?1:m<=6?2:m<=9?3:4;}
 
@@ -6930,19 +6935,10 @@ async function saveEditBuilding(id){
 // سجلي الشهري في صفحة السجلات
 // ════════════════════════════════════════════════
 async function renderMyLogRecords(tab){
-  const containerId = 'myLogRecordsSection_'+tab;
-  // ابحث عن container في التبويب الحالي
-  const tabEl = document.getElementById('tab-'+(tab==='violations'?'vt':tab==='surveys'?'st':tab==='facilities'?'ft':'bt'));
-  if(!tabEl) return;
-  
-  // أضف container إذا ما فيه
-  let container = tabEl.querySelector('.mylog-records-section');
-  if(!container){
-    container = document.createElement('div');
-    container.className = 'mylog-records-section';
-    container.style.marginTop = '20px';
-    tabEl.appendChild(container);
-  }
+  const tabMap = {'violations':'vt','surveys':'st','facilities':'ft','building':'bt'};
+  const containerId = 'mylog-section-' + (tabMap[tab]||'vt');
+  const container = document.getElementById(containerId);
+  if(!container) return;
 
   const user = currentUser ? currentUser.name : '';
   const isAdmin = currentUser?.role === 'admin';
