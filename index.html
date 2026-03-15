@@ -4833,28 +4833,10 @@ async function submitFacility(){
   const timeVal=document.getElementById('fTime').value;
   const desc=document.getElementById('fDesc').value;
 
-  // ── رفع الصور لـ Supabase Storage ──
-  const fileInput=document.getElementById('fImgs');
-  const files=[...fileInput.files].slice(0,3);
-  const photoUrls=[];
-  if(files.length){
-    btn.textContent='⏳ جاري رفع الصور...';
-    for(const file of files){
-      const ext=file.name.split('.').pop();
-      const path=`facility/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-      const{data:upData,error:upErr}=await db.storage.from('buket').upload(path,file,{cacheControl:'3600',upsert:false});
-      if(upErr){toast('❌ خطأ في رفع الصورة: '+upErr.message);btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';return;}
-      const{data:urlData}=db.storage.from('buket').getPublicUrl(path);
-      photoUrls.push(urlData.publicUrl);
-    }
-    btn.textContent='⏳ جاري الحفظ...';
-  }
-
-  // ── حفظ السجل مع روابط الصور ──
+  // ── حفظ السجل ──
   const{error}=await db.from('facility_reports').insert([{
     problem_type:type,location:loc,date:dateVal,time:timeVal,
-    description:desc,observer:obs,
-    photo_urls:photoUrls.length?photoUrls:null
+    description:desc,observer:obs
   }]);
   if(error){toast('❌ '+error.message);btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';return;}
 
@@ -4872,7 +4854,6 @@ async function submitFacility(){
 function resetF(){
   ['fType','fObs'].forEach(id=>document.getElementById(id).value='');
   ['fLoc','fDesc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fPrev').innerHTML='';document.getElementById('fImgs').value='';
   const btn=document.getElementById('fBtn');btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';
   document.getElementById('fForm').style.display='block';document.getElementById('fOk').style.display='none';setDT();
 }
@@ -4893,7 +4874,7 @@ function switchTab(tab,el){
 }
 function getQ(d){if(!d)return 1;const m=new Date(d).getMonth()+1;return m<=3?1:m<=6?2:m<=9?3:4;}
 
-async function loadAll(){
+async async function loadAll(){
   const{data:vd}=await db.from('violations').select('*').order('created_at',{ascending:false});
   allV=vd||[];window._cachedViolations=allV;updateVStats();renderV(allV);
   const{data:sd}=await db.from('surveys').select('*').order('created_at',{ascending:false});
@@ -5748,24 +5729,22 @@ function removeTrainer(idx){
 // Per-staff schedule — key = username
 const STAFF_SCHEDULES = {
   'shahad': {
-    name:"شهد المقرن", shift:"6:00 ص — 1:00 م",
+    name:"شهد المقرن", shift:"6:00 ص — 12:00 م",
     fixed:[
       {time:"6:00 ص",        task:"🏢 جولة على المبنى (داخل وخارج)"},
-      {time:"6:00–6:30 ص",   task:"✅ متابعة خروج المدربات والعملاء — الحصة الأولى"},
+      {time:"6:00–6:30 ص",   task:"✅ متابعة خروج المدربات والعملاء — بداية الحصة الأولى"},
       {time:"6:30–7:20 ص",   task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الأولى)"},
-      {time:"7:20–7:40 ص",   task:"✅ متابعة رجوع المدربات لمواقف التدريب"},
-      {time:"7:40–8:00 ص",   task:"☕ استراحة أولى"},
-      {time:"8:00–8:30 ص",   task:"✅ متابعة خروج المدربات — الحصة الثانية"},
-      {time:"8:30–9:10 ص",   task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الثانية)"},
-      {time:"9:10–9:40 ص",   task:"✅ متابعة رجوع المدربات لمواقف التدريب"},
-      {time:"9:40–10:00 ص",  task:"☕ استراحة ثانية"},
-      {time:"10:00–10:20 ص", task:"✅ متابعة خروج المدربات — الحصة الثالثة"},
-      {time:"10:20–10:40 ص", task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الثالثة)"},
-      {time:"10:40–11:00 ص", task:"☕ استراحة ثالثة"},
-      {time:"11:00–11:30 ص", task:"✅ متابعة خروج المدربات — الحصة الرابعة"},
-      {time:"11:30–12:00 م", task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الرابعة)"},
-      {time:"12:00–12:30 م", task:"✅ متابعة رجوع المدربات + إنهاء الحصة الرابعة"},
-      {time:"1:00 م",        task:"⏹ نهاية الدوام"},
+      {time:"7:20–7:40 ص",   task:"✅ متابعة رجوع المدربات — نهاية الحصة الأولى (7:40)"},
+      {time:"7:40–8:00 ص",   task:"☕ استراحة أولى — 20 دقيقة"},
+      {time:"8:00–8:30 ص",   task:"✅ متابعة خروج المدربات — بداية الحصة الثانية"},
+      {time:"8:30–9:20 ص",   task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الثانية)"},
+      {time:"9:20–9:40 ص",   task:"✅ متابعة رجوع المدربات — نهاية الحصة الثانية (9:40)"},
+      {time:"9:40–10:00 ص",  task:"☕ استراحة ثانية — 20 دقيقة"},
+      {time:"10:00–10:30 ص", task:"✅ متابعة خروج المدربات — بداية الحصة الثالثة"},
+      {time:"10:30–11:20 ص", task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الثالثة)"},
+      {time:"11:20–11:40 ص", task:"✅ متابعة رجوع المدربات — نهاية الحصة الثالثة (11:40)"},
+      {time:"11:40–12:00 م", task:"📋 تقرير المخالفات (كل خميس) + إنهاء الدوام", thursday:true},
+      {time:"12:00 م",       task:"⏹ نهاية الدوام"},
     ],
     rotating:[
       {task:"🔧 ملاحظات المرافق والنظافة",       days:["أنا","امجاد","سمية","أنا","امجاد"]},
@@ -5804,18 +5783,17 @@ const STAFF_SCHEDULES = {
     fixed:[
       {time:"7:00 ص",        task:"🏢 جولة على المبنى (داخل وخارج)"},
       {time:"7:00–7:30 ص",   task:"✅ متابعة خروج المدربات والعملاء — بداية الحصة الأولى"},
-      {time:"7:30–8:10 ص",   task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الأولى)"},
-      {time:"8:10–8:40 ص",   task:"✅ متابعة رجوع المدربات — نهاية الحصة الأولى (8:40)"},
-      {time:"8:40–9:00 ص",   task:"☕ استراحة أولى"},
-      {time:"9:00–9:20 ص",   task:"✅ متابعة خروج المدربات — بداية الحصة الثانية"},
-      {time:"9:20–10:00 ص",  task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الثانية)"},
-      {time:"10:00–10:20 ص", task:"✅ متابعة رجوع المدربات — نهاية الحصة الثانية (10:20)"},
-      {time:"10:20–10:40 ص", task:"☕ استراحة ثانية"},
-      {time:"10:40–11:00 ص", task:"✅ متابعة خروج المدربات — بداية الحصة الثالثة"},
-      {time:"11:00–11:40 ص", task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الثالثة)"},
-      {time:"11:40–12:00 م", task:"✅ متابعة رجوع المدربات — نهاية الحصة الثالثة (12:00)"},
-      {time:"12:00–12:30 م", task:"✅ متابعة خروج المدربات — بداية الحصة الرابعة"},
-      {time:"12:30–1:00 م",  task:"📋 تقرير المخالفات + متابعة نهاية الحصة الرابعة (كل خميس)", thursday:true},
+      {time:"7:30–8:20 ص",   task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الأولى)"},
+      {time:"8:20–8:40 ص",   task:"✅ متابعة رجوع المدربات — نهاية الحصة الأولى (8:40)"},
+      {time:"8:40–9:00 ص",   task:"☕ استراحة أولى — 20 دقيقة"},
+      {time:"9:00–9:30 ص",   task:"✅ متابعة خروج المدربات — بداية الحصة الثانية"},
+      {time:"9:30–10:20 ص",  task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الثانية)"},
+      {time:"10:20–10:40 ص", task:"✅ متابعة رجوع المدربات — نهاية الحصة الثانية (10:40)"},
+      {time:"10:40–11:00 ص", task:"☕ استراحة ثانية — 20 دقيقة"},
+      {time:"11:00–11:30 ص", task:"✅ متابعة خروج المدربات — بداية الحصة الثالثة"},
+      {time:"11:30–12:20 م", task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الثالثة)"},
+      {time:"12:20–12:40 م", task:"✅ متابعة رجوع المدربات — نهاية الحصة الثالثة (12:40)"},
+      {time:"12:40–1:00 م",  task:"📋 تقرير المخالفات (كل خميس)", thursday:true},
       {time:"1:00 م",        task:"⏹ نهاية الدوام"},
     ],
     rotating:[
@@ -6755,8 +6733,15 @@ function renderPhoneObsButtons(idx){
   if(!btnsEl) return;
 
   const trainerName = trainerEl ? trainerEl.value.trim() : '';
-  const count = trainerName ? getTrainerPhoneCount(trainerName) : 0;
-  // next = الرقم المتاح الحين
+  const data = getPhoneObs();
+  const rec = trainerName ? data[trainerName.trim()] : null;
+  // تحقق انتهاء الصلاحية
+  if(rec && Date.now() - rec.lastUpdate > 7*24*60*60*1000){
+    delete data[trainerName.trim()];
+    savePhoneObs(data);
+  }
+  const count = rec && Date.now() - rec.lastUpdate <= 7*24*60*60*1000 ? (rec.count||0) : 0;
+  const observers = rec?.observers || [];
   const next = count + 1;
 
   let html = '';
@@ -6785,10 +6770,16 @@ function renderPhoneObsButtons(idx){
   }
   btnsEl.innerHTML = html;
 
-  // رسالة
+  // رسالة مع أسماء من سجّلوا
+  let prevInfo = '';
+  if(observers.length){
+    prevInfo = '<div style="margin-top:6px;font-size:10px;color:var(--text-dim);">';
+    observers.forEach(o => { prevInfo += `مشاهدة ${o.n}: ${o.by||'—'} الساعة ${o.time||''}<br>`; });
+    prevInfo += '</div>';
+  }
   if(count === 0)      msgEl.innerHTML = 'أول مشاهدة — اضغط <b>1</b> لتسجيلها';
-  else if(count === 1) msgEl.innerHTML = '✅ مشاهدة 1 مسجلة — اضغط <b>2</b> للثانية';
-  else if(count === 2) msgEl.innerHTML = '⚠️ مشاهدتان مسجلتان — اضغط <b>3</b> لتسجيل المخالفة';
+  else if(count === 1) msgEl.innerHTML = '✅ مشاهدة 1 مسجلة — اضغط <b>2</b> للثانية' + prevInfo;
+  else if(count === 2) msgEl.innerHTML = '⚠️ مشاهدتان مسجلتان — اضغط <b>3</b> للمخالفة' + prevInfo;
 }
 
 function selectPhoneObs(idx, n){
@@ -6798,27 +6789,55 @@ function selectPhoneObs(idx, n){
 
   const data = getPhoneObs();
   const key = trainerName.trim();
+  const obsBy = currentUser ? currentUser.name : '';
 
   if(n < 3){
-    // سجّل المشاهدة محلياً
-    data[key] = { count: n, lastUpdate: Date.now() };
+    // سجّل المشاهدة مع اسم الموظف
+    data[key] = { count: n, lastUpdate: Date.now(), observers: (data[key]?.observers||[]).concat([{n, by:obsBy, time:new Date().toLocaleTimeString('ar-SA')}]) };
     savePhoneObs(data);
-    renderPhoneObsButtons(idx);
-    // أخفِ الخانة وأعد الـ select — مش مخالفة بعد
+    // أغلق الخانة وأعد select
     document.getElementById('phoneObsField'+idx).style.display = 'none';
     document.getElementById('vType'+idx).value = '';
     document.getElementById('vAutoGrade'+idx).textContent = '—';
     document.getElementById('vAutoGrade'+idx).className = 'auto-grade-display';
-    toast('👁 مشاهدة ' + n + '/3 سُجِّلت للمدرب ' + trainerName + ' — متبقي ' + (3-n) + ' للمخالفة');
+    // إظهار رسالة واضحة مع زر حسناً
+    showPhoneObsToast(trainerName, n, false);
   } else {
-    // مخالفة رسمية — احذف السجل وابقِ الـ select
+    // مخالفة رسمية
+    const prevObs = data[key]?.observers || [];
     delete data[key];
     savePhoneObs(data);
-    // أخفِ الخانة — المخالفة جاهزة في النموذج
     document.getElementById('phoneObsField'+idx).style.display = 'none';
-    // الـ select يبقى على قيمته (استخدام الجوال|B)
-    toast('⚠️ المخالفة جاهزة — اضغط تسجيل لإتمامها');
+    showPhoneObsToast(trainerName, 3, true);
   }
+}
+
+function showPhoneObsToast(trainerName, n, isViolation){
+  // إنشاء overlay واضح
+  const old = document.getElementById('phoneObsToast');
+  if(old) old.remove();
+  const div = document.createElement('div');
+  div.id = 'phoneObsToast';
+  div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px;';
+  
+  const icon = isViolation ? '⚠️' : '👁';
+  const title = isViolation ? 'تم تسجيل المخالفة' : `تم تسجيل مشاهدة استخدام الهاتف للمرة ${n}`;
+  const sub = isViolation 
+    ? `سُجِّلت مخالفة رسمية على ${trainerName} — اضغط تسجيل لإتمامها`
+    : `المدرب: ${trainerName}<br>للرغبة في التعديل أو الحذف يرجى زيارة <b>السجل الشهري</b>`;
+  const remaining = !isViolation ? `<div style="font-size:11px;color:var(--text-dim);margin-top:6px;">متبقي ${3-n} مشاهدة للمخالفة الرسمية</div>` : '';
+
+  div.innerHTML = `<div style="background:var(--card);border-radius:20px;padding:28px 24px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.4);">
+    <div style="font-size:40px;margin-bottom:12px;">${icon}</div>
+    <div style="font-size:15px;font-weight:900;margin-bottom:8px;">${title}</div>
+    <div style="font-size:12px;color:var(--text-dim);line-height:1.7;">${sub}</div>
+    ${remaining}
+    <button onclick="document.getElementById('phoneObsToast').remove();goHome();" 
+      style="margin-top:20px;width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">
+      حسناً ✓
+    </button>
+  </div>`;
+  document.body.appendChild(div);
 }
 
 
