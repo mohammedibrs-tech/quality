@@ -7109,59 +7109,19 @@ function resetRating(){
 const ATT_KEY = 'nq_attendance_v2'; // backup localStorage key
 
 // الحضور محفوظ في Supabase + نسخة احتياطية localStorage
-let _attCache = null;
-
-async function getAttendRecords(){
-  if(_attCache !== null) return _attCache;
+function getAttendRecords(){
   try{
-    const {data} = await db.from('attendance').select('*').order('created_at',{ascending:false});
-    if(data && data.length){
-      _attCache = data;
-      // حفظ نسخة احتياطية
-      localStorage.setItem(ATT_KEY, JSON.stringify(data));
-      return data;
-    }
-  }catch(e){}
-  // fallback للـ localStorage
-  try{
-    const raw = localStorage.getItem(ATT_KEY);
-    _attCache = raw ? JSON.parse(raw) : [];
-    return _attCache;
-  }catch(e){ return []; }
+    const raw=localStorage.getItem(ATT_KEY);
+    return raw?JSON.parse(raw):[];
+  }catch(e){return[];}
 }
-
-async function saveAttendRecord(rec){
-  _attCache = null; // clear cache
-  try{
-    // حفظ في Supabase
-    const {data, error} = await db.from('attendance').insert([{
-      staff: rec.staff,
-      date: rec.date,
-      status: rec.status,
-      check_in: rec.checkIn||null,
-      check_out: rec.checkOut||null,
-      reason: rec.reason||null,
-      notes: rec.notes||null,
-      registered_by: rec.registeredBy||null,
-      created_at: rec.createdAt||new Date().toISOString()
-    }]).select();
-    if(!error && data) rec.id = data[0].id;
-  }catch(e){}
-  // احتياطي في localStorage دائماً
-  try{
-    const existing = JSON.parse(localStorage.getItem(ATT_KEY)||'[]');
-    existing.unshift(rec);
-    localStorage.setItem(ATT_KEY, JSON.stringify(existing));
-  }catch(e){}
+function saveAttendRecords(recs){
+  localStorage.setItem(ATT_KEY,JSON.stringify(recs));
 }
-
-async function deleteAttendRecord(id){
-  _attCache = null;
-  try{ await db.from('attendance').delete().eq('id', id); }catch(e){}
-  try{
-    const existing = JSON.parse(localStorage.getItem(ATT_KEY)||'[]');
-    localStorage.setItem(ATT_KEY, JSON.stringify(existing.filter(r=>r.id!=id)));
-  }catch(e){}
+function saveAttendRecord(rec){
+  const recs=getAttendRecords();
+  recs.unshift(rec);
+  saveAttendRecords(recs);
 }
 
 function toggleAttendFields(){
@@ -7181,7 +7141,7 @@ function toggleAttendFields(){
   if(leaveToF) leaveToF.style.display=status==='إجازة'?'':'none';
 }
 
-async function submitAttendance(){
+function submitAttendance(){
   const staff=document.getElementById('attStaff').value;
   const date=document.getElementById('attDate').value;
   const status=document.getElementById('attStatus').value;
@@ -7198,7 +7158,7 @@ async function submitAttendance(){
     registeredBy:currentUser?currentUser.name:'admin',
     createdAt:new Date().toISOString()
   };
-  await saveAttendRecord(rec);
+  saveAttendRecord(rec);
   // GS sync
   sendToSheets('attendance',[[rec.date,rec.staff,rec.status,rec.checkIn||'',rec.checkOut||'',rec.reason||'',rec.notes||'']]);
   // Reset fields
@@ -7214,20 +7174,16 @@ async function submitAttendance(){
   toast('✅ تم تسجيل الحضور بنجاح');
 }
 
-async function deleteAttendRecord(id){
-  _attCache = null;
-  try{ await db.from('attendance').delete().eq('id', id); }catch(e){}
-  try{
-    const existing = JSON.parse(localStorage.getItem(ATT_KEY)||'[]');
-    localStorage.setItem(ATT_KEY, JSON.stringify(existing.filter(r=>r.id!=id)));
-  }catch(e){}
+function deleteAttendRecord(id){
+  const recs=getAttendRecords().filter(r=>r.id!==id);
+  saveAttendRecords(recs);
   renderAttendList();
   renderAttendKPIs();
   renderDailyBulletin();
 }
 
-async function renderAttendList(){
-  const recs=await getAttendRecords();
+function renderAttendList(){
+  const recs=getAttendRecords();
   const fs=document.getElementById('attFilterStaff')?.value||'';
   const fst=document.getElementById('attFilterStatus')?.value||'';
   let data=recs;
@@ -7251,8 +7207,8 @@ async function renderAttendList(){
   </div>`).join('');
 }
 
-async function renderAttendKPIs(){
-  const recs=await getAttendRecords();
+function renderAttendKPIs(){
+  const recs=getAttendRecords();
   const today=new Date().toISOString().split('T')[0];
   const todayRecs=recs.filter(r=>r.date===today);
   const counts={};
@@ -7314,12 +7270,12 @@ function exportAttendExcel(){
 // ════════════════════════════════════════════════
 // DAILY BULLETIN (Staff absence notification)
 // ════════════════════════════════════════════════
-async function renderDailyBulletin(){
+function renderDailyBulletin(){
   if(!currentUser) return;
   const el=document.getElementById('dailyBulletin');
   if(!el) return;
   const today=new Date().toISOString().split('T')[0];
-  const allRecs=await getAttendRecords();
+  const allRecs=getAttendRecords();
   const todayRecs=allRecs.filter(r=>r.date===today);
   const absentStatuses=['غياب','إجازة','استئذان','خروج مبكر'];
   const absent=todayRecs.filter(r=>absentStatuses.includes(r.status));
@@ -7374,10 +7330,10 @@ async function renderDailyBulletin(){
 }
 
 // popup التنويه عند فتح التطبيق
-async function showBulletinPopup(){
+function showBulletinPopup(){
   if(!currentUser) return;
   const today=new Date().toISOString().split('T')[0];
-  const recs=await getAttendRecords().filter(r=>r.date===today);
+  const allRecs2=getAttendRecords(); const recs=allRecs2.filter(r=>r.date===today);
   const absentStatuses=['غياب','إجازة','استئذان','خروج مبكر'];
   const absent=recs.filter(r=>absentStatuses.includes(r.status));
   if(!absent.length) return;
