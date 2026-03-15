@@ -1220,7 +1220,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         <select class="filter-select" id="rfMonth" onchange="filterV()" style="max-width:160px;">
           <option value="">كل الأشهر</option>
         </select>
-        <button class="export-btn" onclick="showExportModal()" style="margin-right:auto;">⬇ تصدير Excel</button>
+        <button class="export-btn" onclick="exportViolationsStyled(currentVSection)" style="margin-right:auto;">⬇ تصدير Excel</button>
       </div>
 
       <!-- ── VIOLATIONS DASHBOARD (TOP) ── -->
@@ -1320,7 +1320,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div id="tab-ft" style="display:none">
       <div id="mylog-section-tab-ft" style="margin-bottom:20px;"></div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-        <button class="export-btn" onclick="exportFacility()">⬇ تصدير Excel</button>
+        <button class="export-btn" onclick="exportFacilityStyled()">⬇ تصدير Excel</button>
       </div>
       <!-- Facility Dashboard -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
@@ -1350,7 +1350,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div id="tab-bt" style="display:none">
       <div id="mylog-section-tab-bt" style="margin-bottom:20px;"></div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-        <button class="export-btn" onclick="exportBuilding()">⬇ تصدير Excel</button>
+        <button class="export-btn" onclick="exportBuildingStyled()">⬇ تصدير Excel</button>
       </div>
       <!-- Building Dashboard -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">
@@ -7548,17 +7548,31 @@ async function callExportAPI(type, data, options={}){
 
 // دوال التصدير المنسّق لكل خانة
 async function exportViolationsStyled(section){
-  const secName = section==='female'?'القسم النسائي':'القسم الرجالي';
   const year = new Date().getFullYear();
-  let q = db.from('violations').select('*').order('date',{ascending:true});
-  if(section) q = q.eq('section',section);
-  const {data} = await q;
   const btn = event?.target;
-  await callExportAPI('violations', data||[], {
-    year, section_name: secName,
-    filename: `سجل_المخالفات_${secName}_${year}.xlsx`,
-    btn, btnText:'⬇ تصدير Excel'
-  });
+  if(btn){ btn.disabled=true; btn.textContent='⏳ جاري التصدير...'; }
+  try{
+    // جلب كل المخالفات
+    const {data:allData} = await db.from('violations').select('*').order('date',{ascending:true});
+    const all = allData||[];
+    // إذا محدد قسم — صدّر قسم واحد، وإلا صدّر الكل مقسّم
+    let exportData, secName;
+    if(section && section!==''){
+      exportData = all.filter(r=>r.section===section);
+      secName = section==='female'?'القسم النسائي':'القسم الرجالي';
+    } else {
+      exportData = all;
+      secName = 'نسائي ورجالي';
+    }
+    await callExportAPI('violations', exportData, {
+      year, section_name: secName,
+      filename: `سجل_المخالفات_${secName}_${year}.xlsx`,
+      btn, btnText:'⬇ تصدير Excel'
+    });
+  }catch(e){
+    toast('❌ '+e.message);
+    if(btn){ btn.disabled=false; btn.textContent='⬇ تصدير Excel'; }
+  }
 }
 
 async function exportSurveysStyled(){
