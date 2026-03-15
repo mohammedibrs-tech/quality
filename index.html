@@ -824,50 +824,28 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 </div>
 
 <!-- PHONE VIOLATION TRACKER MODAL -->
-<div id="phoneTrackerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9500;align-items:center;justify-content:center;">
-  <div style="background:var(--card);border-radius:22px;padding:28px 24px;width:100%;max-width:420px;margin:18px;box-shadow:0 30px 60px rgba(0,0,0,0.4);">
-    <div style="text-align:center;margin-bottom:18px;">
-      <div style="font-size:28px;margin-bottom:6px;">📱</div>
-      <div style="font-size:15px;font-weight:900;">نظام رصد استخدام الجوال</div>
-      <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">تراكمي — 3 مشاهدات = مخالفة رسمية</div>
+<div id="phoneTrackerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9500;align-items:center;justify-content:center;padding:18px;">
+  <div style="background:var(--card);border-radius:22px;padding:24px 20px;width:100%;max-width:400px;box-shadow:0 30px 60px rgba(0,0,0,0.4);">
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:30px;margin-bottom:8px;">📱</div>
+      <div style="font-size:15px;font-weight:900;">رصد استخدام الجوال</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">تُسجَّل المخالفة عند المشاهدة الثالثة فقط</div>
     </div>
 
     <!-- اسم المدرب -->
-    <div style="background:rgba(0,168,150,0.08);border-radius:12px;padding:12px 16px;margin-bottom:18px;text-align:center;">
-      <div style="font-size:11px;color:var(--text-dim);margin-bottom:3px;">المدرب/ة المرصود</div>
-      <div id="ptTrainerName" style="font-size:15px;font-weight:900;color:var(--accent);">—</div>
+    <div style="background:rgba(0,168,150,0.08);border:1px solid rgba(0,168,150,0.15);border-radius:12px;padding:10px 16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:11px;color:var(--text-dim);">المدرب/ة:</span>
+      <span id="ptTrainerName" style="font-size:14px;font-weight:900;color:var(--accent);">—</span>
     </div>
 
-    <!-- مراحل المشاهدة -->
-    <div style="font-size:11px;font-weight:700;color:var(--text-dim);text-align:center;margin-bottom:10px;">عدد مرات المشاهدة</div>
-    <div class="phone-steps">
-      <div class="phone-step" id="ptStep1" onclick="selectPhoneStep(1)">
-        <span class="step-num">1</span>
-        <span class="step-label">مشاهدة</span>
-      </div>
-      <div class="phone-step locked" id="ptStep2" onclick="selectPhoneStep(2)">
-        <span class="step-num">2</span>
-        <span class="step-label">مشاهدة</span>
-      </div>
-      <div class="phone-step locked" id="ptStep3" onclick="selectPhoneStep(3)">
-        <span class="step-num">3</span>
-        <span class="step-label">مخالفة!</span>
-      </div>
-    </div>
+    <!-- سجل المشاهدات -->
+    <div id="ptTimelineArea" style="margin-bottom:20px;"></div>
 
-    <!-- تفسير الحالة -->
-    <div id="ptStatusMsg" style="text-align:center;font-size:12px;color:var(--text-dim);margin:14px 0;min-height:36px;line-height:1.6;"></div>
-
-    <!-- تحذير المخالفة الرسمية -->
-    <div id="ptViolationWarning" style="display:none;background:rgba(217,79,79,0.1);border:1px solid rgba(217,79,79,0.25);border-radius:12px;padding:12px;text-align:center;margin-bottom:14px;">
-      <div style="font-size:12px;font-weight:900;color:var(--red);">⚠️ تسجيل مخالفة رسمية</div>
-      <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">تجاوز المدرب 3 مشاهدات — سيتم تسجيل مخالفة درجة B</div>
-    </div>
-
-    <div style="display:flex;gap:10px;margin-top:6px;">
-      <button id="ptConfirmBtn" onclick="confirmPhoneStep()" style="flex:1;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">تأكيد</button>
-      <button onclick="closePhoneTracker()" style="flex:1;padding:12px;background:rgba(0,0,0,0.05);color:var(--text);border:1px solid var(--border);border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">إلغاء</button>
-    </div>
+    <!-- زر التأكيد -->
+    <button id="ptConfirmBtn" onclick="confirmPhoneStep()" style="width:100%;padding:14px;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;transition:all .2s;">تأكيد</button>
+    <button onclick="closePhoneTracker()" style="width:100%;margin-top:8px;padding:10px;background:transparent;border:1px solid var(--border);border-radius:12px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text-dim);">إلغاء</button>
   </div>
 </div>
 
@@ -6745,7 +6723,6 @@ function resetSales(){
 const PHONE_KEY = 'nq_phone_obs_v1';
 let ptCurrentTrainer = '';
 let ptCurrentSection = '';
-let ptSelectedStep = 0;
 let ptTrainerEntryIdx = 0;
 
 function getPhoneObs(){
@@ -6754,20 +6731,17 @@ function getPhoneObs(){
 }
 function savePhoneObs(data){ localStorage.setItem(PHONE_KEY, JSON.stringify(data)); }
 
-function getTrainerPhoneStatus(trainerName){
+function getTrainerPhoneCount(name){
   const data = getPhoneObs();
-  const key = trainerName.trim();
-  const rec = data[key];
-  if(!rec) return {count:0, expired:false};
-  // تحقق من انتهاء الصلاحية (أسبوع)
-  const weekAgo = Date.now() - 7*24*60*60*1000;
-  if(rec.lastUpdate < weekAgo){
-    // انتهت الصلاحية — احذف
-    delete data[key];
+  const rec = data[name.trim()];
+  if(!rec) return 0;
+  // انتهت الصلاحية بعد أسبوع
+  if(Date.now() - rec.lastUpdate > 7*24*60*60*1000){
+    delete data[name.trim()];
     savePhoneObs(data);
-    return {count:0, expired:true};
+    return 0;
   }
-  return {count:rec.count||0, expired:false};
+  return rec.count||0;
 }
 
 function openPhoneTracker(trainerName, section, entryIdx){
@@ -6775,104 +6749,106 @@ function openPhoneTracker(trainerName, section, entryIdx){
   ptCurrentTrainer = trainerName;
   ptCurrentSection = section;
   ptTrainerEntryIdx = entryIdx;
-  ptSelectedStep = 0;
 
   document.getElementById('ptTrainerName').textContent = trainerName;
   document.getElementById('phoneTrackerModal').style.display = 'flex';
-  document.getElementById('ptViolationWarning').style.display = 'none';
-
-  const status = getTrainerPhoneStatus(trainerName);
-  const count = status.count;
-
-  // ضبط الأزرار حسب عدد المشاهدات السابقة
-  const steps = [1,2,3];
-  steps.forEach(s => {
-    const el = document.getElementById('ptStep'+s);
-    el.className = 'phone-step';
-    if(s <= count){
-      // مسجل سابقاً
-      el.classList.add('done');
-      el.querySelector('.step-label').textContent = s===3?'مخالفة!':'✓ مسجل';
-    } else if(s === count+1){
-      // المتاح الحالي
-      el.classList.add('available');
-      el.querySelector('.step-label').textContent = s===3?'مخالفة!':'مشاهدة';
-    } else {
-      // مقفل
-      el.classList.add('locked');
-      el.querySelector('.step-label').textContent = s===3?'مخالفة!':'مشاهدة';
-    }
-  });
-
-  // رسالة الحالة
-  const msgs = [
-    'أول مشاهدة لهذا المدرب — اضغط 1 لتسجيلها',
-    `✅ تم تسجيل مشاهدة واحدة سابقاً — اضغط 2 للمشاهدة الثانية`,
-    `⚠️ مشاهدتان مسجلتان — هذه المرة الثالثة تُسجَّل مخالفة رسمية!`,
-  ];
-  document.getElementById('ptStatusMsg').innerHTML = msgs[count] || msgs[0];
-
-  const confirmBtn = document.getElementById('ptConfirmBtn');
-  confirmBtn.textContent = 'تأكيد';
-  confirmBtn.style.background = 'var(--accent)';
+  renderPhoneTimeline();
 }
 
-function selectPhoneStep(step){
-  const status = getTrainerPhoneStatus(ptCurrentTrainer);
-  const count = status.count;
-  // فقط الخطوة التالية متاحة
-  if(step !== count+1) return;
+function renderPhoneTimeline(){
+  const count = getTrainerPhoneCount(ptCurrentTrainer);
+  const nextStep = count + 1;
+  const area = document.getElementById('ptTimelineArea');
+  const btn = document.getElementById('ptConfirmBtn');
 
-  ptSelectedStep = step;
-  [1,2,3].forEach(s => {
-    const el = document.getElementById('ptStep'+s);
-    if(s === step) el.classList.add('selected');
-    else el.classList.remove('selected');
+  // بناء Timeline
+  const steps = [
+    {n:1, label:'المشاهدة الأولى',   icon:'👁'},
+    {n:2, label:'المشاهدة الثانية',  icon:'👁'},
+    {n:3, label:'المخالفة الرسمية',  icon:'⚠️'},
+  ];
+
+  let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+  steps.forEach(step => {
+    const done   = step.n <= count;
+    const active = step.n === nextStep;
+    const locked = step.n > nextStep;
+
+    let bg, border, textColor, badge;
+    if(done){
+      bg='rgba(0,168,150,0.08)'; border='rgba(0,168,150,0.3)'; textColor='var(--accent)';
+      badge=`<span style="background:rgba(0,168,150,0.15);color:var(--accent);padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">✓ مسجلة</span>`;
+    } else if(active && step.n < 3){
+      bg='rgba(255,193,7,0.08)'; border='rgba(255,193,7,0.4)'; textColor='#B8860B';
+      badge=`<span style="background:rgba(255,193,7,0.15);color:#B8860B;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">الحالية ← اضغط تأكيد</span>`;
+    } else if(active && step.n === 3){
+      bg='rgba(217,79,79,0.08)'; border='rgba(217,79,79,0.35)'; textColor='var(--red)';
+      badge=`<span style="background:rgba(217,79,79,0.15);color:var(--red);padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">⚠️ ستُسجَّل مخالفة</span>`;
+    } else {
+      bg='rgba(0,0,0,0.02)'; border='rgba(0,0,0,0.08)'; textColor='var(--text-dim)';
+      badge=`<span style="color:var(--text-dim);font-size:10px;">🔒 مقفلة</span>`;
+    }
+
+    html += `<div style="background:${bg};border:1.5px solid ${border};border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;opacity:${locked?'0.5':'1'};">
+      <div style="font-size:22px;min-width:32px;text-align:center;">${step.icon}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:900;color:${textColor};">${step.n}. ${step.label}</div>
+      </div>
+      ${badge}
+    </div>`;
   });
+  html += '</div>';
 
-  if(step === 3){
-    document.getElementById('ptViolationWarning').style.display = 'block';
-    document.getElementById('ptConfirmBtn').textContent = '⚠️ تسجيل مخالفة رسمية';
-    document.getElementById('ptConfirmBtn').style.background = 'var(--red)';
+  // ملاحظة التنبيه
+  if(nextStep === 3){
+    html += `<div style="background:rgba(217,79,79,0.07);border:1px solid rgba(217,79,79,0.2);border-radius:10px;padding:10px 14px;margin-top:12px;font-size:11px;color:var(--red);text-align:center;font-weight:700;">
+      هذه المرة الثالثة — ستُسجَّل مخالفة درجة B على المدرب فور الضغط على تأكيد
+    </div>`;
+  }
+
+  area.innerHTML = html;
+
+  // زر التأكيد
+  if(nextStep === 3){
+    btn.textContent = '⚠️ تسجيل مخالفة رسمية';
+    btn.style.cssText = 'width:100%;padding:14px;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;background:var(--red);color:#fff;';
   } else {
-    document.getElementById('ptViolationWarning').style.display = 'none';
-    document.getElementById('ptConfirmBtn').textContent = 'تأكيد التسجيل';
-    document.getElementById('ptConfirmBtn').style.background = 'var(--accent)';
+    btn.textContent = `✓ تسجيل المشاهدة ${nextStep}/3`;
+    btn.style.cssText = 'width:100%;padding:14px;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;background:var(--accent);color:#fff;';
   }
 }
 
 function confirmPhoneStep(){
-  if(!ptSelectedStep){ toast('⚠️ اختر عدد المشاهدات'); return; }
+  const count = getTrainerPhoneCount(ptCurrentTrainer);
+  const nextStep = count + 1;
   const data = getPhoneObs();
   const key = ptCurrentTrainer.trim();
 
-  if(ptSelectedStep === 3){
-    // مخالفة رسمية — احذف السجل واملأ نموذج المخالفة تلقائياً
+  if(nextStep === 3){
+    // مخالفة رسمية
     delete data[key];
     savePhoneObs(data);
     closePhoneTracker();
-    // ابحث عن select نوع المخالفة للمدرب المحدد واملأه
     const typeEl = document.getElementById('vType'+ptTrainerEntryIdx);
     if(typeEl){
       typeEl.value = 'استخدام الجوال اثناء الحصة التدريبية|B';
       autoGrade(ptTrainerEntryIdx);
     }
-    toast('⚠️ تم تحديد المخالفة — أكمل النموذج وسجّل');
+    toast('⚠️ المخالفة جاهزة — أكمل النموذج واضغط تسجيل');
   } else {
-    // سجل المشاهدة
-    data[key] = { count: ptSelectedStep, lastUpdate: Date.now() };
+    // تسجيل مشاهدة
+    data[key] = { count: nextStep, lastUpdate: Date.now() };
     savePhoneObs(data);
     closePhoneTracker();
-    toast(`✅ تم تسجيل المشاهدة ${ptSelectedStep}/3 للمدرب ${ptCurrentTrainer}`);
+    const remaining = 3 - nextStep;
+    toast(`✅ مشاهدة ${nextStep}/3 مسجلة — ${remaining} مشاهدة متبقية للمخالفة`);
   }
 }
 
 function closePhoneTracker(){
   document.getElementById('phoneTrackerModal').style.display = 'none';
-  ptSelectedStep = 0;
 }
 
-// دالة مساعدة — تُستدعى من onchange نوع المخالفة
 function checkPhoneViolation(idx, section){
   const typeEl = document.getElementById('vType'+idx);
   const trainerEl = document.getElementById('vTrainer'+idx);
@@ -6880,7 +6856,6 @@ function checkPhoneViolation(idx, section){
   const val = typeEl.value;
   if(val && val.includes('استخدام الجوال')){
     const trainerName = trainerEl.value.trim();
-    // أعد قيمة الـ select للصفر وافتح الـ tracker
     typeEl.value = '';
     document.getElementById('vAutoGrade'+idx).textContent = '—';
     document.getElementById('vAutoGrade'+idx).className = 'auto-grade-display';
