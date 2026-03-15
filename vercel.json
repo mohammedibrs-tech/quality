@@ -1,9 +1,8 @@
   "version": 2,
-  "functions": {
-    "api/export.py": {
-      "runtime": "python3.9"
-    }
-  },
+  "builds": [
+    { "src": "api/*.py", "use": "@vercel/python" },
+    { "src": "index.html", "use": "@vercel/static" }
+  ],
   "routes": [
     { "src": "/api/export", "dest": "/api/export.py" },
     { "src": "/(.*)", "dest": "/index.html" }
