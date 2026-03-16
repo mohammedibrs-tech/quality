@@ -3909,83 +3909,94 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="page-header">
       <div class="p-icon" style="background:rgba(255,215,0,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">🏆</div>
       <h1>الحوافز الشهرية</h1>
-      <div class="sub">MONTHLY INCENTIVES — مبني على بيانات Supabase</div>
+      <div class="sub">MONTHLY INCENTIVES — رفع وتحليل وتصدير</div>
     </div>
 
-    <!-- نموذج إضافة حافز -->
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;">
-      <div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:14px;">✦ إضافة حافز شهري</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="field">
-          <label>الشهر <span class="req">*</span></label>
-          <select id="incMonth" class="filter-select">
-            <option value="">اختر...</option>
-            <option>يناير</option><option>فبراير</option><option>مارس</option>
-            <option>أبريل</option><option>مايو</option><option>يونيو</option>
-            <option>يوليو</option><option>أغسطس</option><option>سبتمبر</option>
-            <option>أكتوبر</option><option>نوفمبر</option><option>ديسمبر</option>
-          </select>
+    <!-- تبويبات -->
+    <div class="section-tabs" style="margin-bottom:20px;">
+      <button class="stab active" onclick="switchIncTab('upload',this)">📤 رفع ملف</button>
+      <button class="stab" onclick="switchIncTab('manual',this)">✏️ إدخال يدوي</button>
+      <button class="stab" onclick="switchIncTab('analysis',this)">📊 التحليل</button>
+    </div>
+
+    <!-- تبويب رفع ملف -->
+    <div id="inc-tab-upload">
+      <div id="incDropArea" onclick="document.getElementById('incFileInput').click()"
+        style="background:var(--card);border:2.5px dashed var(--border);border-radius:16px;padding:36px;text-align:center;cursor:pointer;transition:all .2s;"
+        ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+        ondragleave="this.style.borderColor='var(--border)'"
+        ondrop="event.preventDefault();this.style.borderColor='var(--border)';handleIncFile({files:event.dataTransfer.files})">
+        <div style="font-size:40px;margin-bottom:10px;">📊</div>
+        <div style="font-size:14px;font-weight:900;margin-bottom:6px;">رفع ملف الحوافز الشهرية</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">اسحب الملف هنا أو اضغط للاختيار</div>
+        <div style="font-size:11px;color:var(--accent);font-weight:700;">Excel يحتوي 8 شيتات: KPIs + المقيمون + المبيعات + الفحص الطبي + المدربون + الدراجات</div>
+        <input type="file" id="incFileInput" accept=".xlsx,.xls" style="display:none;" onchange="handleIncFile(this)">
+      </div>
+      <div id="incUploadStatus" style="display:none;background:rgba(0,168,150,0.08);border:1px solid rgba(0,168,150,0.2);border-radius:12px;padding:12px 16px;margin-top:14px;font-size:12px;font-weight:700;color:var(--accent);text-align:center;"></div>
+      <div style="margin-top:14px;text-align:center;">
+        <button onclick="downloadIncTemplate()" style="padding:10px 20px;background:rgba(0,168,150,0.08);border:1.5px solid rgba(0,168,150,0.25);border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--accent);">⬇ تحميل القالب الجاهز</button>
+      </div>
+    </div>
+
+    <!-- تبويب إدخال يدوي -->
+    <div id="inc-tab-manual" style="display:none;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:14px;">✦ إضافة حافز شهري</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field"><label>الشهر <span class="req">*</span></label>
+            <select id="incMonth" class="filter-select"><option value="">اختر...</option>
+              <option>يناير</option><option>فبراير</option><option>مارس</option><option>أبريل</option>
+              <option>مايو</option><option>يونيو</option><option>يوليو</option><option>أغسطس</option>
+              <option>سبتمبر</option><option>أكتوبر</option><option>نوفمبر</option><option>ديسمبر</option>
+            </select></div>
+          <div class="field"><label>السنة <span class="req">*</span></label><input type="number" id="incYear" value="2026" min="2024" max="2030"></div>
+          <div class="field"><label>اسم الموظف <span class="req">*</span></label>
+            <select id="incStaff" class="filter-select"><option value="">اختر...</option>
+              <option>شهد المقرن</option><option>سمية الخضيري</option><option>امجاد ابانمي</option>
+              <option>احمد الحماد</option><option>ابراهيم الحمد</option><option>احمد سحاب</option>
+            </select></div>
+          <div class="field"><label>القسم</label>
+            <select id="incSection" class="filter-select"><option value="">اختر...</option>
+              <option>نسائي</option><option>رجالي</option>
+            </select></div>
+          <div class="field"><label>النقاط / التقييم</label><input type="number" id="incScore" placeholder="0-100" min="0" max="100"></div>
+          <div class="field"><label>عدد المخالفات</label><input type="number" id="incViolations" value="0" min="0"></div>
+          <div class="field" style="grid-column:1/-1;"><label>ملاحظات</label><textarea id="incNotes" rows="2" placeholder="أي ملاحظات..."></textarea></div>
         </div>
-        <div class="field">
-          <label>السنة <span class="req">*</span></label>
-          <input type="number" id="incYear" value="2026" min="2024" max="2030">
-        </div>
-        <div class="field">
-          <label>اسم الموظف <span class="req">*</span></label>
-          <select id="incStaff" class="filter-select">
-            <option value="">اختر...</option>
-            <option>شهد المقرن</option><option>سمية الخضيري</option>
-            <option>امجاد ابانمي</option><option>احمد الحماد</option>
-            <option>ابراهيم الحمد</option><option>احمد سحاب</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>القسم</label>
-          <select id="incSection" class="filter-select">
-            <option value="">اختر...</option>
-            <option>نسائي</option><option>رجالي</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>النقاط / التقييم</label>
-          <input type="number" id="incScore" placeholder="0-100" min="0" max="100">
-        </div>
-        <div class="field">
-          <label>عدد المخالفات</label>
-          <input type="number" id="incViolations" value="0" min="0">
-        </div>
-        <div class="field" style="grid-column:1/-1;">
-          <label>ملاحظات</label>
-          <textarea id="incNotes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
+        <button class="submit-btn" onclick="submitIncentive()" style="margin-top:12px;">✦ حفظ الحافز</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+        <select class="filter-select" id="incFilterMonth" onchange="loadIncentives()" style="max-width:140px;">
+          <option value="">كل الأشهر</option>
+          <option>يناير</option><option>فبراير</option><option>مارس</option><option>أبريل</option>
+          <option>مايو</option><option>يونيو</option><option>يوليو</option><option>أغسطس</option>
+          <option>سبتمبر</option><option>أكتوبر</option><option>نوفمبر</option><option>ديسمبر</option>
+        </select>
+        <select class="filter-select" id="incFilterYear" onchange="loadIncentives()" style="max-width:100px;">
+          <option>2026</option><option>2025</option><option>2024</option>
+        </select>
+      </div>
+      <div id="incList"><div style="text-align:center;padding:30px;color:var(--text-dim);">لا توجد بيانات</div></div>
+    </div>
+
+    <!-- تبويب التحليل -->
+    <div id="inc-tab-analysis" style="display:none;">
+      <div id="incAnalysisContent">
+        <div style="text-align:center;padding:40px;color:var(--text-dim);">
+          <div style="font-size:36px;margin-bottom:10px;">📊</div>
+          <div style="font-size:13px;font-weight:700;">ارفع ملف الحوافز لعرض التحليل</div>
         </div>
       </div>
-      <button class="submit-btn" onclick="submitIncentive()" style="margin-top:12px;">✦ حفظ الحافز</button>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button id="incExportBtn" onclick="exportIncentivesStyled()" class="export-btn" style="display:none;">⬇ تصدير Excel منسّق</button>
+      </div>
     </div>
-
-    <!-- فلتر وتصدير -->
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
-      <select class="filter-select" id="incFilterMonth" onchange="loadIncentives()" style="max-width:140px;">
-        <option value="">كل الأشهر</option>
-        <option>يناير</option><option>فبراير</option><option>مارس</option>
-        <option>أبريل</option><option>مايو</option><option>يونيو</option>
-        <option>يوليو</option><option>أغسطس</option><option>سبتمبر</option>
-        <option>أكتوبر</option><option>نوفمبر</option><option>ديسمبر</option>
-      </select>
-      <select class="filter-select" id="incFilterYear" onchange="loadIncentives()" style="max-width:100px;">
-        <option>2026</option><option>2025</option><option>2024</option>
-      </select>
-      <button class="export-btn" onclick="exportIncentivesStyled()" style="margin-right:auto;">⬇ تصدير Excel</button>
-    </div>
-
-    <!-- قائمة الحوافز -->
-    <div id="incList"><div class="loading"><div class="spin"></div>جاري التحميل...</div></div>
 
     <div style="height:30px;"></div>
     <button class="back-btn" onclick="goHome()">← رجوع / Back</button>
   </div>
 </div>
 
-<!-- MAIN BUILDING REPORT PAGE -->
 <div id="page-building" class="page">
   <div class="container">
     <button class="back-btn" onclick="goHome()">← الرئيسية / Home</button>
@@ -7549,43 +7560,9 @@ async function callExportAPI(type, data, options={}){
 }
 
 // دوال التصدير المنسّق لكل خانة
-async function exportViolationsStyled(section){
-  const year = new Date().getFullYear();
-  const btn = event?.target;
-  if(btn){ btn.disabled=true; btn.textContent='⏳ جاري التصدير...'; }
-  try{
-    // جلب كل المخالفات
-    const {data:allData} = await db.from('violations').select('*').order('date',{ascending:true});
-    const all = allData||[];
-    // إذا محدد قسم — صدّر قسم واحد، وإلا صدّر الكل مقسّم
-    let exportData, secName;
-    if(section && section!==''){
-      exportData = all.filter(r=>r.section===section);
-      secName = section==='female'?'القسم النسائي':'القسم الرجالي';
-    } else {
-      exportData = all;
-      secName = 'نسائي ورجالي';
-    }
-    await callExportAPI('violations', exportData, {
-      year, section_name: secName,
-      filename: `سجل_المخالفات_${secName}_${year}.xlsx`,
-      btn, btnText:'⬇ تصدير Excel'
-    });
-  }catch(e){
-    toast('❌ '+e.message);
-    if(btn){ btn.disabled=false; btn.textContent='⬇ تصدير Excel'; }
-  }
-}
 
-async function exportSurveysStyled(){
-  const year = new Date().getFullYear();
-  const {data} = await db.from('surveys').select('*').order('date',{ascending:false}).limit(500);
-  const btn = event?.target;
-  await callExportAPI('surveys', data||[], {
-    year, filename:`استطلاع_رضا_العملاء_${year}.xlsx`,
-    btn, btnText:'⬇ تصدير Excel'
-  });
-}
+
+
 
 async function exportFacilityStyled(){
   const year = new Date().getFullYear();
@@ -8203,6 +8180,241 @@ async function exportRatingsStyled(){
     await saveExcelJS(wb,`تقرير_الأعلى_بالتقييم_${new Date().getFullYear()}.xlsx`);
     toast(`✅ تم تصدير ${recs.length} مدرب`);
   }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تصدير التحليل Excel';} }
+}
+
+
+// ════════════════════════════════════════════════
+// INCENTIVES — الحوافز الشهرية
+// ════════════════════════════════════════════════
+let incData = {}; // البيانات المرفوعة من Excel
+
+function switchIncTab(tab, el){
+  ['upload','manual','analysis'].forEach(t=>{
+    document.getElementById('inc-tab-'+t).style.display = t===tab?'block':'none';
+  });
+  document.querySelectorAll('#page-incentives .stab').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(tab==='manual') loadIncentives();
+}
+
+function handleIncFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(typeof XLSX==='undefined'){toast('❌ مكتبة Excel غير محملة');return;}
+  const status = document.getElementById('incUploadStatus');
+  status.style.display='block'; status.textContent='⏳ جاري قراءة الملف...';
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      incData = {};
+      wb.SheetNames.forEach(name=>{
+        const ws = wb.Sheets[name];
+        incData[name] = XLSX.utils.sheet_to_json(ws, {header:1, raw:false, defval:''});
+      });
+      const sheetCount = wb.SheetNames.length;
+      status.textContent = `✅ تم قراءة ${sheetCount} شيتات: ${wb.SheetNames.join(' | ')}`;
+      // انتقل لتبويب التحليل
+      switchIncTab('analysis', document.querySelectorAll('#page-incentives .stab')[2]);
+      renderIncAnalysis();
+    }catch(err){
+      status.textContent = '❌ خطأ: '+err.message;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderIncAnalysis(){
+  const el = document.getElementById('incAnalysisContent');
+  const exportBtn = document.getElementById('incExportBtn');
+  if(!incData || !Object.keys(incData).length){
+    el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);">ارفع ملف الحوافز لعرض التحليل</div>';
+    return;
+  }
+  exportBtn.style.display='block';
+
+  // احسب الإجماليات
+  const sheets = Object.keys(incData);
+  let totalEmployees=0, totalEligible=0;
+  const sheetSummaries = [];
+
+  sheets.forEach(name=>{
+    const rows = incData[name];
+    if(!rows||rows.length<3) return;
+    const headers = rows[2]||[];
+    const dataRows = rows.slice(3).filter(r=>r.some(v=>String(v).trim()));
+    if(!dataRows.length) return;
+    totalEmployees += dataRows.length;
+    sheetSummaries.push({name, count:dataRows.length, headers, rows:dataRows});
+  });
+
+  // بناء HTML التحليل
+  let html = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;">`;
+
+  // KPI cards
+  const kpis = [
+    {label:'إجمالي الموظفين',val:totalEmployees,color:'var(--accent)',icon:'👥'},
+    {label:'إجمالي الشيتات',val:sheetSummaries.length,color:'#667EEA',icon:'📋'},
+  ];
+  kpis.forEach(k=>{
+    html+=`<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;">
+      <div style="font-size:24px;">${k.icon}</div>
+      <div style="font-size:22px;font-weight:900;color:${k.color};margin:4px 0;">${k.val}</div>
+      <div style="font-size:11px;color:var(--text-dim);">${k.label}</div>
+    </div>`;
+  });
+  html+='</div>';
+
+  // جدول ملخص الشيتات
+  html+=`<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;">
+    <div style="background:var(--accent);color:#fff;padding:12px 16px;font-size:13px;font-weight:900;">📊 ملخص الشيتات</div>
+    <table style="width:100%;border-collapse:collapse;">
+    <tr style="background:var(--card2);">
+      <td style="padding:8px 12px;font-weight:700;font-size:11px;">الشيت</td>
+      <td style="padding:8px 12px;font-weight:700;font-size:11px;text-align:center;">عدد السجلات</td>
+    </tr>`;
+  sheetSummaries.forEach((s,i)=>{
+    const bg=i%2===0?'var(--card)':'var(--card2)';
+    html+=`<tr style="background:${bg};">
+      <td style="padding:8px 12px;font-size:12px;font-weight:700;">${s.name}</td>
+      <td style="padding:8px 12px;font-size:13px;font-weight:900;text-align:center;color:var(--accent);">${s.count}</td>
+    </tr>`;
+  });
+  html+='</table></div>';
+
+  // عرض بيانات كل شيت
+  sheetSummaries.forEach(s=>{
+    if(!s.rows.length) return;
+    html+=`<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;">
+      <div style="background:var(--dark);color:#fff;padding:10px 16px;font-size:12px;font-weight:900;">📋 ${s.name} (${s.count} سجل)</div>
+      <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;min-width:600px;">
+      <tr style="background:rgba(0,168,150,0.1);">`;
+    s.headers.forEach(h=>{ if(h) html+=`<td style="padding:7px 10px;font-weight:700;font-size:10px;white-space:nowrap;">${h}</td>`; });
+    html+='</tr>';
+    s.rows.slice(0,10).forEach((row,ri)=>{
+      const bg=ri%2===0?'var(--card)':'var(--card2)';
+      html+=`<tr style="background:${bg};">`;
+      s.headers.forEach((h,hi)=>{ if(h) html+=`<td style="padding:6px 10px;font-size:11px;">${row[hi]||''}</td>`; });
+      html+='</tr>';
+    });
+    if(s.rows.length>10) html+=`<tr><td colspan="${s.headers.filter(h=>h).length}" style="padding:8px;text-align:center;color:var(--text-dim);font-size:11px;">... و ${s.rows.length-10} سجل آخر</td></tr>`;
+    html+='</table></div></div>';
+  });
+
+  el.innerHTML = html;
+}
+
+// تصدير الحوافز بـ ExcelJS
+async function exportIncentivesStyled(){
+  if(typeof ExcelJS==='undefined'){toast('❌');return;}
+  if(!incData||!Object.keys(incData).length){ toast('❌ ارفع ملف الحوافز أولاً'); return; }
+  const btn=event?.target; if(btn){btn.disabled=true;btn.textContent='⏳ جاري البناء...';}
+  try{
+    const year=new Date().getFullYear();
+    const wb=new ExcelJS.Workbook(); wb.views=[{rightToLeft:true}];
+
+    // شيت KPIs
+    const ks=wb.addWorksheet('KPIs – الحوافز'); ks.views=[{rightToLeft:true}];
+    exMerge(ks,1,1,1,10,`تقرير الحوافز الشهرية – KPIs  |  نورة لتعليم القيادة`,{size:14,height:38});
+    exMerge(ks,2,1,2,10,`السنة: ${year}  |  المشرف: محمد إبراهيم الجمعان`,{bold:false,bg:EX.TEAL,size:10,height:22});
+    exMerge(ks,4,1,4,10,'📊 ملخص الحوافز',{bg:EX.TEAL,size:12,height:28});
+
+    const sheetNames = Object.keys(incData);
+    let row=5;
+    sheetNames.forEach(name=>{
+      const rows=(incData[name]||[]).slice(3).filter(r=>r.some(v=>String(v).trim()));
+      ws_kpi_row(ks,row,name,rows.length,EX.TEAL2); row++;
+    });
+    [20,8,8,10,10,20,8,8,10,10].forEach((w,i)=>{ks.getColumn(i+1).width=w;});
+
+    // شيتات البيانات
+    const sheetColors={
+      'المقيمون والفاحصون رجال':EX.DARK,
+      'المقيمون والفاحصون نساء':'5299E0',
+      'تقرير المبيعات':EX.GREEN,
+      'الفحص الطبي':'8B4513',
+      'المدربون رجال':EX.DARK,
+      'المدربون نساء':'5299E0',
+      'الدراجات النارية':EX.ORANGE,
+    };
+
+    sheetNames.forEach(name=>{
+      if(name.includes('KPI')||name.includes('kpi')) return;
+      const sheetData = incData[name]||[];
+      if(sheetData.length<3) return;
+      const headers = (sheetData[2]||[]).filter(h=>String(h).trim());
+      const dataRows = sheetData.slice(3).filter(r=>r.some(v=>String(v).trim()));
+      if(!headers.length) return;
+
+      const ws=wb.addWorksheet(name); ws.views=[{rightToLeft:true}];
+      const bg=sheetColors[name]||EX.DARK;
+      exMerge(ws,1,1,1,headers.length,`${name}  |  نورة لتعليم القيادة`,{bg,size:13,height:34});
+      exMerge(ws,2,1,2,headers.length,`إجمالي السجلات: ${dataRows.length}  |  السنة: ${year}`,{bold:false,bg:EX.TEAL,size:10,height:22});
+      exHeader(ws,3,headers,bg);
+
+      dataRows.forEach((row,ri)=>{
+        const r=4+ri; const rowBg=ri%2===0?EX.ALT1:'FFFFFF';
+        headers.forEach((h,hi)=>{
+          const val=row[hi]||'';
+          exCell(ws,r,hi+1,val,{bg:rowBg,h:hi===0?'right':'center'});
+        });
+        ws.getRow(r).height=20;
+      });
+
+      // عرض الأعمدة
+      headers.forEach((h,i)=>{
+        const w=String(h).includes('ملاحظات')?28:String(h).includes('المسمى')||String(h).includes('الاسم')?24:12;
+        ws.getColumn(i+1).width=w;
+      });
+      ws.views=[{state:'frozen',ySplit:3,rightToLeft:true}];
+    });
+
+    await saveExcelJS(wb,`تقرير_الحوافز_الشهرية_${year}.xlsx`);
+    toast('✅ تم تصدير تقرير الحوافز بكل الشيتات');
+  }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تصدير Excel منسّق';} }
+}
+
+// تحميل القالب الجاهز
+async function downloadIncTemplate(){
+  if(typeof ExcelJS==='undefined'){toast('❌');return;}
+  const btn=event?.target; if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try{
+    const wb=new ExcelJS.Workbook(); wb.views=[{rightToLeft:true}];
+    const sheets=[
+      {name:'KPIs – الحوافز', cols:[]},
+      {name:'المقيمون والفاحصون رجال', cols:['الاسم','الرقم الوظيفي','المسمى الوظيفي','تقييم إدارة العمليات','الإجازة','الاستئذان','الغياب','ملاحظات الموارد البشرية']},
+      {name:'المقيمون والفاحصون نساء', cols:['الاسم','الرقم الوظيفي','المسمى الوظيفي','تقييم إدارة العمليات','الإجازة','الاستئذان','الغياب','ملاحظات الموارد البشرية']},
+      {name:'تقرير المبيعات', cols:['الاسم','الرقم الوظيفي','المسمى الوظيفي','عدد العملاء الذين تم تسجيلهم']},
+      {name:'الفحص الطبي', cols:['الاسم','الرقم الوظيفي','المسمى الوظيفي','عدد العملاء المسجلين']},
+      {name:'المدربون رجال', cols:['الاسم','الرقم الوظيفي','تاريخ التعيين','المسمى الوظيفي','ZONE','المخالفات','الاستئذان','التأخير','الإجازة','الغياب','ملاحظات إدارة الجودة','ملاحظات الموارد البشرية']},
+      {name:'المدربون نساء', cols:['الاسم','الرقم الوظيفي','تاريخ التعيين','المسمى الوظيفي','ZONE','المخالفات','الاستئذان','التأخير','الإجازة','الغياب','ملاحظات إدارة الجودة','ملاحظات الموارد البشرية']},
+      {name:'الدراجات النارية', cols:['الاسم','الرقم الوظيفي','تاريخ التعيين','المسمى الوظيفي','ZONE','المخالفات','الاستئذان','التأخير','الإجازة','الغياب','ملاحظات إدارة الجودة','ملاحظات الموارد البشرية']},
+    ];
+    const year=new Date().getFullYear();
+    sheets.forEach(({name,cols})=>{
+      const ws=wb.addWorksheet(name); ws.views=[{rightToLeft:true}];
+      if(!cols.length){
+        exMerge(ws,1,1,1,10,`تقرير الحوافز الشهرية – KPIs  |  نورة لتعليم القيادة`,{size:14,height:38});
+        exMerge(ws,2,1,2,10,'الشهر: _________   |   السنة: _________',{bold:false,bg:EX.TEAL,size:10,height:22});
+        return;
+      }
+      exMerge(ws,1,1,1,cols.length,`${name}  |  نورة لتعليم القيادة`,{size:13,height:34});
+      exMerge(ws,2,1,2,cols.length,'الشهر: _________   |   السنة: _________',{bold:false,bg:EX.TEAL,size:10,height:22});
+      exHeader(ws,3,cols);
+      for(let r=4;r<34;r++){
+        const bg=r%2===0?EX.ALT1:'FFFFFF';
+        cols.forEach((_,i)=>{
+          const c=ws.getCell(r,i+1); c.fill=exFill(bg); c.border=exBd(); c.alignment=exAlign(); 
+        });
+        ws.getRow(r).height=22;
+      }
+      cols.forEach((h,i)=>{ ws.getColumn(i+1).width=h.includes('ملاحظات')?28:h.includes('المسمى')||h.includes('الاسم')?24:12; });
+      ws.views=[{state:'frozen',ySplit:3,rightToLeft:true}];
+    });
+    await saveExcelJS(wb,`قالب_الحوافز_الشهرية_${year}.xlsx`);
+    toast('✅ تم تحميل القالب');
+  }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تحميل القالب الجاهز';} }
 }
 
 // TOP RATED TRAINERS SECTION
