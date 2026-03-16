@@ -4379,6 +4379,18 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div style="height:30px;"></div>
     <div style="display:flex;gap:10px;margin-top:10px;">
     <button class="back-btn" onclick="goHome()" style="flex:1;">← رجوع / Back</button>
+
+    <!-- ══ من هو متصل بالتطبيق؟ ══ -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:900;color:var(--accent);">🔐 المتصلون بالتطبيق</div>
+        <button onclick="renderUserSessions()" style="background:rgba(0,200,180,0.1);border:1px solid rgba(0,200,180,0.25);border-radius:8px;padding:4px 10px;font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;cursor:pointer;color:var(--accent);">🔄 تحديث</button>
+      </div>
+      <div id="userSessionsList">
+        <div style="color:var(--text-dim);font-size:11px;text-align:center;padding:10px;">اضغط تحديث لعرض المتصلين</div>
+      </div>
+    </div>
+
     <button onclick="showMyLogInRecords('building')" style="flex:1;padding:10px;background:rgba(82,153,224,0.1);border:1px solid rgba(82,153,224,0.2);color:#5299E0;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">📝 سجلي</button>
   </div>
   </div>
@@ -4624,6 +4636,8 @@ function doLogin(){
   const usr=USERS[u];
   if(usr&&usr.password===p){
     currentUser={username:u,...usr};hideLM();updateNav();
+    recordSession(u, usr.name).then(()=>{});
+    startHeartbeat();
     loadActiveStaffHome();
     renderHomeWidgets();
     renderDailyBulletin().catch(()=>{});
@@ -4638,7 +4652,9 @@ function doLogin(){
     }
   }else{document.getElementById('lErr').style.display='block';}
 }
-function doLogout(){currentUser=null;updateNav();goHome();}
+function doLogout(){recordLogout().then(()=>{});
+  stopHeartbeat();
+  currentUser=null;updateNav();goHome();}
 
 // ── THEME TOGGLE ──
 function toggleTheme(){
@@ -4801,6 +4817,7 @@ function openSec(type){
     const today=new Date().toISOString().split('T')[0];
     document.getElementById('attDate').value=today;
     loadAttendFromSupabase().then(()=>{renderAttendList();renderAttendKPIs();});
+    setTimeout(renderUserSessions, 300);
   }else{
     document.getElementById('page-facility').classList.add('active');autoObs('fObs');
   }
@@ -9511,6 +9528,103 @@ function renderBuildingDash(){
   const recEl=document.getElementById('dashBldRec');
   if(recEl) recEl.innerHTML=recs.map(r=>`<div class="rec-item"><div class="rec-dot ${r.dot}"></div><div>${r.text}</div></div>`).join('');
 }
+// ════════════════════════════════════
+// USER SESSIONS — تتبع الاتصال
+// ════════════════════════════════════
+let heartbeatInterval = null;
+
+async function recordSession(username, name){
+  const now = new Date().toISOString();
+  const deviceInfo = navigator.userAgent.includes('Mobile') ? '📱 موبايل' : '💻 كمبيوتر';
+  try {
+    // Upsert في Supabase
+    await db.from('user_sessions').upsert({
+      username,
+      name,
+      last_login: now,
+      last_active: now,
+      device: deviceInfo,
+      is_online: true
+    }, { onConflict: 'username' });
+    // حفظ في localStorage للسرعة
+    localStorage.setItem('session_user', JSON.stringify({username, name, device:deviceInfo, last_login:now}));
+  } catch(e){ console.log('Session record error:', e); }
+}
+
+async function updateHeartbeat(){
+  if(!currentUser) return;
+  const now = new Date().toISOString();
+  try {
+    await db.from('user_sessions').update({ last_active: now, is_online: true })
+      .eq('username', currentUser.username);
+  } catch(e){}
+}
+
+async function recordLogout(){
+  if(!currentUser) return;
+  try {
+    await db.from('user_sessions').update({ is_online: false })
+      .eq('username', currentUser.username);
+    localStorage.removeItem('session_user');
+  } catch(e){}
+}
+
+function startHeartbeat(){
+  if(heartbeatInterval) clearInterval(heartbeatInterval);
+  heartbeatInterval = setInterval(updateHeartbeat, 3 * 60 * 1000); // كل 3 دقائق
+}
+
+function stopHeartbeat(){
+  if(heartbeatInterval) clearInterval(heartbeatInterval);
+  heartbeatInterval = null;
+}
+
+// عرض جلسات المستخدمين في كرت الحضور
+async function renderUserSessions(){
+  const el = document.getElementById('userSessionsList');
+  if(!el) return;
+  el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">جاري التحميل...</div>';
+  try {
+    const { data } = await db.from('user_sessions').select('*').order('last_active', { ascending: false });
+    const sessions = data || [];
+    const now = new Date();
+    
+    if(!sessions.length){
+      el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;text-align:center;padding:10px;">لا توجد جلسات مسجلة</div>';
+      return;
+    }
+
+    el.innerHTML = sessions.map(s => {
+      const lastActive = new Date(s.last_active);
+      const diffMin = Math.floor((now - lastActive) / 60000);
+      const isOnline = s.is_online && diffMin < 10; // نشط خلال 10 دقائق
+      const timeAgo = diffMin < 1 ? 'الآن' : diffMin < 60 ? `منذ ${diffMin} د` : diffMin < 1440 ? `منذ ${Math.floor(diffMin/60)} س` : `منذ ${Math.floor(diffMin/1440)} ي`;
+      const loginTime = new Date(s.last_login).toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'});
+      const loginDate = new Date(s.last_login).toLocaleDateString('ar-SA', {day:'numeric', month:'short'});
+
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--border);margin-bottom:8px;transition:all .2s;">
+        <div style="position:relative;flex-shrink:0;">
+          <div style="width:38px;height:38px;border-radius:50%;background:${isOnline?'linear-gradient(135deg,#00C8B4,#00897A)':'linear-gradient(135deg,#6B8C95,#4A6470)'};display:flex;align-items:center;justify-content:center;font-size:16px;">
+            ${s.name?.includes('شهد')||s.name?.includes('سمية')||s.name?.includes('امجاد')?'👩':'👨'}
+          </div>
+          <div style="position:absolute;bottom:0;left:0;width:12px;height:12px;border-radius:50%;background:${isOnline?'#00C84A':'#6B8C95'};border:2px solid var(--card);"></div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:1px;">${s.device} · آخر نشاط: ${timeAgo}</div>
+        </div>
+        <div style="text-align:left;flex-shrink:0;">
+          <div style="font-size:10px;font-weight:700;color:${isOnline?'#00C84A':'var(--text-dim)'};">${isOnline?'🟢 متصل':'⚫ غير متصل'}</div>
+          <div style="font-size:9px;color:var(--text-dim);margin-top:1px;">دخل: ${loginTime}</div>
+          <div style="font-size:9px;color:var(--text-dim);">${loginDate}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){
+    el.innerHTML = `<div style="color:var(--red);font-size:11px;">خطأ في التحميل</div>`;
+  }
+}
+
 loadSummaryWidgets();
 setDT();updateNav();
 setTimeout(()=>{ if(currentUser){loadActiveStaffHome();renderHomeWidgets();renderDailyBulletin();showBulletinPopup();} },300);
