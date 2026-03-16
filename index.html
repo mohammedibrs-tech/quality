@@ -666,6 +666,107 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 .phone-step.available:hover{background:rgba(0,168,150,0.2);transform:scale(1.05);}
 .phone-step.locked{background:rgba(0,0,0,0.05);border-color:rgba(0,0,0,0.1);color:var(--text-dim);cursor:not-allowed;opacity:0.5;}
 .phone-step.selected{background:var(--accent);border-color:var(--accent);color:#fff;transform:scale(1.08);}
+
+/* ══ APPLE ARCADE CARDS ══ */
+.section-card{
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  gap:14px !important;
+  padding:14px 16px !important;
+  border-radius:16px !important;
+  min-height:66px !important;
+  border:none !important;
+  box-shadow:0 4px 16px rgba(0,0,0,0.18) !important;
+  transition:transform .15s ease, opacity .15s ease !important;
+  text-align:right !important;
+}
+.section-card:active{transform:scale(0.97) !important;opacity:0.92 !important;}
+
+/* Shine effect */
+.section-card::after{
+  content:'';position:absolute;top:0;left:-60%;
+  width:40%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
+  transform:skewX(-15deg);
+  animation:cardShine 4s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes cardShine{0%{left:-60%}65%,100%{left:130%}}
+.section-card:nth-child(2n)::after{animation-delay:1.5s;}
+.section-card:nth-child(3n)::after{animation-delay:3s;}
+
+/* card-col للكروت الزوجية */
+.section-card.card-col{
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  min-height:96px !important;
+  padding:14px !important;
+}
+.section-card.card-col .s-arrow{display:none !important;}
+.section-card.full-w .s-text{text-align:center !important;flex:1;}
+.section-card.full-w .s-title-ar,
+.section-card.full-w .s-title-en{text-align:center !important;}
+
+/* ألوان الكروت */
+.section-card.female   {background:linear-gradient(to right,#E74C3C,#922B21) !important;}
+.section-card.male     {background:linear-gradient(to right,#2E86C1,#1A5276) !important;}
+.section-card.survey   {background:linear-gradient(to right,#00C9A7,#007A6E) !important;}
+.section-card.attend   {background:linear-gradient(to right,#00C8B4,#00897A) !important;}
+.section-card.facility {background:linear-gradient(to right,#27AE60,#1A6B3A) !important;}
+.section-card.building {background:linear-gradient(to right,#4A6FA5,#2C3E6B) !important;}
+.section-card.ops      {background:linear-gradient(to right,#7D3C98,#4A235A) !important;}
+.section-card.incentives{background:linear-gradient(to right,#D4AC0D,#9A7A00) !important;}
+.section-card.sales    {background:linear-gradient(to right,#8E44AD,#5B2C6F) !important;}
+.section-card.rating   {background:linear-gradient(to right,#CA6F1E,#7D4E0A) !important;}
+.section-card.archive  {background:linear-gradient(to right,#4A6FA5,#2C3E50) !important;}
+.section-card.vref     {background:linear-gradient(to right,#27AE60,#1A3A2A) !important;}
+[data-theme="dark"] .section-card{filter:brightness(0.82);}
+[data-theme="light"] .section-card{filter:none;}
+
+/* النص داخل الكروت */
+.s-icon{font-size:28px !important;flex-shrink:0 !important;width:44px !important;text-align:center !important;line-height:1 !important;pointer-events:none !important;background:none !important;height:auto !important;border-radius:0 !important;margin:0 !important;display:block !important;}
+.section-card.card-col .s-icon{margin-bottom:8px !important;}
+.s-text{flex:1 !important;min-width:0 !important;text-align:right !important;pointer-events:none !important;}
+.s-title-ar{font-size:14px !important;font-weight:900 !important;color:#fff !important;margin-bottom:2px !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;}
+.s-title-en{font-size:10px !important;color:rgba(255,255,255,0.75) !important;font-weight:600 !important;text-transform:uppercase !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;}
+.s-desc{font-size:10px !important;color:rgba(255,255,255,0.6) !important;}
+.s-arrow{font-size:16px !important;color:rgba(255,255,255,0.55) !important;flex-shrink:0 !important;pointer-events:none !important;}
+.s-badge{position:absolute !important;top:8px !important;left:12px !important;background:rgba(255,255,255,0.2) !important;border-radius:20px !important;padding:2px 8px !important;font-size:9px !important;color:#fff !important;font-weight:700 !important;}
+
+/* HOME LAYOUT */
+.home-sections{display:flex;flex-direction:column;gap:10px;padding:0 14px;}
+.cards-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sec-group-label{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;padding:6px 2px 2px;}
+
+/* Desktop 2-col */
+@media(min-width:768px){
+  .home-sections{display:grid !important;grid-template-columns:1fr 1fr;gap:14px;padding:0 24px !important;}
+  .home-sections .sec-group-label,
+  .home-sections .cards-row-2,
+  .home-sections .section-card.full-w{grid-column:1/-1;}
+}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
+.kpi-card{border-radius:14px;padding:14px 16px;position:relative;overflow:hidden;}
+.kpi-card::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);transform:skewX(-15deg);animation:cardShine 4s ease-in-out infinite;pointer-events:none;}
+.kpi-card.kpi-teal  {background:linear-gradient(135deg,#00C8B4,#00897A);box-shadow:0 3px 12px rgba(0,200,180,0.3);}
+.kpi-card.kpi-red   {background:linear-gradient(135deg,#E74C3C,#922B21);box-shadow:0 3px 12px rgba(231,76,60,0.3);}
+.kpi-card.kpi-blue  {background:linear-gradient(135deg,#2E86C1,#1A5276);box-shadow:0 3px 12px rgba(46,134,193,0.3);}
+.kpi-card.kpi-purple{background:linear-gradient(135deg,#7D3C98,#4A235A);box-shadow:0 3px 12px rgba(125,60,152,0.3);}
+.kpi-card.kpi-gold  {background:linear-gradient(135deg,#D4AC0D,#9A7A00);box-shadow:0 3px 12px rgba(212,172,13,0.3);}
+.kpi-card.kpi-green {background:linear-gradient(135deg,#27AE60,#1A6B3A);box-shadow:0 3px 12px rgba(39,174,96,0.3);}
+.kpi-card.kpi-dark  {background:linear-gradient(135deg,#1E3A5F,#0D1F2D);box-shadow:0 3px 12px rgba(30,58,95,0.4);}
+.kpi-card.kpi-orange{background:linear-gradient(135deg,#CA6F1E,#7D4E0A);box-shadow:0 3px 12px rgba(202,111,30,0.3);}
+.kpi-val{font-size:24px;font-weight:900;color:#fff;line-height:1;margin-bottom:4px;}
+.kpi-lbl{font-size:10px;color:rgba(255,255,255,0.82);font-weight:600;}
+
+/* أزرار محسّنة */
+.submit-btn{background:linear-gradient(135deg,#00C8B4,#00897A) !important;color:#fff !important;border-radius:12px !important;box-shadow:0 4px 14px rgba(0,200,180,0.35) !important;border:none !important;}
+.export-btn{border:1.5px solid rgba(0,200,180,0.4) !important;background:rgba(0,200,180,0.08) !important;color:var(--accent) !important;border-radius:10px !important;}
+.stab{border-radius:10px !important;}
+.stab.active{background:linear-gradient(135deg,var(--accent),var(--accent2)) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 3px 12px rgba(0,200,180,0.3) !important;}
 </style>
 </head>
 <body>
@@ -694,241 +795,100 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <p>اختر القسم المناسب — Select a section</p>
     <div class="hero-line"></div>
   </div>
-  <div class="sections-grid">
-    <!-- Weekly Tasks Card — TOP -->
-    <div class="section-card full-w" onclick="showWeeklyTasks()" style="background:linear-gradient(135deg,#1A2E35,#0D4A45);border:none;">
-      <div style="display:flex;align-items:center;justify-content:center;gap:14px;text-align:center;">
-        <div class="s-icon" style="flex-shrink:0;background:rgba(255,255,255,0.12);font-size:24px;width:52px;height:52px;">📅</div>
-        <div>
-          <div class="s-title-ar" style="color:#FFFFFF;font-size:15px;">المهام الأسبوعية لعضو الجودة</div>
-          <div class="s-title-en" style="color:rgba(255,255,255,0.6);">WEEKLY QUALITY MEMBER TASKS — اضغط للعرض</div>
-        </div>
-      </div>
-    </div>
-    <div class="section-card female" onclick="showSection('female')">
-      <div class="s-icon">👩</div>
-      <div class="s-title-ar">رصد المخالفات</div>
-      <div class="s-title-en">VIOLATIONS — FEMALE</div>
-      <div class="s-desc">القسم النسائي</div>
-    </div>
-    <div class="section-card male" onclick="showSection('male')">
-      <div class="s-icon">👨</div>
-      <div class="s-title-ar">رصد المخالفات</div>
-      <div class="s-title-en">VIOLATIONS — MALE</div>
-      <div class="s-desc">القسم الرجالي</div>
-    </div>
-    <div class="section-card survey" onclick="showSection('survey')">
-      <div class="s-icon">⭐</div>
-      <div class="s-title-ar">استطلاع رضا العملاء</div>
-      <div class="s-title-en">CUSTOMER SATISFACTION</div>
-      <div class="s-desc">تقييم 1-5 نجوم | Rating 1-5</div>
-    </div>
-    <div class="section-card facility" onclick="showSection('facility')">
-      <div class="s-icon">🔧</div>
-      <div class="s-title-ar">ملاحظات المرافق</div>
-      <div class="s-title-en">FACILITY REPORTS</div>
-      <div class="s-desc">المشاكل والنظافة | Issues & Cleanliness</div>
-    </div>
-    <div class="section-card building" onclick="showSection('building')">
-      <div class="s-icon">🏢</div>
-      <div class="s-title-ar">تقرير المبنى الرئيسي</div>
-      <div class="s-title-en">MAIN BUILDING REPORT</div>
-      <div class="s-desc">الاستقبال والقاعات | Reception & Halls</div>
-    </div>
-    <div class="section-card sales" onclick="adminOnly('sales')">
-      <div class="s-icon">💼</div>
-      <div class="s-title-ar">تقرير قسم المبيعات <span style="font-size:11px;">🔒</span></div>
-      <div class="s-title-en">SALES DEPARTMENT REPORT</div>
-      <div class="s-desc">للإدارة فقط | Admin Only</div>
-    </div>
-    <div class="section-card ops" onclick="adminOnly('ops')">
-      <div class="s-icon">⚙️</div>
-      <div class="s-title-ar">كفاءة التشغيل <span style="font-size:11px;">🔒</span></div>
-      <div class="s-title-en">OPERATIONAL EFFICIENCY</div>
-      <div class="s-desc">للإدارة فقط | Admin Only</div>
-    </div>
-    <div class="section-card incentives" onclick="adminOnly('incentives')">
-      <div class="s-icon">🏆</div>
-      <div class="s-title-ar">الحوافز الشهرية <span style="font-size:11px;">🔒</span></div>
-      <div class="s-title-en">MONTHLY INCENTIVES</div>
-      <div class="s-desc">للإدارة فقط | Admin Only</div>
-    </div>
-    <!-- Archive Card — Admin Only -->
-    <div class="section-card archive" onclick="adminOnly('archive')">
-      <div class="s-icon">🗂️</div>
-      <div class="s-title-ar">الأرشيف <span style="font-size:11px;">🔒</span></div>
-      <div class="s-title-en">ARCHIVE</div>
-      <div class="s-desc">للمدير فقط | Admin Only</div>
-    </div>
-    <!-- Top Rated Trainers Card — Admin Only -->
-    <div class="section-card rating" onclick="adminOnly('rating')">
-      <div class="s-icon">🌟</div>
-      <div class="s-title-ar">الأعلى بالتقييم <span style="font-size:11px;">🔒</span></div>
-      <div class="s-title-en">TOP RATED TRAINERS</div>
-      <div class="s-desc">للمدير فقط | Admin Only</div>
-    </div>
-    <!-- Staff Attendance Card — Admin Only -->
-    <div class="section-card attend" onclick="adminOnly('attend')">
-      <div class="s-icon">🕐</div>
-      <div class="s-title-ar">الحضور والانصراف <span style="font-size:11px;">🔒</span></div>
-      <div class="s-title-en">STAFF ATTENDANCE</div>
-      <div class="s-desc">للمدير فقط | Admin Only</div>
-    </div>
-    <!-- Violations Reference Card -->
-    <div class="section-card vref" onclick="showViolationsRef()">
+  <div class="home-sections">
+    <div class="section-card full-w" onclick="showWeeklyTasks()" style="background:linear-gradient(to right,#00C8B4,#0D3040);">
       <div class="s-icon">📋</div>
-      <div class="s-title-ar">جدول المخالفات وتصنيفها</div>
-      <div class="s-title-en">VIOLATIONS TABLE</div>
-      <div class="s-desc">اضغط للعرض</div>
+      <div class="s-text"><div class="s-title-ar" style="text-align:center;">جدول مهامي الأسبوعي</div><div class="s-title-en" style="text-align:center;">MY WEEKLY SCHEDULE</div></div>
+      <div class="s-arrow">›</div>
     </div>
-
+    <div class="sec-group-label">رصد المخالفات</div>
+    <div class="cards-row-2">
+      <div class="section-card female card-col" onclick="showSection('female')">
+        <div class="s-icon">👩</div>
+        <div class="s-text"><div class="s-title-ar">القسم النسائي</div><div class="s-title-en">FEMALE</div></div>
+      </div>
+      <div class="section-card male card-col" onclick="showSection('male')">
+        <div class="s-icon">👨</div>
+        <div class="s-text"><div class="s-title-ar">القسم الرجالي</div><div class="s-title-en">MALE</div></div>
+      </div>
+    </div>
+    <div class="sec-group-label">الخدمات والتقارير</div>
+    <div class="section-card survey" onclick="showSection('survey')"><div class="s-icon">⭐</div><div class="s-text"><div class="s-title-ar">استطلاع رضا العملاء</div><div class="s-title-en">CUSTOMER SATISFACTION SURVEY</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card attend" onclick="adminOnly('attend')"><div class="s-icon">🕐</div><div class="s-text"><div class="s-title-ar">الحضور والانصراف</div><div class="s-title-en">ATTENDANCE &amp; DEPARTURE</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card facility" onclick="showSection('facility')"><div class="s-icon">🔧</div><div class="s-text"><div class="s-title-ar">ملاحظات المرافق</div><div class="s-title-en">FACILITY REPORTS</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card building" onclick="showSection('building')"><div class="s-icon">🏢</div><div class="s-text"><div class="s-title-ar">تقرير المبنى الرئيسي</div><div class="s-title-en">MAIN BUILDING REPORT</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card ops" onclick="adminOnly('ops')"><div class="s-icon">⚙️</div><div class="s-text"><div class="s-title-ar">كفاءة التشغيل</div><div class="s-title-en">OPERATIONAL EFFICIENCY</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card incentives" onclick="adminOnly('incentives')"><div class="s-icon">🏆</div><div class="s-text"><div class="s-title-ar">الحوافز الشهرية</div><div class="s-title-en">MONTHLY INCENTIVES</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card sales" onclick="adminOnly('sales')"><div class="s-icon">💼</div><div class="s-text"><div class="s-title-ar">قسم المبيعات</div><div class="s-title-en">SALES DEPARTMENT</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon">🌟</div><div class="s-text"><div class="s-title-ar">الأعلى بالتقييم</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon">🗂️</div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card vref" onclick="showViolationsRef()"><div class="s-icon">📋</div><div class="s-text"><div class="s-title-ar">جدول المخالفات وتصنيفها</div><div class="s-title-en">VIOLATIONS TABLE</div></div><div class="s-arrow">›</div></div>
   </div>
 
-<!-- PAGE: MY DAILY LOG -->
-<div id="page-mylog" class="page">
-  <div class="container-wide">
-    <div class="page-header">
-      <div class="p-icon" style="background:rgba(82,153,224,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">📝</div>
-      <h1>سجلي اليومي</h1>
-      <div class="sub">MY DAILY LOG — آخر سجلاتك</div>
+  <!-- ══ DAILY BULLETIN ══ -->
+  <div style="padding:0 14px 8px;">
+    <div id="dailyBulletin" style="display:none;border-radius:18px;overflow:hidden;background:linear-gradient(135deg,#E8F8F6,#D0EDE9);border:1px solid rgba(0,168,150,0.2);box-shadow:0 3px 14px rgba(0,168,150,0.15);padding:14px 16px;cursor:pointer;" onclick="showBulletinPopup()">
+      <div style="font-size:11px;font-weight:700;color:#007A6E;letter-spacing:1px;margin-bottom:4px;">📢 النشرة اليومية</div>
+      <div id="dailyBulletinSummary" style="font-size:13px;font-weight:900;color:#1A3A35;"></div>
     </div>
-
-    <!-- Tabs -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">
-      <div onclick="setMyLogTab('violations')" id="mylogTab_violations" style="background:var(--accent);color:#fff;border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;transition:all .2s;">
-        <div style="font-size:24px;margin-bottom:6px;">🚨</div>
-        <div style="font-size:13px;font-weight:900;">رصد المخالفات</div>
-        <div style="font-size:10px;opacity:.8;">VIOLATIONS</div>
-      </div>
-      <div onclick="setMyLogTab('facilities')" id="mylogTab_facilities" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;transition:all .2s;">
-        <div style="font-size:24px;margin-bottom:6px;">🔧</div>
-        <div style="font-size:13px;font-weight:900;">ملاحظات المرافق</div>
-        <div style="font-size:10px;color:var(--text-dim);">FACILITY REPORTS</div>
-      </div>
-      <div onclick="setMyLogTab('building')" id="mylogTab_building" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;transition:all .2s;">
-        <div style="font-size:24px;margin-bottom:6px;">🏢</div>
-        <div style="font-size:13px;font-weight:900;">تقرير المبنى</div>
-        <div style="font-size:10px;color:var(--text-dim);">BUILDING REPORT</div>
-      </div>
-    </div>
-
-    <div id="mylogContent" style="min-height:200px;"></div>
-
-    <div style="height:30px;"></div>
-    <button class="back-btn" onclick="goHome()">← رجوع / Back</button>
   </div>
-</div>
 
-<!-- WEEKLY TASKS MODAL -->
-<div id="weeklyTasksModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);z-index:9200;overflow-y:auto;padding:20px 12px;">
-  <div style="background:var(--card);border-radius:20px;max-width:700px;margin:0 auto;padding:24px 20px;position:relative;">
-    <button onclick="document.getElementById('weeklyTasksModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
-
-    <!-- Notice Banner -->
-    <div style="background:linear-gradient(135deg,#00A896,#0D4A45);border-radius:14px;padding:16px 18px;margin-bottom:20px;text-align:center;">
-      <div style="font-size:20px;margin-bottom:6px;">📌</div>
-      <div style="font-size:13px;font-weight:900;color:#FFFFFF;margin-bottom:6px;">تنويه مهم</div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.88);line-height:1.7;">
-        المهام اليومية تدور حول الموظفين يومياً<br>
-        <strong>(ملاحظات المرافق والنظافة) | (تقرير المبنى الرئيسي) | (استطلاع رضا العملاء) | (متابعة مبنى التدريب العملي)</strong><br>
-        يرجى متابعة مهامك بشكل دوري
-      </div>
-    </div>
-
-    <!-- Day + tabs row -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-      <div id="wtDayBadge" style="font-size:11px;font-weight:700;background:var(--accent);color:#fff;padding:5px 14px;border-radius:20px;"></div>
-    </div>
-
-    <!-- Admin staff tabs -->
-    <div id="wtTabsRow" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;"></div>
-
-    <!-- Content -->
-    <div id="wtBody"></div>
-  </div>
-</div>
-
-  <!-- ══ DAILY BULLETIN BANNER ══ -->
-  <div id="dailyBulletin" style="max-width:780px;margin:0 auto;padding:0 18px 12px;position:relative;z-index:1;display:none;"></div>
-
-  <!-- Active Staff Widget -->
-  <div style="max-width:780px;margin:0 auto;padding:0 18px 16px;position:relative;z-index:1;">
-    <div style="background:#FFFFFF;border:1px solid rgba(0,168,150,0.15);border-radius:18px;padding:18px 20px;box-shadow:0 2px 12px rgba(0,168,150,0.07);">
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent);margin-bottom:12px;">⚡ أكثر الموظفين نشاطاً بالرصد / MOST ACTIVE OBSERVERS</div>
-      <div id="homeActiveStaff" style="display:flex;gap:9px;flex-wrap:wrap;">
-        <div style="font-size:11px;color:var(--text-dim);">جاري التحميل...</div>
+  <!-- ══ Active Staff ══ -->
+  <div style="padding:0 14px 12px;">
+    <div style="background:linear-gradient(to right,#00C8B4,#00897A);border-radius:18px;padding:14px 16px;box-shadow:0 4px 16px rgba(0,200,180,0.3);position:relative;overflow:hidden;">
+      <div style="font-size:11px;font-weight:700;color:#fff;letter-spacing:1px;margin-bottom:10px;">⚡ أكثر الموظفين نشاطاً بالرصد</div>
+      <div id="homeActiveStaff" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.8);">جاري التحميل...</div>
       </div>
     </div>
   </div>
 
-  <!-- ══ QUICK SUMMARY WIDGETS ══ -->
-  <div style="max-width:780px;margin:0 auto;padding:0 18px 40px;position:relative;z-index:1;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-      📊 ملخص الشهر الحالي / THIS MONTH AT A GLANCE
-      <span id="homeMonth" style="background:rgba(0,200,180,0.1);border:1px solid rgba(0,200,180,0.2);padding:2px 10px;border-radius:12px;font-size:9px;letter-spacing:1px;"></span>
+  <!-- ══ ملخص الشهر ══ -->
+  <div style="padding:0 14px 20px;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:10px;text-transform:uppercase;display:flex;align-items:center;gap:8px;">
+      📊 ملخص الشهر الحالي
+      <span id="homeMonth" style="background:rgba(0,200,180,0.12);border:1px solid rgba(0,200,180,0.2);padding:2px 10px;border-radius:12px;font-size:9px;color:var(--accent);"></span>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-
-      <!-- MALE VIOLATIONS SUMMARY -->
-      <div class="summary-widget" id="swMale">
-        <div class="sw-header male-h">
-          <span class="sw-icon">👨</span>
-          <div>
-            <div class="sw-title">مخالفات الرجالي</div>
-            <div class="sw-sub">Male Violations</div>
-          </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div id="swFemale" onclick="showSection('female')" style="display:flex;flex-direction:row;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#E74C3C,#922B21);box-shadow:0 4px 16px rgba(231,76,60,0.35);transition:transform .15s;position:relative;">
+        <div style="flex:0 0 60px;height:70px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(0,0,0,0.15);">👩</div>
+        <div style="flex:1;padding:0 10px;text-align:right;">
+          <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:3px;">مخالفات النسائي</div>
+          <div id="swFemaleTop" style="font-size:10px;color:rgba(255,255,255,0.85);font-weight:600;">—</div>
+          <div id="swFemaleTrend" style="font-size:9px;color:rgba(255,255,255,0.65);">هذا الشهر</div>
         </div>
-        <div class="sw-body">
-          <div class="sw-big" id="swMaleCount">-</div>
-          <div class="sw-label">هذا الشهر</div>
-          <div class="sw-divider"></div>
-          <div class="sw-micro-label">الأكثر تكراراً</div>
-          <div class="sw-repeat" id="swMaleTop">-</div>
+        <div style="flex:0 0 48px;text-align:center;">
+          <div id="swFemaleCount" style="font-size:22px;font-weight:900;color:#fff;">0</div>
+          <div style="font-size:8px;color:rgba(255,255,255,0.65);">مخالفة</div>
         </div>
-        <div class="sw-footer male-f" id="swMaleTrend"></div>
+        <div style="flex:0 0 24px;display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(255,255,255,0.5);">›</div>
       </div>
-
-      <!-- FEMALE VIOLATIONS SUMMARY -->
-      <div class="summary-widget" id="swFemale">
-        <div class="sw-header female-h">
-          <span class="sw-icon">👩</span>
-          <div>
-            <div class="sw-title">مخالفات النسائي</div>
-            <div class="sw-sub">Female Violations</div>
-          </div>
+      <div id="swMale" onclick="showSection('male')" style="display:flex;flex-direction:row;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#2E86C1,#1A5276);box-shadow:0 4px 16px rgba(46,134,193,0.35);transition:transform .15s;position:relative;">
+        <div style="flex:0 0 60px;height:70px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(0,0,0,0.15);">👨</div>
+        <div style="flex:1;padding:0 10px;text-align:right;">
+          <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:3px;">مخالفات الرجالي</div>
+          <div id="swMaleTop" style="font-size:10px;color:rgba(255,255,255,0.85);font-weight:600;">—</div>
+          <div id="swMaleTrend" style="font-size:9px;color:rgba(255,255,255,0.65);">هذا الشهر</div>
         </div>
-        <div class="sw-body">
-          <div class="sw-big" id="swFemaleCount">-</div>
-          <div class="sw-label">هذا الشهر</div>
-          <div class="sw-divider"></div>
-          <div class="sw-micro-label">الأكثر تكراراً</div>
-          <div class="sw-repeat" id="swFemaleTop">-</div>
+        <div style="flex:0 0 48px;text-align:center;">
+          <div id="swMaleCount" style="font-size:22px;font-weight:900;color:#fff;">0</div>
+          <div style="font-size:8px;color:rgba(255,255,255,0.65);">مخالفة</div>
         </div>
-        <div class="sw-footer female-f" id="swFemaleTrend"></div>
+        <div style="flex:0 0 24px;display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(255,255,255,0.5);">›</div>
       </div>
-
-      <!-- OPS EFFICIENCY SUMMARY -->
-      <div class="summary-widget" id="swOps">
-        <div class="sw-header ops-h">
-          <span class="sw-icon">⚙️</span>
-          <div>
-            <div class="sw-title">كفاءة التشغيل</div>
-            <div class="sw-sub">Ops Efficiency</div>
-          </div>
+      <div id="swOps" onclick="adminOnly('ops')" style="display:flex;flex-direction:row;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#7D3C98,#4A235A);box-shadow:0 4px 16px rgba(125,60,152,0.3);transition:transform .15s;position:relative;">
+        <div style="flex:0 0 60px;height:70px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(0,0,0,0.15);">⚙️</div>
+        <div style="flex:1;padding:0 10px;text-align:right;">
+          <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:3px;">كفاءة التشغيل</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.75);">OPERATIONAL EFFICIENCY</div>
         </div>
-        <div class="sw-body" style="text-align:center;padding:16px 12px;">
-          <div style="font-size:38px;font-weight:900;color:#667EEA;line-height:1;">-</div>
-          <div class="sw-label" style="margin-top:4px;">نسبة الشهر الحالي</div>
-          <div class="sw-divider"></div>
-          <div class="sw-micro-label">سيُربط لاحقاً</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">Coming Soon</div>
+        <div style="flex:0 0 48px;text-align:center;">
+          <div id="swOpsNum" style="font-size:20px;font-weight:900;color:#fff;">—</div>
         </div>
-        <div class="sw-footer ops-f">🔗 جاهز للربط</div>
+        <div style="flex:0 0 24px;display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(255,255,255,0.5);">›</div>
       </div>
-
     </div>
-  </div>
-</div>
+  </div></div>
 
 <!-- VIOLATIONS -->
 <div id="page-violations" class="page">
