@@ -10,6 +10,8 @@
 <title>منصة إدارة الجودة | Noura Quality</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -7655,6 +7657,416 @@ async function exportRatingsStyled(){
     filename:`تقرير_الأعلى_بالتقييم_${new Date().getFullYear()}.xlsx`,
     btn, btnText:'⬇ تصدير Excel'
   });
+}
+
+
+// ════════════════════════════════════════════════
+// EXCELJS STYLED EXPORT — تصدير Excel منسّق بالكامل
+// ════════════════════════════════════════════════
+const EX = {
+  DARK:'1E3A5F', TEAL:'00A896', TEAL2:'00505A',
+  ALT1:'EEF6F7', RED:'C00000', ORANGE:'E07B2A', GREEN:'006B3C',
+  MONTHS:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
+};
+
+function exBd(color='B2D8D8'){
+  return {top:{style:'thin',color:{argb:'FF'+color}},bottom:{style:'thin',color:{argb:'FF'+color}},left:{style:'thin',color:{argb:'FF'+color}},right:{style:'thin',color:{argb:'FF'+color}}};
+}
+function exFill(color){ return {type:'pattern',pattern:'solid',fgColor:{argb:'FF'+color}}; }
+function exFont(bold=false,size=10,color='000000'){ return {name:'Arial',bold,size,color:{argb:'FF'+color}}; }
+function exAlign(h='center',v='center',wrap=false){ return {horizontal:h,vertical:v,wrapText:wrap,readingOrder:'rtl'}; }
+
+function exCell(ws, row, col, val, opts={}){
+  const cell = ws.getCell(row, col);
+  cell.value = val;
+  cell.font = exFont(opts.bold||false, opts.size||10, opts.fg||'000000');
+  if(opts.bg) cell.fill = exFill(opts.bg);
+  cell.alignment = exAlign(opts.h||'center', 'center', opts.wrap||false);
+  cell.border = exBd(opts.border||'B2D8D8');
+  return cell;
+}
+
+function exMerge(ws, r1, c1, r2, c2, val, opts={}){
+  ws.mergeCells(r1, c1, r2, c2);
+  const cell = ws.getCell(r1, c1);
+  cell.value = val;
+  cell.font = exFont(opts.bold!==false, opts.size||13, opts.fg||'FFFFFF');
+  cell.fill = exFill(opts.bg||EX.DARK);
+  cell.alignment = exAlign(opts.h||'center');
+  cell.border = exBd('FFFFFF');
+  if(opts.height) ws.getRow(r1).height = opts.height;
+  return cell;
+}
+
+function exHeader(ws, row, cols, bg=null){
+  bg = bg || EX.TEAL2;
+  cols.forEach((h,i)=>{
+    const cell = ws.getCell(row, i+1);
+    cell.value = h;
+    cell.font = exFont(true, 10, 'FFFFFF');
+    cell.fill = exFill(bg);
+    cell.alignment = exAlign('center','center',true);
+    cell.border = exBd('FFFFFF');
+  });
+  ws.getRow(row).height = 28;
+}
+
+async function saveExcelJS(wb, filename){
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  saveAs(blob, filename);
+}
+
+// ── تصدير المخالفات ──
+async function exportViolationsStyled(section){
+  if(typeof ExcelJS==='undefined'){toast('❌ مكتبة ExcelJS غير محملة');return;}
+  const year = new Date().getFullYear();
+  const btn = event?.target;
+  if(btn){btn.disabled=true;btn.textContent='⏳ جاري البناء...';}
+  try{
+    const {data:all} = await db.from('violations').select('*').order('date',{ascending:true});
+    const recs = all||[];
+    const female = recs.filter(r=>r.section==='female');
+    const male = recs.filter(r=>r.section==='male');
+
+    const wb = new ExcelJS.Workbook();
+    wb.views = [{rightToLeft:true}];
+
+    // شيت KPIs
+    const ks = wb.addWorksheet('لوحة KPIs');
+    ks.views = [{rightToLeft:true}];
+    exMerge(ks,1,1,1,8,`لوحة المخالفات – KPIs  |  نورة لتعليم القيادة`,{size:14,height:36});
+    exMerge(ks,2,1,2,8,`إجمالي: ${recs.length} | نسائي: ${female.length} | رجالي: ${male.length} | السنة: ${year}`,{bold:false,bg:EX.TEAL,size:10,height:20});
+    exMerge(ks,4,1,4,8,'📊 مؤشرات الأداء الرئيسية',{bg:EX.TEAL,size:11,height:26});
+
+    const kpis=[
+      ['إجمالي المخالفات',recs.length,EX.DARK],
+      ['مخالفات A – خطيرة',recs.filter(r=>r.grade==='A').length,EX.RED],
+      ['مخالفات B – متوسطة',recs.filter(r=>r.grade==='B').length,EX.ORANGE],
+      ['مخالفات C – خفيفة',recs.filter(r=>r.grade==='C').length,EX.GREEN],
+      ['القسم النسائي',female.length,EX.TEAL2],
+      ['القسم الرجالي',male.length,EX.TEAL2],
+    ];
+    kpis.forEach(([lbl,val,vbg],i)=>{
+      const r=5+i;
+      ws_kpi_row(ks,r,lbl,val,vbg);
+    });
+
+    // جدول شهري
+    exMerge(ks,12,1,12,8,'📅 توزيع المخالفات الشهري',{bg:EX.TEAL,size:11,height:26});
+    exHeader(ks,13,['الشهر','الإجمالي','A خطيرة','B متوسطة','C خفيفة','نسبة A%','نسبة B%','نسبة C%']);
+    EX.MONTHS.forEach((month,mi)=>{
+      const r=14+mi;
+      const mr=recs.filter(x=>(x.date||'').startsWith(`${year}-${String(mi+1).padStart(2,'0')}`));
+      const mt=mr.length,mA=mr.filter(x=>x.grade==='A').length,mB=mr.filter(x=>x.grade==='B').length,mC=mr.filter(x=>x.grade==='C').length;
+      const bg=mi%2===0?EX.ALT1:'FFFFFF';
+      exCell(ks,r,1,month,{bold:true,fg:EX.DARK,bg,h:'right'});
+      exCell(ks,r,2,mt,{bg}); exCell(ks,r,3,mA,{fg:EX.RED,bg}); exCell(ks,r,4,mB,{fg:EX.ORANGE,bg}); exCell(ks,r,5,mC,{fg:EX.GREEN,bg});
+      exCell(ks,r,6,mt?`${(mA/mt*100).toFixed(1)}%`:'-',{bg}); exCell(ks,r,7,mt?`${(mB/mt*100).toFixed(1)}%`:'-',{bg}); exCell(ks,r,8,mt?`${(mC/mt*100).toFixed(1)}%`:'-',{bg});
+      ks.getRow(r).height=20;
+    });
+    [18,10,10,10,10,10,10,10].forEach((w,i)=>{ks.getColumn(i+1).width=w;});
+
+    // شيت النساء
+    addViolationsSheet(wb, female, 'مخالفات النسائي', year);
+    // شيت الرجال  
+    addViolationsSheet(wb, male, 'مخالفات الرجالي', year);
+
+    await saveExcelJS(wb, `سجل_المخالفات_${year}.xlsx`);
+    toast(`✅ تم تصدير ${recs.length} مخالفة بـ 3 شيتات`);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='⬇ تصدير Excel';}
+  }
+}
+
+function ws_kpi_row(ws, r, label, val, vbg){
+  ws.mergeCells(r,1,r,2);
+  const lc=ws.getCell(r,1); lc.value=label;
+  lc.font=exFont(true,10,'FFFFFF'); lc.fill=exFill(EX.TEAL2);
+  lc.alignment=exAlign('right'); lc.border=exBd('FFFFFF');
+  ws.mergeCells(r,3,r,4);
+  const vc=ws.getCell(r,3); vc.value=val;
+  vc.font=exFont(true,12,'FFFFFF'); vc.fill=exFill(vbg);
+  vc.alignment=exAlign(); vc.border=exBd('FFFFFF');
+  ws.getRow(r).height=26;
+}
+
+function addViolationsSheet(wb, recs, title, year){
+  const ds=wb.addWorksheet(title);
+  ds.views=[{rightToLeft:true}];
+  exMerge(ds,1,1,1,8,`${title}  |  نورة لتعليم القيادة`,{size:13,height:34});
+  exMerge(ds,2,1,2,8,`إجمالي: ${recs.length}  |  السنة: ${year}`,{bold:false,bg:EX.TEAL,size:10,height:22});
+  exHeader(ds,3,['اسم المدرب/ة','ZONE','الوقت','التاريخ','نوع المخالفة','شرح المخالفة','درجة المخالفة','تم الرصد من قبل']);
+  const gradeColors={'A':EX.RED,'B':EX.ORANGE,'C':EX.GREEN};
+  recs.forEach((rec,ri)=>{
+    const r=4+ri; const bg=ri%2===0?EX.ALT1:'FFFFFF';
+    exCell(ds,r,1,rec.trainer_name||'—',{bold:true,fg:EX.DARK,bg,h:'right'});
+    exCell(ds,r,2,rec.zone||'',{bg}); exCell(ds,r,3,rec.time||'',{bg}); exCell(ds,r,4,rec.date||'',{bg});
+    exCell(ds,r,5,rec.violation_type||'',{bg,h:'right',wrap:true});
+    exCell(ds,r,6,rec.description||'',{bg,h:'right',wrap:true});
+    exCell(ds,r,7,rec.grade||'',{bold:true,fg:gradeColors[rec.grade]||'000000',bg});
+    exCell(ds,r,8,rec.observer||'',{bg});
+    ds.getRow(r).height=20;
+  });
+  [28,8,10,12,34,30,14,20].forEach((w,i)=>{ds.getColumn(i+1).width=w;});
+  ds.views=[{state:'frozen',ySplit:3,rightToLeft:true}];
+}
+
+// ── تصدير الاستطلاع ──
+async function exportSurveysStyled(){
+  if(typeof ExcelJS==='undefined'){toast('❌');return;}
+  const btn=event?.target; if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try{
+    const {data} = await db.from('surveys').select('*').order('date',{ascending:false}).limit(500);
+    const recs=data||[]; const year=new Date().getFullYear();
+    const scores=recs.map(r=>((r.q1||0)+(r.q2||0)+(r.q3||0)+(r.q4||0)+(r.q5||0))/25*100);
+    const avg=scores.length?(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+
+    const wb=new ExcelJS.Workbook(); wb.views=[{rightToLeft:true}];
+    const ws=wb.addWorksheet('بيانات الاستطلاع'); ws.views=[{rightToLeft:true}];
+    exMerge(ws,1,1,1,11,'تقرير استطلاع رضا العملاء  |  إدارة الجودة  |  نورة لتعليم القيادة',{size:13,height:34});
+    exMerge(ws,2,1,2,11,`إجمالي: ${recs.length} | متوسط الرضا: ${avg.toFixed(1)}%`,{bold:false,bg:EX.TEAL,size:10,height:22});
+    exHeader(ws,3,['م','التاريخ','الموظف','خدمة العملاء/5','التدريب النظري/5','مبنى العملي/5','التدريب العملي/5','ما بعد التدريب/5','المجموع/25','نسبة الرضا%','ملاحظات']);
+    recs.forEach((rec,ri)=>{
+      const r=4+ri; const bg=ri%2===0?EX.ALT1:'FFFFFF';
+      const q=[rec.q1||0,rec.q2||0,rec.q3||0,rec.q4||0,rec.q5||0];
+      const tot=q.reduce((a,b)=>a+b,0); const pct=tot/25*100;
+      const pctBg=pct>=90?'009975':pct>=75?EX.ORANGE:EX.RED;
+      exCell(ws,r,1,ri+1,{bg}); exCell(ws,r,2,rec.date||'',{bg}); exCell(ws,r,3,rec.observer||'',{bold:true,fg:EX.DARK,bg,h:'right'});
+      q.forEach((v,qi)=>exCell(ws,r,4+qi,v,{bg}));
+      exCell(ws,r,9,tot,{bold:true,bg});
+      const pc=ws.getCell(r,10); pc.value=`${pct.toFixed(1)}%`;
+      pc.font=exFont(true,10,'FFFFFF'); pc.fill=exFill(pctBg); pc.alignment=exAlign(); pc.border=exBd();
+      exCell(ws,r,11,rec.notes||'',{bg,wrap:true}); ws.getRow(r).height=20;
+    });
+    [5,12,18,12,14,12,14,16,10,11,20].forEach((w,i)=>{ws.getColumn(i+1).width=w;});
+    ws.views=[{state:'frozen',ySplit:3,rightToLeft:true}];
+
+    // شيت KPIs
+    const la=wb.addWorksheet('لوحة التحليل'); la.views=[{rightToLeft:true}];
+    exMerge(la,1,1,1,8,'لوحة تحليل استطلاع رضا العملاء  |  نورة لتعليم القيادة',{size:13,height:34});
+    ws_kpi_row(la,3,'إجمالي الاستطلاعات',recs.length,EX.DARK);
+    ws_kpi_row(la,4,'متوسط الرضا',`${avg.toFixed(1)}%`,avg>=90?'009975':avg>=75?EX.ORANGE:EX.RED);
+    ws_kpi_row(la,5,'الهدف','90%','006B3C');
+    ws_kpi_row(la,6,'الفجوة',`${(90-avg).toFixed(1)}%`,avg<90?EX.RED:'006B3C');
+    [20,10,10,10,20,10,10,10].forEach((w,i)=>{la.getColumn(i+1).width=w;});
+
+    await saveExcelJS(wb,`استطلاع_رضا_العملاء_${year}.xlsx`);
+    toast(`✅ تم تصدير ${recs.length} استطلاع`);
+  }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تصدير Excel';} }
+}
+
+// ── تصدير المرافق ──
+async function exportFacilityStyled(){
+  if(typeof ExcelJS==='undefined'){toast('❌');return;}
+  const btn=event?.target; if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try{
+    const {data}=await db.from('facility_reports').select('*').order('date',{ascending:false}).limit(500);
+    const recs=data||[]; const year=new Date().getFullYear();
+    const wb=new ExcelJS.Workbook(); wb.views=[{rightToLeft:true}];
+    const ws=wb.addWorksheet('سجل الملاحظات'); ws.views=[{rightToLeft:true}];
+    exMerge(ws,1,1,1,8,'تقرير ملاحظات المرافق والنظافة  |  إدارة الجودة  |  نورة لتعليم القيادة',{size:13,height:34});
+    exMerge(ws,2,1,2,8,`إجمالي: ${recs.length}  |  السنة: ${year}`,{bold:false,bg:EX.TEAL,size:10,height:22});
+    exHeader(ws,3,['م','التاريخ','الوقت','نوع المشكلة','الموقع','الوصف','الراصد','الحالة']);
+    recs.forEach((rec,ri)=>{
+      const r=4+ri; const bg=ri%2===0?EX.ALT1:'FFFFFF';
+      exCell(ws,r,1,ri+1,{bg}); exCell(ws,r,2,rec.date||'',{bg}); exCell(ws,r,3,rec.time||'',{bg});
+      exCell(ws,r,4,rec.problem_type||'',{bold:true,fg:EX.DARK,bg,h:'right'});
+      exCell(ws,r,5,rec.location||'',{bg,h:'right'}); exCell(ws,r,6,rec.description||'',{bg,h:'right',wrap:true});
+      exCell(ws,r,7,rec.observer||'',{bg}); exCell(ws,r,8,'',{bg}); ws.getRow(r).height=20;
+    });
+    [5,12,10,22,16,34,18,16].forEach((w,i)=>{ws.getColumn(i+1).width=w;});
+    ws.views=[{state:'frozen',ySplit:3,rightToLeft:true}];
+    await saveExcelJS(wb,`تقرير_المرافق_${year}.xlsx`);
+    toast(`✅ تم تصدير ${recs.length} ملاحظة`);
+  }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تصدير Excel';} }
+}
+
+// ── تصدير المبنى ──
+async function exportBuildingStyled(){
+  if(typeof ExcelJS==='undefined'){toast('❌');return;}
+  const btn=event?.target; if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try{
+    const {data}=await db.from('building_reports').select('*').order('date',{ascending:false}).limit(500);
+    const recs=data||[]; const year=new Date().getFullYear();
+    const wb=new ExcelJS.Workbook(); wb.views=[{rightToLeft:true}];
+    const ws=wb.addWorksheet('سجل التقارير'); ws.views=[{rightToLeft:true}];
+    exMerge(ws,1,1,1,9,'تقرير المبنى الرئيسي  |  إدارة الجودة  |  نورة لتعليم القيادة',{size:13,height:34});
+    exMerge(ws,2,1,2,9,`إجمالي: ${recs.length}  |  السنة: ${year}`,{bold:false,bg:EX.TEAL,size:10,height:22});
+    exHeader(ws,3,['م','التاريخ','الوقت','ازدحام الاستقبال','موظفات الاستقبال','وقت الانتظار','ازدحام القاعات','ملاحظات عامة','الراصد']);
+    const crowdColors={'شديد':EX.RED,'متوسط':EX.ORANGE,'خفيف':EX.GREEN};
+    recs.forEach((rec,ri)=>{
+      const r=4+ri; const bg=ri%2===0?EX.ALT1:'FFFFFF';
+      exCell(ws,r,1,ri+1,{bg}); exCell(ws,r,2,rec.date||'',{bg}); exCell(ws,r,3,rec.time||'',{bg});
+      const rc=rec.recep_crowd||''; exCell(ws,r,4,rc,{bold:!!rc,fg:crowdColors[rc]||'000000',bg});
+      exCell(ws,r,5,rec.recep_staff||'',{bg}); exCell(ws,r,6,rec.wait_time||'',{bg});
+      const ec=rec.exam_crowd||''; exCell(ws,r,7,ec,{bold:!!ec,fg:crowdColors[ec]||'000000',bg});
+      exCell(ws,r,8,rec.general_notes||'',{bg,h:'right',wrap:true}); exCell(ws,r,9,rec.observer||'',{bg}); ws.getRow(r).height=20;
+    });
+    [5,12,10,16,16,14,14,34,18].forEach((w,i)=>{ws.getColumn(i+1).width=w;});
+    ws.views=[{state:'frozen',ySplit:3,rightToLeft:true}];
+    await saveExcelJS(wb,`تقرير_المبنى_${year}.xlsx`);
+    toast(`✅ تم تصدير ${recs.length} تقرير`);
+  }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تصدير Excel';} }
+}
+
+// ── تصدير الحوافز ──
+async function exportIncentivesStyled(){
+  if(typeof ExcelJS==='undefined'){toast('❌');return;}
+  const btn=event?.target; if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try{
+    const year=new Date().getFullYear();
+    const {data}=await db.from('incentives').select('*').eq('year',String(year)).order('created_at',{ascending:false});
+    const recs=data||[];
+    const wb=new ExcelJS.Workbook(); wb.views=[{rightToLeft:true}];
+    const ws=wb.addWorksheet('قائمة الحوافز'); ws.views=[{rightToLeft:true}];
+    exMerge(ws,1,1,1,8,'تقرير الحوافز الشهرية  |  إدارة الجودة  |  نورة لتعليم القيادة',{size:13,height:34});
+    exMerge(ws,2,1,2,8,`إجمالي: ${recs.length}  |  السنة: ${year}`,{bold:false,bg:EX.TEAL,size:10,height:22});
+    exHeader(ws,3,['الشهر','السنة','اسم الموظف','القسم','النقاط','المخالفات','الأهلية','ملاحظات']);
+    recs.forEach((rec,ri)=>{
+      const r=4+ri; const bg=ri%2===0?EX.ALT1:'FFFFFF';
+      const score=rec.score||0; const viols=rec.violations_count||0;
+      const eligible=score>=80&&viols===0?'✅ مؤهل':'❌ غير مؤهل';
+      const eligFg=eligible.includes('✅')?EX.GREEN:EX.RED;
+      exCell(ws,r,1,rec.month||'',{bg}); exCell(ws,r,2,rec.year||'',{bg});
+      exCell(ws,r,3,rec.staff_name||'',{bold:true,fg:EX.DARK,bg,h:'right'});
+      exCell(ws,r,4,rec.section||'',{bg}); exCell(ws,r,5,score,{bg}); exCell(ws,r,6,viols,{bg});
+      exCell(ws,r,7,eligible,{bold:true,fg:eligFg,bg});
+      exCell(ws,r,8,rec.notes||'',{bg,h:'right',wrap:true}); ws.getRow(r).height=20;
+    });
+    [12,8,22,12,10,12,14,24].forEach((w,i)=>{ws.getColumn(i+1).width=w;});
+    ws.views=[{state:'frozen',ySplit:3,rightToLeft:true}];
+
+    // KPIs
+    const la=wb.addWorksheet('ملخص الحوافز'); la.views=[{rightToLeft:true}];
+    exMerge(la,1,1,1,8,'ملخص الحوافز الشهرية  |  نورة لتعليم القيادة',{size:13,height:34});
+    const eligible_count=recs.filter(r=>(r.score||0)>=80&&!(r.violations_count)).length;
+    ws_kpi_row(la,3,'إجمالي المرشحين',recs.length,EX.DARK);
+    ws_kpi_row(la,4,'المؤهلون للحافز',eligible_count,'006B3C');
+    ws_kpi_row(la,5,'غير المؤهلين',recs.length-eligible_count,EX.RED);
+    ws_kpi_row(la,6,'نسبة التأهيل',recs.length?`${(eligible_count/recs.length*100).toFixed(1)}%`:'-',EX.TEAL2);
+    [20,10,10,10,20,10,10,10].forEach((w,i)=>{la.getColumn(i+1).width=w;});
+
+    await saveExcelJS(wb,`تقرير_الحوافز_${year}.xlsx`);
+    toast(`✅ تم تصدير ${recs.length} سجل`);
+  }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تصدير Excel';} }
+}
+
+// ── تصدير كفاءة التشغيل ──
+async function exportOpsStyled(){
+  if(typeof ExcelJS==='undefined'){toast('❌');return;}
+  const btn=event?.target; if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try{
+    const year=new Date().getFullYear();
+    const {data}=await db.from('ops_reports').select('*').order('created_at',{ascending:false}).limit(500);
+    const recs=data||[];
+    const wb=new ExcelJS.Workbook(); wb.views=[{rightToLeft:true}];
+    const ws=wb.addWorksheet('بيانات المدربين'); ws.views=[{rightToLeft:true}];
+    exMerge(ws,1,1,1,9,'تقرير كفاءة التشغيل  |  إدارة الجودة  |  نورة لتعليم القيادة',{size:13,height:34});
+    exMerge(ws,2,1,2,9,`إجمالي: ${recs.length}  |  السنة: ${year}`,{bold:false,bg:EX.TEAL,size:10,height:22});
+    exHeader(ws,3,['اسم المدرب','الشهر','الزون','القسم','الساعات المتاحة','الحصص','المتدربين','الحصص غير المستغلة','نسبة الكفاءة%']);
+    const effs=recs.map(r=>r.efficiency_pct||0).filter(e=>e>0);
+    const avgEff=effs.length?(effs.reduce((a,b)=>a+b,0)/effs.length):0;
+    recs.forEach((rec,ri)=>{
+      const r=4+ri; const bg=ri%2===0?EX.ALT1:'FFFFFF';
+      const eff=rec.efficiency_pct||0; const effBg=eff>=85?'009975':eff>=70?EX.ORANGE:EX.RED;
+      exCell(ws,r,1,rec.trainer_name||'',{bold:true,fg:EX.DARK,bg,h:'right'});
+      exCell(ws,r,2,rec.report_month?EX.MONTHS[parseInt(rec.report_month)-1]:'',{bg});
+      exCell(ws,r,3,rec.zone||'',{bg}); exCell(ws,r,4,rec.section||'',{bg});
+      exCell(ws,r,5,rec.available_hours||'',{bg}); exCell(ws,r,6,rec.sessions||'',{bg}); exCell(ws,r,7,rec.trainees||'',{bg});
+      const unused=Math.max(0,(rec.sessions||0)-(rec.trainees||0));
+      exCell(ws,r,8,unused||'',{bg});
+      const ec=ws.getCell(r,9); ec.value=eff?`${eff.toFixed(1)}%`:'-';
+      ec.font=exFont(true,10,'FFFFFF'); ec.fill=exFill(effBg); ec.alignment=exAlign(); ec.border=exBd();
+      ws.getRow(r).height=20;
+    });
+    [28,10,8,10,14,10,12,16,13].forEach((w,i)=>{ws.getColumn(i+1).width=w;});
+    ws.views=[{state:'frozen',ySplit:3,rightToLeft:true}];
+
+    // KPIs
+    const la=wb.addWorksheet('لوحة KPIs'); la.views=[{rightToLeft:true}];
+    exMerge(la,1,1,1,8,'لوحة كفاءة التشغيل  |  نورة لتعليم القيادة',{size:13,height:34});
+    ws_kpi_row(la,3,'إجمالي المدربين',recs.length,EX.DARK);
+    ws_kpi_row(la,4,'متوسط الكفاءة',`${avgEff.toFixed(1)}%`,avgEff>=85?'009975':avgEff>=70?EX.ORANGE:EX.RED);
+    ws_kpi_row(la,5,'إجمالي الحصص',recs.reduce((a,r)=>a+(r.sessions||0),0),EX.TEAL2);
+    ws_kpi_row(la,6,'إجمالي المتدربين',recs.reduce((a,r)=>a+(r.trainees||0),0),EX.TEAL2);
+    [20,10,10,10,20,10,10,10].forEach((w,i)=>{la.getColumn(i+1).width=w;});
+
+    await saveExcelJS(wb,`تقرير_كفاءة_التشغيل_${year}.xlsx`);
+    toast(`✅ تم تصدير ${recs.length} مدرب`);
+  }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تصدير Excel';} }
+}
+
+// ── تصدير المبيعات ──
+async function exportSalesStyled(){
+  if(typeof ExcelJS==='undefined'){toast('❌');return;}
+  const btn=event?.target; if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try{
+    const year=new Date().getFullYear();
+    const {data}=await db.from('sales_reports').select('*').order('created_at',{ascending:false}).limit(500);
+    const recs=data||[];
+    const wb=new ExcelJS.Workbook(); wb.views=[{rightToLeft:true}];
+    const ws=wb.addWorksheet('بيانات الاسترداد'); ws.views=[{rightToLeft:true}];
+    exMerge(ws,1,1,1,8,'نموذج متابعة عملاء الاسترداد  |  إدارة الجودة  |  نورة لتعليم القيادة',{size:13,height:34});
+    exMerge(ws,2,1,2,8,`إجمالي: ${recs.length}  |  السنة: ${year}`,{bold:false,bg:EX.TEAL,size:10,height:22});
+    exHeader(ws,3,['م','اسم العميل','رسوم البرنامج','تاريخ الطلب','شرح رغبة العميل','ملاحظات المبيعات','نوع الطلب','الأسبوع']);
+    const typeColors={'استرداد':EX.RED,'استكمال':EX.GREEN,'تأجيل':EX.ORANGE};
+    recs.forEach((rec,ri)=>{
+      const r=4+ri; const bg=ri%2===0?EX.ALT1:'FFFFFF'; const t=rec.request_type||'';
+      exCell(ws,r,1,ri+1,{bg}); exCell(ws,r,2,rec.client_name||'',{bold:true,fg:EX.DARK,bg,h:'right'});
+      exCell(ws,r,3,rec.fees||'',{bg}); exCell(ws,r,4,rec.request_date||'',{bg});
+      exCell(ws,r,5,rec.client_reason||'',{bg,h:'right',wrap:true});
+      exCell(ws,r,6,rec.sales_notes||'',{bg,h:'right',wrap:true});
+      exCell(ws,r,7,t,{bold:!!t,fg:typeColors[t]||'000000',bg});
+      exCell(ws,r,8,rec.week_label||'',{bg}); ws.getRow(r).height=20;
+    });
+    [5,22,14,14,30,34,12,14].forEach((w,i)=>{ws.getColumn(i+1).width=w;});
+    ws.views=[{state:'frozen',ySplit:3,rightToLeft:true}];
+
+    // KPIs
+    const la=wb.addWorksheet('لوحة التحليل'); la.views=[{rightToLeft:true}];
+    exMerge(la,1,1,1,8,'لوحة تحليل عملاء الاسترداد  |  نورة لتعليم القيادة',{size:13,height:34});
+    ws_kpi_row(la,3,'إجمالي العملاء',recs.length,EX.DARK);
+    ws_kpi_row(la,4,'طلبات الاسترداد',recs.filter(r=>r.request_type==='استرداد').length,EX.RED);
+    ws_kpi_row(la,5,'طلبات الاستكمال',recs.filter(r=>r.request_type==='استكمال').length,EX.GREEN);
+    ws_kpi_row(la,6,'طلبات التأجيل',recs.filter(r=>r.request_type==='تأجيل').length,EX.ORANGE);
+    [22,10,10,10,22,10,10,10].forEach((w,i)=>{la.getColumn(i+1).width=w;});
+
+    await saveExcelJS(wb,`تقرير_المبيعات_${year}.xlsx`);
+    toast(`✅ تم تصدير ${recs.length} عميل`);
+  }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تصدير Excel';} }
+}
+
+// ── تصدير الأعلى بالتقييم ──
+async function exportRatingsStyled(){
+  if(typeof ExcelJS==='undefined'){toast('❌');return;}
+  const btn=event?.target; if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try{
+    const {data}=await db.from('trainer_ratings').select('*').order('rank_position',{ascending:true}).limit(100);
+    const recs=data||[];
+    const wb=new ExcelJS.Workbook(); wb.views=[{rightToLeft:true}];
+    const ws=wb.addWorksheet('نتائج التقييم'); ws.views=[{rightToLeft:true}];
+    exMerge(ws,1,1,1,6,'تقرير الأعلى تقييماً – مبني على آراء العملاء  |  نورة لتعليم القيادة',{size:13,height:34});
+    exMerge(ws,2,1,2,6,`إجمالي: ${recs.length} مدرب`,{bold:false,bg:EX.TEAL,size:10,height:22});
+    exHeader(ws,3,['الترتيب','اسم المدرب/ة','عدد مرات الذكر','النسبة%','التصنيف','تاريخ الرفع']);
+    const medals=['🥇','🥈','🥉'];
+    const medalBgs=['FFF8DC','F5F5EE','F0EEE8'];
+    recs.forEach((rec,ri)=>{
+      const r=4+ri; const bg=ri<3?medalBgs[ri]:ri%2===0?EX.ALT1:'FFFFFF';
+      const medal=ri<3?medals[ri]:`#${rec.rank_position||ri+1}`;
+      exCell(ws,r,1,medal,{bold:ri<3,size:ri<3?12:10,bg});
+      exCell(ws,r,2,rec.trainer_name||'',{bold:ri<3,fg:EX.DARK,bg,h:'right'});
+      exCell(ws,r,3,rec.mention_count||'',{bg});
+      exCell(ws,r,4,rec.mention_pct?`${rec.mention_pct.toFixed(1)}%`:'-',{bg});
+      const tag=ri===0?'أعلى تقييماً':ri===1?'ثاني أعلى':ri===2?'ثالث أعلى':ri<10?'ضمن أعلى 10':'';
+      exCell(ws,r,5,tag,{bold:ri<3,fg:ri<3?EX.GREEN:'000000',bg});
+      exCell(ws,r,6,rec.upload_date||'',{bg}); ws.getRow(r).height=22;
+    });
+    [8,28,14,12,18,14].forEach((w,i)=>{ws.getColumn(i+1).width=w;});
+    ws.views=[{state:'frozen',ySplit:3,rightToLeft:true}];
+    await saveExcelJS(wb,`تقرير_الأعلى_بالتقييم_${new Date().getFullYear()}.xlsx`);
+    toast(`✅ تم تصدير ${recs.length} مدرب`);
+  }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تصدير التحليل Excel';} }
 }
 
 // TOP RATED TRAINERS SECTION
