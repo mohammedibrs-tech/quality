@@ -819,6 +819,29 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
+<!-- VIOLATIONS EXPORT MODAL -->
+<div id="violExportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:9200;align-items:center;justify-content:center;padding:18px;">
+  <div style="background:var(--card);border-radius:20px;padding:26px 22px;max-width:380px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.4);">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:28px;margin-bottom:8px;">📊</div>
+      <div style="font-size:15px;font-weight:900;">تصدير سجل المخالفات</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">اختر القسم المراد تصديره</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button onclick="doExportViolations('female')" style="padding:14px;background:rgba(82,153,224,0.1);border:2px solid rgba(82,153,224,0.3);border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;color:#5299E0;">
+        👩 القسم النسائي فقط
+      </button>
+      <button onclick="doExportViolations('male')" style="padding:14px;background:rgba(30,58,95,0.08);border:2px solid rgba(30,58,95,0.2);border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;color:var(--dark);">
+        👨 القسم الرجالي فقط
+      </button>
+      <button onclick="doExportViolations('both')" style="padding:14px;background:rgba(0,168,150,0.1);border:2px solid rgba(0,168,150,0.3);border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;color:var(--accent);">
+        👥 كلا القسمين (KPIs مجمّع)
+      </button>
+    </div>
+    <button onclick="document.getElementById('violExportModal').style.display='none'" style="width:100%;margin-top:12px;padding:10px;background:transparent;border:1px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;cursor:pointer;color:var(--text-dim);">إلغاء</button>
+  </div>
+</div>
+
 <!-- WEEKLY TASKS MODAL -->
 <div id="weeklyTasksModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);z-index:9200;overflow-y:auto;padding:20px 12px;">
   <div style="background:var(--card);border-radius:20px;max-width:700px;margin:0 auto;padding:24px 20px;position:relative;">
@@ -1222,7 +1245,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         <select class="filter-select" id="rfMonth" onchange="filterV()" style="max-width:160px;">
           <option value="">كل الأشهر</option>
         </select>
-        <button class="export-btn" onclick="exportViolationsStyled(currentVSection)" style="margin-right:auto;">⬇ تصدير Excel</button>
+        <button class="export-btn" onclick="document.getElementById('violExportModal').style.display='flex'" style="margin-right:auto;">⬇ تصدير Excel</button>
       </div>
 
       <!-- ── VIOLATIONS DASHBOARD (TOP) ── -->
@@ -1290,7 +1313,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div id="tab-st" style="display:none">
       <div id="mylog-section-tab-st" style="margin-bottom:20px;"></div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-        <button class="export-btn" onclick="exportSurvey()">⬇ تقرير تحليلي Excel</button>
+        <button class="export-btn" onclick="exportSurveysStyled()">⬇ تقرير تحليلي Excel</button>
       </div>
       <!-- Survey Dashboard -->
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;" id="dashSurveyQs"></div>
@@ -3940,43 +3963,32 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
     <!-- تبويب إدخال يدوي -->
     <div id="inc-tab-manual" style="display:none;">
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;">
-        <div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:14px;">✦ إضافة حافز شهري</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="field"><label>الشهر <span class="req">*</span></label>
-            <select id="incMonth" class="filter-select"><option value="">اختر...</option>
-              <option>يناير</option><option>فبراير</option><option>مارس</option><option>أبريل</option>
-              <option>مايو</option><option>يونيو</option><option>يوليو</option><option>أغسطس</option>
-              <option>سبتمبر</option><option>أكتوبر</option><option>نوفمبر</option><option>ديسمبر</option>
-            </select></div>
-          <div class="field"><label>السنة <span class="req">*</span></label><input type="number" id="incYear" value="2026" min="2024" max="2030"></div>
-          <div class="field"><label>اسم الموظف <span class="req">*</span></label>
-            <select id="incStaff" class="filter-select"><option value="">اختر...</option>
-              <option>شهد المقرن</option><option>سمية الخضيري</option><option>امجاد ابانمي</option>
-              <option>احمد الحماد</option><option>ابراهيم الحمد</option><option>احمد سحاب</option>
-            </select></div>
-          <div class="field"><label>القسم</label>
-            <select id="incSection" class="filter-select"><option value="">اختر...</option>
-              <option>نسائي</option><option>رجالي</option>
-            </select></div>
-          <div class="field"><label>النقاط / التقييم</label><input type="number" id="incScore" placeholder="0-100" min="0" max="100"></div>
-          <div class="field"><label>عدد المخالفات</label><input type="number" id="incViolations" value="0" min="0"></div>
-          <div class="field" style="grid-column:1/-1;"><label>ملاحظات</label><textarea id="incNotes" rows="2" placeholder="أي ملاحظات..."></textarea></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:14px;">✦ إضافة سجل يدوي</div>
+        <!-- اختيار الشيت -->
+        <div class="field">
+          <label>القسم / الشيت <span class="req">*</span></label>
+          <select id="incSheetSelect" class="filter-select" onchange="onIncSheetChange()">
+            <option value="">اختر القسم...</option>
+            <option>المدربون رجال</option>
+            <option>المدربون نساء</option>
+            <option>المقيمون والفاحصون رجال</option>
+            <option>المقيمون والفاحصون نساء</option>
+            <option>تقرير المبيعات</option>
+            <option>الفحص الطبي</option>
+            <option>الدراجات النارية</option>
+          </select>
         </div>
-        <button class="submit-btn" onclick="submitIncentive()" style="margin-top:12px;">✦ حفظ الحافز</button>
+        <!-- حقول ديناميكية -->
+        <div id="incManualForm"></div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
-        <select class="filter-select" id="incFilterMonth" onchange="loadIncentives()" style="max-width:140px;">
-          <option value="">كل الأشهر</option>
-          <option>يناير</option><option>فبراير</option><option>مارس</option><option>أبريل</option>
-          <option>مايو</option><option>يونيو</option><option>يوليو</option><option>أغسطس</option>
-          <option>سبتمبر</option><option>أكتوبر</option><option>نوفمبر</option><option>ديسمبر</option>
-        </select>
-        <select class="filter-select" id="incFilterYear" onchange="loadIncentives()" style="max-width:100px;">
-          <option>2026</option><option>2025</option><option>2024</option>
-        </select>
-      </div>
-      <div id="incList"><div style="text-align:center;padding:30px;color:var(--text-dim);">لا توجد بيانات</div></div>
+      <!-- قائمة المدخلات -->
+      <div id="incManualList"></div>
+      <!-- زر دمج ودفع للتحليل -->
+      <button onclick="mergeIncManualToData();switchIncTab('analysis',document.querySelectorAll('#page-incentives .stab')[2]);renderIncAnalysis();"
+        style="width:100%;margin-top:12px;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">
+        📊 انتقل للتحليل
+      </button>
     </div>
 
     <!-- تبويب التحليل -->
@@ -7807,34 +7819,40 @@ async function saveExcelJS(wb, filename){
 }
 
 // ── تصدير المخالفات ──
-async function exportViolationsStyled(section){
+function exportViolationsStyled(){ document.getElementById('violExportModal').style.display='flex'; }
+
+async function doExportViolations(choice){
   if(typeof ExcelJS==='undefined'){toast('❌ مكتبة ExcelJS غير محملة');return;}
   const year = new Date().getFullYear();
   const btn = event?.target;
   if(btn){btn.disabled=true;btn.textContent='⏳ جاري البناء...';}
   try{
-    const {data:all} = await db.from('violations').select('*').order('date',{ascending:true});
+    const {data:all} = await db.from('violations').select('*').order('date',{ascending:false});
     const recs = all||[];
     const female = recs.filter(r=>r.section==='female');
     const male = recs.filter(r=>r.section==='male');
+
+    // فلترة حسب الاختيار
+    const filtered = choice==='female'?female:choice==='male'?male:recs;
+    const sectionLabel = choice==='female'?'القسم النسائي 👩':choice==='male'?'القسم الرجالي 👨':'كلا القسمين 👥';
 
     const wb = new ExcelJS.Workbook(); wb.views=[{rightToLeft:true}];
 
     // شيت KPIs
     const ks = wb.addWorksheet('لوحة KPIs'); ks.views=[{rightToLeft:true}];
-    exMerge(ks,1,1,1,10,`لوحة المخالفات – KPIs  |  نورة لتعليم القيادة`,{size:14,height:36});
+    exMerge(ks,1,1,1,10,`لوحة المخالفات – ${sectionLabel}  |  نورة لتعليم القيادة`,{size:14,height:36});
     exMerge(ks,2,1,2,10,`إجمالي: ${recs.length} | نسائي: ${female.length} | رجالي: ${male.length} | السنة: ${year}`,{bold:false,bg:EX.TEAL,size:10,height:20});
     exMerge(ks,4,1,4,10,'📊 مؤشرات الأداء الرئيسية',{bg:EX.TEAL,size:11,height:26});
-    [['إجمالي المخالفات',recs.length,EX.DARK],['مخالفات A – خطيرة',recs.filter(r=>r.grade==='A').length,EX.RED],
-     ['مخالفات B – متوسطة',recs.filter(r=>r.grade==='B').length,EX.ORANGE],['مخالفات C – خفيفة',recs.filter(r=>r.grade==='C').length,EX.GREEN],
-     ['القسم النسائي',female.length,EX.TEAL2],['القسم الرجالي',male.length,EX.TEAL2],
+    [['إجمالي المخالفات',filtered.length,EX.DARK],['مخالفات A – خطيرة',filtered.filter(r=>r.grade==='A').length,EX.RED],
+     ['مخالفات B – متوسطة',filtered.filter(r=>r.grade==='B').length,EX.ORANGE],['مخالفات C – خفيفة',filtered.filter(r=>r.grade==='C').length,EX.GREEN],
+     ...(choice==='both'?[['القسم النسائي',female.length,EX.TEAL2],['القسم الرجالي',male.length,EX.TEAL2]]:[]),
     ].forEach(([lbl,val,vbg],i)=>{ ws_kpi_row(ks,5+i,lbl,val,vbg); });
 
     // أكثر المدربين مخالفات
     exMerge(ks,12,1,12,10,'🏴 أكثر المدربين مخالفات',{bg:EX.RED,size:11,height:26});
     exHeader(ks,13,['الترتيب','اسم المدرب/ة','القسم','عدد المخالفات','A','B','C','أكثر مخالفة تكراراً','','']);
     const trainerMap={};
-    recs.forEach(r=>{
+    filtered.forEach(r=>{
       const k=r.trainer_name||'—'; if(!trainerMap[k]) trainerMap[k]={name:k,sec:r.section,total:0,A:0,B:0,C:0,types:{}};
       trainerMap[k].total++; trainerMap[k][r.grade||'C']++;
       const t=r.violation_type||'—'; trainerMap[k].types[t]=(trainerMap[k].types[t]||0)+1;
@@ -7854,7 +7872,21 @@ async function exportViolationsStyled(section){
     exMerge(ks,typeStartRow,1,typeStartRow,10,'🔁 أكثر المخالفات تكراراً',{bg:EX.ORANGE,size:11,height:26});
     exHeader(ks,typeStartRow+1,['الترتيب','نوع المخالفة','عدد التكرار','النسبة%','الدرجة الغالبة','','','','','']);
     const typeMap={};
-    recs.forEach(r=>{ const t=r.violation_type||'—'; if(!typeMap[t]) typeMap[t]={count:0,grades:{}}; typeMap[t].count++; typeMap[t].grades[r.grade||'C']=(typeMap[t].grades[r.grade||'C']||0)+1; });
+    filtered.forEach(r=>{ const t=r.violation_type||'—'; if(!typeMap[t]) typeMap[t]={count:0,grades:{}}; typeMap[t].count++; typeMap[t].grades[r.grade||'C']=(typeMap[t].grades[r.grade||'C']||0)+1; });
+    // أعلى زون مخالفات
+    const zoneMap={};
+    filtered.forEach(r=>{ const z=r.zone||'—'; zoneMap[z]=(zoneMap[z]||0)+1; });
+    const topZones=Object.entries(zoneMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const zoneStartRow2 = typeStartRow-2;
+    exMerge(ks,zoneStartRow2,1,zoneStartRow2,10,'📍 أعلى زون مخالفات',{bg:'8B0000',size:11,height:26});
+    topZones.forEach(([zone,count],i)=>{
+      const r=zoneStartRow2+1+i; const bg=i%2===0?EX.ALT1:'FFFFFF';
+      exCell(ks,r,1,i+1,{bg}); exCell(ks,r,2,zone,{bold:true,fg:EX.DARK,bg,h:'right'});
+      exCell(ks,r,3,count,{bold:true,fg:EX.RED,bg});
+      exCell(ks,r,4,filtered.length?`${(count/filtered.length*100).toFixed(1)}%`:'-',{bg});
+      ks.getRow(r).height=20;
+    });
+
     Object.entries(typeMap).sort((a,b)=>b[1].count-a[1].count).slice(0,10).forEach(([type,data],i)=>{
       const r=typeStartRow+2+i; const bg=i%2===0?EX.ALT1:'FFFFFF';
       const topGrade=Object.entries(data.grades).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
@@ -7871,7 +7903,7 @@ async function exportViolationsStyled(section){
     exHeader(ks,monthStartRow+1,['الشهر','الإجمالي','A خطيرة','B متوسطة','C خفيفة','نسبة A%','نسبة B%','نسبة C%','','']);
     EX.MONTHS.forEach((month,mi)=>{
       const r=monthStartRow+2+mi;
-      const mr=recs.filter(x=>(x.date||'').startsWith(`${year}-${String(mi+1).padStart(2,'0')}`));
+      const mr=filtered.filter(x=>(x.date||'').startsWith(`${year}-${String(mi+1).padStart(2,'0')}`));
       const mt=mr.length,mA=mr.filter(x=>x.grade==='A').length,mB=mr.filter(x=>x.grade==='B').length,mC=mr.filter(x=>x.grade==='C').length;
       const bg=mi%2===0?EX.ALT1:'FFFFFF';
       exCell(ks,r,1,month,{bold:true,fg:EX.DARK,bg,h:'right'}); exCell(ks,r,2,mt,{bg});
@@ -7881,12 +7913,13 @@ async function exportViolationsStyled(section){
     });
     [20,14,10,10,10,10,10,10,10,10].forEach((w,i)=>{ks.getColumn(i+1).width=w;});
 
-    // شيت النساء والرجال
-    addViolationsSheet(wb, female, 'مخالفات النسائي', year);
-    addViolationsSheet(wb, male, 'مخالفات الرجالي', year);
-
-    await saveExcelJS(wb, `سجل_المخالفات_${year}.xlsx`);
-    toast(`✅ تم تصدير ${recs.length} مخالفة بـ 3 شيتات`);
+    // شيتات حسب الاختيار
+    if(choice==='female'||choice==='both') addViolationsSheet(wb, female, 'مخالفات النسائي', year);
+    if(choice==='male'||choice==='both') addViolationsSheet(wb, male, 'مخالفات الرجالي', year);
+    const fname = choice==='female'?`سجل_المخالفات_النسائي_${year}.xlsx`:choice==='male'?`سجل_المخالفات_الرجالي_${year}.xlsx`:`سجل_المخالفات_كلا_القسمين_${year}.xlsx`;
+    await saveExcelJS(wb, fname);
+    const cnt = choice==='female'?female.length:choice==='male'?male.length:recs.length;
+    toast(`✅ تم تصدير ${cnt} مخالفة`);
   }finally{
     if(btn){btn.disabled=false;btn.textContent='⬇ تصدير Excel';}
   }
@@ -8415,6 +8448,136 @@ async function downloadIncTemplate(){
     await saveExcelJS(wb,`قالب_الحوافز_الشهرية_${year}.xlsx`);
     toast('✅ تم تحميل القالب');
   }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تحميل القالب الجاهز';} }
+}
+
+
+// ════════════════════════════════════════════════
+// INCENTIVES MANUAL INPUT — الإدخال اليدوي للحوافز
+// ════════════════════════════════════════════════
+const INC_SHEETS = {
+  'المدربون رجال': {
+    cols: ['الاسم','الرقم الوظيفي','تاريخ التعيين','المسمى الوظيفي','ZONE','المخالفات','الاستئذان','التأخير','الإجازة','الغياب','ملاحظات إدارة الجودة','ملاحظات الموارد البشرية'],
+    eligible_logic: (row) => !row['ملاحظات إدارة الجودة'] && !row['ملاحظات الموارد البشرية']
+  },
+  'المدربون نساء': {
+    cols: ['الاسم','الرقم الوظيفي','تاريخ التعيين','المسمى الوظيفي','ZONE','المخالفات','الاستئذان','التأخير','الإجازة','الغياب','ملاحظات إدارة الجودة','ملاحظات الموارد البشرية'],
+    eligible_logic: (row) => !row['ملاحظات إدارة الجودة'] && !row['ملاحظات الموارد البشرية']
+  },
+  'المقيمون والفاحصون رجال': {
+    cols: ['الاسم','الرقم الوظيفي','المسمى الوظيفي','تقييم إدارة العمليات','الإجازة','الاستئذان','الغياب','ملاحظات الموارد البشرية'],
+    eligible_logic: (row) => !row['ملاحظات الموارد البشرية']
+  },
+  'المقيمون والفاحصون نساء': {
+    cols: ['الاسم','الرقم الوظيفي','المسمى الوظيفي','تقييم إدارة العمليات','الإجازة','الاستئذان','الغياب','ملاحظات الموارد البشرية'],
+    eligible_logic: (row) => !row['ملاحظات الموارد البشرية']
+  },
+  'تقرير المبيعات': {
+    cols: ['الاسم','الرقم الوظيفي','المسمى الوظيفي','عدد العملاء الذين تم تسجيلهم'],
+    eligible_logic: (row) => true
+  },
+  'الفحص الطبي': {
+    cols: ['الاسم','الرقم الوظيفي','المسمى الوظيفي','عدد العملاء المسجلين'],
+    eligible_logic: (row) => true
+  },
+  'الدراجات النارية': {
+    cols: ['الاسم','الرقم الوظيفي','تاريخ التعيين','المسمى الوظيفي','ZONE','المخالفات','الاستئذان','التأخير','الإجازة','الغياب','ملاحظات إدارة الجودة','ملاحظات الموارد البشرية'],
+    eligible_logic: (row) => !row['ملاحظات إدارة الجودة'] && !row['ملاحظات الموارد البشرية']
+  },
+};
+
+let incManualData = {}; // {sheetName: [rows]}
+
+function onIncSheetChange(){
+  const sheet = document.getElementById('incSheetSelect').value;
+  const form = document.getElementById('incManualForm');
+  if(!sheet){ form.innerHTML=''; return; }
+  const config = INC_SHEETS[sheet];
+  if(!config){ form.innerHTML=''; return; }
+
+  let html = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">`;
+  config.cols.forEach(col=>{
+    const isTextarea = col.includes('ملاحظات');
+    html += `<div class="field" style="${isTextarea?'grid-column:1/-1':''}">
+      <label>${col}</label>
+      ${isTextarea
+        ? `<textarea id="incField_${col.replace(/\s/g,'_')}" rows="2" placeholder="${col}..."></textarea>`
+        : `<input type="text" id="incField_${col.replace(/\s/g,'_')}" placeholder="${col}">`
+      }
+    </div>`;
+  });
+  html += `</div>
+  <button class="submit-btn" onclick="addIncManualRow('${sheet}')" style="margin-top:12px;">✦ إضافة للقائمة</button>`;
+  form.innerHTML = html;
+
+  // عرض السجلات الحالية
+  renderIncManualList(sheet);
+}
+
+function addIncManualRow(sheet){
+  const config = INC_SHEETS[sheet];
+  if(!config) return;
+  const row = {};
+  config.cols.forEach(col=>{
+    const el = document.getElementById('incField_'+col.replace(/\s/g,'_'));
+    row[col] = el ? el.value.trim() : '';
+  });
+  if(!row[config.cols[0]]){ toast('❌ أدخل الاسم على الأقل'); return; }
+
+  if(!incManualData[sheet]) incManualData[sheet]=[];
+  incManualData[sheet].push(row);
+  
+  // مسح الحقول
+  config.cols.forEach(col=>{
+    const el = document.getElementById('incField_'+col.replace(/\s/g,'_'));
+    if(el) el.value='';
+  });
+  renderIncManualList(sheet);
+  toast('✅ تمت الإضافة');
+}
+
+function renderIncManualList(sheet){
+  const el = document.getElementById('incManualList');
+  if(!el) return;
+  const rows = incManualData[sheet]||[];
+  const config = INC_SHEETS[sheet];
+  if(!rows.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">لا توجد سجلات بعد</div>'; return; }
+
+  let html = `<div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;">${rows.length} سجل مضاف</div>`;
+  rows.forEach((row,i)=>{
+    const eligible = config.eligible_logic(row);
+    const bg = eligible?'rgba(0,168,150,0.06)':'rgba(217,79,79,0.06)';
+    const badge = eligible
+      ? '<span style="background:rgba(0,168,150,0.15);color:var(--accent);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">✅ مؤهل</span>'
+      : '<span style="background:rgba(217,79,79,0.12);color:var(--red);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">❌ غير مؤهل</span>';
+    html += `<div style="background:${bg};border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+      <div style="flex:1;">
+        <div style="font-size:12px;font-weight:900;">${row[config.cols[0]]||'—'} ${badge}</div>
+        <div style="font-size:10px;color:var(--text-dim);">${config.cols.slice(1,4).map(c=>row[c]?c+': '+row[c]:'').filter(Boolean).join(' | ')}</div>
+      </div>
+      <button onclick="removeIncRow('${sheet}',${i})" style="background:rgba(217,79,79,0.1);border:none;color:var(--red);padding:4px 8px;border-radius:7px;font-size:11px;cursor:pointer;">🗑</button>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function removeIncRow(sheet, idx){
+  if(incManualData[sheet]) incManualData[sheet].splice(idx,1);
+  renderIncManualList(sheet);
+}
+
+// دمج البيانات اليدوية مع incData عند التحليل
+function mergeIncManualToData(){
+  Object.entries(incManualData).forEach(([sheet,rows])=>{
+    if(!rows.length) return;
+    const config = INC_SHEETS[sheet];
+    if(!incData[sheet]){
+      // أنشئ الشيت
+      incData[sheet] = [[], [], config.cols, ...rows.map(r=>config.cols.map(c=>r[c]||''))];
+    } else {
+      // أضف للشيت
+      rows.forEach(row=>incData[sheet].push(config.cols.map(c=>row[c]||'')));
+    }
+  });
 }
 
 // TOP RATED TRAINERS SECTION
