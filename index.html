@@ -1193,9 +1193,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     </div>
     <div class="section-tabs">
       <button class="stab active" onclick="switchTab('vt',this)">👥 المخالفات / Violations</button>
-      <button class="stab" onclick="switchTab('st',this)">⭐ الاستطلاعات / Surveys</button>
-      <button class="stab" onclick="switchTab('ft',this)">🔧 المرافق / Facility</button>
-      <button class="stab" onclick="switchTab('bt',this)">🏢 المبنى / Building</button>
+      <button class="stab admin-only-tab" onclick="switchTab('st',this)" style="display:none;">⭐ الاستطلاعات / Surveys</button>
+      <button class="stab admin-only-tab" onclick="switchTab('ft',this)" style="display:none;">🔧 المرافق / Facility</button>
+      <button class="stab admin-only-tab" onclick="switchTab('bt',this)" style="display:none;">🏢 المبنى / Building</button>
     </div>
 
     <!-- ══ VIOLATIONS TAB ══ -->
@@ -4607,7 +4607,7 @@ function doLogin(){
     currentUser={username:u,...usr};hideLM();updateNav();
     loadActiveStaffHome();
     renderHomeWidgets();
-    renderDailyBulletin();
+    renderDailyBulletin().catch(()=>{});
     if(pendingSec){
       const s=pendingSec;pendingSec=null;
       if(s.startsWith('__admin_')){
@@ -4638,6 +4638,11 @@ function toggleTheme(){
   });
 })();
 function updateNav(){
+  // إظهار/إخفاء تبويبات السجلات حسب الصلاحية
+  const isAdmin = currentUser?.role === 'admin';
+  document.querySelectorAll('.admin-only-tab').forEach(t=>{
+    t.style.display = isAdmin ? 'inline-flex' : 'none';
+  });
   const el=document.getElementById('navUser');
   // قفل البطاقات حسب الجنس (تظهر لكن مقفلة)
   const femaleCard = document.querySelector('.section-card.female');
@@ -4706,7 +4711,7 @@ function showPage(name,el){
   document.getElementById('page-'+name).classList.add('active');
   if(el)el.classList.add('active');
   if(name==='records')loadAll().then(()=>{ const activeTab=document.querySelector('.stab.active'); if(activeTab)activeTab.click(); });
-  if(name==='home'){loadActiveStaffHome();renderHomeWidgets();renderDailyBulletin();}
+  if(name==='home'){loadActiveStaffHome();renderHomeWidgets();renderDailyBulletin().catch(()=>{});}
 }
 
 // ── صلاحيات الجنس ──
@@ -4799,7 +4804,7 @@ function goHome(){
   document.getElementById('page-home').classList.add('active');
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.querySelector('.nav-tab').classList.add('active');
-  renderDailyBulletin();
+  renderDailyBulletin().catch(()=>{});
   loadActiveStaffHome();
 }
 function setDT(){
@@ -5842,7 +5847,6 @@ const STAFF_SCHEDULES = {
     ],
     rotating:[
       {task:"🔧 ملاحظات المرافق والنظافة",       days:["أنا","امجاد","سمية","أنا","امجاد"]},
-      {task:"🏢 تقرير المبنى الرئيسي",           days:["امجاد","سمية","أنا","امجاد","سمية"]},
       {task:"⭐ استطلاع رضا العملاء",             days:["سمية","أنا","امجاد","سمية","أنا"]},
       {task:"🏫 متابعة مبنى التدريب العملي (50د)",days:["امجاد","أنا","سمية","امجاد","أنا"]},
     ]
@@ -5892,7 +5896,6 @@ const STAFF_SCHEDULES = {
     ],
     rotating:[
       {task:"🔧 ملاحظات المرافق والنظافة",       days:["شهد","امجاد","أنا","شهد","امجاد"]},
-      {task:"🏢 تقرير المبنى الرئيسي",           days:["امجاد","أنا","شهد","امجاد","أنا"]},
       {task:"⭐ استطلاع رضا العملاء",             days:["أنا","شهد","امجاد","أنا","شهد"]},
       {task:"🏫 متابعة مبنى التدريب العملي (50د)",days:["امجاد","شهد","أنا","امجاد","شهد"]},
     ]
@@ -7406,7 +7409,7 @@ async function exportAttendanceMonthly(yearIn, monthIn){
   sheet1Data.push(headerRow);
 
   const SECTIONS_MAP={'شهد المقرن':'نسائي','سمية الخضيري':'نسائي','امجاد ابانمي':'نسائي',
-    'احمد الحماد':'رجالي','ابراهيم الحمد':'رجالي','احمد سحاب':'رجالي','محمد محمد الجمعان':'إدارة'};
+    'احمد الحماد':'رجالي','ابراهيم الحمد':'رجالي','احمد سحاب':'رجالي','محمد محمد الجمعان':'إدارة (المسؤول)'};
 
   let totalPresent=0, totalAbsent=0, totalPerm=0, totalLeave=0;
   ALL_STAFF.forEach((staff,ri)=>{
@@ -7599,7 +7602,7 @@ async function exportAttendanceStyled(yearIn, monthIn){
     const monthNames=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
     const monthName=monthNames[month-1];
     const STAFF_LIST=['شهد المقرن','سمية الخضيري','امجاد ابانمي','احمد الحماد','ابراهيم الحمد','احمد سحاب','محمد محمد الجمعان'];
-    const SECS={'شهد المقرن':'نسائي','سمية الخضيري':'نسائي','امجاد ابانمي':'نسائي','احمد الحماد':'رجالي','ابراهيم الحمد':'رجالي','احمد سحاب':'رجالي','محمد محمد الجمعان':'إدارة'};
+    const SECS={'شهد المقرن':'نسائي','سمية الخضيري':'نسائي','امجاد ابانمي':'نسائي','احمد الحماد':'رجالي','ابراهيم الحمد':'رجالي','احمد سحاب':'رجالي','محمد محمد الجمعان':'إدارة (المسؤول)'};
     const DN={0:'اثنين',1:'ثلاثاء',2:'أربعاء',3:'خميس',6:'أحد'};
     const SYM={'غياب':'❌','إجازة':'🔵','استئذان':'🟡','خروج مبكر':'🔶','تأخير':'⏰'};
     const SBG={'✅':'E8F8F2','❌':'FDECEA','🔵':'EAF2FB','🟡':'FFF8E1','🔶':'FFF3E0','⏰':'FFF3E0'};
@@ -8170,9 +8173,52 @@ async function exportSalesStyled(){
     ws_kpi_row(la,6,'طلبات التأجيل',recs.filter(r=>r.request_type==='تأجيل').length,EX.ORANGE);
     [22,10,10,10,22,10,10,10].forEach((w,i)=>{la.getColumn(i+1).width=w;});
 
+    // شيت KPIs وتوصيات
+    const la=wb.addWorksheet('لوحة KPIs والتوصيات'); la.views=[{rightToLeft:true}];
+    exMerge(la,1,1,1,8,'لوحة تحليل عملاء الاسترداد  |  نورة لتعليم القيادة',{size:13,height:34});
+    const refund=recs.filter(r=>r.request_type==='استرداد');
+    const cont=recs.filter(r=>r.request_type==='استكمال');
+    const defer=recs.filter(r=>r.request_type==='تأجيل');
+    const totalFees=refund.reduce((a,r)=>a+(parseFloat(r.fees)||0),0);
+    const retRate=recs.length?((cont.length/recs.length)*100).toFixed(1):0;
+    ws_kpi_row(la,3,'إجمالي العملاء',recs.length,EX.DARK);
+    ws_kpi_row(la,4,'طلبات الاسترداد',refund.length,EX.RED);
+    ws_kpi_row(la,5,'طلبات الاستكمال',cont.length,EX.GREEN);
+    ws_kpi_row(la,6,'طلبات التأجيل',defer.length,EX.ORANGE);
+    ws_kpi_row(la,7,'نسبة الاحتفاظ',`${retRate}%`,retRate>=70?'009975':retRate>=50?EX.ORANGE:EX.RED);
+    ws_kpi_row(la,8,'إجمالي المبالغ المطلوبة',`${totalFees.toLocaleString()} ريال`,EX.RED);
+    // تحليل الأسباب
+    exMerge(la,10,1,10,8,'📊 أكثر أسباب الاسترداد تكراراً',{bg:EX.TEAL,size:11,height:26});
+    exHeader(la,11,['السبب','التكرار','النسبة%','الفئة','','','','']);
+    const reasonMap={};
+    recs.forEach(r=>{ const reason=(r.client_reason||'غير محدد').trim(); reasonMap[reason]=(reasonMap[reason]||0)+1; });
+    Object.entries(reasonMap).sort((a,b)=>b[1]-a[1]).slice(0,8).forEach(([reason,count],i)=>{
+      const r=12+i; const bg=i%2===0?EX.ALT1:'FFFFFF';
+      exCell(la,r,1,reason,{bold:true,fg:EX.DARK,bg,h:'right',wrap:true});
+      exCell(la,r,2,count,{bold:true,fg:EX.RED,bg});
+      exCell(la,r,3,recs.length?`${(count/recs.length*100).toFixed(1)}%`:'-',{bg});
+      const category=refund.find(x=>(x.client_reason||'').includes(reason.slice(0,5)))?'استرداد':cont.find(x=>(x.client_reason||'').includes(reason.slice(0,5)))?'استكمال':'—';
+      exCell(la,r,4,category,{bg}); la.getRow(r).height=22;
+    });
+    // توصيات
+    const recRow=21;
+    exMerge(la,recRow,1,recRow,8,'💡 التوصيات',{bg:'8B4513',size:11,height:26});
+    [{label:'توصية 1',val:retRate<50?'مراجعة أسعار البرامج وتقديم خيارات تقسيط مرنة':'الحفاظ على معدل الاحتفاظ الحالي'},
+     {label:'توصية 2',val:'متابعة العملاء المؤجلين شخصياً خلال أسبوع من الطلب'},
+     {label:'توصية 3',val:`معالجة أكثر سبب متكرر: "${Object.entries(reasonMap).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—'}"`},
+     {label:'توصية 4',val:'إنشاء تقرير أسبوعي لمتابعة حالات الاسترداد مع الإدارة'},
+    ].forEach(({label,val},i)=>{
+      const r=recRow+1+i; const bg=i%2===0?EX.ALT1:'FFFFFF';
+      exCell(la,r,1,label,{bold:true,fg:EX.TEAL2,bg,h:'right'});
+      la.mergeCells(r,2,r,8); const vc=la.getCell(r,2); vc.value=val;
+      vc.font=exFont(false,10,EX.DARK); vc.fill=exFill(bg); vc.alignment=exAlign('right'); vc.border=exBd();
+      la.getRow(r).height=22;
+    });
+    [22,12,12,14,10,10,10,10].forEach((w,i)=>{la.getColumn(i+1).width=w;});
+
     await saveExcelJS(wb,`تقرير_المبيعات_${year}.xlsx`);
-    toast(`✅ تم تصدير ${recs.length} عميل`);
-  }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تصدير Excel';} }
+    toast(`✅ تم تصدير ${recs.length} عميل بـ شيتين`);
+  }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تصدير Excel منسّق + KPIs';} }
 }
 
 // ── تصدير الأعلى بالتقييم ──
@@ -8868,7 +8914,7 @@ async function submitAttendance(){
   renderAttendList();
   renderAttendKPIs();
   // Trigger bulletin refresh
-  renderDailyBulletin();
+  renderDailyBulletin().catch(()=>{});
   toast('✅ تم تسجيل الحضور بنجاح');
 }
 
