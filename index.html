@@ -4638,12 +4638,14 @@ function toggleTheme(){
   });
 })();
 function updateNav(){
+  try{
   // إظهار/إخفاء تبويبات السجلات حسب الصلاحية
   const isAdmin = currentUser?.role === 'admin';
   document.querySelectorAll('.admin-only-tab').forEach(t=>{
     t.style.display = isAdmin ? 'inline-flex' : 'none';
   });
   const el=document.getElementById('navUser');
+  if(!el) return;
   // قفل البطاقات حسب الجنس (تظهر لكن مقفلة)
   const femaleCard = document.querySelector('.section-card.female');
   const maleCard   = document.querySelector('.section-card.male');
@@ -4701,6 +4703,7 @@ function updateNav(){
   }else{
     el.innerHTML=`<button onclick="showLM()" style="background:rgba(0,200,180,0.09);border:1px solid var(--border);color:var(--accent);padding:5px 11px;border-radius:7px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;margin-left:10px">🔐 دخول</button>`;
   }
+  }catch(e){console.error("updateNav error:",e);}
 }
 
 // NAVIGATION
@@ -8174,22 +8177,22 @@ async function exportSalesStyled(){
     [22,10,10,10,22,10,10,10].forEach((w,i)=>{la.getColumn(i+1).width=w;});
 
     // شيت KPIs وتوصيات
-    const la=wb.addWorksheet('لوحة KPIs والتوصيات'); la.views=[{rightToLeft:true}];
-    exMerge(la,1,1,1,8,'لوحة تحليل عملاء الاسترداد  |  نورة لتعليم القيادة',{size:13,height:34});
+    const la2=wb.addWorksheet('لوحة KPIs والتوصيات'); la2.views=[{rightToLeft:true}];
+    exMerge(la2,1,1,1,8,'لوحة تحليل عملاء الاسترداد  |  نورة لتعليم القيادة',{size:13,height:34});
     const refund=recs.filter(r=>r.request_type==='استرداد');
     const cont=recs.filter(r=>r.request_type==='استكمال');
     const defer=recs.filter(r=>r.request_type==='تأجيل');
     const totalFees=refund.reduce((a,r)=>a+(parseFloat(r.fees)||0),0);
     const retRate=recs.length?((cont.length/recs.length)*100).toFixed(1):0;
-    ws_kpi_row(la,3,'إجمالي العملاء',recs.length,EX.DARK);
-    ws_kpi_row(la,4,'طلبات الاسترداد',refund.length,EX.RED);
-    ws_kpi_row(la,5,'طلبات الاستكمال',cont.length,EX.GREEN);
-    ws_kpi_row(la,6,'طلبات التأجيل',defer.length,EX.ORANGE);
-    ws_kpi_row(la,7,'نسبة الاحتفاظ',`${retRate}%`,retRate>=70?'009975':retRate>=50?EX.ORANGE:EX.RED);
-    ws_kpi_row(la,8,'إجمالي المبالغ المطلوبة',`${totalFees.toLocaleString()} ريال`,EX.RED);
+    ws_kpi_row(la2,3,'إجمالي العملاء',recs.length,EX.DARK);
+    ws_kpi_row(la2,4,'طلبات الاسترداد',refund.length,EX.RED);
+    ws_kpi_row(la2,5,'طلبات الاستكمال',cont.length,EX.GREEN);
+    ws_kpi_row(la2,6,'طلبات التأجيل',defer.length,EX.ORANGE);
+    ws_kpi_row(la2,7,'نسبة الاحتفاظ',`${retRate}%`,retRate>=70?'009975':retRate>=50?EX.ORANGE:EX.RED);
+    ws_kpi_row(la2,8,'إجمالي المبالغ المطلوبة',`${totalFees.toLocaleString()} ريال`,EX.RED);
     // تحليل الأسباب
-    exMerge(la,10,1,10,8,'📊 أكثر أسباب الاسترداد تكراراً',{bg:EX.TEAL,size:11,height:26});
-    exHeader(la,11,['السبب','التكرار','النسبة%','الفئة','','','','']);
+    exMerge(la2,10,1,10,8,'📊 أكثر أسباب الاسترداد تكراراً',{bg:EX.TEAL,size:11,height:26});
+    exHeader(la2,11,['السبب','التكرار','النسبة%','الفئة','','','','']);
     const reasonMap={};
     recs.forEach(r=>{ const reason=(r.client_reason||'غير محدد').trim(); reasonMap[reason]=(reasonMap[reason]||0)+1; });
     Object.entries(reasonMap).sort((a,b)=>b[1]-a[1]).slice(0,8).forEach(([reason,count],i)=>{
@@ -8198,11 +8201,11 @@ async function exportSalesStyled(){
       exCell(la,r,2,count,{bold:true,fg:EX.RED,bg});
       exCell(la,r,3,recs.length?`${(count/recs.length*100).toFixed(1)}%`:'-',{bg});
       const category=refund.find(x=>(x.client_reason||'').includes(reason.slice(0,5)))?'استرداد':cont.find(x=>(x.client_reason||'').includes(reason.slice(0,5)))?'استكمال':'—';
-      exCell(la,r,4,category,{bg}); la.getRow(r).height=22;
+      exCell(la,r,4,category,{bg}); la2.getRow(r).height=22;
     });
     // توصيات
     const recRow=21;
-    exMerge(la,recRow,1,recRow,8,'💡 التوصيات',{bg:'8B4513',size:11,height:26});
+    exMerge(la2,recRow,1,recRow,8,'💡 التوصيات',{bg:'8B4513',size:11,height:26});
     [{label:'توصية 1',val:retRate<50?'مراجعة أسعار البرامج وتقديم خيارات تقسيط مرنة':'الحفاظ على معدل الاحتفاظ الحالي'},
      {label:'توصية 2',val:'متابعة العملاء المؤجلين شخصياً خلال أسبوع من الطلب'},
      {label:'توصية 3',val:`معالجة أكثر سبب متكرر: "${Object.entries(reasonMap).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—'}"`},
@@ -8210,11 +8213,11 @@ async function exportSalesStyled(){
     ].forEach(({label,val},i)=>{
       const r=recRow+1+i; const bg=i%2===0?EX.ALT1:'FFFFFF';
       exCell(la,r,1,label,{bold:true,fg:EX.TEAL2,bg,h:'right'});
-      la.mergeCells(r,2,r,8); const vc=la.getCell(r,2); vc.value=val;
+      la2.mergeCells(r,2,r,8); const vc=la2.getCell(r,2); vc.value=val;
       vc.font=exFont(false,10,EX.DARK); vc.fill=exFill(bg); vc.alignment=exAlign('right'); vc.border=exBd();
-      la.getRow(r).height=22;
+      la2.getRow(r).height=22;
     });
-    [22,12,12,14,10,10,10,10].forEach((w,i)=>{la.getColumn(i+1).width=w;});
+    [22,12,12,14,10,10,10,10].forEach((w,i)=>{la2.getColumn(i+1).width=w;});
 
     await saveExcelJS(wb,`تقرير_المبيعات_${year}.xlsx`);
     toast(`✅ تم تصدير ${recs.length} عميل بـ شيتين`);
