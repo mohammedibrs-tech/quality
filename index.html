@@ -739,12 +739,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 .cards-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .sec-group-label{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;padding:6px 2px 2px;}
 
-/* Desktop 2-col */
-@media(min-width:768px){
-  .home-sections{display:grid !important;grid-template-columns:1fr 1fr;gap:14px;padding:0 24px !important;}
-  .home-sections .sec-group-label,
-  .home-sections .cards-row-2,
-  .home-sections .section-card.full-w{grid-column:1/-1;}
+
 }
 
 /* KPI CARDS */
@@ -767,6 +762,43 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 .export-btn{border:1.5px solid rgba(0,200,180,0.4) !important;background:rgba(0,200,180,0.08) !important;color:var(--accent) !important;border-radius:10px !important;}
 .stab{border-radius:10px !important;}
 .stab.active{background:linear-gradient(135deg,var(--accent),var(--accent2)) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 3px 12px rgba(0,200,180,0.3) !important;}
+
+/* ══ نصوص الكروت واضحة دائماً ══ */
+.section-card .s-title-ar{color:#fff !important;text-shadow:0 1px 3px rgba(0,0,0,0.3);}
+.section-card .s-title-en{color:rgba(255,255,255,0.82) !important;}
+.section-card .s-arrow{color:rgba(255,255,255,0.6) !important;}
+.section-card .s-icon{color:#fff;}
+
+/* ══ DESKTOP LAYOUT ══ */
+@media(min-width:768px){
+  /* wrapper للرئيسية بحيث لا تصل الكروت للهوامش */
+  .home-sections{
+    display:grid !important;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    max-width:900px;
+    margin:0 auto;
+    padding:0 32px !important;
+  }
+  .home-sections .sec-group-label,
+  .home-sections .cards-row-2,
+  .home-sections .section-card.full-w{grid-column:1/-1;}
+
+  /* توسيط النص في الكروت على الديسكتوب */
+  .section-card .s-text{
+    text-align:center !important;
+  }
+  .section-card .s-title-ar{
+    text-align:center !important;
+  }
+  .section-card .s-title-en{
+    text-align:center !important;
+  }
+  /* ترتيب: أيقونة في اليسار والنص في المنتصف */
+  .section-card{
+    justify-content:space-between;
+  }
+}
 </style>
 </head>
 <body>
@@ -889,6 +921,34 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
   </div></div>
+
+<div id="weeklyTasksModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);z-index:9200;overflow-y:auto;padding:20px 12px;">
+  <div style="background:var(--card);border-radius:20px;max-width:700px;margin:0 auto;padding:24px 20px;position:relative;">
+    <button onclick="document.getElementById('weeklyTasksModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
+
+    <!-- Notice Banner -->
+    <div style="background:linear-gradient(135deg,#00A896,#0D4A45);border-radius:14px;padding:16px 18px;margin-bottom:20px;text-align:center;">
+      <div style="font-size:20px;margin-bottom:6px;">📌</div>
+      <div style="font-size:13px;font-weight:900;color:#FFFFFF;margin-bottom:6px;">تنويه مهم</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.88);line-height:1.7;">
+        المهام اليومية تدور حول الموظفين يومياً<br>
+        <strong>(ملاحظات المرافق والنظافة) | (تقرير المبنى الرئيسي) | (استطلاع رضا العملاء) | (متابعة مبنى التدريب العملي)</strong><br>
+        يرجى متابعة مهامك بشكل دوري
+      </div>
+    </div>
+
+    <!-- Day + tabs row -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div id="wtDayBadge" style="font-size:11px;font-weight:700;background:var(--accent);color:#fff;padding:5px 14px;border-radius:20px;"></div>
+    </div>
+
+    <!-- Admin staff tabs -->
+    <div id="wtTabsRow" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;"></div>
+
+    <!-- Content -->
+    <div id="wtBody"></div>
+  </div>
+</div>
 
 <!-- VIOLATIONS -->
 <div id="page-violations" class="page">
