@@ -7608,16 +7608,128 @@ async function exportBuildingStyled(){
 }
 
 async function exportAttendanceStyled(yearIn, monthIn){
+  if(typeof ExcelJS==='undefined'){toast('❌ مكتبة ExcelJS غير محملة');return;}
   const now=new Date();
-  const year=yearIn||now.getFullYear(); const month=monthIn||(now.getMonth()+1);
-  const allRecs = await loadAttendFromSupabase();
-  const monthNames=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-  const btn = event?.target;
-  await callExportAPI('attendance', allRecs, {
-    year, month,
-    filename:`كشف_الحضور_${monthNames[month-1]}_${year}.xlsx`,
-    btn, btnText:'📅 كشف شهري للـ HR'
-  });
+  const year=yearIn||now.getFullYear();
+  const month=monthIn!==undefined?monthIn:(now.getMonth()+1);
+  const btn=event?.target; if(btn){btn.disabled=true;btn.textContent='⏳ جاري البناء...';}
+  try{
+    const allRecs = await loadAttendFromSupabase();
+    const monthNames=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const monthName=monthNames[month-1];
+    const STAFF_LIST=['شهد المقرن','سمية الخضيري','امجاد ابانمي','احمد الحماد','ابراهيم الحمد','احمد سحاب','محمد محمد الجمعان'];
+    const SECS={'شهد المقرن':'نسائي','سمية الخضيري':'نسائي','امجاد ابانمي':'نسائي','احمد الحماد':'رجالي','ابراهيم الحمد':'رجالي','احمد سحاب':'رجالي','محمد محمد الجمعان':'إدارة'};
+    const DN={0:'اثنين',1:'ثلاثاء',2:'أربعاء',3:'خميس',6:'أحد'};
+    const SYM={'غياب':'❌','إجازة':'🔵','استئذان':'🟡','خروج مبكر':'🔶','تأخير':'⏰'};
+    const SBG={'✅':'E8F8F2','❌':'FDECEA','🔵':'EAF2FB','🟡':'FFF8E1','🔶':'FFF3E0','⏰':'FFF3E0'};
+    const SFG={'✅':'00A896','❌':'C00000','🔵':'5299E0','🟡':'E0A800','🔶':'E07B2A','⏰':'E07B2A'};
+
+    // أيام العمل
+    const workDays=[];
+    const d=new Date(year,month-1,1);
+    while(d.getMonth()===month-1){
+      if([0,1,2,3,6].includes(d.getDay())) workDays.push(new Date(d));
+      d.setDate(d.getDate()+1);
+    }
+    const monthStr=String(year)+'-'+String(month).padStart(2,'0');
+    const monthRecs=allRecs.filter(r=>(r.date||'').startsWith(monthStr));
+
+    const wb=new ExcelJS.Workbook(); wb.views=[{rightToLeft:true}];
+
+    // ══ شيت كشف الحضور ══
+    const ws=wb.addWorksheet('كشف الحضور'); ws.views=[{rightToLeft:true}];
+    const totalCols=3+workDays.length+5;
+    exMerge(ws,1,1,1,totalCols,`كشف حضور وانصراف الموظفين  ·  ${monthName} ${year}  ·  نورة لتعليم القيادة`,{size:14,height:36});
+    exMerge(ws,2,1,2,totalCols,`أيام العمل: الأحد — الخميس  |  إجمالي أيام العمل: ${workDays.length} يوم`,{bold:false,bg:EX.TEAL,size:10,height:22});
+
+    // رؤوس
+    ['م','اسم الموظف','القسم'].forEach((h,i)=>{
+      const c=ws.getCell(3,i+1); c.value=h;
+      c.font=exFont(true,10,'FFFFFF'); c.fill=exFill(EX.DARK);
+      c.alignment=exAlign('center','center',true); c.border=exBd('FFFFFF');
+    });
+    workDays.forEach((day,di)=>{
+      const c=ws.getCell(3,4+di);
+      c.value=`${String(day.getDate()).padStart(2,'0')}/${String(day.getMonth()+1).padStart(2,'0')}
+${DN[day.getDay()]}`;
+      c.font=exFont(true,9,'FFFFFF'); c.fill=exFill(EX.DARK);
+      c.alignment=exAlign('center','center',true); c.border=exBd('FFFFFF');
+      ws.getColumn(4+di).width=8;
+    });
+    ['الحضور','الغياب','استئذان','إجازة','نسبة الحضور%'].forEach((h,i)=>{
+      const c=ws.getCell(3,4+workDays.length+i); c.value=h;
+      c.font=exFont(true,9,'FFFFFF'); c.fill=exFill(EX.DARK);
+      c.alignment=exAlign('center','center',true); c.border=exBd('FFFFFF');
+      ws.getColumn(4+workDays.length+i).width=11;
+    });
+    ws.getRow(3).height=30; ws.getColumn(1).width=5; ws.getColumn(2).width=22; ws.getColumn(3).width=10;
+
+    // بيانات الموظفين
+    STAFF_LIST.forEach((staff,ri)=>{
+      const r=4+ri; const bg=ri%2===0?EX.ALT1:'FFFFFF';
+      exCell(ws,r,1,ri+1,{bg}); exCell(ws,r,2,staff,{bold:true,fg:EX.DARK,bg,h:'right'});
+      exCell(ws,r,3,SECS[staff]||'—',{bg});
+      let p=0,ab=0,pm=0,lv=0;
+      workDays.forEach((day,di)=>{
+        const dateStr=day.toISOString().split('T')[0];
+        const rec=monthRecs.find(x=>x.staff===staff&&x.date===dateStr);
+        const sym=rec?SYM[rec.status]||'✅':'✅';
+        const st=rec?.status||'';
+        if(!rec||st==='حضور') p++; else if(st==='غياب') ab++; else if(st==='إجازة') lv++; else pm++;
+        const cell=ws.getCell(r,4+di);
+        cell.value=sym; cell.font=exFont(sym==='✅',10,SFG[sym]||'000000');
+        cell.fill=exFill(SBG[sym]||bg); cell.alignment=exAlign(); cell.border=exBd();
+      });
+      const sc=4+workDays.length; const pct=Math.round(p/workDays.length*100);
+      const pctBg=pct>=90?'009975':pct>=75?EX.ORANGE:EX.RED;
+      exCell(ws,r,sc,p,{fg:'00A896',bg}); exCell(ws,r,sc+1,ab,{fg:EX.RED,bg});
+      exCell(ws,r,sc+2,pm,{fg:EX.ORANGE,bg}); exCell(ws,r,sc+3,lv,{fg:'5299E0',bg});
+      const pc=ws.getCell(r,sc+4); pc.value=pct+'%';
+      pc.font=exFont(true,10,'FFFFFF'); pc.fill=exFill(pctBg); pc.alignment=exAlign(); pc.border=exBd();
+      ws.getRow(r).height=20;
+    });
+    ws.views=[{state:'frozen',xSplit:3,ySplit:3,rightToLeft:true}];
+
+    // ══ شيت التحليل ══
+    const ws2=wb.addWorksheet('تحليل شهري'); ws2.views=[{rightToLeft:true}];
+    exMerge(ws2,1,1,1,7,`تحليل شهري للحضور – ${monthName} ${year}  ·  نورة لتعليم القيادة`,{size:13,height:34});
+    exMerge(ws2,3,1,3,7,'ملخص حضور الموظفين',{bg:EX.TEAL,size:11,height:26});
+    exHeader(ws2,4,['الموظف','القسم','حضور','غياب','استئذان','إجازة','نسبة الحضور%']);
+    [24,12,12,12,15,12,14].forEach((w,i)=>{ws2.getColumn(i+1).width=w;});
+    let totalP=0,totalAb=0,totalPm=0,totalLv=0;
+    STAFF_LIST.forEach((staff,ri)=>{
+      const r=5+ri; const bg=ri%2===0?EX.ALT1:'FFFFFF';
+      const sr=monthRecs.filter(x=>x.staff===staff);
+      const p=workDays.filter(d=>!sr.find(x=>x.date===d.toISOString().split('T')[0])).length;
+      const ab=sr.filter(x=>x.status==='غياب').length;
+      const pm=sr.filter(x=>['استئذان','خروج مبكر','تأخير'].includes(x.status)).length;
+      const lv=sr.filter(x=>x.status==='إجازة').length;
+      const pct=Math.round(p/workDays.length*100);
+      const pctBg=pct>=90?'009975':pct>=75?EX.ORANGE:EX.RED;
+      totalP+=p;totalAb+=ab;totalPm+=pm;totalLv+=lv;
+      exCell(ws2,r,1,staff,{bold:true,fg:EX.DARK,bg,h:'right'});
+      exCell(ws2,r,2,SECS[staff]||'—',{bg}); exCell(ws2,r,3,p,{fg:'00A896',bg});
+      exCell(ws2,r,4,ab,{fg:EX.RED,bg}); exCell(ws2,r,5,pm,{fg:EX.ORANGE,bg}); exCell(ws2,r,6,lv,{fg:'5299E0',bg});
+      const pc=ws2.getCell(r,7); pc.value=pct+'%';
+      pc.font=exFont(true,10,'FFFFFF'); pc.fill=exFill(pctBg); pc.alignment=exAlign(); pc.border=exBd();
+      ws2.getRow(r).height=20;
+    });
+    // إحصائيات
+    const sr2=5+STAFF_LIST.length+2;
+    exMerge(ws2,sr2,1,sr2,7,'📈 إحصائيات الشهر الإجمالية',{bg:EX.TEAL,size:11,height:26});
+    [['إجمالي أيام العمل',workDays.length,EX.DARK],['عدد الموظفين',STAFF_LIST.length,EX.DARK],
+     ['إجمالي الحضور',totalP,'009975'],['إجمالي الغياب',totalAb,EX.RED],
+     ['إجمالي استئذان/تأخير',totalPm,EX.ORANGE],['إجمالي إجازات',totalLv,'5299E0'],
+     ['نسبة الحضور الكلية',Math.round(totalP/(workDays.length*STAFF_LIST.length)*100)+'%',totalP/(workDays.length*STAFF_LIST.length)>=0.9?'009975':EX.ORANGE]
+    ].forEach(([lbl,val,vbg],i)=>{
+      const r=sr2+1+i;
+      ws_kpi_row(ws2,r,lbl,val,vbg);
+      ws2.getRow(r).height=22;
+    });
+
+    await saveExcelJS(wb,`كشف_الحضور_${monthName}_${year}.xlsx`);
+    toast('✅ تم تصدير كشف الحضور بشيتين');
+  }finally{ if(btn){btn.disabled=false;btn.textContent='📅 كشف شهري للـ HR';} }
 }
 
 async function exportIncentivesStyled(){
@@ -7729,47 +7841,71 @@ async function exportViolationsStyled(section){
     const female = recs.filter(r=>r.section==='female');
     const male = recs.filter(r=>r.section==='male');
 
-    const wb = new ExcelJS.Workbook();
-    wb.views = [{rightToLeft:true}];
+    const wb = new ExcelJS.Workbook(); wb.views=[{rightToLeft:true}];
 
     // شيت KPIs
-    const ks = wb.addWorksheet('لوحة KPIs');
-    ks.views = [{rightToLeft:true}];
-    exMerge(ks,1,1,1,8,`لوحة المخالفات – KPIs  |  نورة لتعليم القيادة`,{size:14,height:36});
-    exMerge(ks,2,1,2,8,`إجمالي: ${recs.length} | نسائي: ${female.length} | رجالي: ${male.length} | السنة: ${year}`,{bold:false,bg:EX.TEAL,size:10,height:20});
-    exMerge(ks,4,1,4,8,'📊 مؤشرات الأداء الرئيسية',{bg:EX.TEAL,size:11,height:26});
+    const ks = wb.addWorksheet('لوحة KPIs'); ks.views=[{rightToLeft:true}];
+    exMerge(ks,1,1,1,10,`لوحة المخالفات – KPIs  |  نورة لتعليم القيادة`,{size:14,height:36});
+    exMerge(ks,2,1,2,10,`إجمالي: ${recs.length} | نسائي: ${female.length} | رجالي: ${male.length} | السنة: ${year}`,{bold:false,bg:EX.TEAL,size:10,height:20});
+    exMerge(ks,4,1,4,10,'📊 مؤشرات الأداء الرئيسية',{bg:EX.TEAL,size:11,height:26});
+    [['إجمالي المخالفات',recs.length,EX.DARK],['مخالفات A – خطيرة',recs.filter(r=>r.grade==='A').length,EX.RED],
+     ['مخالفات B – متوسطة',recs.filter(r=>r.grade==='B').length,EX.ORANGE],['مخالفات C – خفيفة',recs.filter(r=>r.grade==='C').length,EX.GREEN],
+     ['القسم النسائي',female.length,EX.TEAL2],['القسم الرجالي',male.length,EX.TEAL2],
+    ].forEach(([lbl,val,vbg],i)=>{ ws_kpi_row(ks,5+i,lbl,val,vbg); });
 
-    const kpis=[
-      ['إجمالي المخالفات',recs.length,EX.DARK],
-      ['مخالفات A – خطيرة',recs.filter(r=>r.grade==='A').length,EX.RED],
-      ['مخالفات B – متوسطة',recs.filter(r=>r.grade==='B').length,EX.ORANGE],
-      ['مخالفات C – خفيفة',recs.filter(r=>r.grade==='C').length,EX.GREEN],
-      ['القسم النسائي',female.length,EX.TEAL2],
-      ['القسم الرجالي',male.length,EX.TEAL2],
-    ];
-    kpis.forEach(([lbl,val,vbg],i)=>{
-      const r=5+i;
-      ws_kpi_row(ks,r,lbl,val,vbg);
+    // أكثر المدربين مخالفات
+    exMerge(ks,12,1,12,10,'🏴 أكثر المدربين مخالفات',{bg:EX.RED,size:11,height:26});
+    exHeader(ks,13,['الترتيب','اسم المدرب/ة','القسم','عدد المخالفات','A','B','C','أكثر مخالفة تكراراً','','']);
+    const trainerMap={};
+    recs.forEach(r=>{
+      const k=r.trainer_name||'—'; if(!trainerMap[k]) trainerMap[k]={name:k,sec:r.section,total:0,A:0,B:0,C:0,types:{}};
+      trainerMap[k].total++; trainerMap[k][r.grade||'C']++;
+      const t=r.violation_type||'—'; trainerMap[k].types[t]=(trainerMap[k].types[t]||0)+1;
+    });
+    Object.values(trainerMap).sort((a,b)=>b.total-a.total).slice(0,15).forEach((tr,i)=>{
+      const r=14+i; const bg=i%2===0?EX.ALT1:'FFFFFF';
+      const topType=Object.entries(tr.types).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
+      exCell(ks,r,1,i+1,{bg}); exCell(ks,r,2,tr.name,{bold:true,fg:EX.DARK,bg,h:'right'});
+      exCell(ks,r,3,tr.sec==='female'?'نسائي':'رجالي',{bg});
+      exCell(ks,r,4,tr.total,{bold:true,fg:EX.RED,bg}); exCell(ks,r,5,tr.A,{fg:EX.RED,bg});
+      exCell(ks,r,6,tr.B,{fg:EX.ORANGE,bg}); exCell(ks,r,7,tr.C,{fg:EX.GREEN,bg});
+      exCell(ks,r,8,topType,{bg,h:'right',wrap:true}); ks.getRow(r).height=20;
+    });
+
+    // أكثر المخالفات تكراراً
+    const typeStartRow = 14+15+2;
+    exMerge(ks,typeStartRow,1,typeStartRow,10,'🔁 أكثر المخالفات تكراراً',{bg:EX.ORANGE,size:11,height:26});
+    exHeader(ks,typeStartRow+1,['الترتيب','نوع المخالفة','عدد التكرار','النسبة%','الدرجة الغالبة','','','','','']);
+    const typeMap={};
+    recs.forEach(r=>{ const t=r.violation_type||'—'; if(!typeMap[t]) typeMap[t]={count:0,grades:{}}; typeMap[t].count++; typeMap[t].grades[r.grade||'C']=(typeMap[t].grades[r.grade||'C']||0)+1; });
+    Object.entries(typeMap).sort((a,b)=>b[1].count-a[1].count).slice(0,10).forEach(([type,data],i)=>{
+      const r=typeStartRow+2+i; const bg=i%2===0?EX.ALT1:'FFFFFF';
+      const topGrade=Object.entries(data.grades).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
+      const gradeFg=topGrade==='A'?EX.RED:topGrade==='B'?EX.ORANGE:EX.GREEN;
+      exCell(ks,r,1,i+1,{bg}); exCell(ks,r,2,type,{bold:true,fg:EX.DARK,bg,h:'right',wrap:true});
+      exCell(ks,r,3,data.count,{bold:true,fg:EX.DARK,bg});
+      exCell(ks,r,4,recs.length?`${(data.count/recs.length*100).toFixed(1)}%`:'-',{bg});
+      exCell(ks,r,5,topGrade,{bold:true,fg:gradeFg,bg}); ks.getRow(r).height=22;
     });
 
     // جدول شهري
-    exMerge(ks,12,1,12,8,'📅 توزيع المخالفات الشهري',{bg:EX.TEAL,size:11,height:26});
-    exHeader(ks,13,['الشهر','الإجمالي','A خطيرة','B متوسطة','C خفيفة','نسبة A%','نسبة B%','نسبة C%']);
+    const monthStartRow = typeStartRow+2+12;
+    exMerge(ks,monthStartRow,1,monthStartRow,10,'📅 توزيع المخالفات الشهري',{bg:EX.TEAL,size:11,height:26});
+    exHeader(ks,monthStartRow+1,['الشهر','الإجمالي','A خطيرة','B متوسطة','C خفيفة','نسبة A%','نسبة B%','نسبة C%','','']);
     EX.MONTHS.forEach((month,mi)=>{
-      const r=14+mi;
+      const r=monthStartRow+2+mi;
       const mr=recs.filter(x=>(x.date||'').startsWith(`${year}-${String(mi+1).padStart(2,'0')}`));
       const mt=mr.length,mA=mr.filter(x=>x.grade==='A').length,mB=mr.filter(x=>x.grade==='B').length,mC=mr.filter(x=>x.grade==='C').length;
       const bg=mi%2===0?EX.ALT1:'FFFFFF';
-      exCell(ks,r,1,month,{bold:true,fg:EX.DARK,bg,h:'right'});
-      exCell(ks,r,2,mt,{bg}); exCell(ks,r,3,mA,{fg:EX.RED,bg}); exCell(ks,r,4,mB,{fg:EX.ORANGE,bg}); exCell(ks,r,5,mC,{fg:EX.GREEN,bg});
+      exCell(ks,r,1,month,{bold:true,fg:EX.DARK,bg,h:'right'}); exCell(ks,r,2,mt,{bg});
+      exCell(ks,r,3,mA,{fg:EX.RED,bg}); exCell(ks,r,4,mB,{fg:EX.ORANGE,bg}); exCell(ks,r,5,mC,{fg:EX.GREEN,bg});
       exCell(ks,r,6,mt?`${(mA/mt*100).toFixed(1)}%`:'-',{bg}); exCell(ks,r,7,mt?`${(mB/mt*100).toFixed(1)}%`:'-',{bg}); exCell(ks,r,8,mt?`${(mC/mt*100).toFixed(1)}%`:'-',{bg});
       ks.getRow(r).height=20;
     });
-    [18,10,10,10,10,10,10,10].forEach((w,i)=>{ks.getColumn(i+1).width=w;});
+    [20,14,10,10,10,10,10,10,10,10].forEach((w,i)=>{ks.getColumn(i+1).width=w;});
 
-    // شيت النساء
+    // شيت النساء والرجال
     addViolationsSheet(wb, female, 'مخالفات النسائي', year);
-    // شيت الرجال  
     addViolationsSheet(wb, male, 'مخالفات الرجالي', year);
 
     await saveExcelJS(wb, `سجل_المخالفات_${year}.xlsx`);
