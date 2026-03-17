@@ -667,31 +667,33 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 .phone-step.locked{background:rgba(0,0,0,0.05);border-color:rgba(0,0,0,0.1);color:var(--text-dim);cursor:not-allowed;opacity:0.5;}
 .phone-step.selected{background:var(--accent);border-color:var(--accent);color:#fff;transform:scale(1.08);}
 
-/* ══ CARD COLORS ══ */
+/* ══ APPLE ARCADE CARDS ══ */
 .section-card:active{transform:scale(0.97);opacity:0.92;}
-.section-card.female   {background:linear-gradient(135deg,#E74C3C,#922B21) !important;border:none !important;box-shadow:0 4px 16px rgba(231,76,60,0.35) !important;}
-.section-card.male     {background:linear-gradient(135deg,#2E86C1,#1A5276) !important;border:none !important;box-shadow:0 4px 16px rgba(46,134,193,0.35) !important;}
-.section-card.survey   {background:linear-gradient(135deg,#00C9A7,#007A6E) !important;border:none !important;}
-.section-card.attend   {background:linear-gradient(135deg,#00C8B4,#00897A) !important;border:none !important;}
-.section-card.facility {background:linear-gradient(135deg,#27AE60,#1A6B3A) !important;border:none !important;}
-.section-card.building {background:linear-gradient(135deg,#4A6FA5,#2C3E6B) !important;border:none !important;}
-.section-card.ops      {background:linear-gradient(135deg,#7D3C98,#4A235A) !important;border:none !important;}
-.section-card.incentives{background:linear-gradient(135deg,#D4AC0D,#9A7A00) !important;border:none !important;}
-.section-card.sales    {background:linear-gradient(135deg,#8E44AD,#5B2C6F) !important;border:none !important;}
-.section-card.rating   {background:linear-gradient(135deg,#CA6F1E,#7D4E0A) !important;border:none !important;}
-.section-card.archive  {background:linear-gradient(135deg,#4A6FA5,#2C3E50) !important;border:none !important;}
-.section-card.vref     {background:linear-gradient(135deg,#27AE60,#1A3A2A) !important;border:none !important;}
-.section-card .s-title-ar{color:#fff !important;}
-.section-card .s-title-en{color:rgba(255,255,255,0.82) !important;}
-.section-card .s-desc{color:rgba(255,255,255,0.7) !important;}
-.section-card{position:relative;overflow:hidden;}
 .section-card::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);transform:skewX(-15deg);animation:cardShine 4s ease-in-out infinite;pointer-events:none;}
 @keyframes cardShine{0%{left:-60%}65%,100%{left:130%}}
+.section-card.female   {background:linear-gradient(135deg,#E74C3C,#922B21)!important;border:none!important;}
+.section-card.male     {background:linear-gradient(135deg,#2E86C1,#1A5276)!important;border:none!important;}
+.section-card.survey   {background:linear-gradient(135deg,#00C9A7,#007A6E)!important;border:none!important;}
+.section-card.attend   {background:linear-gradient(135deg,#00C8B4,#00897A)!important;border:none!important;}
+.section-card.facility {background:linear-gradient(135deg,#27AE60,#1A6B3A)!important;border:none!important;}
+.section-card.building {background:linear-gradient(135deg,#4A6FA5,#2C3E6B)!important;border:none!important;}
+.section-card.ops      {background:linear-gradient(135deg,#7D3C98,#4A235A)!important;border:none!important;}
+.section-card.incentives{background:linear-gradient(135deg,#D4AC0D,#9A7A00)!important;border:none!important;}
+.section-card.sales    {background:linear-gradient(135deg,#8E44AD,#5B2C6F)!important;border:none!important;}
+.section-card.rating   {background:linear-gradient(135deg,#CA6F1E,#7D4E0A)!important;border:none!important;}
+.section-card.archive  {background:linear-gradient(135deg,#4A6FA5,#2C3E50)!important;border:none!important;}
+.section-card.vref     {background:linear-gradient(135deg,#27AE60,#1A3A2A)!important;border:none!important;}
+.section-card .s-title-ar{color:#fff!important;text-shadow:0 1px 3px rgba(0,0,0,0.3);}
+.section-card .s-title-en{color:rgba(255,255,255,0.82)!important;}
+[data-theme="dark"] .section-card{filter:brightness(0.82);}
+
+/* Desktop 2-col */
 @media(min-width:768px){
-  .sections-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:860px;margin:0 auto;padding:0 20px;}
+  .sections-grid{display:grid!important;grid-template-columns:1fr 1fr;gap:14px;max-width:860px;margin:0 auto;padding:0 20px;}
   .sections-grid .section-card.full-w{grid-column:1/-1;}
-  .section-card .s-title-ar,.section-card .s-title-en{text-align:center !important;}
+  .section-card .s-title-ar,.section-card .s-title-en{text-align:center!important;}
 }
+/* KPI */
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
 .kpi-card{border-radius:14px;padding:14px 16px;}
 .kpi-card.kpi-teal{background:linear-gradient(135deg,#00C8B4,#00897A);box-shadow:0 3px 12px rgba(0,200,180,0.3);}
@@ -704,6 +706,14 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 .kpi-card.kpi-orange{background:linear-gradient(135deg,#CA6F1E,#7D4E0A);box-shadow:0 3px 12px rgba(202,111,30,0.3);}
 .kpi-val{font-size:24px;font-weight:900;color:#fff;line-height:1;margin-bottom:4px;}
 .kpi-lbl{font-size:10px;color:rgba(255,255,255,0.82);font-weight:600;}
+/* home sections */
+.home-sections{display:flex;flex-direction:column;gap:10px;padding:0 14px;}
+.cards-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sec-group-label{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;padding:6px 2px 2px;}
+@media(min-width:768px){
+  .home-sections{display:grid!important;grid-template-columns:1fr 1fr;gap:14px;max-width:900px;margin:0 auto;padding:0 24px!important;}
+  .home-sections .sec-group-label,.home-sections .cards-row-2,.home-sections .section-card.full-w{grid-column:1/-1;}
+}
 </style>
 </head>
 <body>
@@ -732,159 +742,29 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <p>اختر القسم المناسب — Select a section</p>
     <div class="hero-line"></div>
   </div>
-  <div class="sections-grid">
-    <!-- Weekly Tasks Card — TOP -->
-    <div class="section-card full-w" onclick="showWeeklyTasks()" style="background:linear-gradient(135deg,#1A2E35,#0D4A45);border:none;">
-      <div style="display:flex;align-items:center;justify-content:center;gap:14px;text-align:center;">
-        <div class="s-icon" style="flex-shrink:0;background:rgba(255,255,255,0.12);font-size:24px;width:52px;height:52px;">📅</div>
-        <div>
-          <div class="s-title-ar" style="color:#FFFFFF;font-size:15px;">المهام الأسبوعية لعضو الجودة</div>
-          <div class="s-title-en" style="color:rgba(255,255,255,0.6);">WEEKLY QUALITY MEMBER TASKS — اضغط للعرض</div>
-        </div>
-      </div>
-    </div>
-    <div class="section-card female" onclick="showSection('female')">
-      <div class="s-icon">👩</div>
-      <div class="s-title-ar">رصد المخالفات</div>
-      <div class="s-title-en">VIOLATIONS — FEMALE</div>
-      <div class="s-desc">القسم النسائي</div>
-    </div>
-    <div class="section-card male" onclick="showSection('male')">
-      <div class="s-icon">👨</div>
-      <div class="s-title-ar">رصد المخالفات</div>
-      <div class="s-title-en">VIOLATIONS — MALE</div>
-      <div class="s-desc">القسم الرجالي</div>
-    </div>
-    <div class="section-card survey" onclick="showSection('survey')">
-      <div class="s-icon">⭐</div>
-      <div class="s-title-ar">استطلاع رضا العملاء</div>
-      <div class="s-title-en">CUSTOMER SATISFACTION</div>
-      <div class="s-desc">تقييم 1-5 نجوم | Rating 1-5</div>
-    </div>
-    <div class="section-card facility" onclick="showSection('facility')">
-      <div class="s-icon">🔧</div>
-      <div class="s-title-ar">ملاحظات المرافق</div>
-      <div class="s-title-en">FACILITY REPORTS</div>
-      <div class="s-desc">المشاكل والنظافة | Issues & Cleanliness</div>
-    </div>
-    <div class="section-card building" onclick="showSection('building')">
-      <div class="s-icon">🏢</div>
-      <div class="s-title-ar">تقرير المبنى الرئيسي</div>
-      <div class="s-title-en">MAIN BUILDING REPORT</div>
-      <div class="s-desc">الاستقبال والقاعات | Reception & Halls</div>
-    </div>
-    <div class="section-card sales" onclick="adminOnly('sales')">
-      <div class="s-icon">💼</div>
-      <div class="s-title-ar">تقرير قسم المبيعات <span style="font-size:11px;">🔒</span></div>
-      <div class="s-title-en">SALES DEPARTMENT REPORT</div>
-      <div class="s-desc">للإدارة فقط | Admin Only</div>
-    </div>
-    <div class="section-card ops" onclick="adminOnly('ops')">
-      <div class="s-icon">⚙️</div>
-      <div class="s-title-ar">كفاءة التشغيل <span style="font-size:11px;">🔒</span></div>
-      <div class="s-title-en">OPERATIONAL EFFICIENCY</div>
-      <div class="s-desc">للإدارة فقط | Admin Only</div>
-    </div>
-    <div class="section-card incentives" onclick="adminOnly('incentives')">
-      <div class="s-icon">🏆</div>
-      <div class="s-title-ar">الحوافز الشهرية <span style="font-size:11px;">🔒</span></div>
-      <div class="s-title-en">MONTHLY INCENTIVES</div>
-      <div class="s-desc">للإدارة فقط | Admin Only</div>
-    </div>
-    <!-- Archive Card — Admin Only -->
-    <div class="section-card archive" onclick="adminOnly('archive')">
-      <div class="s-icon">🗂️</div>
-      <div class="s-title-ar">الأرشيف <span style="font-size:11px;">🔒</span></div>
-      <div class="s-title-en">ARCHIVE</div>
-      <div class="s-desc">للمدير فقط | Admin Only</div>
-    </div>
-    <!-- Top Rated Trainers Card — Admin Only -->
-    <div class="section-card rating" onclick="adminOnly('rating')">
-      <div class="s-icon">🌟</div>
-      <div class="s-title-ar">الأعلى بالتقييم <span style="font-size:11px;">🔒</span></div>
-      <div class="s-title-en">TOP RATED TRAINERS</div>
-      <div class="s-desc">للمدير فقط | Admin Only</div>
-    </div>
-    <!-- Staff Attendance Card — Admin Only -->
-    <div class="section-card attend" onclick="adminOnly('attend')">
-      <div class="s-icon">🕐</div>
-      <div class="s-title-ar">الحضور والانصراف <span style="font-size:11px;">🔒</span></div>
-      <div class="s-title-en">STAFF ATTENDANCE</div>
-      <div class="s-desc">للمدير فقط | Admin Only</div>
-    </div>
-    <!-- Violations Reference Card -->
-    <div class="section-card vref" onclick="showViolationsRef()">
+  <div class="home-sections">
+    <div class="section-card full-w" onclick="showWeeklyTasks()" style="background:linear-gradient(to right,#00C8B4,#0D3040);">
       <div class="s-icon">📋</div>
-      <div class="s-title-ar">جدول المخالفات وتصنيفها</div>
-      <div class="s-title-en">VIOLATIONS TABLE</div>
-      <div class="s-desc">اضغط للعرض</div>
+      <div class="s-text"><div class="s-title-ar" style="text-align:center;">جدول مهامي الأسبوعي</div><div class="s-title-en" style="text-align:center;">MY WEEKLY SCHEDULE</div></div>
+      <div class="s-arrow">›</div>
     </div>
-
+    <div class="sec-group-label">رصد المخالفات</div>
+    <div class="cards-row-2">
+      <div class="section-card female card-col" onclick="showSection('female')"><div class="s-icon">👩</div><div class="s-text"><div class="s-title-ar">القسم النسائي</div><div class="s-title-en">FEMALE</div></div></div>
+      <div class="section-card male card-col" onclick="showSection('male')"><div class="s-icon">👨</div><div class="s-text"><div class="s-title-ar">القسم الرجالي</div><div class="s-title-en">MALE</div></div></div>
+    </div>
+    <div class="sec-group-label">الخدمات والتقارير</div>
+    <div class="section-card survey" onclick="showSection('survey')"><div class="s-icon">⭐</div><div class="s-text"><div class="s-title-ar">استطلاع رضا العملاء</div><div class="s-title-en">CUSTOMER SATISFACTION SURVEY</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card attend" onclick="adminOnly('attend')"><div class="s-icon">🕐</div><div class="s-text"><div class="s-title-ar">الحضور والانصراف</div><div class="s-title-en">ATTENDANCE &amp; DEPARTURE</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card facility" onclick="showSection('facility')"><div class="s-icon">🔧</div><div class="s-text"><div class="s-title-ar">ملاحظات المرافق</div><div class="s-title-en">FACILITY REPORTS</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card building" onclick="showSection('building')"><div class="s-icon">🏢</div><div class="s-text"><div class="s-title-ar">تقرير المبنى الرئيسي</div><div class="s-title-en">MAIN BUILDING REPORT</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card ops" onclick="adminOnly('ops')"><div class="s-icon">⚙️</div><div class="s-text"><div class="s-title-ar">كفاءة التشغيل</div><div class="s-title-en">OPERATIONAL EFFICIENCY</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card incentives" onclick="adminOnly('incentives')"><div class="s-icon">🏆</div><div class="s-text"><div class="s-title-ar">الحوافز الشهرية</div><div class="s-title-en">MONTHLY INCENTIVES</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card sales" onclick="adminOnly('sales')"><div class="s-icon">💼</div><div class="s-text"><div class="s-title-ar">قسم المبيعات</div><div class="s-title-en">SALES DEPARTMENT</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon">🌟</div><div class="s-text"><div class="s-title-ar">الأعلى بالتقييم</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon">🗂️</div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card vref" onclick="showViolationsRef()"><div class="s-icon">📋</div><div class="s-text"><div class="s-title-ar">جدول المخالفات وتصنيفها</div><div class="s-title-en">VIOLATIONS TABLE</div></div><div class="s-arrow">›</div></div>
   </div>
-
-<!-- PAGE: MY DAILY LOG -->
-<div id="page-mylog" class="page">
-  <div class="container-wide">
-    <div class="page-header">
-      <div class="p-icon" style="background:rgba(82,153,224,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">📝</div>
-      <h1>سجلي اليومي</h1>
-      <div class="sub">MY DAILY LOG — آخر سجلاتك</div>
-    </div>
-
-    <!-- Tabs -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">
-      <div onclick="setMyLogTab('violations')" id="mylogTab_violations" style="background:var(--accent);color:#fff;border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;transition:all .2s;">
-        <div style="font-size:24px;margin-bottom:6px;">🚨</div>
-        <div style="font-size:13px;font-weight:900;">رصد المخالفات</div>
-        <div style="font-size:10px;opacity:.8;">VIOLATIONS</div>
-      </div>
-      <div onclick="setMyLogTab('facilities')" id="mylogTab_facilities" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;transition:all .2s;">
-        <div style="font-size:24px;margin-bottom:6px;">🔧</div>
-        <div style="font-size:13px;font-weight:900;">ملاحظات المرافق</div>
-        <div style="font-size:10px;color:var(--text-dim);">FACILITY REPORTS</div>
-      </div>
-      <div onclick="setMyLogTab('building')" id="mylogTab_building" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;transition:all .2s;">
-        <div style="font-size:24px;margin-bottom:6px;">🏢</div>
-        <div style="font-size:13px;font-weight:900;">تقرير المبنى</div>
-        <div style="font-size:10px;color:var(--text-dim);">BUILDING REPORT</div>
-      </div>
-    </div>
-
-    <div id="mylogContent" style="min-height:200px;"></div>
-
-    <div style="height:30px;"></div>
-    <button class="back-btn" onclick="goHome()">← رجوع / Back</button>
-  </div>
-</div>
-
-<!-- WEEKLY TASKS MODAL -->
-<div id="weeklyTasksModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);z-index:9200;overflow-y:auto;padding:20px 12px;">
-  <div style="background:var(--card);border-radius:20px;max-width:700px;margin:0 auto;padding:24px 20px;position:relative;">
-    <button onclick="document.getElementById('weeklyTasksModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
-
-    <!-- Notice Banner -->
-    <div style="background:linear-gradient(135deg,#00A896,#0D4A45);border-radius:14px;padding:16px 18px;margin-bottom:20px;text-align:center;">
-      <div style="font-size:20px;margin-bottom:6px;">📌</div>
-      <div style="font-size:13px;font-weight:900;color:#FFFFFF;margin-bottom:6px;">تنويه مهم</div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.88);line-height:1.7;">
-        المهام اليومية تدور حول الموظفين يومياً<br>
-        <strong>(ملاحظات المرافق والنظافة) | (تقرير المبنى الرئيسي) | (استطلاع رضا العملاء) | (متابعة مبنى التدريب العملي)</strong><br>
-        يرجى متابعة مهامك بشكل دوري
-      </div>
-    </div>
-
-    <!-- Day + tabs row -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-      <div id="wtDayBadge" style="font-size:11px;font-weight:700;background:var(--accent);color:#fff;padding:5px 14px;border-radius:20px;"></div>
-    </div>
-
-    <!-- Admin staff tabs -->
-    <div id="wtTabsRow" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;"></div>
-
-    <!-- Content -->
-    <div id="wtBody"></div>
-  </div>
-</div>
 
   <!-- ══ DAILY BULLETIN ══ -->
   <div style="padding:0 14px 8px;max-width:900px;margin:0 auto;">
@@ -4379,18 +4259,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div style="height:30px;"></div>
     <div style="display:flex;gap:10px;margin-top:10px;">
     <button class="back-btn" onclick="goHome()" style="flex:1;">← رجوع / Back</button>
-
-    <!-- ══ من هو متصل بالتطبيق؟ ══ -->
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div style="font-size:12px;font-weight:900;color:var(--accent);">🔐 المتصلون بالتطبيق</div>
-        <button onclick="renderUserSessions()" style="background:rgba(0,200,180,0.1);border:1px solid rgba(0,200,180,0.25);border-radius:8px;padding:4px 10px;font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;cursor:pointer;color:var(--accent);">🔄 تحديث</button>
-      </div>
-      <div id="userSessionsList">
-        <div style="color:var(--text-dim);font-size:11px;text-align:center;padding:10px;">اضغط تحديث لعرض المتصلين</div>
-      </div>
-    </div>
-
     <button onclick="showMyLogInRecords('building')" style="flex:1;padding:10px;background:rgba(82,153,224,0.1);border:1px solid rgba(82,153,224,0.2);color:#5299E0;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">📝 سجلي</button>
   </div>
   </div>
@@ -4636,8 +4504,6 @@ function doLogin(){
   const usr=USERS[u];
   if(usr&&usr.password===p){
     currentUser={username:u,...usr};hideLM();updateNav();
-    recordSession(u, usr.name).then(()=>{});
-    startHeartbeat();
     loadActiveStaffHome();
     renderHomeWidgets();
     renderDailyBulletin().catch(()=>{});
@@ -4652,9 +4518,7 @@ function doLogin(){
     }
   }else{document.getElementById('lErr').style.display='block';}
 }
-function doLogout(){recordLogout().then(()=>{});
-  stopHeartbeat();
-  currentUser=null;updateNav();goHome();}
+function doLogout(){currentUser=null;updateNav();goHome();}
 
 // ── THEME TOGGLE ──
 function toggleTheme(){
@@ -4817,7 +4681,6 @@ function openSec(type){
     const today=new Date().toISOString().split('T')[0];
     document.getElementById('attDate').value=today;
     loadAttendFromSupabase().then(()=>{renderAttendList();renderAttendKPIs();});
-    setTimeout(renderUserSessions, 300);
   }else{
     document.getElementById('page-facility').classList.add('active');autoObs('fObs');
   }
@@ -9528,102 +9391,224 @@ function renderBuildingDash(){
   const recEl=document.getElementById('dashBldRec');
   if(recEl) recEl.innerHTML=recs.map(r=>`<div class="rec-item"><div class="rec-dot ${r.dot}"></div><div>${r.text}</div></div>`).join('');
 }
-// ════════════════════════════════════
-// USER SESSIONS — تتبع الاتصال
-// ════════════════════════════════════
-let heartbeatInterval = null;
+// ════════════════ كفاءة التشغيل — النظام الجديد ════════════════
+const OPS_DATA = { ops:{}, att:{female:{},male:{},bike:{}} };
+const TARGET_EFF = 0.90;
+const HOURS_PER_SESSION = 2;
+const SESSIONS_PER_DAY = 4;
+const ABS_CODES  = ['غ','غع','غياب','absent'];
+const LEAV_CODES = ['إج','اج','إجازة','اجازة','leave'];
+const UNPL_CODES = ['إغ','اغ','إجازة غير مدفوعة'];
+const PERM_CODES = ['2hr','2HR','استئذان'];
 
-async function recordSession(username, name){
-  const now = new Date().toISOString();
-  const deviceInfo = navigator.userAgent.includes('Mobile') ? '📱 موبايل' : '💻 كمبيوتر';
-  try {
-    // Upsert في Supabase
-    await db.from('user_sessions').upsert({
-      username,
-      name,
-      last_login: now,
-      last_active: now,
-      device: deviceInfo,
-      is_online: true
-    }, { onConflict: 'username' });
-    // حفظ في localStorage للسرعة
-    localStorage.setItem('session_user', JSON.stringify({username, name, device:deviceInfo, last_login:now}));
-  } catch(e){ console.log('Session record error:', e); }
+function opsTab(tab){
+  ['upload','analysis','kpi'].forEach(t=>{
+    const b=document.getElementById(`opsBody_${t}`);
+    const tb=document.getElementById(`opsTab_${t}`);
+    if(b) b.style.display=t===tab?'block':'none';
+    if(tb) tb.classList.toggle('active',t===tab);
+  });
+  if(tab==='analysis') renderOpsTable(currentOpsSection||'all');
+  if(tab==='kpi') renderOpsKPI();
+}
+let currentOpsSection='all';
+
+function opsSecTab(sec){
+  currentOpsSection=sec;
+  ['female','male','bike','all'].forEach(s=>{
+    const b=document.getElementById(`opsSec_${s}`);
+    if(b) b.classList.toggle('active',s===sec);
+  });
+  renderOpsTable(sec);
 }
 
-async function updateHeartbeat(){
-  if(!currentUser) return;
-  const now = new Date().toISOString();
-  try {
-    await db.from('user_sessions').update({ last_active: now, is_online: true })
-      .eq('username', currentUser.username);
-  } catch(e){}
+function handleOpsFileNew(input,type){
+  const file=input.files[0]; if(!file) return;
+  const nameEls={ops:'opsFileName',att_female:'attFemFileName',att_male:'attMalFileName',att_bike:'attBikeFileName'};
+  const el=document.getElementById(nameEls[type]); if(el) el.textContent=file.name;
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    try{
+      if(typeof XLSX==='undefined'){toast('❌ مكتبة XLSX غير محملة');return;}
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      if(type==='ops'){
+        OPS_DATA.ops={};
+        wb.SheetNames.forEach(name=>{
+          const lower=name.toLowerCase();
+          const sec=lower.includes('نساء')||lower.includes('female')?'female':lower.includes('رجال')||lower.includes('male')?'male':lower.includes('دراج')||lower.includes('bike')?'bike':name;
+          const ws=wb.Sheets[name];
+          const json=XLSX.utils.sheet_to_json(ws,{header:1,raw:false});
+          if(!json.length) return;
+          const headers=(json[0]||[]).map(h=>String(h||'').trim());
+          OPS_DATA.ops[sec]=json.slice(1).filter(r=>r.some(v=>v)).map(r=>{const obj={};headers.forEach((h,i)=>{if(h)obj[h]=r[i]!=null?String(r[i]).trim():'';});return obj;});
+        });
+        const stEl=document.getElementById('opsFileStatus');
+        if(stEl) stEl.textContent=`✅ تم قراءة ${wb.SheetNames.length} شيتات`;
+        toast('✅ تم قراءة ملف التشغيل');
+      } else {
+        const secKey=type.replace('att_','');
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        OPS_DATA.att[secKey]=parseAttendance(XLSX.utils.sheet_to_json(ws,{header:1,raw:false}));
+        const stEl=document.getElementById('attStatus');
+        if(stEl) stEl.textContent=`✅ ${secKey}: تم قراءة ${Object.keys(OPS_DATA.att[secKey]).length} مدرب`;
+        toast(`✅ تم قراءة كشف الحضور`);
+      }
+    }catch(err){toast('❌ خطأ: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
 }
 
-async function recordLogout(){
-  if(!currentUser) return;
-  try {
-    await db.from('user_sessions').update({ is_online: false })
-      .eq('username', currentUser.username);
-    localStorage.removeItem('session_user');
-  } catch(e){}
-}
-
-function startHeartbeat(){
-  if(heartbeatInterval) clearInterval(heartbeatInterval);
-  heartbeatInterval = setInterval(updateHeartbeat, 3 * 60 * 1000); // كل 3 دقائق
-}
-
-function stopHeartbeat(){
-  if(heartbeatInterval) clearInterval(heartbeatInterval);
-  heartbeatInterval = null;
-}
-
-// عرض جلسات المستخدمين في كرت الحضور
-async function renderUserSessions(){
-  const el = document.getElementById('userSessionsList');
-  if(!el) return;
-  el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">جاري التحميل...</div>';
-  try {
-    const { data } = await db.from('user_sessions').select('*').order('last_active', { ascending: false });
-    const sessions = data || [];
-    const now = new Date();
-    
-    if(!sessions.length){
-      el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;text-align:center;padding:10px;">لا توجد جلسات مسجلة</div>';
-      return;
-    }
-
-    el.innerHTML = sessions.map(s => {
-      const lastActive = new Date(s.last_active);
-      const diffMin = Math.floor((now - lastActive) / 60000);
-      const isOnline = s.is_online && diffMin < 10; // نشط خلال 10 دقائق
-      const timeAgo = diffMin < 1 ? 'الآن' : diffMin < 60 ? `منذ ${diffMin} د` : diffMin < 1440 ? `منذ ${Math.floor(diffMin/60)} س` : `منذ ${Math.floor(diffMin/1440)} ي`;
-      const loginTime = new Date(s.last_login).toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'});
-      const loginDate = new Date(s.last_login).toLocaleDateString('ar-SA', {day:'numeric', month:'short'});
-
-      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--border);margin-bottom:8px;transition:all .2s;">
-        <div style="position:relative;flex-shrink:0;">
-          <div style="width:38px;height:38px;border-radius:50%;background:${isOnline?'linear-gradient(135deg,#00C8B4,#00897A)':'linear-gradient(135deg,#6B8C95,#4A6470)'};display:flex;align-items:center;justify-content:center;font-size:16px;">
-            ${s.name?.includes('شهد')||s.name?.includes('سمية')||s.name?.includes('امجاد')?'👩':'👨'}
-          </div>
-          <div style="position:absolute;bottom:0;left:0;width:12px;height:12px;border-radius:50%;background:${isOnline?'#00C84A':'#6B8C95'};border:2px solid var(--card);"></div>
-        </div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:12px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:1px;">${s.device} · آخر نشاط: ${timeAgo}</div>
-        </div>
-        <div style="text-align:left;flex-shrink:0;">
-          <div style="font-size:10px;font-weight:700;color:${isOnline?'#00C84A':'var(--text-dim)'};">${isOnline?'🟢 متصل':'⚫ غير متصل'}</div>
-          <div style="font-size:9px;color:var(--text-dim);margin-top:1px;">دخل: ${loginTime}</div>
-          <div style="font-size:9px;color:var(--text-dim);">${loginDate}</div>
-        </div>
-      </div>`;
-    }).join('');
-  } catch(e){
-    el.innerHTML = `<div style="color:var(--red);font-size:11px;">خطأ في التحميل</div>`;
+function parseAttendance(json){
+  const result={};
+  if(!json.length) return result;
+  let headerRow=0;
+  for(let i=0;i<Math.min(5,json.length);i++){
+    if((json[i]||[]).some(c=>String(c||'').includes('اسم')||String(c||'').toLowerCase().includes('name'))){headerRow=i;break;}
   }
+  const headers=(json[headerRow]||[]).map(h=>String(h||'').trim());
+  const nameIdx=headers.findIndex(h=>h.includes('اسم')||h.includes('مدرب')||h.toLowerCase().includes('name'));
+  for(let r=headerRow+1;r<json.length;r++){
+    const row=json[r]||[];
+    const name=String(row[nameIdx>=0?nameIdx:0]||'').trim();
+    if(!name) continue;
+    let absence=0,leave=0,unpaid=0,permission=0;
+    row.forEach((cell,ci)=>{
+      if(ci===(nameIdx>=0?nameIdx:0)) return;
+      const val=String(cell||'').trim().toLowerCase();
+      if(!val) return;
+      if(ABS_CODES.some(c=>val===c.toLowerCase())) absence++;
+      else if(LEAV_CODES.some(c=>val===c.toLowerCase())) leave++;
+      else if(UNPL_CODES.some(c=>val===c.toLowerCase())) unpaid++;
+      else if(PERM_CODES.some(c=>val===c.toLowerCase())) permission++;
+    });
+    result[name]={absence,leave,unpaid,permission,totalAbsDays:absence+leave+unpaid,permHours:permission*2};
+  }
+  return result;
 }
+
+function getOpsAnalysis(){
+  const now=new Date();
+  const yr=now.getFullYear(),mo=now.getMonth();
+  let workDays=0;
+  for(let d=1;d<=new Date(yr,mo+1,0).getDate();d++){
+    const dow=new Date(yr,mo,d).getDay();
+    if(dow>=0&&dow<=4) workDays++;
+  }
+  const all=[];
+  ['female','male','bike'].forEach(sec=>{
+    (OPS_DATA.ops[sec]||[]).forEach(row=>{
+      const keys=Object.keys(row);
+      const nk=keys.find(k=>k.includes('اسم')||k.includes('مدرب'))||keys[0];
+      const sk=keys.find(k=>k.includes('حصة')||k.includes('حصص'));
+      const htk=keys.find(k=>k.includes('إجمالي')||k.includes('اجمالي'));
+      const hak=keys.find(k=>k.includes('فعلية')||k.includes('فعلي'));
+      const trk=keys.find(k=>k.includes('مستفيد')||k.includes('متدرب'));
+      const name=row[nk]||'—';
+      const hrsAct=parseFloat(row[hak])||0;
+      const hrsTot=parseFloat(row[htk])||0;
+      const sessions=parseFloat(row[sk])||0;
+      const trainees=parseFloat(row[trk])||0;
+      const att=OPS_DATA.att[sec][name]||{};
+      const absDays=att.totalAbsDays||0;
+      const effWork=Math.max(0,workDays-absDays);
+      const expSess=effWork*SESSIONS_PER_DAY;
+      const actSess=hrsAct/HOURS_PER_SESSION;
+      const unusedSess=Math.max(0,expSess-actSess);
+      const eff=expSess>0?actSess/expSess:0;
+      all.push({name,section:sec,sessions,hrsTot,hrsAct,trainees,absDays,workDays,effectiveWorkDays:effWork,expectedSessions:expSess,actualSessions:Math.round(actSess*10)/10,unusedSessions:Math.round(unusedSess*10)/10,absSessions:absDays*SESSIONS_PER_DAY,efficiency:Math.round(eff*1000)/10,status:eff>=TARGET_EFF?'✅ جيد':eff>=0.7?'⚠️ تحسين':'❌ ضعيف',recommendation:eff<0.7?`مراجعة عاجلة: كفاءة ${Math.round(eff*100)}%${absDays>3?' — غياب '+absDays+' أيام':''}`:eff<TARGET_EFF?`تحسين: ${Math.round(unusedSess)} حصة مهدرة`:'أداء ممتاز ✅'});
+    });
+  });
+  return all.sort((a,b)=>b.efficiency-a.efficiency);
+}
+
+function renderOpsTable(sec){
+  const trainers=getOpsAnalysis();
+  const filtered=sec==='all'?trainers:trainers.filter(t=>t.section===sec);
+  const el=document.getElementById('opsTableContainer');
+  if(!el) return;
+  const kpiEl=document.getElementById('opsKpiBar');
+  if(kpiEl){
+    const src=filtered.length?filtered:trainers;
+    const avg=src.length?src.reduce((s,t)=>s+t.efficiency,0)/src.length:0;
+    const above=src.filter(t=>t.efficiency>=90).length;
+    kpiEl.innerHTML=[{l:'متوسط الكفاءة',v:avg.toFixed(1)+'%',c:avg>=90?'#27AE60':'#D4AC0D',i:'📊'},{l:'مدربون ≥90%',v:above+'/'+src.length,c:'#27AE60',i:'✅'},{l:'إجمالي الغياب',v:src.reduce((s,t)=>s+t.absDays,0)+' يوم',c:'#E74C3C',i:'📅'},{l:'حصص مهدرة',v:src.reduce((s,t)=>s+t.unusedSessions,0).toFixed(0)+' حصة',c:'#D4AC0D',i:'⚠️'}].map(k=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;"><div style="font-size:20px;margin-bottom:4px;">${k.i}</div><div style="font-size:18px;font-weight:900;color:${k.c};">${k.v}</div><div style="font-size:10px;color:var(--text-dim);margin-top:2px;">${k.l}</div></div>`).join('');
+  }
+  if(!filtered.length){el.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:30px;">لا توجد بيانات — ارفع الملفات أولاً</div>';return;}
+  const sc={female:'#E74C3C',male:'#2E86C1',bike:'#D4AC0D'};
+  const sn={female:'👩 نسائي',male:'👨 رجالي',bike:'🏍️ دراجات'};
+  el.innerHTML=`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="background:var(--accent);color:#fff;">${['#','اسم المدرب','القسم','متوقعة','فعلية','مهدرة','غياب','الكفاءة %','تقييم'].map(h=>`<th style="padding:10px 8px;text-align:${h==='اسم المدرب'?'right':'center'};">${h}</th>`).join('')}</tr></thead><tbody>${filtered.map((t,i)=>{const ec=t.efficiency>=90?'#27AE60':t.efficiency>=70?'#D4AC0D':'#E74C3C';const bg=i%2===0?'var(--card)':'var(--primary)';return`<tr style="background:${bg};"><td style="padding:9px 8px;text-align:center;font-weight:700;color:var(--accent);">${i+1}</td><td style="padding:9px 8px;text-align:right;font-weight:700;">${t.name}</td><td style="padding:9px 8px;text-align:center;"><span style="background:${sc[t.section]}22;color:${sc[t.section]};border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;">${sn[t.section]}</span></td><td style="padding:9px 8px;text-align:center;">${t.expectedSessions}</td><td style="padding:9px 8px;text-align:center;">${t.actualSessions}</td><td style="padding:9px 8px;text-align:center;color:#E74C3C;font-weight:700;">${t.unusedSessions}</td><td style="padding:9px 8px;text-align:center;">${t.absDays}</td><td style="padding:9px 8px;text-align:center;"><div style="background:${ec}22;color:${ec};border-radius:8px;padding:3px 8px;font-weight:900;">${t.efficiency.toFixed(1)}%</div><div style="background:#eee;border-radius:4px;height:4px;margin-top:3px;overflow:hidden;"><div style="background:${ec};height:4px;width:${Math.min(t.efficiency,100)}%;"></div></div></td><td style="padding:9px 8px;text-align:center;">${t.status}</td></tr>`;}).join('')}</tbody></table></div>`;
+}
+
+function renderOpsKPI(){
+  const trainers=getOpsAnalysis();
+  const el=document.getElementById('opsKpiContent');
+  if(!el) return;
+  if(!trainers.length){el.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:40px;">ارفع الملفات أولاً ثم اضغط تحليل</div>';return;}
+  const avg=trainers.reduce((s,t)=>s+t.efficiency,0)/trainers.length;
+  const top10=trainers.slice(0,10);
+  const bot10=[...trainers].sort((a,b)=>a.efficiency-b.efficiency).slice(0,10);
+  const sc={female:'#E74C3C',male:'#2E86C1',bike:'#D4AC0D'};
+  const sn={female:'👩 نسائي',male:'👨 رجالي',bike:'🏍️ دراجات'};
+  el.innerHTML=`<div class="card" style="margin-bottom:14px;background:${avg>=90?'rgba(39,174,96,0.08)':'rgba(212,172,13,0.08)'};border-color:${avg>=90?'rgba(39,174,96,0.3)':'rgba(212,172,13,0.3)'};">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-size:13px;font-weight:900;">🎯 الكفاءة الإجمالية</div><div style="font-size:10px;color:var(--text-dim);">الهدف: 90% | ${trainers.length} مدرب</div></div>
+      <div style="text-align:center;"><div style="font-size:28px;font-weight:900;color:${avg>=90?'#27AE60':'#D4AC0D'};">${avg.toFixed(1)}%</div><div style="font-size:10px;color:${avg>=90?'#27AE60':'#D4AC0D'};">${avg>=90?'✅ حقق الهدف':'⚠️ دون الهدف'}</div></div>
+    </div></div>
+  <div class="card" style="margin-bottom:14px;"><div style="font-size:13px;font-weight:900;color:#27AE60;margin-bottom:10px;">🏆 أعلى 10 مدربين</div>${top10.map((t,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;${i<9?'border-bottom:1px solid var(--border)':''}"><div style="width:28px;height:28px;border-radius:50%;background:${i<3?'linear-gradient(135deg,#D4AC0D,#9A7A00)':'var(--primary)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:${i<3?'#fff':'var(--text-dim)'};">${i+1}</div><div style="flex:1;"><div style="font-size:12px;font-weight:700;">${t.name}</div><div style="font-size:9px;color:var(--text-dim);">${sn[t.section]} · ${t.actualSessions} حصة · ${t.absDays} أيام غياب</div></div><div style="background:rgba(39,174,96,0.12);color:#27AE60;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:900;">${t.efficiency.toFixed(1)}%</div></div>`).join('')}</div>
+  <div class="card" style="margin-bottom:14px;"><div style="font-size:13px;font-weight:900;color:#E74C3C;margin-bottom:10px;">⚠️ أقل 10 مدربين</div>${bot10.map((t,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;${i<9?'border-bottom:1px solid var(--border)':''}"><div style="width:28px;height:28px;border-radius:50%;background:rgba(231,76,60,0.12);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#E74C3C;">${i+1}</div><div style="flex:1;"><div style="font-size:12px;font-weight:700;">${t.name}</div><div style="font-size:9px;color:var(--text-dim);">${t.recommendation}</div></div><div style="background:rgba(231,76,60,0.12);color:#E74C3C;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:900;">${t.efficiency.toFixed(1)}%</div></div>`).join('')}</div>`;
+}
+
+function processOpsAnalysis(){
+  const trainers=getOpsAnalysis();
+  if(!trainers.length){toast('❌ ارفع ملف التشغيل أولاً');return;}
+  opsTab('analysis'); renderOpsTable('all');
+  saveOpsToSupabase(trainers);
+}
+
+async function saveOpsToSupabase(trainers){
+  try{
+    const now=new Date();
+    await db.from('ops_reports').upsert(trainers.map(t=>({report_month:String(now.getMonth()+1),report_year:String(now.getFullYear()),trainer_name:t.name,zone:t.section,available_hours:t.hrsTot,sessions:t.sessions,trainees:t.trainees,efficiency_pct:Math.round(t.efficiency),uploaded_by:currentUser?.name||'admin'})),{onConflict:'trainer_name,report_month,report_year'});
+    toast('✅ تم الحفظ في Supabase');
+  }catch(e){console.log('ops save:',e);}
+}
+
+async function exportOpsExcelNew(){
+  const trainers=getOpsAnalysis();
+  if(!trainers.length){toast('❌ لا توجد بيانات');return;}
+  if(typeof ExcelJS==='undefined'){toast('❌ ExcelJS غير محمل');return;}
+  const wb=new ExcelJS.Workbook();
+  wb.creator='نورة لتعليم القيادة';
+  const ws=wb.addWorksheet('تحليل الكفاءة');
+  ws.views=[{rightToLeft:true}];
+  ws.columns=[{header:'اسم المدرب',key:'name',width:30},{header:'القسم',key:'sec',width:14},{header:'حصص متوقعة',key:'exp',width:14},{header:'حصص فعلية',key:'act',width:14},{header:'حصص مهدرة',key:'unused',width:14},{header:'أيام الغياب',key:'abs',width:12},{header:'الكفاءة %',key:'eff',width:12},{header:'التقييم',key:'status',width:12},{header:'التوصية',key:'rec',width:35}];
+  const sn={female:'نسائي',male:'رجالي',bike:'دراجات'};
+  const T='FF00A896',W='FFFFFFFF',D='FF0D1F2D';
+  ws.getRow(1).eachCell(c=>{c.font={name:'Arial',bold:true,color:{argb:W}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:T}};c.alignment={horizontal:'center',vertical:'middle'};});
+  ws.getRow(1).height=30;
+  trainers.forEach((t,i)=>{
+    const r=ws.addRow({name:t.name,sec:sn[t.section]||t.section,exp:t.expectedSessions,act:t.actualSessions,unused:t.unusedSessions,abs:t.absDays,eff:t.efficiency/100,status:t.status,rec:t.recommendation});
+    r.height=22;
+    const ec=t.efficiency>=90?'FF27AE60':t.efficiency>=70?'FFD4AC0D':'FFE74C3C';
+    r.getCell(7).numFmt='0.0%'; r.getCell(7).font={name:'Arial',bold:true,color:{argb:ec}};
+    if(i%2===0) r.eachCell(c=>{if(!c.fill||c.fill.type==='none')c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF5FFFE'}};});
+  });
+  // KPI sheet
+  const ws2=wb.addWorksheet('KPIs');
+  ws2.views=[{rightToLeft:true}];
+  const avg=trainers.reduce((s,t)=>s+t.efficiency,0)/trainers.length;
+  ws2.addRow(['مؤشر','القيمة','ملاحظة']);
+  ws2.getRow(1).eachCell(c=>{c.font={name:'Arial',bold:true,color:{argb:W}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:D}};});
+  [[`الكفاءة الإجمالية`,avg.toFixed(1)+'%',avg>=90?'✅ حقق الهدف 90%':'⚠️ دون الهدف'],[`مدربون ≥90%`,trainers.filter(t=>t.efficiency>=90).length+'/'+trainers.length,''],[`أقل كفاءة`,[...trainers].sort((a,b)=>a.efficiency-b.efficiency)[0]?.name||'—',[...trainers].sort((a,b)=>a.efficiency-b.efficiency)[0]?.efficiency.toFixed(1)+'%'],[`إجمالي الغياب`,trainers.reduce((s,t)=>s+t.absDays,0)+' يوم',''],[`حصص مهدرة`,trainers.reduce((s,t)=>s+t.unusedSessions,0).toFixed(0)+' حصة','']].forEach(r=>ws2.addRow(r));
+  ws2.columns=[{width:30},{width:20},{width:35}];
+  const buf=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; const now=new Date(); a.download=`كفاءة_التشغيل_${now.getFullYear()}_${now.getMonth()+1}.xlsx`;
+  a.click(); URL.revokeObjectURL(url); toast('✅ تم التصدير');
+}
+function handleOpsFile(input){handleOpsFileNew(input,'ops');}
 
 loadSummaryWidgets();
 setDT();updateNav();
