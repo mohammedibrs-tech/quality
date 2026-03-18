@@ -717,6 +717,11 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   .home-sections .sec-group-label,.home-sections .cards-row-2,.home-sections .section-card.full-w{grid-column:1/-1;}
 }
 
+/* إخفاء الـ nav العلوي على الكمبيوتر */
+@media (min-width: 900px) {
+  nav.nav { display:none !important; }
+}
+
 /* ══ DESKTOP SIDEBAR ══ */
 @media (min-width: 900px) {
   body { display:flex; }
@@ -788,33 +793,39 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 <!-- ══ DESKTOP SIDEBAR ══ -->
 <div id="desktopSidebar" style="display:none;">
-  <!-- لوقو صغير -->
-  <div style="margin-bottom:10px;padding:0 6px;text-align:center;">
-    <div style="width:40px;height:40px;border-radius:12px;background:rgba(0,168,150,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto;">
-      <span style="font-size:18px;">⚙️</span>
+  <!-- لوقو -->
+  <div style="margin-bottom:10px;text-align:center;">
+    <div style="width:42px;height:42px;border-radius:12px;background:rgba(0,168,150,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto;">
+      <span style="font-size:20px;">⚙️</span>
     </div>
   </div>
 
   <div class="sb-divider"></div>
 
-  <!-- الرئيسية -->
+  <!-- 1. الرئيسية -->
   <div class="sb-item active" id="sb-home" onclick="sbNav('home')">
     <span class="sb-icon">🏠</span>
     <span class="sb-label">الرئيسية</span>
   </div>
 
-  <!-- السجلات -->
+  <!-- 2. السجلات -->
   <div class="sb-item" id="sb-records" onclick="sbNav('records')">
     <span class="sb-icon">📊</span>
     <span class="sb-label">السجلات</span>
   </div>
 
-  <div class="sb-divider" style="margin-top:auto;"></div>
+  <div class="sb-divider"></div>
 
-  <!-- الوضع الليلي/نهاري -->
-  <div class="sb-item" onclick="toggleTheme()" style="margin-top:auto;">
+  <!-- 3. الوضع الداكن/الفاتح -->
+  <div class="sb-item" onclick="toggleTheme()">
     <span class="sb-icon" id="sbThemeIcon">🌙</span>
-    <span class="sb-label" id="sbThemeLabel">الوضع الليلي</span>
+    <span class="sb-label" id="sbThemeLabel">الوضع الداكن</span>
+  </div>
+
+  <!-- 4. تسجيل دخول/خروج -->
+  <div class="sb-item" id="sb-auth" onclick="sbAuthAction()">
+    <span class="sb-icon" id="sbAuthIcon">🔑</span>
+    <span class="sb-label" id="sbAuthLabel">تسجيل الدخول</span>
   </div>
 </div>
 
@@ -4693,7 +4704,7 @@ function doLogin(){
   if(usr&&usr.password===p){
     currentUser={username:u,...usr};hideLM();updateNav();
     loadActiveStaffHome();
-    renderHomeWidgets();
+    renderHomeWidgets(); sbUpdateAuth();
     renderDailyBulletin().catch(()=>{});
     if(pendingSec){
       const s=pendingSec;pendingSec=null;
@@ -9975,6 +9986,34 @@ setTimeout(()=>{if(currentUser)_refreshHomeLeader();},1500);
 
 
 // ══ Desktop Sidebar Navigation ══
+function sbUpdateAuth() {
+  const icon  = document.getElementById('sbAuthIcon');
+  const label = document.getElementById('sbAuthLabel');
+  if (!icon || !label) return;
+  if (currentUser) {
+    icon.textContent  = '🚪';
+    label.textContent = 'تسجيل الخروج';
+  } else {
+    icon.textContent  = '🔑';
+    label.textContent = 'تسجيل الدخول';
+  }
+}
+
+function sbAuthAction() {
+  if (currentUser) {
+    // تسجيل خروج
+    if (confirm('تسجيل الخروج؟')) {
+      currentUser = null;
+      localStorage.removeItem('nq_user');
+      updateNav();
+      goHome();
+      sbUpdateAuth();
+      toast('👋 تم تسجيل الخروج');
+    }
+  } else {
+    showLM();
+  }
+}
 function sbNav(page) {
   ['sb-home','sb-records'].forEach(id => {
     const el = document.getElementById(id);
@@ -9993,7 +10032,7 @@ window.toggleTheme = function() {
   const label = document.getElementById('sbThemeLabel');
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   if(icon)  icon.textContent  = isDark ? '☀️' : '🌙';
-  if(label) label.textContent = isDark ? 'الوضع النهاري' : 'الوضع الليلي';
+  if(label) label.textContent = isDark ? 'الوضع الفاتح' : 'الوضع الداكن';
 }
 
 // تحديث أيقونة الثيم عند التحميل
@@ -10002,7 +10041,8 @@ window.addEventListener('load', () => {
   const icon   = document.getElementById('sbThemeIcon');
   const label  = document.getElementById('sbThemeLabel');
   if(icon)  icon.textContent  = isDark ? '☀️' : '🌙';
-  if(label) label.textContent = isDark ? 'الوضع النهاري' : 'الوضع الليلي';
+  if(label) label.textContent = isDark ? 'الوضع الفاتح' : 'الوضع الداكن';
+  sbUpdateAuth();
 });
 
 </script>
