@@ -7400,11 +7400,11 @@ function getOpsAnalysis() {
       const permHours   = att.permHours    || 0; // مجموع ساعات الاستئذان الفعلية
 
       // ══ الحصص والكفاءة ══
-      // أيام العمل الفعلية = أيام الشهر - أيام الغياب (تختلف بين المدربين)
-      const effWorkDays = Math.max(0, workDays - absDays);
+      // الحصص المفترضة = أيام الشهر × 4 — ثابتة لكل مدرب (الهدف الكامل للشهر)
+      const expSessions = workDays * SESSIONS_PER_DAY;
 
-      // الحصص المفترضة = أيام العمل الفعلية × 4 (تختلف حسب غياب كل مدرب)
-      const expSessions = effWorkDays * SESSIONS_PER_DAY;
+      // أيام العمل الفعلية بعد الغياب (تُستخدم في التوصيات والحصص المهدرة بسبب الغياب)
+      const effWorkDays = Math.max(0, workDays - absDays);
 
       // الحصص المنجزة = عدد الحصص من ملف التشغيل مباشرة
       const trainedSess = sessions; // هذا هو العدد الحقيقي للحصص
