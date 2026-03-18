@@ -7346,21 +7346,23 @@ function opsSecTab(tab){
   });
   if(tab==='analysis'){
     // استخدام التحليل المحفوظ أو إعادة الحساب
-    const saved = ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]?.analysis?.length
-      ? OPS_MONTHS[ACTIVE_MONTH].analysis : getOpsAnalysis();
+    const mo_a = ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH];
+    const saved_a = (mo_a && mo_a.analysis && mo_a.analysis.length)
+      ? mo_a.analysis : (window._lastTrainers && window._lastTrainers.length ? window._lastTrainers : getOpsAnalysis());
     const el = document.getElementById('opsAnalysisOut');
-    if(saved.length){
-      renderOpsTableFromData(saved,'all');
+    if(saved_a && saved_a.length){
+      renderOpsTableFromData(saved_a,'all');
     } else if(el){
       el.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:40px;font-size:13px;">📂 ارفع الملفات ثم اضغط <strong>تحليل الكفاءة</strong></div>';
     }
   }
   if(tab==='kpi'){
-    const saved = ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]?.analysis?.length
-      ? OPS_MONTHS[ACTIVE_MONTH].analysis : getOpsAnalysis();
+    const mo_k = ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH];
+    const saved_k = (mo_k && mo_k.analysis && mo_k.analysis.length)
+      ? mo_k.analysis : (window._lastTrainers && window._lastTrainers.length ? window._lastTrainers : getOpsAnalysis());
     const el = document.getElementById('opsKpiOut');
-    if(saved.length){
-      renderOpsKPIFromData(saved);
+    if(saved_k && saved_k.length){
+      renderOpsKPIFromData(saved_k);
     } else if(el){
       el.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:40px;font-size:13px;">📂 ارفع الملفات ثم اضغط <strong>تحليل الكفاءة</strong></div>';
     }
@@ -7737,9 +7739,10 @@ function processOpsAnalysis(){
   // تمرير البيانات مباشرة للعرض
   window._lastTrainers = trainers;
 
-  // فتح تبويب التحليل وعرض البيانات
-  opsSecTab('analysis');
+  // عرض البيانات مباشرة بدون انتظار opsSecTab
   renderOpsTableFromData(trainers, 'all');
+  // ثم نفتح التبويب
+  opsSecTab('analysis');
 
   saveOpsToSupabase(trainers);
   toast('✅ تم التحليل — ' + trainers.length + ' مدرب');
