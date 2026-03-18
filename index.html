@@ -728,7 +728,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   #desktopSidebar {
     display:flex !important;
     flex-direction:column;
-    width:72px;
+    width:200px;
     min-height:100vh;
     background:var(--card);
     border-left:1px solid var(--border);
@@ -743,7 +743,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     overflow:hidden;
   }
   #desktopSidebar:hover {
-    width:190px;
+    width:200px;
   }
   #desktopSidebar .sb-item {
     width:100%;
@@ -764,18 +764,16 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   #desktopSidebar .sb-icon {
     font-size:20px;
     flex-shrink:0;
-    width:72px;
+    width:52px;
     text-align:center;
   }
   #desktopSidebar .sb-label {
     font-size:12px;
     font-weight:700;
     color:var(--text);
-    opacity:0;
-    transition:opacity .2s;
+    opacity:1;
     pointer-events:none;
   }
-  #desktopSidebar:hover .sb-label { opacity:1; }
   #desktopSidebar .sb-divider {
     width:40px;
     height:1px;
@@ -783,7 +781,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     margin:6px auto;
   }
   /* دفع المحتوى لليسار */
-  #app { margin-right:72px; width:calc(100% - 72px); }
+  #app { margin-right:200px; width:calc(100% - 200px); }
 }
 @media (max-width: 899px) {
   #desktopSidebar { display:none !important; }
@@ -7322,7 +7320,33 @@ function opsTab(tab){
 }
 let currentOpsSection='all';
 
-function opsSecTab(sec){
+function opsSecTab(tab){
+  // تبديل التبويبات الرئيسية: upload / analysis / kpi
+  ['upload','analysis','kpi'].forEach(t=>{
+    const body=document.getElementById('opsBody_'+t);
+    const btn=document.getElementById('opsTab'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(body) body.style.display = t===tab ? 'block':'none';
+    if(btn){
+      btn.style.background = t===tab ? 'var(--accent)':'var(--card)';
+      btn.style.color      = t===tab ? '#fff':'var(--text)';
+      btn.style.borderColor= t===tab ? 'var(--accent)':'var(--border)';
+    }
+  });
+  if(tab==='analysis'){
+    const trainers=getOpsAnalysis();
+    if(trainers.length) renderOpsTable('all');
+    else document.getElementById('opsAnalysisOut').innerHTML=
+      '<div style="text-align:center;color:var(--text-dim);padding:40px;font-size:13px;">📂 ارفع الملفات أولاً ثم اضغط تحليل الكفاءة</div>';
+  }
+  if(tab==='kpi'){
+    const trainers=getOpsAnalysis();
+    if(trainers.length) renderOpsKPI();
+    else document.getElementById('opsKpiOut').innerHTML=
+      '<div style="text-align:center;color:var(--text-dim);padding:40px;font-size:13px;">📂 ارفع الملفات أولاً ثم اضغط تحليل الكفاءة</div>';
+  }
+}
+
+function opsSecTabInner(sec){
   currentOpsSection=sec;
   ['female','male','bike','all'].forEach(s=>{
     const b=document.getElementById(`opsSec_${s}`);
@@ -7435,7 +7459,7 @@ function getOpsAnalysis(){
 function renderOpsTable(sec){
   const trainers=getOpsAnalysis();
   const filtered=sec==='all'?trainers:trainers.filter(t=>t.section===sec);
-  const el=document.getElementById('opsTableContainer');
+  const el=document.getElementById('opsAnalysisOut')||document.getElementById('opsTableContainer');
   if(!el) return;
   const kpiEl=document.getElementById('opsKpiBar');
   if(kpiEl){
@@ -7452,7 +7476,7 @@ function renderOpsTable(sec){
 
 function renderOpsKPI(){
   const trainers=getOpsAnalysis();
-  const el=document.getElementById('opsKpiContent');
+  const el=document.getElementById('opsKpiOut')||document.getElementById('opsKpiContent');
   if(!el) return;
   if(!trainers.length){el.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:40px;">ارفع الملفات أولاً ثم اضغط تحليل</div>';return;}
   const avg=trainers.reduce((s,t)=>s+t.efficiency,0)/trainers.length;
@@ -7469,11 +7493,21 @@ function renderOpsKPI(){
   <div class="card" style="margin-bottom:14px;"><div style="font-size:13px;font-weight:900;color:#E74C3C;margin-bottom:10px;">⚠️ أقل 10 مدربين</div>${bot10.map((t,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;${i<9?'border-bottom:1px solid var(--border)':''}"><div style="width:28px;height:28px;border-radius:50%;background:rgba(231,76,60,0.12);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#E74C3C;">${i+1}</div><div style="flex:1;"><div style="font-size:12px;font-weight:700;">${t.name}</div><div style="font-size:9px;color:var(--text-dim);">${t.recommendation}</div></div><div style="background:rgba(231,76,60,0.12);color:#E74C3C;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:900;">${t.efficiency.toFixed(1)}%</div></div>`).join('')}</div>`;
 }
 
+function runOpsAnalysis(){
+  if (!ACTIVE_MONTH) { initOpsMonths(); }
+  if (ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]) {
+    OPS_DATA.ops = OPS_MONTHS[ACTIVE_MONTH].ops;
+    OPS_DATA.att = OPS_MONTHS[ACTIVE_MONTH].att;
+  }
+  processOpsAnalysis();
+}
+
 function processOpsAnalysis(){
   const trainers=getOpsAnalysis();
   if(!trainers.length){toast('❌ ارفع ملف التشغيل أولاً');return;}
-  opsTab('analysis'); renderOpsTable('all');
+  opsSecTab('analysis');
   saveOpsToSupabase(trainers);
+  toast('✅ تم التحليل — '+trainers.length+' مدرب');
 }
 
 async function saveOpsToSupabase(trainers){
@@ -7482,6 +7516,10 @@ async function saveOpsToSupabase(trainers){
     await db.from('ops_reports').upsert(trainers.map(t=>({report_month:String(now.getMonth()+1),report_year:String(now.getFullYear()),trainer_name:t.name,zone:t.section,available_hours:t.hrsTot,sessions:t.sessions,trainees:t.trainees,efficiency_pct:Math.round(t.efficiency),uploaded_by:currentUser?.name||'admin'})),{onConflict:'trainer_name,report_month,report_year'});
     toast('✅ تم الحفظ في Supabase');
   }catch(e){console.log('ops save:',e);}
+}
+
+async function exportOpsExcelFull(){
+  return exportOpsExcelNew();
 }
 
 async function exportOpsExcelNew(){
