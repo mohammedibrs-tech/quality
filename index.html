@@ -1748,7 +1748,13 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <!-- أزرار -->
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button onclick="runOpsAnalysis()" style="flex:1;padding:14px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">📊 تحليل الكفاءة</button>
+        <button onclick="pinMonthData()" style="padding:14px 20px;background:linear-gradient(135deg,#D4AC0D,#9A7A00);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;" title="تثبيت بيانات الشهر الحالي">📌 تثبيت البيانات</button>
         <button onclick="exportOpsExcelFull()" style="padding:14px 20px;background:rgba(0,168,150,0.1);border:1.5px solid var(--accent);color:var(--accent);border-radius:14px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">⬇ تصدير Excel</button>
+      </div>
+      <!-- الأشهر المثبتة -->
+      <div id="pinnedMonthsBar" style="margin-top:14px;display:none;">
+        <div style="font-size:11px;font-weight:900;color:var(--text-dim);margin-bottom:8px;">📌 الأشهر المثبتة:</div>
+        <div id="pinnedMonthsList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
       </div>
     </div>
 
@@ -2718,6 +2724,13 @@ async function submitViolation(){
   const _gsType = curSec==='male'?'violations_male':'violations_female';
   const _gsRows = rows.map(r=>[r.date,r.time||'',r.observer,r.trainer_name,r.zone||'',r.violation_type,r.grade,'',r.description||'']);
   sendToSheets(_gsType, _gsRows);
+  // تثبيت تلقائي
+  const _vKey = (rows[0]?.date||new Date().toISOString().slice(0,10)).slice(0,7);
+  if(_vKey){
+    if(!PINNED_DATA.violations[_vKey]) PINNED_DATA.violations[_vKey]={data:[],label:_monthLabel(_vKey),pinnedAt:''};
+    rows.forEach(r=>PINNED_DATA.violations[_vKey].data.push(r));
+    PINNED_DATA.violations[_vKey].pinnedAt=new Date().toLocaleString('ar');
+  }
   document.getElementById('vForm').style.display='none';
   document.getElementById('vOk').style.display='block';
 }
@@ -2765,6 +2778,13 @@ async function submitSurvey(){
   // GS sync
   const _sTotal=scores.reduce((a,b)=>a+b,0);
   sendToSheets('surveys',[[date,document.getElementById('sDate')?.value||'',obs,'استطلاع',document.getElementById('sClient')?.value||'',document.getElementById('sN1')?.value||'',Math.round((_sTotal/25)*100)+'%']]);
+  // تثبيت تلقائي
+  const _sKeyPin = (date||new Date().toISOString().slice(0,10)).slice(0,7);
+  if(_sKeyPin){
+    if(!PINNED_DATA.surveys[_sKeyPin]) PINNED_DATA.surveys[_sKeyPin]={data:[],label:_monthLabel(_sKeyPin),pinnedAt:''};
+    PINNED_DATA.surveys[_sKeyPin].data.push({client_name:document.getElementById('sClient')?.value||'',date,satisfaction_pct:pct,q1:scores[0],q2:scores[1],q3:scores[2],q4:scores[3],q5:scores[4]});
+    PINNED_DATA.surveys[_sKeyPin].pinnedAt=new Date().toLocaleString('ar');
+  }
   document.getElementById('sForm').style.display='none';document.getElementById('sOk').style.display='block';
 }
 function resetS(){
@@ -2801,6 +2821,13 @@ async function submitFacility(){
   const subject='🔧 ملاحظة مرافق جديدة — '+type;
   const body='النوع: '+type+'\nالموقع: '+loc+'\nالتاريخ: '+dateVal+'\nالراصد: '+obs+'\nالتفاصيل: '+(desc||'—')+'\n\nمنصة إدارة الجودة — نورة لتعليم القيادة';
   sendEmailNotification(subject,body,ADMIN_EMAIL);
+  // تثبيت تلقائي
+  const _fKey = (dateVal||new Date().toISOString().slice(0,10)).slice(0,7);
+  if(_fKey){
+    if(!PINNED_DATA.facility[_fKey]) PINNED_DATA.facility[_fKey]={data:[],label:_monthLabel(_fKey),pinnedAt:''};
+    PINNED_DATA.facility[_fKey].data.push({problem_type:type,location:loc,date:dateVal,observer:obs,description:desc||''});
+    PINNED_DATA.facility[_fKey].pinnedAt=new Date().toLocaleString('ar');
+  }
   document.getElementById('fForm').style.display='none';document.getElementById('fOk').style.display='block';
 }
 function resetF(){
@@ -7004,6 +7031,13 @@ async function submitBuilding(){
     // Build analysis
     const analysis=buildingAnalysis(data);
     document.getElementById('bAnalysis').innerHTML=analysis;
+    // تثبيت تلقائي
+    const _bKey = (data.date||new Date().toISOString().slice(0,10)).slice(0,7);
+    if(_bKey){
+      if(!PINNED_DATA.building[_bKey]) PINNED_DATA.building[_bKey]={data:[],label:_monthLabel(_bKey),pinnedAt:''};
+      PINNED_DATA.building[_bKey].data.push({...data});
+      PINNED_DATA.building[_bKey].pinnedAt=new Date().toLocaleString('ar');
+    }
     document.getElementById('bForm').style.display='none';
     document.getElementById('bOk').style.display='block';
   }catch(e){
@@ -8215,16 +8249,23 @@ async function loadQuarterlyData(q, year) {
       db.from('incentives').select('*').in('month', monthStrs).eq('year', String(year)),
     ]);
 
+    // جلب البيانات المثبتة محلياً ودمجها مع Supabase
+    const _pinned = getPinnedForQuarter(q, year);
+    const _merge = (arr1, arr2, keyFn) => {
+      const seen = new Set(arr1.map(keyFn));
+      return [...arr1, ...arr2.filter(r => !seen.has(keyFn(r)))];
+    };
+
     _qData = {
       q, year,
-      violations:  vRes.data   || [],
-      surveys:     sRes.data   || [],
-      facilities:  fRes.data   || [],
-      buildings:   bRes.data   || [],
-      ops:         oRes.data   || [],
-      sales:       salRes.data || [],
-      ratings:     ratRes.data || [],
-      incentives:  incRes.data || [],
+      violations: _merge(vRes.data||[], _pinned.violations, r=>(r.trainer_name||'')+(r.date||'')),
+      surveys:    _merge(sRes.data||[], _pinned.surveys,    r=>(r.client_name||'')+(r.date||'')),
+      facilities: _merge(fRes.data||[], _pinned.facility,   r=>(r.location||'')+(r.date||r.report_date||'')),
+      buildings:  _merge(bRes.data||[], _pinned.building,   r=>(r.date||r.report_date||'')),
+      ops:        _merge(oRes.data||[], _pinned.ops,        r=>(r.trainer_name||'')+(r.report_month||'')),
+      sales:      salRes.data || [],
+      ratings:    ratRes.data || [],
+      incentives: incRes.data || [],
     };
 
     renderQuarterlyResults();
@@ -9121,6 +9162,167 @@ function _showState(state){
   });
 }
 setTimeout(()=>{if(currentUser)_refreshHomeLeader();},1500);
+
+
+// ══════════════════════════════════════════════════════════
+// 📌 نظام تثبيت البيانات الشهرية
+// يعمل لكل أنواع التقارير: ops, violations, surveys, facility, building, sales
+// ══════════════════════════════════════════════════════════
+
+const PINNED_DATA = {
+  ops:       {},  // key = 'YYYY-MM' → { ops, att, analysis, label, workDays }
+  violations:{},  // key = 'YYYY-MM' → { data[], label }
+  surveys:   {},  // key = 'YYYY-MM' → { data[], label }
+  facility:  {},  // key = 'YYYY-MM' → { data[], label }
+  building:  {},  // key = 'YYYY-MM' → { data[], label }
+  sales:     {},  // key = 'YYYY-MM' → { data[], label }
+};
+
+const MONTH_NAMES_AR2 = ['','يناير','فبراير','مارس','أبريل','مايو','يونيو',
+  'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+function _currentMonthKey() {
+  const now = new Date();
+  return now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+}
+
+function _monthLabel(key) {
+  const [y,m] = key.split('-');
+  return MONTH_NAMES_AR2[parseInt(m)] + ' ' + y;
+}
+
+// ══ تثبيت بيانات كفاءة التشغيل ══
+function pinMonthData() {
+  if (!ACTIVE_MONTH || !OPS_MONTHS[ACTIVE_MONTH]) {
+    toast('❌ لا توجد بيانات للتثبيت — اختر شهراً أولاً');
+    return;
+  }
+  const mo = OPS_MONTHS[ACTIVE_MONTH];
+  const hasOps = (mo.ops.female||[]).length+(mo.ops.male||[]).length+(mo.ops.bike||[]).length > 0;
+  if (!hasOps) { toast('❌ ارفع ملف التشغيل أولاً'); return; }
+
+  PINNED_DATA.ops[ACTIVE_MONTH] = {
+    ops:      JSON.parse(JSON.stringify(mo.ops)),
+    att:      JSON.parse(JSON.stringify(mo.att)),
+    analysis: mo.analysis ? JSON.parse(JSON.stringify(mo.analysis)) : [],
+    label:    mo.label,
+    workDays: mo.workDays,
+    pinnedAt: new Date().toLocaleString('ar'),
+  };
+  renderPinnedMonths('ops');
+  toast(`✅ تم تثبيت بيانات ${mo.label}`);
+}
+
+// ══ تثبيت بيانات أي نوع تقرير ══
+function pinReportData(type, data, monthKey) {
+  const key = monthKey || _currentMonthKey();
+  const label = _monthLabel(key);
+  if (!data || !data.length) { toast('❌ لا توجد بيانات للتثبيت'); return; }
+  PINNED_DATA[type][key] = { data: JSON.parse(JSON.stringify(data)), label, pinnedAt: new Date().toLocaleString('ar') };
+  renderPinnedMonths(type);
+  toast(`✅ تم تثبيت ${label} (${data.length} سجل)`);
+}
+
+// ══ عرض الأشهر المثبتة ══
+function renderPinnedMonths(type) {
+  const pinned = PINNED_DATA[type];
+  const keys   = Object.keys(pinned).sort();
+  if (!keys.length) return;
+
+  // لـ ops
+  if (type === 'ops') {
+    const bar  = document.getElementById('pinnedMonthsBar');
+    const list = document.getElementById('pinnedMonthsList');
+    if (!bar || !list) return;
+    bar.style.display = 'block';
+    list.innerHTML = keys.map(k => {
+      const mo = pinned[k];
+      const cnt = (mo.ops.female||[]).length+(mo.ops.male||[]).length+(mo.ops.bike||[]).length;
+      const hasAn = mo.analysis && mo.analysis.length > 0;
+      return `<div style="background:var(--card2);border:1.5px solid ${k===ACTIVE_MONTH?'var(--accent)':'var(--border)'};
+        border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;"
+        onclick="loadPinnedMonth('${k}')">
+        <span style="font-size:18px;">📌</span>
+        <div>
+          <div style="font-size:12px;font-weight:900;">${mo.label}</div>
+          <div style="font-size:9px;color:var(--text-dim);">${cnt} مدرب${hasAn?' | ✅ محلل':''}</div>
+        </div>
+        <button onclick="event.stopPropagation();unpinMonth('ops','${k}')"
+          style="background:rgba(231,76,60,0.1);border:none;border-radius:8px;
+          padding:3px 8px;font-size:10px;color:#E74C3C;cursor:pointer;margin-right:auto;">🗑️</button>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ══ تحميل شهر مثبت ══
+function loadPinnedMonth(key) {
+  if (!PINNED_DATA.ops[key]) return;
+  const mo = PINNED_DATA.ops[key];
+  // نسخ البيانات للشهر المحدد في OPS_MONTHS
+  if (!OPS_MONTHS[key]) {
+    const [y,m] = key.split('-');
+    OPS_MONTHS[key] = {
+      key, year:parseInt(y), month:parseInt(m)-1,
+      workDays: mo.workDays || 22,
+      label: mo.label,
+      ops:  JSON.parse(JSON.stringify(mo.ops)),
+      att:  JSON.parse(JSON.stringify(mo.att)),
+      analysis: mo.analysis ? JSON.parse(JSON.stringify(mo.analysis)) : [],
+    };
+  }
+  opsSelectMonth(key, OPS_MONTHS[key].year, OPS_MONTHS[key].month);
+  toast(`✅ تم تحميل ${mo.label}`);
+}
+
+// ══ إزالة تثبيت ══
+function unpinMonth(type, key) {
+  const label = PINNED_DATA[type][key]?.label || key;
+  if (!confirm(`إزالة تثبيت ${label}؟`)) return;
+  delete PINNED_DATA[type][key];
+  renderPinnedMonths(type);
+  toast(`✅ تم إزالة ${label}`);
+}
+
+// ══ جلب كل البيانات المثبتة لتقرير ربعي ══
+function getPinnedForQuarter(q, year) {
+  const months = Q_MONTHS[q]; // [1,2,3] أو [4,5,6]...
+  const result = { ops:[], att:{female:{},male:{},bike:{}}, violations:[], surveys:[], facility:[], building:[], sales:[] };
+
+  months.forEach(m => {
+    const key = year+'-'+String(m).padStart(2,'0');
+
+    // ops
+    if (PINNED_DATA.ops[key]) {
+      const po = PINNED_DATA.ops[key];
+      if (po.analysis && po.analysis.length) {
+        result.ops.push(...po.analysis);
+      } else {
+        ['female','male','bike'].forEach(sec => {
+          (po.ops[sec]||[]).forEach(row => result.ops.push({...row, zone:sec, report_month:String(m), report_year:String(year)}));
+        });
+      }
+    }
+
+    // violations
+    if (PINNED_DATA.violations[key]) result.violations.push(...PINNED_DATA.violations[key].data);
+    // surveys
+    if (PINNED_DATA.surveys[key])    result.surveys.push(...PINNED_DATA.surveys[key].data);
+    // facility
+    if (PINNED_DATA.facility[key])   result.facility.push(...PINNED_DATA.facility[key].data);
+    // building
+    if (PINNED_DATA.building[key])   result.building.push(...PINNED_DATA.building[key].data);
+    // sales
+    if (PINNED_DATA.sales[key])      result.sales.push(...PINNED_DATA.sales[key].data);
+  });
+
+  return result;
+}
+
+// ══ مؤشر الأشهر المثبتة في كل صفحة ══
+function renderAllPinnedBadges() {
+  Object.keys(PINNED_DATA).forEach(type => renderPinnedMonths(type));
+}
 
 </script>
 
