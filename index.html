@@ -7345,16 +7345,25 @@ function opsSecTab(tab){
     }
   });
   if(tab==='analysis'){
-    const trainers=getOpsAnalysis();
-    if(trainers.length) renderOpsTable('all');
-    else document.getElementById('opsAnalysisOut').innerHTML=
-      '<div style="text-align:center;color:var(--text-dim);padding:40px;font-size:13px;">📂 ارفع الملفات أولاً ثم اضغط تحليل الكفاءة</div>';
+    // استخدام التحليل المحفوظ أو إعادة الحساب
+    const saved = ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]?.analysis?.length
+      ? OPS_MONTHS[ACTIVE_MONTH].analysis : getOpsAnalysis();
+    const el = document.getElementById('opsAnalysisOut');
+    if(saved.length){
+      renderOpsTableFromData(saved,'all');
+    } else if(el){
+      el.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:40px;font-size:13px;">📂 ارفع الملفات ثم اضغط <strong>تحليل الكفاءة</strong></div>';
+    }
   }
   if(tab==='kpi'){
-    const trainers=getOpsAnalysis();
-    if(trainers.length) renderOpsKPI();
-    else document.getElementById('opsKpiOut').innerHTML=
-      '<div style="text-align:center;color:var(--text-dim);padding:40px;font-size:13px;">📂 ارفع الملفات أولاً ثم اضغط تحليل الكفاءة</div>';
+    const saved = ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]?.analysis?.length
+      ? OPS_MONTHS[ACTIVE_MONTH].analysis : getOpsAnalysis();
+    const el = document.getElementById('opsKpiOut');
+    if(saved.length){
+      renderOpsKPIFromData(saved);
+    } else if(el){
+      el.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:40px;font-size:13px;">📂 ارفع الملفات ثم اضغط <strong>تحليل الكفاءة</strong></div>';
+    }
   }
 }
 
@@ -7388,7 +7397,13 @@ function handleOpsFileNew(input,type){
           OPS_DATA.ops[sec]=json.slice(1).filter(r=>r.some(v=>v)).map(r=>{const obj={};headers.forEach((h,i)=>{if(h)obj[h]=r[i]!=null?String(r[i]).trim():'';});return obj;});
         });
         const stEl=document.getElementById('opsFileStatus');
-        if(stEl) stEl.textContent=`✅ تم قراءة ${wb.SheetNames.length} شيتات`;
+        if(stEl){stEl.textContent=`✅ تم قراءة ${wb.SheetNames.length} شيتات`;stEl.style.color='#27AE60';}
+        // حفظ في الشهر المحدد
+        if(!ACTIVE_MONTH) initOpsMonths();
+        if(ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]){
+          OPS_MONTHS[ACTIVE_MONTH].ops = JSON.parse(JSON.stringify(OPS_DATA.ops));
+          renderMonthTabs();
+        }
         toast('✅ تم قراءة ملف التشغيل');
       } else {
         const secKey=type.replace('att_','');
@@ -7400,7 +7415,9 @@ function handleOpsFileNew(input,type){
         if(stEl){stEl.textContent=`✅ ${cnt} مدرب — جاهز`;stEl.style.color='#27AE60';}
         // حفظ في OPS_MONTHS
         if(ACTIVE_MONTH&&OPS_MONTHS[ACTIVE_MONTH]){
-          OPS_MONTHS[ACTIVE_MONTH].att[secKey]={...OPS_DATA.att[secKey]};
+          OPS_MONTHS[ACTIVE_MONTH].att[secKey] = JSON.parse(JSON.stringify(OPS_DATA.att[secKey]));
+          // reset التحليل عند رفع كشف جديد
+          OPS_MONTHS[ACTIVE_MONTH].analysis = [];
           renderMonthTabs();
         }
         toast(`✅ تم قراءة كشف الحضور — ${cnt} مدرب`);
@@ -7479,7 +7496,130 @@ function getOpsAnalysis(){
   return all.sort((a,b)=>b.efficiency-a.efficiency);
 }
 
+function renderOpsTableFromData(trainers, sec){
+  const filtered = sec==='all' ? trainers : trainers.filter(t=>t.section===sec);
+  const el = document.getElementById('opsAnalysisOut') || document.getElementById('opsTableContainer');
+  if(!el) return;
+  // أزرار الأقسام
+  const sc={female:'#E74C3C',male:'#2E86C1',bike:'#D4AC0D'};
+  const sn={female:'👩 نسائي',male:'👨 رجالي',bike:'🏍️ دراجات'};
+  const avg = filtered.length ? filtered.reduce((s,t)=>s+t.efficiency,0)/filtered.length : 0;
+  // KPI bar
+  const kpiBar = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+    ${[
+      {l:'متوسط الكفاءة',v:avg.toFixed(1)+'%',c:avg>=90?'#27AE60':'#D4AC0D',i:'📊'},
+      {l:'مدربون ≥90%',v:filtered.filter(t=>t.efficiency>=90).length+'/'+filtered.length,c:'#27AE60',i:'✅'},
+      {l:'إجمالي الغياب',v:filtered.reduce((s,t)=>s+(t.absDays||0),0)+' يوم',c:'#E74C3C',i:'📅'},
+      {l:'حصص مهدرة',v:filtered.reduce((s,t)=>s+(t.unusedSessions||0),0).toFixed(0)+' حصة',c:'#D4AC0D',i:'⚠️'},
+    ].map(k=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center;">
+      <div style="font-size:18px;">${k.i}</div>
+      <div style="font-size:16px;font-weight:900;color:${k.c};">${k.v}</div>
+      <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">${k.l}</div>
+    </div>`).join('')}
+  </div>`;
+  // أزرار الأقسام
+  const secBtns = `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    ${['all','female','male','bike'].map(s=>`<button onclick="renderOpsTableFromData(window._lastTrainers,'${s}')"
+      style="padding:6px 14px;border-radius:10px;border:1.5px solid ${s===sec?'var(--accent)':'var(--border)'};
+      background:${s===sec?'var(--accent)':'var(--card)'};color:${s===sec?'#fff':'var(--text)'};
+      font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">
+      ${{all:'الكل',female:'👩 نسائي',male:'👨 رجالي',bike:'🏍️ دراجات'}[s]}</button>`).join('')}
+  </div>`;
+  // الجدول
+  const headers = ['#','اسم المدرب','القسم','حصص منجزة','الحصص المفترضة','الحصص الغير مجدولة','الحصص المهدرة بسبب الغياب','غياب','إجازة','استئذان (س)','ساعات إجمالية','ساعات فعلية','نسبة المنصة','كفاءة %','تقييم','التوصية'];
+  const table = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:11px;">
+    <thead><tr style="background:var(--accent);color:#fff;">${headers.map(h=>`<th style="padding:9px 7px;text-align:center;white-space:nowrap;">${h}</th>`).join('')}</tr></thead>
+    <tbody>${filtered.map((t,i)=>{
+      const ec=t.efficiency>=90?'#27AE60':t.efficiency>=70?'#D4AC0D':'#E74C3C';
+      const bg=i%2===0?'var(--card)':'rgba(0,168,150,0.02)';
+      const secColor=sc[t.section]||'#888';
+      return `<tr style="background:${bg};">
+        <td style="padding:9px 7px;text-align:center;font-weight:700;color:var(--accent);">${i+1}</td>
+        <td style="padding:9px 7px;text-align:right;font-weight:700;">${t.name||'—'}</td>
+        <td style="padding:9px 7px;text-align:center;"><span style="background:${secColor}22;color:${secColor};border-radius:6px;padding:2px 7px;font-size:10px;font-weight:700;">${sn[t.section]||t.section}</span></td>
+        <td style="padding:9px 7px;text-align:center;font-weight:700;color:var(--accent);">${t.actualSessions||t.sessions||0}</td>
+        <td style="padding:9px 7px;text-align:center;">${t.expectedSessions||0}</td>
+        <td style="padding:9px 7px;text-align:center;color:#D4AC0D;font-weight:700;">${t.unusedSessions||0}</td>
+        <td style="padding:9px 7px;text-align:center;color:#E74C3C;">${t.absSessions||0}</td>
+        <td style="padding:9px 7px;text-align:center;color:#E74C3C;">${t.absDays||0}</td>
+        <td style="padding:9px 7px;text-align:center;color:#8E44AD;">${t.leaveP||0}</td>
+        <td style="padding:9px 7px;text-align:center;color:#2E86C1;">${t.permHours||0}</td>
+        <td style="padding:9px 7px;text-align:center;color:var(--text-dim);">${t.hrsTot||0}</td>
+        <td style="padding:9px 7px;text-align:center;color:var(--text-dim);">${t.hrsAct||0}</td>
+        <td style="padding:9px 7px;text-align:center;font-size:10px;color:var(--text-dim);">${(t.effSource||0).toFixed?t.effSource.toFixed(1)+'%':''}</td>
+        <td style="padding:9px 7px;text-align:center;">
+          <div style="background:${ec}22;color:${ec};border-radius:8px;padding:3px 8px;font-weight:900;">${t.efficiency.toFixed(1)}%</div>
+          <div style="background:#e0e0e0;border-radius:4px;height:3px;margin-top:3px;overflow:hidden;"><div style="background:${ec};height:3px;width:${Math.min(t.efficiency,100)}%;"></div></div>
+        </td>
+        <td style="padding:9px 7px;text-align:center;">${t.status||''}</td>
+        <td style="padding:9px 7px;font-size:10px;color:var(--text-dim);max-width:200px;">${t.recommendation||''}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+  window._lastTrainers = trainers;
+  el.innerHTML = kpiBar + secBtns + table;
+}
+
 function renderOpsTable(sec){
+  window._lastTrainers = getOpsAnalysis();
+  renderOpsTableFromData(window._lastTrainers, sec||'all');
+}
+
+function renderOpsKPIFromData(trainers){
+  const el = document.getElementById('opsKpiOut') || document.getElementById('opsKpiContent');
+  if(!el) return;
+  if(!trainers.length){el.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:40px;">لا توجد بيانات</div>';return;}
+  const sects=[{k:'female',l:'👩 نسائي',c:'#E74C3C'},{k:'male',l:'👨 رجالي',c:'#2E86C1'},{k:'bike',l:'🏍️ دراجات',c:'#D4AC0D'}];
+  const avg=trainers.reduce((s,t)=>s+t.efficiency,0)/trainers.length;
+  let html=`<div style="background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;text-align:center;">
+    <div style="font-size:11px;color:var(--text-dim);">الكفاءة الإجمالية — ${trainers.length} مدرب</div>
+    <div style="font-size:36px;font-weight:900;color:${avg>=90?'#27AE60':'#D4AC0D'};">${avg.toFixed(1)}%</div>
+    <div style="font-size:11px;color:${avg>=90?'#27AE60':'#D4AC0D'};">${avg>=90?'✅ حقق الهدف 90%':'⚠️ دون الهدف (فجوة '+(90-avg).toFixed(1)+'%)'}</div>
+  </div>`;
+  sects.forEach(({k,l,c})=>{
+    const data=trainers.filter(t=>t.section===k);
+    if(!data.length) return;
+    const secAvg=data.reduce((s,t)=>s+t.efficiency,0)/data.length;
+    const top3=[...data].sort((a,b)=>b.efficiency-a.efficiency).slice(0,3);
+    const bot3=[...data].sort((a,b)=>a.efficiency-b.efficiency).slice(0,3);
+    html+=`<div style="background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;border-right:4px solid ${c};">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-size:14px;font-weight:900;">${l}</div>
+        <div style="font-size:20px;font-weight:900;color:${secAvg>=90?'#27AE60':'#D4AC0D'};">${secAvg.toFixed(1)}%</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        ${[
+          {l:'مدربون',v:data.length},
+          {l:'≥90%',v:data.filter(t=>t.efficiency>=90).length},
+          {l:'غياب إجمالي',v:data.reduce((s,t)=>s+(t.absDays||0),0)+' يوم'},
+          {l:'حصص مهدرة',v:data.reduce((s,t)=>s+(t.unusedSessions||0),0).toFixed(0)},
+        ].map(m=>`<div style="background:${c}11;border-radius:10px;padding:8px;text-align:center;">
+          <div style="font-size:14px;font-weight:900;color:${c};">${m.v}</div>
+          <div style="font-size:9px;color:var(--text-dim);">${m.l}</div>
+        </div>`).join('')}
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#27AE60;margin-bottom:6px;">🏆 أعلى 3</div>
+      ${top3.map((t,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:14px;">${['🥇','🥈','🥉'][i]}</span>
+        <span style="flex:1;font-size:11px;font-weight:700;">${t.name}</span>
+        <span style="font-size:11px;font-weight:900;color:#27AE60;">${t.efficiency.toFixed(1)}%</span>
+      </div>`).join('')}
+      <div style="font-size:11px;font-weight:700;color:#E74C3C;margin-top:10px;margin-bottom:6px;">⚠️ أقل 3</div>
+      ${bot3.map((t,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:14px;">${i+1}</span>
+        <span style="flex:1;"><div style="font-size:11px;font-weight:700;">${t.name}</div><div style="font-size:9px;color:var(--text-dim);">${t.recommendation||''}</div></span>
+        <span style="font-size:11px;font-weight:900;color:#E74C3C;">${t.efficiency.toFixed(1)}%</span>
+      </div>`).join('')}
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+function renderOpsKPI(){
+  renderOpsKPIFromData(getOpsAnalysis());
+}
+
+function renderOpsTable_old(sec){
   const trainers=getOpsAnalysis();
   const filtered=sec==='all'?trainers:trainers.filter(t=>t.section===sec);
   const el=document.getElementById('opsAnalysisOut')||document.getElementById('opsTableContainer');
@@ -7526,11 +7666,24 @@ function runOpsAnalysis(){
 }
 
 function processOpsAnalysis(){
-  const trainers=getOpsAnalysis();
-  if(!trainers.length){toast('❌ ارفع ملف التشغيل أولاً');return;}
+  const trainers = getOpsAnalysis();
+  if(!trainers.length){ toast('❌ ارفع ملف التشغيل أولاً'); return; }
+
+  // حفظ في OPS_MONTHS
+  if(ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]){
+    OPS_MONTHS[ACTIVE_MONTH].analysis = trainers;
+    renderMonthTabs();
+  }
+
+  // تمرير البيانات مباشرة للعرض
+  window._lastTrainers = trainers;
+
+  // فتح تبويب التحليل وعرض البيانات
   opsSecTab('analysis');
+  renderOpsTableFromData(trainers, 'all');
+
   saveOpsToSupabase(trainers);
-  toast('✅ تم التحليل — '+trainers.length+' مدرب');
+  toast('✅ تم التحليل — ' + trainers.length + ' مدرب');
 }
 
 async function saveOpsToSupabase(trainers){
@@ -7542,11 +7695,19 @@ async function saveOpsToSupabase(trainers){
 }
 
 async function exportOpsExcelFull(){
-  return exportOpsExcelNew();
+  const trainers = (ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]?.analysis?.length)
+    ? OPS_MONTHS[ACTIVE_MONTH].analysis
+    : (window._lastTrainers?.length ? window._lastTrainers : getOpsAnalysis());
+  if(!trainers.length){ toast('❌ لا توجد بيانات — حلّل أولاً'); return; }
+  if(typeof ExcelJS==='undefined'){ toast('❌ ExcelJS غير محملة'); return; }
+  window._exportTrainers = trainers;
+  exportOpsExcelNew();
 }
 
+
 async function exportOpsExcelNew(){
-  const trainers=getOpsAnalysis();
+  const trainers = window._exportTrainers || window._lastTrainers || getOpsAnalysis();
+  window._exportTrainers = null; // reset
   if(!trainers.length){toast('❌ لا توجد بيانات');return;}
   if(typeof ExcelJS==='undefined'){toast('❌ ExcelJS غير محمل');return;}
   const wb=new ExcelJS.Workbook();
@@ -7592,173 +7753,33 @@ let ACTIVE_MONTH = null;
 const MONTH_NAMES_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 function initOpsMonths(){const now=new Date();const key=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');if(!OPS_MONTHS[key])opsSelectMonth(key,now.getFullYear(),now.getMonth());else{ACTIVE_MONTH=key;OPS_DATA.ops=OPS_MONTHS[key].ops;OPS_DATA.att=OPS_MONTHS[key].att;}renderMonthTabs();opsRefreshStatus();}
 function opsAddMonth(){const now=new Date();const def=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');const key=prompt('أدخل الشهر بصيغة YYYY-MM\nمثال: '+def,def);if(!key)return;const m=key.match(/^(\d{4})-(\d{2})$/);if(!m){toast('❌ الصيغة غير صحيحة');return;}const year=parseInt(m[1]),month=parseInt(m[2])-1;if(month<0||month>11){toast('❌ شهر غير صالح');return;}opsSelectMonth(key,year,month);}
-function opsSelectMonth(key,year,month){if(!OPS_MONTHS[key]){OPS_MONTHS[key]={key,year,month,workDays:calcWorkDays(year,month,null),label:MONTH_NAMES_AR[month]+' '+year,ops:{female:[],male:[],bike:[]},att:{female:{},male:{},bike:{}}};}ACTIVE_MONTH=key;OPS_DATA.ops=OPS_MONTHS[key].ops;OPS_DATA.att=OPS_MONTHS[key].att;renderMonthTabs();opsRefreshStatus();}
-function renderMonthTabs(){const c=document.getElementById('opsMonthTabs');if(!c)return;const keys=Object.keys(OPS_MONTHS).sort().reverse();if(!keys.length){c.innerHTML='<div style="font-size:11px;color:var(--text-dim);">لا توجد أشهر — اضغط إضافة شهر جديد</div>';return;}c.innerHTML=keys.map(k=>{const mo=OPS_MONTHS[k];const act=k===ACTIVE_MONTH;const hO=(mo.ops.female||[]).length+(mo.ops.male||[]).length+(mo.ops.bike||[]).length>0;const hA=Object.keys(mo.att.female||{}).length+Object.keys(mo.att.male||{}).length+Object.keys(mo.att.bike||{}).length>0;return`<button onclick="opsSelectMonth('${k}',${mo.year},${mo.month})" style="padding:8px 16px;border-radius:12px;border:2px solid ${act?'var(--accent)':'var(--border)'};background:${act?'var(--accent)':'var(--card)'};color:${act?'#fff':'var(--text)'};font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">${mo.label}${hO?' 📊':''}${hA?' 👥':''}</button>`;}).join('');}
-function opsRefreshStatus(){if(!ACTIVE_MONTH||!OPS_MONTHS[ACTIVE_MONTH])return;const mo=OPS_MONTHS[ACTIVE_MONTH];const lbl=document.getElementById('opsActiveMonthLabel');if(lbl){lbl.style.display='block';const hO=(mo.ops.female||[]).length+(mo.ops.male||[]).length+(mo.ops.bike||[]).length;const hA=Object.keys(mo.att.female||{}).length+Object.keys(mo.att.male||{}).length+Object.keys(mo.att.bike||{}).length;lbl.innerHTML=`✅ <strong style="color:var(--accent);">${mo.label}</strong> — أيام العمل: <strong>${mo.workDays} يوم</strong> — الحصص المفترضة/مدرب: <strong>${mo.workDays*4} حصة</strong>${hO>0?` <span style="color:#27AE60;font-size:10px;">📊 ${hO} مدرب</span>`:''}${hA>0?` <span style="color:#27AE60;font-size:10px;">👥 ${hA} مدرب</span>`:''}`;}}
-
-function showOpsMonthModal(){if(!currentUser){showLM();return;}if(currentUser.role!=='admin'&&currentUser.username!=='shahad'){toast('❌ هذه الخانة للمدير فقط');return;}const modal=document.getElementById('opsMonthModal');const list=document.getElementById('opsMonthModalList');if(!modal||!list){adminOnly('ops');return;}const keys=Object.keys(OPS_MONTHS).sort().reverse();if(!keys.length){list.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:20px;font-size:12px;">لا توجد بيانات — افتح كفاءة التشغيل وأضف شهراً</div>';}else{list.innerHTML=keys.map(key=>{const mo=OPS_MONTHS[key];const hO=(mo.ops.female||[]).length+(mo.ops.male||[]).length+(mo.ops.bike||[]).length;const hA=Object.keys(mo.att.female||{}).length+Object.keys(mo.att.male||{}).length+Object.keys(mo.att.bike||{}).length;return`<div onclick="opsSelectFromModal('${key}',${mo.year},${mo.month})" style="background:var(--card2);border:1.5px solid ${key===ACTIVE_MONTH?'var(--accent)':'var(--border)'};border-radius:14px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;"><div style="font-size:28px;">📅</div><div style="flex:1;"><div style="font-size:13px;font-weight:900;">${mo.label}</div><div style="font-size:10px;color:var(--text-dim);margin-top:3px;">أيام العمل: ${mo.workDays} يوم${hO>0?' | 📊 '+hO+' مدرب':''}${hA>0?' | 👥 '+hA+' حضور':''}</div></div><div style="font-size:16px;color:var(--text-dim);">›</div></div>`;}).join('');}modal.style.display='block';}
-function opsSelectFromModal(key,year,month){document.getElementById('opsMonthModal').style.display='none';opsSelectMonth(key,year,month);adminOnly('ops');}
-
-// ══ GAME JS ══
-const QUESTION_BANK=[
-  {cat:'🏆 إدارة الجودة',q:'ما معنى اختصار TQM؟',opts:['Total Quality Management','Technical Quality Monitoring','Team Quality Measurement','Training Quality Methods'],ans:0,exp:'TQM تعني إدارة الجودة الشاملة.'},
-  {cat:'🏆 إدارة الجودة',q:'من هو مؤسس مفهوم دورة PDCA؟',opts:['جوزيف جوران','إدواردز ديمينغ','فيليب كروسبي','كاورو إيشيكاوا'],ans:1,exp:'إدواردز ديمينغ طوّر دورة PDCA.'},
-  {cat:'🏆 إدارة الجودة',q:'ما هي خطوات دورة PDCA بالترتيب؟',opts:['نفّذ، خطط، تحقق، تصرف','تحقق، خطط، نفّذ، تصرف','خطط، نفّذ، تحقق، تصرف','تصرف، خطط، نفّذ، تحقق'],ans:2,exp:'Plan→Do→Check→Act.'},
-  {cat:'🏆 إدارة الجودة',q:'ما الهدف الرئيسي للتحسين المستمر؟',opts:['تقليل التكاليف','زيادة الإنتاج','سرعة التسليم','رضا العميل'],ans:3,exp:'رضا العميل هو المحور الأساسي.'},
-  {cat:'🏆 إدارة الجودة',q:'ما هو مخطط إيشيكاوا المستخدم لـ؟',opts:['جدولة المهام','حساب التكاليف','تحليل أسباب المشاكل','قياس الإنتاج'],ans:2,exp:'يُستخدم لتحليل الأسباب الجذرية.'},
-  {cat:'🏆 إدارة الجودة',q:'كم مبدأ في ISO 9001:2015؟',opts:['5 مبادئ','10 مبادئ','3 مبادئ','7 مبادئ'],ans:3,exp:'7 مبادئ للجودة.'},
-  {cat:'🏆 إدارة الجودة',q:'ماذا تعني كلمة "كايزن"؟',opts:['ضبط العمليات','الجودة الشاملة','إدارة الوقت','التحسين المستمر'],ans:3,exp:'كايزن = التحسين المستمر.'},
-  {cat:'🌍 معلومات عامة',q:'كم عدد طبقات الغلاف الجوي؟',opts:['3 طبقات','7 طبقات','4 طبقات','5 طبقات'],ans:3,exp:'5 طبقات.'},
-  {cat:'🌍 معلومات عامة',q:'من اخترع المصباح الكهربائي؟',opts:['نيكولا تسلا','ألبرت أينشتاين','ألكسندر بيل','توماس إديسون'],ans:3,exp:'توماس إديسون 1879م.'},
-  {cat:'🌍 معلومات عامة',q:'ما أكبر محيط في العالم؟',opts:['الأطلسي','الهندي','المتجمد الشمالي','الهادئ'],ans:3,exp:'المحيط الهادئ.'},
-  {cat:'🌍 معلومات عامة',q:'كم دولة في الأمم المتحدة؟',opts:['180','200','150','193'],ans:3,exp:'193 دولة.'},
-  {cat:'🌍 معلومات عامة',q:'ما أطول سلسلة جبال في العالم؟',opts:['الهيمالايا','الألب','الأورال','الأنديز'],ans:3,exp:'جبال الأنديز 7000 كم.'},
-  {cat:'🇸🇦 وطنية',q:'في أي عام تأسست المملكة؟',opts:['1902م','1945م','1960م','1932م'],ans:3,exp:'1932م.'},
-  {cat:'🇸🇦 وطنية',q:'ما شعار رؤية 2030؟',opts:['الاستدامة والتطوير','التحول الرقمي','القيادة والريادة','مجتمع حيوي، اقتصاد مزدهر، وطن طموح'],ans:3,exp:'مجتمع حيوي، اقتصاد مزدهر، وطن طموح.'},
-  {cat:'🇸🇦 وطنية',q:'متى اليوم الوطني السعودي؟',opts:['17 رجب','1 محرم','12 ربيع الأول','23 سبتمبر'],ans:3,exp:'23 سبتمبر.'},
-  {cat:'🇸🇦 وطنية',q:'ما عاصمة المملكة؟',opts:['جدة','مكة المكرمة','المدينة المنورة','الرياض'],ans:3,exp:'الرياض.'},
-  {cat:'🇸🇦 وطنية',q:'أي مدينة تُعرف بـ عروس البحر الأحمر؟',opts:['ينبع','جازان','الليث','جدة'],ans:3,exp:'جدة.'},
-];
-const GAME_TIMER=10;
-let _gameQuestions=[],_gameCurrent=0,_gameScore=0,_gameTimerInt=null,_gameTimeLeft=GAME_TIMER,_gameAnswered=false;
-function _todayStr(){return new Date().toISOString().slice(0,10);}
-function _getDailyQuestions(){const today=_todayStr();const username=currentUser?.username||'guest';const seedStr=today.replace(/-/g,'')+username;let seed=0;for(let i=0;i<seedStr.length;i++)seed=(seed*31+seedStr.charCodeAt(i))>>>0;const bank=[...QUESTION_BANK];for(let i=bank.length-1;i>0;i--){seed=(seed*1664525+1013904223)>>>0;const j=seed%(i+1);[bank[i],bank[j]]=[bank[j],bank[i]];}const cats=[...new Set(QUESTION_BANK.map(q=>q.cat))];const picked=[];cats.forEach(cat=>{const q=bank.find(b=>b.cat===cat&&!picked.includes(b));if(q)picked.push(q);});bank.forEach(q=>{if(picked.length<3&&!picked.includes(q))picked.push(q);});return picked.slice(0,3);}
-async function openGameModal(){if(!currentUser){toast('❌ يرجى تسجيل الدخول أولاً');return;}const modal=document.getElementById('gameModal');modal.style.display='block';const alreadyData=await _gameCheckAlready();if(alreadyData){_showState('already');const el=document.getElementById('gameAlreadyScore');if(el)el.textContent=`نقاطك اليوم: ${alreadyData.score} نقطة`;await _loadLeader('gameLeaderAlready');return;}_gameQuestions=_getDailyQuestions();_gameCurrent=0;_gameScore=0;_showQuestion();}
-function _showQuestion(){if(_gameCurrent>=_gameQuestions.length){_gameEnd();return;}_showState('question');_gameAnswered=false;_gameTimeLeft=GAME_TIMER;const q=_gameQuestions[_gameCurrent];document.getElementById('gameQNum').textContent=_gameCurrent+1;document.getElementById('gameQTotal').textContent=_gameQuestions.length;document.getElementById('gameCategory').textContent=q.cat;document.getElementById('gameQuestion').textContent=q.q;const opts=document.getElementById('gameOptions');const labels=['أ','ب','ج','د'];opts.innerHTML=q.opts.map((opt,i)=>`<button onclick="_gameAnswer(${i})" id="gameOpt${i}" style="padding:12px 16px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:14px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;color:#fff;text-align:right;display:flex;align-items:center;gap:10px;"><span style="background:rgba(255,255,255,0.12);border-radius:8px;padding:2px 8px;font-size:11px;flex-shrink:0;">${labels[i]}</span><span>${opt}</span></button>`).join('');_startTimer();}
-function _startTimer(){clearInterval(_gameTimerInt);const bar=document.getElementById('gameTimerBar');const el=document.getElementById('gameTimer');if(el){el.textContent=_gameTimeLeft;el.style.color='#fff';}if(bar)bar.style.background='linear-gradient(90deg,#00C8B4,#7D3C98)';_gameTimerInt=setInterval(()=>{_gameTimeLeft--;if(el)el.textContent=_gameTimeLeft;if(bar)bar.style.width=(_gameTimeLeft/GAME_TIMER*100)+'%';if(_gameTimeLeft<=3){if(el)el.style.color='#FF6B6B';if(bar)bar.style.background='linear-gradient(90deg,#E74C3C,#C0392B)';}else if(_gameTimeLeft<=6){if(el)el.style.color='#FFE07F';}if(_gameTimeLeft<=0){clearInterval(_gameTimerInt);if(!_gameAnswered)_gameAnswer(-1);}},1000);}
-function _gameAnswer(idx){if(_gameAnswered)return;_gameAnswered=true;clearInterval(_gameTimerInt);const q=_gameQuestions[_gameCurrent];const correct=q.ans;const isRight=idx===correct;q.opts.forEach((_,i)=>{const btn=document.getElementById('gameOpt'+i);if(!btn)return;if(i===correct){btn.style.background='rgba(39,174,96,0.3)';btn.style.borderColor='#27AE60';}else if(i===idx&&!isRight){btn.style.background='rgba(231,76,60,0.3)';btn.style.borderColor='#E74C3C';}btn.style.cursor='default';btn.onclick=null;});const pts=isRight?10+_gameTimeLeft:0;_gameScore+=pts;setTimeout(()=>{_showState('result');document.getElementById('gameResultIcon').textContent=isRight?'✅':(idx===-1?'⏰':'❌');document.getElementById('gameResultText').textContent=isRight?'إجابة صحيحة! 🎉':(idx===-1?'انتهى الوقت!':'إجابة خاطئة!');document.getElementById('gameResultExplain').textContent=q.exp;document.getElementById('gameResultScore').textContent=isRight?`+${pts} نقطة (10 + ${_gameTimeLeft} ثانية)`:`الإجابة الصحيحة: ${q.opts[correct]}`;const nb=document.getElementById('gameNextBtn');if(nb)nb.textContent=_gameCurrent+1>=_gameQuestions.length?'🏆 النتيجة النهائية':'التالي ›';},800);}
-function gameNext(){_gameCurrent++;_gameCurrent>=_gameQuestions.length?_gameEnd():_showQuestion();}
-async function _gameEnd(){_showState('end');document.getElementById('gameFinalScore').textContent=_gameScore;try{await db.from('game_scores').upsert({player_name:currentUser.name,username:currentUser.username,score:_gameScore,play_date:_todayStr(),questions_count:_gameQuestions.length},{onConflict:'username,play_date'});toast('✅ نقاطك حُفظت!');}catch(e){console.log('game save:',e);}await _loadLeader('gameLeaderEnd');_refreshHomeLeader();}
-async function _gameCheckAlready(){try{const{data}=await db.from('game_scores').select('score').eq('username',currentUser.username).eq('play_date',_todayStr()).single();return data;}catch(e){return null;}}
-async function _loadLeader(containerId){const el=document.getElementById(containerId);if(!el)return;try{const{data}=await db.from('game_scores').select('player_name,score').eq('play_date',_todayStr()).order('score',{ascending:false}).limit(6);if(!data||!data.length){el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.4);font-size:11px;">لا توجد نتائج اليوم</div>';return;}const medals=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣'];const isAdmin=currentUser?.role==='admin';el.innerHTML=data.map((r,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,0.07);border-radius:12px;"><span style="font-size:18px;">${medals[i]||''}</span><span style="flex:1;font-size:12px;font-weight:700;color:#fff;">${r.player_name}</span><span style="font-size:13px;font-weight:900;color:#FFD700;">${r.score} pt</span>${isAdmin?`<button onclick="_gameDeleteScore('${r.player_name}','${containerId}')" style="background:rgba(231,76,60,0.2);border:1px solid rgba(231,76,60,0.4);border-radius:8px;padding:3px 8px;font-size:10px;color:#FF6B6B;cursor:pointer;font-family:'Cairo',sans-serif;">🗑️</button>`:''}</div>`).join('');}catch(e){}}
-async function _refreshHomeLeader(){const el=document.getElementById('gameLeaderCard');if(!el)return;try{const{data}=await db.from('game_scores').select('player_name,score').eq('play_date',_todayStr()).order('score',{ascending:false}).limit(3);if(!data||!data.length){el.innerHTML='<div style="font-size:10px;color:rgba(255,255,255,0.4);">كن أول من يلعب اليوم! 🎮</div>';return;}const medals=['🥇','🥈','🥉'];el.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;">${data.map((r,i)=>`<div style="background:rgba(255,255,255,0.1);border-radius:20px;padding:4px 12px;display:flex;align-items:center;gap:6px;"><span>${medals[i]}</span><span style="font-size:11px;font-weight:700;color:#fff;">${r.player_name.split(' ')[0]}</span><span style="font-size:11px;color:#FFD700;font-weight:900;">${r.score}pt</span></div>`).join('')}</div>`;const badge=document.getElementById('gameTodayBadge');if(badge){const mine=data.find(r=>r.player_name===currentUser?.name);badge.textContent=mine?`نقاطك: ${mine.score} ⭐`:'العب الآن! 🎮';}}catch(e){}}
-function closeGame(){clearInterval(_gameTimerInt);document.getElementById('gameModal').style.display='none';}
-async function _gameDeleteScore(playerName,containerId){if(currentUser?.role!=='admin')return;if(!confirm(`حذف نتيجة "${playerName}" من اليوم؟`))return;try{await db.from('game_scores').delete().eq('player_name',playerName).eq('play_date',_todayStr());toast('✅ تم الحذف');await _loadLeader(containerId);_refreshHomeLeader();}catch(e){toast('❌ فشل: '+e.message);}}
-function _showState(state){['Question','Result','End','Already'].forEach(s=>{const el=document.getElementById('game'+s+'State');if(el)el.style.display=(s.toLowerCase()===state)?'block':'none';});}
-setTimeout(()=>{if(currentUser)_refreshHomeLeader();},1500);
-
-
-// ══ Quality Canvas Animation — التحسين المستمر ══
-(function() {
-  function initQualityCanvas() {
-    const canvas = document.getElementById('qualityCanvas');
-    if (!canvas) return;
-    const ctx    = canvas.getContext('2d');
-    let W, H, animFrame;
-
-    function resize() {
-      W = canvas.width  = canvas.offsetWidth  || window.innerWidth;
-      H = canvas.height = canvas.offsetHeight || window.innerHeight;
-    }
-    resize();
-    window.addEventListener('resize', resize);
-
-    // ── نقاط بيانية صاعدة (خطوط بيانية) ──
-    const lines = Array.from({ length: 4 }, (_, li) => ({
-      points: Array.from({ length: 12 }, (_, i) => ({
-        x: (i / 11) * W,
-        y: H * (0.7 - li * 0.1) - Math.random() * H * 0.2,
-        vy: (Math.random() - 0.5) * 0.3,
-      })),
-      color: `rgba(0,200,180,${0.4 + li * 0.1})`,
-      width: 1 + li * 0.4,
-    }));
-
-    // ── دوائر متموجة ──
-    const circles = Array.from({ length: 6 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 40 + 10,
-      dr: (Math.random() - 0.5) * 0.2,
-      alpha: Math.random() * 0.15 + 0.05,
-    }));
-
-    // ── أرقام صاعدة ──
-    const numbers = Array.from({ length: 8 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      val: Math.floor(Math.random() * 100),
-      vy: -(Math.random() * 0.4 + 0.2),
-      alpha: Math.random() * 0.3 + 0.1,
-      size: Math.random() * 8 + 7,
-    }));
-
-    // ── سهام صاعدة ──
-    const arrows = Array.from({ length: 5 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      vy: -(Math.random() * 0.5 + 0.3),
-      alpha: Math.random() * 0.25 + 0.1,
-      size: Math.random() * 10 + 8,
-    }));
-
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-
-      // سهام صاعدة كبيرة — ترمز للتحسين المستمر
-      lines.forEach(line => {
-        line.points.forEach(p => {
-          p.y -= 0.5 + line.width * 0.2; // تصعد باستمرار
-          if (p.y < -40) { p.y = H + 20; p.x = Math.random() * W; }
-          const sz = 8 + line.width * 4;
-          const alpha = parseFloat(line.color.match(/[\d.]+\)$/)?.[0] || 0.4);
-          ctx.save();
-          ctx.globalAlpha = alpha;
-          ctx.fillStyle = '#00C8B4';
-          ctx.font = `bold ${sz}px Arial`;
-          ctx.fillText('▲', p.x, p.y);
-          ctx.restore();
-        });
-      });
-
-      // الدوائر المتموجة
-      circles.forEach(c => {
-        c.r += c.dr;
-        if (c.r > 60 || c.r < 5) c.dr *= -1;
-        ctx.beginPath();
-        ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(0,200,180,${c.alpha})`;
-        ctx.lineWidth   = 0.8;
-        ctx.stroke();
-      });
-
-      // الأرقام الصاعدة
-      numbers.forEach(n => {
-        n.y += n.vy;
-        if (n.y < -20) { n.y = H + 10; n.val = Math.floor(Math.random() * 100); n.x = Math.random() * W; }
-        ctx.font      = `bold ${n.size}px Arial`;
-        ctx.fillStyle = `rgba(0,200,180,${n.alpha})`;
-        ctx.fillText(n.val + '%', n.x, n.y);
-      });
-
-      // السهام الصاعدة ↑
-      arrows.forEach(a => {
-        a.y += a.vy;
-        if (a.y < -20) { a.y = H + 10; a.x = Math.random() * W; }
-        ctx.font      = `bold ${a.size}px Arial`;
-        ctx.fillStyle = `rgba(0,200,180,${a.alpha})`;
-        ctx.fillText('↑', a.x, a.y);
-      });
-
-      animFrame = requestAnimationFrame(draw);
-    }
-
-    draw();
-
-    // إيقاف عند مغادرة الصفحة
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) cancelAnimationFrame(animFrame);
-      else draw();
-    });
+function opsSelectMonth(key,year,month){
+  if(!OPS_MONTHS[key]){
+    OPS_MONTHS[key]={key,year,month,
+      workDays:calcWorkDays(year,month,null),
+      label:MONTH_NAMES_AR[month]+' '+year,
+      ops:{female:[],male:[],bike:[]},
+      att:{female:{},male:{},bike:{}},
+      analysis:[],
+    };
   }
+  ACTIVE_MONTH=key;
+  OPS_DATA.ops=OPS_MONTHS[key].ops;
+  OPS_DATA.att=OPS_MONTHS[key].att;
+  renderMonthTabs();
+  opsRefreshStatus();
 
-  // تشغيل بعد تحميل الصفحة
-  if (document.readyState === 'complete') initQualityCanvas();
-  else window.addEventListener('load', initQualityCanvas);
-})();
+  // إذا عنده تحليل محفوظ — اعرضه مباشرة
+  if(OPS_MONTHS[key].analysis && OPS_MONTHS[key].analysis.length){
+    window._lastTrainers = OPS_MONTHS[key].analysis;
+    // تحديث عرض التحليل إذا التبويب مفتوح
+    const analysisBody = document.getElementById('opsBody_analysis');
+    if(analysisBody && analysisBody.style.display !== 'none'){
+      renderOpsTableFromData(OPS_MONTHS[key].analysis, 'all');
+    }
+  }
+}
 
-
-// ══ Desktop Sidebar Navigation ══
 function sbUpdateAuth() {
   const icon  = document.getElementById('sbAuthIcon');
   const label = document.getElementById('sbAuthLabel');
