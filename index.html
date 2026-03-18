@@ -7306,7 +7306,7 @@ function parseAttendance(json) {
     if (/^\d+$/.test(name)) continue; // رقم فقط (مثل "4")
     if (['المجموع','الإجمالي','total','sum','المجموع الكلي'].some(kw => name.toLowerCase().includes(kw.toLowerCase()))) continue;
 
-    let absence = 0, leaveP = 0, leaveU = 0, permission = 0;
+    let absence = 0, leaveP = 0, leaveU = 0, permHours = 0;
 
     row.forEach((cell, ci) => {
       if (ci === effectiveNameIdx) return;
@@ -7345,7 +7345,7 @@ function parseAttendance(json) {
       absence,
       leaveP,
       leaveU,
-      permission,
+      permHours,
       totalAbsDays: absence + leaveP + leaveU,
       permHours,
     };
