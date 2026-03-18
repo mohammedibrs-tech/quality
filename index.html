@@ -783,6 +783,31 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     </div>
   </div>
 
+
+  <!-- ══ GAME OF THE DAY CARD ══ -->
+  <div style="padding:0 14px 16px;max-width:900px;margin:0 auto;">
+    <div id="gameDayCard" onclick="openGameModal()" style="background:linear-gradient(135deg,#1A0533,#3D0B6B,#6A0DAD);border-radius:22px;padding:18px 20px;cursor:pointer;box-shadow:0 8px 32px rgba(106,13,173,0.45);position:relative;overflow:hidden;transition:transform .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <!-- خلفية نجوم -->
+      <div style="position:absolute;inset:0;opacity:0.15;background:radial-gradient(circle at 20% 50%,#fff 1px,transparent 1px),radial-gradient(circle at 80% 20%,#fff 1px,transparent 1px),radial-gradient(circle at 60% 80%,#fff 1px,transparent 1px);background-size:40px 40px,60px 60px,30px 30px;"></div>
+      <div style="position:relative;z-index:1;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="font-size:28px;">🎮</div>
+            <div>
+              <div style="font-size:14px;font-weight:900;color:#fff;">لعبة اليوم</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:1px;">DAILY QUALITY QUIZ</div>
+            </div>
+          </div>
+          <div id="gameTodayBadge" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;color:#fff;">جديد اليوم 🎯</div>
+        </div>
+        <!-- لوحة المتصدرين -->
+        <div id="gameLeaderCard" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="font-size:10px;color:rgba(255,255,255,0.5);">جاري تحميل الترتيب...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- QUICK SUMMARY WIDGETS -->
   <div style="padding:0 14px 20px;max-width:900px;margin:0 auto;">
     <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:10px;text-transform:uppercase;display:flex;align-items:center;gap:8px;">
@@ -8248,6 +8273,256 @@ function handleOpsFile(input){handleOpsFileNew(input,'ops');}
 if(document.getElementById('swMaleCount')) loadSummaryWidgets();
 setDT();updateNav();
 setTimeout(()=>{ if(currentUser){loadActiveStaffHome();renderHomeWidgets();renderDailyBulletin();showBulletinPopup();} },300);
+
+// ══════════════════════════════════════════════════════════
+// 🎮 لعبة اليوم — Daily Quality Quiz
+// ══════════════════════════════════════════════════════════
+
+// ── بنك الأسئلة ──
+const QUESTION_BANK = [
+  // إدارة الجودة الشاملة
+  { cat:'🏆 إدارة الجودة', q:'ما معنى اختصار TQM؟', opts:['Total Quality Management','Technical Quality Monitoring','Team Quality Measurement','Training Quality Methods'], ans:0, exp:'TQM تعني إدارة الجودة الشاملة — منهجية تهدف لتحسين جودة المنتجات والخدمات في المنظمة.' },
+  { cat:'🏆 إدارة الجودة', q:'من هو مؤسس مفهوم دورة PDCA؟', opts:['إدواردز ديمينغ','جوزيف جوران','فيليب كروسبي','كاورو إيشيكاوا'], ans:0, exp:'إدواردز ديمينغ هو من طوّر دورة PDCA (خطط-نفّذ-تحقق-تصرف) كأداة للتحسين المستمر.' },
+  { cat:'🏆 إدارة الجودة', q:'ما هي خطوات دورة PDCA بالترتيب الصحيح؟', opts:['خطط، نفّذ، تحقق، تصرف','نفّذ، خطط، تحقق، تصرف','تحقق، خطط، نفّذ، تصرف','تصرف، خطط، نفّذ، تحقق'], ans:0, exp:'Plan→Do→Check→Act: تبدأ بالتخطيط ثم التنفيذ ثم المراجعة ثم التحسين.' },
+  { cat:'🏆 إدارة الجودة', q:'ما الهدف الرئيسي لمبدأ التحسين المستمر في الجودة؟', opts:['رضا العميل','تقليل التكاليف','زيادة الإنتاج','سرعة التسليم'], ans:0, exp:'رضا العميل هو المحور الأساسي في إدارة الجودة الشاملة — كل التحسينات تهدف لتقديم قيمة أفضل للعميل.' },
+  { cat:'🏆 إدارة الجودة', q:'ما هو مخطط إيشيكاوا (عظمة السمكة) المستخدم لـ؟', opts:['تحليل أسباب المشاكل','قياس الإنتاج','جدولة المهام','حساب التكاليف'], ans:0, exp:'مخطط إيشيكاوا يُستخدم لتحليل الأسباب الجذرية للمشاكل من خلال فئات: المواد، الآلات، الأفراد، الأساليب.' },
+  { cat:'🏆 إدارة الجودة', q:'كم مبدأ تتضمن إدارة الجودة الشاملة وفق ISO 9001؟', opts:['7 مبادئ','5 مبادئ','10 مبادئ','3 مبادئ'], ans:0, exp:'ISO 9001:2015 يرتكز على 7 مبادئ للجودة: التركيز على العميل، القيادة، المشاركة، المنهج العملي، التحسين، القرارات المبنية على الأدلة، إدارة العلاقات.' },
+  { cat:'🏆 إدارة الجودة', q:'ماذا تعني كلمة "كايزن" في ثقافة الجودة؟', opts:['التحسين المستمر','الجودة الشاملة','إدارة الوقت','ضبط العمليات'], ans:0, exp:'كايزن كلمة يابانية تعني التحسين المستمر — فلسفة تقوم على إجراء تحسينات صغيرة يومية تتراكم لتحقق نتائج كبيرة.' },
+  { cat:'🏆 إدارة الجودة', q:'ما الفرق بين الكفاءة والفعالية في الجودة؟', opts:['الكفاءة: العمل الصحيح بأقل موارد | الفعالية: تحقيق الأهداف','الكفاءة: السرعة | الفعالية: الدقة','الكفاءة: التكلفة | الفعالية: الوقت','لا فرق بينهما'], ans:0, exp:'الكفاءة تعني أداء العمل بالطريقة الصحيحة بأقل تكلفة، والفعالية تعني تحقيق الأهداف المطلوبة.' },
+
+  // معلومات عامة
+  { cat:'🌍 معلومات عامة', q:'كم عدد طبقات الغلاف الجوي للأرض؟', opts:['5 طبقات','3 طبقات','7 طبقات','4 طبقات'], ans:0, exp:'الغلاف الجوي يتكون من 5 طبقات: التروبوسفير، الستراتوسفير، الميزوسفير، الثيرموسفير، الإكسوسفير.' },
+  { cat:'🌍 معلومات عامة', q:'ما هي أسرع وسيلة اتصال بين البشر حالياً؟', opts:['الإنترنت','الهاتف','البريد الإلكتروني','الراديو'], ans:0, exp:'الإنترنت يتيح التواصل الفوري عبر العالم بسرعة الضوء تقريباً.' },
+  { cat:'🌍 معلومات عامة', q:'من اخترع المصباح الكهربائي؟', opts:['توماس إديسون','نيكولا تسلا','ألبرت أينشتاين','ألكسندر بيل'], ans:0, exp:'توماس إديسون طوّر المصباح الكهربائي العملي عام 1879م.' },
+  { cat:'🌍 معلومات عامة', q:'ما هو أكبر محيط في العالم؟', opts:['المحيط الهادئ','المحيط الأطلسي','المحيط الهندي','المحيط المتجمد الشمالي'], ans:0, exp:'المحيط الهادئ هو الأكبر ويغطي أكثر من 30% من سطح الأرض.' },
+  { cat:'🌍 معلومات عامة', q:'كم عدد دول العالم المعترف بها في الأمم المتحدة؟', opts:['193 دولة','180 دولة','200 دولة','150 دولة'], ans:0, exp:'الأمم المتحدة تضم 193 دولة عضو حتى الآن.' },
+  { cat:'🌍 معلومات عامة', q:'ما هي أطول سلسلة جبال في العالم؟', opts:['جبال الأنديز','جبال الهيمالايا','جبال الألب','جبال الأورال'], ans:0, exp:'جبال الأنديز في أمريكا الجنوبية هي الأطول بامتداد 7000 كم.' },
+  { cat:'🌍 معلومات عامة', q:'ما هو عنصر الكربون في الجدول الدوري؟', opts:['C','Ca','Co','Cr'], ans:0, exp:'الكربون رمزه C في الجدول الدوري وعدده الذري 6.' },
+
+  // وطنية سعودية
+  { cat:'🇸🇦 وطنية', q:'في أي عام تأسست المملكة العربية السعودية؟', opts:['1932م','1902م','1945م','1960م'], ans:0, exp:'أُعلن تأسيس المملكة العربية السعودية الموحدة عام 1932م على يد الملك عبدالعزيز بن سعود.' },
+  { cat:'🇸🇦 وطنية', q:'ما هو شعار رؤية 2030؟', opts:['مجتمع حيوي، اقتصاد مزدهر، وطن طموح','الاستدامة والتطوير والإبداع','التحول الرقمي والابتكار','القيادة والريادة والتميز'], ans:0, exp:'رؤية 2030 ترتكز على ثلاثة محاور: مجتمع حيوي، اقتصاد مزدهر، وطن طموح.' },
+  { cat:'🇸🇦 وطنية', q:'ما هو اليوم الوطني السعودي؟', opts:['23 سبتمبر','17 رجب','1 محرم','12 ربيع الأول'], ans:0, exp:'اليوم الوطني للمملكة العربية السعودية يُحتفل به في 23 سبتمبر من كل عام.' },
+  { cat:'🇸🇦 وطنية', q:'ما هي عاصمة المملكة العربية السعودية؟', opts:['الرياض','جدة','مكة المكرمة','المدينة المنورة'], ans:0, exp:'الرياض هي العاصمة الإدارية والسياسية للمملكة العربية السعودية.' },
+  { cat:'🇸🇦 وطنية', q:'ما هو المسجد الذي يحتوي على الكعبة المشرفة؟', opts:['المسجد الحرام','المسجد النبوي','مسجد قباء','مسجد الأقصى'], ans:0, exp:'المسجد الحرام في مكة المكرمة يحتضن الكعبة المشرفة قبلة المسلمين.' },
+  { cat:'🇸🇦 وطنية', q:'ما هي لغة المملكة العربية السعودية الرسمية؟', opts:['العربية','الإنجليزية','الفارسية','التركية'], ans:0, exp:'اللغة العربية هي اللغة الرسمية للمملكة وإحدى أكثر لغات العالم انتشاراً.' },
+  { cat:'🇸🇦 وطنية', q:'ما هو دين المملكة العربية السعودية الرسمي؟', opts:['الإسلام','المسيحية','اليهودية','لا دين رسمي'], ans:0, exp:'الإسلام هو الدين الرسمي للمملكة العربية السعودية.' },
+  { cat:'🇸🇦 وطنية', q:'أي مدينة سعودية تُعرف بـ "عروس البحر الأحمر"؟', opts:['جدة','ينبع','جازان','الليث'], ans:0, exp:'جدة تُعرف بـ "عروس البحر الأحمر" لموقعها الجميل على ساحل البحر الأحمر وتاريخها العريق.' },
+];
+
+const GAME_KEY   = 'nq_game_v1';
+const GAME_TIMER = 10;
+let _gameQuestions = [];
+let _gameCurrent   = 0;
+let _gameScore     = 0;
+let _gameTimerInt  = null;
+let _gameTimeLeft  = GAME_TIMER;
+let _gameAnswered  = false;
+
+function _todayStr() { return new Date().toISOString().slice(0,10); }
+
+// اختيار سؤالين يومياً بناءً على التاريخ (ثابتان لكل يوم)
+function _getDailyQuestions() {
+  const today = _todayStr();
+  const seed  = today.replace(/-/g,'');
+  // خلط محدد بالتاريخ
+  const shuffled = [...QUESTION_BANK].sort((a,b) => {
+    const ha = parseInt(seed + QUESTION_BANK.indexOf(a)) % 97;
+    const hb = parseInt(seed + QUESTION_BANK.indexOf(b)) % 97;
+    return ha - hb;
+  });
+  // سؤال من فئة مختلفة لكل يوم
+  const cats = [...new Set(QUESTION_BANK.map(q=>q.cat))];
+  const dayIdx = parseInt(seed.slice(-2)) % cats.length;
+  const q1 = shuffled.find(q=>q.cat===cats[dayIdx]) || shuffled[0];
+  const q2 = shuffled.find(q=>q.cat!==q1.cat) || shuffled[1];
+  return [q1, q2];
+}
+
+// ── فتح اللعبة ──
+async function openGameModal() {
+  if (!currentUser) { toast('❌ يرجى تسجيل الدخول أولاً'); return; }
+  const modal = document.getElementById('gameModal');
+  modal.style.display = 'block';
+
+  const alreadyData = await _gameCheckAlready();
+  if (alreadyData) {
+    _showState('already');
+    const el = document.getElementById('gameAlreadyScore');
+    if (el) el.textContent = `نقاطك اليوم: ${alreadyData.score} نقطة`;
+    await _loadLeader('gameLeaderAlready');
+    return;
+  }
+
+  _gameQuestions = _getDailyQuestions();
+  _gameCurrent   = 0;
+  _gameScore     = 0;
+  _showQuestion();
+}
+
+// ── عرض السؤال ──
+function _showQuestion() {
+  if (_gameCurrent >= _gameQuestions.length) { _gameEnd(); return; }
+  _showState('question');
+  _gameAnswered = false;
+  _gameTimeLeft = GAME_TIMER;
+
+  const q = _gameQuestions[_gameCurrent];
+  document.getElementById('gameQNum').textContent    = _gameCurrent + 1;
+  document.getElementById('gameQTotal').textContent  = _gameQuestions.length;
+  document.getElementById('gameCategory').textContent = q.cat;
+  document.getElementById('gameQuestion').textContent = q.q;
+
+  const opts   = document.getElementById('gameOptions');
+  const labels = ['أ','ب','ج','د'];
+  opts.innerHTML = q.opts.map((opt,i) => `
+    <button onclick="_gameAnswer(${i})" id="gameOpt${i}"
+      style="padding:12px 16px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);
+      border-radius:14px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;
+      color:#fff;text-align:right;transition:all .2s;display:flex;align-items:center;gap:10px;">
+      <span style="background:rgba(255,255,255,0.12);border-radius:8px;padding:2px 8px;font-size:11px;flex-shrink:0;">${labels[i]}</span>
+      <span>${opt}</span>
+    </button>`).join('');
+
+  _startTimer();
+}
+
+// ── العداد ──
+function _startTimer() {
+  clearInterval(_gameTimerInt);
+  const bar = document.getElementById('gameTimerBar');
+  const el  = document.getElementById('gameTimer');
+  if (el) { el.textContent = _gameTimeLeft; el.style.color='#fff'; }
+  if (bar) bar.style.background = 'linear-gradient(90deg,#00C8B4,#7D3C98)';
+
+  _gameTimerInt = setInterval(() => {
+    _gameTimeLeft--;
+    if (el) el.textContent = _gameTimeLeft;
+    if (bar) bar.style.width = (_gameTimeLeft / GAME_TIMER * 100) + '%';
+    if (_gameTimeLeft <= 3) {
+      if (el)  el.style.color = '#FF6B6B';
+      if (bar) bar.style.background = 'linear-gradient(90deg,#E74C3C,#C0392B)';
+    } else if (_gameTimeLeft <= 6) {
+      if (el)  el.style.color = '#FFE07F';
+      if (bar) bar.style.background = 'linear-gradient(90deg,#D4AC0D,#F39C12)';
+    }
+    if (_gameTimeLeft <= 0) { clearInterval(_gameTimerInt); if (!_gameAnswered) _gameAnswer(-1); }
+  }, 1000);
+}
+
+// ── الإجابة ──
+function _gameAnswer(idx) {
+  if (_gameAnswered) return;
+  _gameAnswered = true;
+  clearInterval(_gameTimerInt);
+
+  const q       = _gameQuestions[_gameCurrent];
+  const correct = q.ans;
+  const isRight = idx === correct;
+
+  q.opts.forEach((_,i) => {
+    const btn = document.getElementById('gameOpt'+i);
+    if (!btn) return;
+    if (i === correct)             { btn.style.background='rgba(39,174,96,0.3)'; btn.style.borderColor='#27AE60'; }
+    else if (i===idx && !isRight)  { btn.style.background='rgba(231,76,60,0.3)'; btn.style.borderColor='#E74C3C'; }
+    btn.style.cursor='default';
+    btn.onclick=null;
+  });
+
+  const pts = isRight ? 10 + _gameTimeLeft : 0;
+  _gameScore += pts;
+
+  setTimeout(() => {
+    _showState('result');
+    document.getElementById('gameResultIcon').textContent    = isRight ? '✅' : (idx===-1?'⏰':'❌');
+    document.getElementById('gameResultText').textContent    = isRight ? 'إجابة صحيحة! 🎉' : (idx===-1?'انتهى الوقت!':'إجابة خاطئة!');
+    document.getElementById('gameResultExplain').textContent = q.exp;
+    document.getElementById('gameResultScore').textContent   = isRight
+      ? `+${pts} نقطة (10 + ${_gameTimeLeft} ثانية سرعة)`
+      : `الإجابة الصحيحة: ${q.opts[correct]}`;
+    const nb = document.getElementById('gameNextBtn');
+    if (nb) nb.textContent = _gameCurrent+1 >= _gameQuestions.length ? '🏆 النتيجة النهائية' : 'التالي ›';
+  }, 800);
+}
+
+function gameNext() {
+  _gameCurrent++;
+  _gameCurrent >= _gameQuestions.length ? _gameEnd() : _showQuestion();
+}
+
+async function _gameEnd() {
+  _showState('end');
+  document.getElementById('gameFinalScore').textContent = _gameScore;
+  try {
+    await db.from('game_scores').upsert({
+      player_name: currentUser.name,
+      username:    currentUser.username,
+      score:       _gameScore,
+      play_date:   _todayStr(),
+      questions_count: _gameQuestions.length,
+    }, { onConflict:'username,play_date' });
+    toast('✅ نقاطك حُفظت!');
+  } catch(e) { console.log('game save:',e); }
+  await _loadLeader('gameLeaderEnd');
+  _refreshHomeLeader();
+}
+
+async function _gameCheckAlready() {
+  try {
+    const {data} = await db.from('game_scores').select('score').eq('username',currentUser.username).eq('play_date',_todayStr()).single();
+    return data;
+  } catch(e){ return null; }
+}
+
+async function _loadLeader(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  try {
+    const {data} = await db.from('game_scores').select('player_name,score').eq('play_date',_todayStr()).order('score',{ascending:false}).limit(6);
+    if (!data||!data.length){ el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.4);font-size:11px;">لا توجد نتائج اليوم بعد</div>'; return; }
+    const medals=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣'];
+    el.innerHTML=data.map((r,i)=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,0.07);border-radius:12px;">
+        <span style="font-size:18px;">${medals[i]||''}</span>
+        <span style="flex:1;font-size:12px;font-weight:700;color:#fff;">${r.player_name}</span>
+        <span style="font-size:13px;font-weight:900;color:#FFD700;">${r.score} pt</span>
+      </div>`).join('');
+  } catch(e){}
+}
+
+async function _refreshHomeLeader() {
+  const el = document.getElementById('gameLeaderCard');
+  if (!el) return;
+  try {
+    const {data} = await db.from('game_scores').select('player_name,score').eq('play_date',_todayStr()).order('score',{ascending:false}).limit(3);
+    if (!data||!data.length){ el.innerHTML='<div style="font-size:10px;color:rgba(255,255,255,0.4);">كن أول من يلعب اليوم! 🎮</div>'; return; }
+    const medals=['🥇','🥈','🥉'];
+    el.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;">${data.map((r,i)=>`
+      <div style="background:rgba(255,255,255,0.1);border-radius:20px;padding:4px 12px;display:flex;align-items:center;gap:6px;">
+        <span>${medals[i]}</span>
+        <span style="font-size:11px;font-weight:700;color:#fff;">${r.player_name.split(' ')[0]}</span>
+        <span style="font-size:11px;color:#FFD700;font-weight:900;">${r.score}pt</span>
+      </div>`).join('')}</div>`;
+    const badge = document.getElementById('gameTodayBadge');
+    if (badge) {
+      const mine = data.find(r=>r.player_name===currentUser?.name);
+      badge.textContent = mine ? `نقاطك: ${mine.score} ⭐` : 'العب الآن! 🎮';
+    }
+  } catch(e){}
+}
+
+function closeGame() { clearInterval(_gameTimerInt); document.getElementById('gameModal').style.display='none'; }
+
+function _showState(state) {
+  ['Loading','Question','Result','End','Already'].forEach(s=>{
+    const el=document.getElementById('game'+s+'State');
+    if(el) el.style.display=(s.toLowerCase()===state)?'block':'none';
+  });
+}
+
+// تحميل الترتيب عند فتح الصفحة
+setTimeout(() => { if(currentUser) _refreshHomeLeader(); }, 1500);
+
 </script>
 
 <!-- ══ WEEKLY TASKS MODAL ══ -->
@@ -8282,5 +8557,80 @@ setTimeout(()=>{ if(currentUser){loadActiveStaffHome();renderHomeWidgets();rende
     </div>
   </div>
 </div>
+
+<!-- ══ GAME OF THE DAY MODAL ══ -->
+<div id="gameModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);z-index:9500;overflow-y:auto;padding:16px;">
+  <div style="max-width:500px;margin:0 auto;background:linear-gradient(135deg,#1A0533,#3D0B6B);border-radius:24px;padding:24px 20px;position:relative;min-height:60vh;">
+    <button onclick="closeGame()" style="position:absolute;top:16px;left:16px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:#fff;line-height:1;">✕</button>
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:32px;margin-bottom:6px;">🎮</div>
+      <div style="font-size:16px;font-weight:900;color:#fff;">لعبة اليوم</div>
+      <div id="gameCategory" style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:3px;letter-spacing:1px;"></div>
+    </div>
+
+    <!-- حالة التحميل -->
+    <div id="gameLoadingState" style="text-align:center;padding:40px 0;">
+      <div style="font-size:36px;margin-bottom:12px;">⚡</div>
+      <div style="color:#fff;font-size:13px;font-weight:700;">جاري توليد أسئلة اليوم...</div>
+      <div style="color:rgba(255,255,255,0.5);font-size:10px;margin-top:6px;">بواسطة Claude AI</div>
+    </div>
+
+    <!-- حالة السؤال -->
+    <div id="gameQuestionState" style="display:none;">
+      <!-- Progress -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="color:rgba(255,255,255,0.6);font-size:11px;">سؤال <span id="gameQNum">1</span> من <span id="gameQTotal">2</span></div>
+        <div id="gameTimer" style="background:rgba(255,255,255,0.15);border-radius:20px;padding:4px 14px;font-size:14px;font-weight:900;color:#fff;min-width:50px;text-align:center;">10</div>
+      </div>
+      <!-- Progress bar -->
+      <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:4px;margin-bottom:20px;overflow:hidden;">
+        <div id="gameTimerBar" style="height:4px;background:linear-gradient(90deg,#00C8B4,#7D3C98);border-radius:4px;transition:width 1s linear;width:100%;"></div>
+      </div>
+      <!-- السؤال -->
+      <div id="gameQuestion" style="font-size:15px;font-weight:800;color:#fff;text-align:center;line-height:1.6;margin-bottom:24px;min-height:60px;"></div>
+      <!-- الخيارات -->
+      <div id="gameOptions" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+
+    <!-- نتيجة السؤال -->
+    <div id="gameResultState" style="display:none;text-align:center;padding:20px 0;">
+      <div id="gameResultIcon" style="font-size:48px;margin-bottom:12px;"></div>
+      <div id="gameResultText" style="font-size:16px;font-weight:900;color:#fff;margin-bottom:8px;"></div>
+      <div id="gameResultExplain" style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:20px;line-height:1.6;"></div>
+      <div id="gameResultScore" style="background:rgba(255,255,255,0.1);border-radius:14px;padding:10px 20px;font-size:13px;color:#fff;font-weight:700;margin-bottom:16px;"></div>
+      <button id="gameNextBtn" onclick="gameNext()" style="width:100%;padding:14px;background:linear-gradient(135deg,#00C8B4,#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">التالي ›</button>
+    </div>
+
+    <!-- نهاية اللعبة -->
+    <div id="gameEndState" style="display:none;text-align:center;padding:10px 0;">
+      <div style="font-size:48px;margin-bottom:12px;">🏆</div>
+      <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:6px;">انتهت لعبة اليوم!</div>
+      <div id="gameFinalScore" style="font-size:32px;font-weight:900;color:#FFD700;margin:10px 0;"></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:20px;">نقطة — سيتم حفظها في لوحة المتصدرين</div>
+      <!-- لوحة المتصدرين -->
+      <div style="background:rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:900;color:#fff;margin-bottom:12px;">🏅 لوحة المتصدرين</div>
+        <div id="gameLeaderEnd" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+      <button onclick="closeGame()" style="width:100%;padding:14px;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">إغلاق</button>
+    </div>
+
+    <!-- سبق وأجبت -->
+    <div id="gameAlreadyState" style="display:none;text-align:center;padding:20px 0;">
+      <div style="font-size:48px;margin-bottom:12px;">✅</div>
+      <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:8px;">أجبت على أسئلة اليوم!</div>
+      <div id="gameAlreadyScore" style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:20px;"></div>
+      <!-- لوحة المتصدرين -->
+      <div style="background:rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:900;color:#fff;margin-bottom:12px;">🏅 لوحة المتصدرين اليوم</div>
+        <div id="gameLeaderAlready" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+      <button onclick="closeGame()" style="width:100%;padding:14px;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">إغلاق</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
