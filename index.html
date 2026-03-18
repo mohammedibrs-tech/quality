@@ -7460,41 +7460,100 @@ function parseAttendance(json){
 }
 
 function getOpsAnalysis(){
-  const now=new Date();
-  const yr=now.getFullYear(),mo=now.getMonth();
-  let workDays=0;
-  for(let d=1;d<=new Date(yr,mo+1,0).getDate();d++){
-    const dow=new Date(yr,mo,d).getDay();
-    if(dow>=0&&dow<=4) workDays++;
+  // استخدام بيانات الشهر المحدد
+  const opsData = ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]
+    ? OPS_MONTHS[ACTIVE_MONTH].ops : OPS_DATA.ops;
+  const attData = ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]
+    ? OPS_MONTHS[ACTIVE_MONTH].att : OPS_DATA.att;
+
+  // أيام العمل من الشهر المحدد
+  let workDays = 0;
+  if(ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]){
+    workDays = OPS_MONTHS[ACTIVE_MONTH].workDays || 22;
+  } else {
+    const now = new Date();
+    for(let d=1;d<=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();d++){
+      const dow=new Date(now.getFullYear(),now.getMonth(),d).getDay();
+      if(dow>=0&&dow<=4) workDays++;
+    }
   }
+
   const all=[];
   ['female','male','bike'].forEach(sec=>{
-    (OPS_DATA.ops[sec]||[]).forEach(row=>{
+    (opsData[sec]||[]).forEach(row=>{
       const keys=Object.keys(row);
       const nk=keys.find(k=>k.includes('اسم')||k.includes('مدرب'))||keys[0];
       const sk=keys.find(k=>k.includes('حصة')||k.includes('حصص'));
       const htk=keys.find(k=>k.includes('إجمالي')||k.includes('اجمالي'));
       const hak=keys.find(k=>k.includes('فعلية')||k.includes('فعلي'));
       const trk=keys.find(k=>k.includes('مستفيد')||k.includes('متدرب'));
-      const name=row[nk]||'—';
-      const hrsAct=parseFloat(row[hak])||0;
-      const hrsTot=parseFloat(row[htk])||0;
-      const sessions=parseFloat(row[sk])||0;
-      const trainees=parseFloat(row[trk])||0;
-      const att=OPS_DATA.att[sec][name]||{};
-      const absDays=att.totalAbsDays||0;
-      const effWork=Math.max(0,workDays-absDays);
-      // الحصص المفترضة = ساعات العمل الإجمالية ÷ 2 (من ملف التشغيل)
-      const expSess=hrsTot>0?Math.round(hrsTot/HOURS_PER_SESSION):effWork*SESSIONS_PER_DAY;
-      // الحصص المنجزة = عدد الحصص من الملف مباشرة
-      const actSess=sessions;
-      const unusedSess=Math.max(0,expSess-actSess);
-      const eff=expSess>0?actSess/expSess:0;
-      all.push({name,section:sec,sessions,hrsTot,hrsAct,trainees,absDays,workDays,effectiveWorkDays:effWork,expectedSessions:expSess,actualSessions:Math.round(actSess*10)/10,unusedSessions:Math.round(unusedSess*10)/10,absSessions:absDays*SESSIONS_PER_DAY,efficiency:Math.round(eff*1000)/10,status:eff>=TARGET_EFF?'✅ جيد':eff>=0.7?'⚠️ تحسين':'❌ ضعيف',recommendation:eff<0.7?`مراجعة عاجلة: كفاءة ${Math.round(eff*100)}%${absDays>3?' — غياب '+absDays+' أيام':''}`:eff<TARGET_EFF?`تحسين: ${Math.round(unusedSess)} حصة مهدرة`:'أداء ممتاز ✅'});
+      const effk=keys.find(k=>k.includes('نسبة')||k.includes('كفاءة'));
+
+      const name=String(row[nk]||'').trim();
+      if(!name||name.length<2) return;
+
+      const hrsTot  = parseFloat(row[htk])||0;
+      const hrsAct  = parseFloat(row[hak])||0;
+      const sessions= parseFloat(row[sk])||0;
+      const trainees= parseFloat(row[trk])||0;
+      const effSource= parseFloat(row[effk])||0;
+
+      const att     = (attData[sec]&&attData[sec][name]) || {};
+      const absDays = att.totalAbsDays||0;
+      const absence = att.absence||0;
+      const leaveP  = att.leaveP||0;
+      const leaveU  = att.leaveU||0;
+      const permHours= att.permHours||0;
+
+      // الحصص المفترضة = ساعات الإجمالية ÷ 2
+      const expSess = hrsTot>0 ? Math.round(hrsTot/HOURS_PER_SESSION) : workDays*SESSIONS_PER_DAY;
+      const actSess = sessions;
+      const unusedSess = Math.max(0, expSess-actSess);
+      const absSess = absDays * SESSIONS_PER_DAY;
+      const eff = expSess>0 ? actSess/expSess : 0;
+
+      // توصية تفصيلية
+      let recommendation='';
+      if(eff>=TARGET_EFF){
+        const reasons=[];
+        if(absDays===0) reasons.push('لا غياب هذا الشهر');
+        else if(absDays<=2) reasons.push(`غياب ${absDays} يوم فقط`);
+        if(unusedSess<=5) reasons.push(`حصص مهدرة منخفضة (${unusedSess.toFixed(0)})`);
+        reasons.push(`أنجز ${actSess} من ${expSess} حصة`);
+        recommendation='✅ أداء ممتاز — '+reasons.join('، ');
+      } else {
+        const reasons=[];
+        if(absDays>0){
+          const parts=[];
+          if(absence>0) parts.push(`${absence} غياب`);
+          if(leaveP>0)  parts.push(`${leaveP} إجازة`);
+          if(leaveU>0)  parts.push(`${leaveU} غير مدفوعة`);
+          reasons.push(`غياب ${absDays} يوم (${parts.join(' + ')||absDays+' يوم'})`);
+        }
+        if(permHours>0) reasons.push(`استئذان ${permHours} ساعة`);
+        const missed=Math.round(unusedSess);
+        if(missed>0) reasons.push(`${missed} حصة لم تُنجز من أصل ${expSess}`);
+        if(!reasons.length) reasons.push(`أنجز ${actSess} من ${expSess} حصة`);
+        recommendation=`⚠️ كفاءة ${(eff*100).toFixed(1)}% — `+reasons.join(' | ');
+      }
+
+      all.push({
+        name, section:sec, sessions:actSess, hrsTot, hrsAct, trainees,
+        absDays, absence, leaveP, leaveU, permHours, workDays,
+        effSource,
+        expectedSessions: expSess,
+        actualSessions:   actSess,
+        unusedSessions:   Math.round(unusedSess*10)/10,
+        absSessions:      absSess,
+        efficiency:       Math.round(eff*1000)/10,
+        status: eff>=TARGET_EFF?'✅ ممتاز':eff>=0.7?'⚠️ يحتاج تحسين':'❌ ضعيف',
+        recommendation,
+      });
     });
   });
   return all.sort((a,b)=>b.efficiency-a.efficiency);
 }
+
 
 function renderOpsTableFromData(trainers, sec){
   const filtered = sec==='all' ? trainers : trainers.filter(t=>t.section===sec);
@@ -7695,13 +7754,105 @@ async function saveOpsToSupabase(trainers){
 }
 
 async function exportOpsExcelFull(){
-  const trainers = (ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]?.analysis?.length)
-    ? OPS_MONTHS[ACTIVE_MONTH].analysis
-    : (window._lastTrainers?.length ? window._lastTrainers : getOpsAnalysis());
-  if(!trainers.length){ toast('❌ لا توجد بيانات — حلّل أولاً'); return; }
-  if(typeof ExcelJS==='undefined'){ toast('❌ ExcelJS غير محملة'); return; }
-  window._exportTrainers = trainers;
-  exportOpsExcelNew();
+  const trainers=(ACTIVE_MONTH&&OPS_MONTHS[ACTIVE_MONTH]?.analysis?.length)
+    ?OPS_MONTHS[ACTIVE_MONTH].analysis
+    :(window._lastTrainers?.length?window._lastTrainers:getOpsAnalysis());
+  if(!trainers.length){toast('❌ لا توجد بيانات — حلّل أولاً');return;}
+  if(typeof ExcelJS==='undefined'){toast('❌ ExcelJS غير محملة');return;}
+  const wb=new ExcelJS.Workbook();
+  wb.creator='نورة لتعليم القيادة';wb.created=new Date();
+  const mo=ACTIVE_MONTH||new Date().toISOString().slice(0,7);
+  const CLR={teal:'FF00A896',white:'FFFFFFFF',dark:'FF0D1F2D',red:'FFE74C3C',green:'FF27AE60',gold:'FFD4AC0D',blue:'FF2E86C1'};
+  const sects=[{k:'female',l:'نسائي',c:CLR.red},{k:'male',l:'رجالي',c:CLR.blue},{k:'bike',l:'دراجات',c:CLR.gold}];
+  const sn={female:'نسائي',male:'رجالي',bike:'دراجات'};
+  const COLS=[
+    {w:5},{w:30},{w:12},{w:14},{w:16},{w:18},{w:22},
+    {w:13},{w:13},{w:13},{w:15},{w:14},{w:14},{w:14},{w:14},{w:45},{w:35}
+  ];
+  const HDRS=['#','اسم المدرب','القسم','حصص منجزة','الحصص المفترضة','الحصص الغير مجدولة',
+    'الحصص المهدرة بسبب الغياب','غياب','إجازة','استئذان (س)','ساعات إجمالية','ساعات فعلية',
+    'نسبة المنصة','كفاءة %','تقييم','التوصية','ملاحظات HR'];
+  function sHdr(row,bg){row.height=30;row.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',bold:true,size:10,color:{argb:CLR.white}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};c.alignment={horizontal:'center',vertical:'middle',wrapText:true};});}
+  function sRow(row,i,eff){
+    row.height=22;row.eachCell({includeEmpty:true},c=>{c.font=c.font||{};c.font.name='Arial';c.font.size=c.font.size||10;c.alignment={vertical:'middle'};
+    if(!c.fill||!c.fill.fgColor)c.fill={type:'pattern',pattern:'solid',fgColor:{argb:i%2===0?'FFEEF7F5':CLR.white}};});
+    if(eff!==undefined){const ec=eff>=90?CLR.green:eff>=70?CLR.gold:CLR.red;const c=row.getCell(14);c.numFmt='0.0%';c.font={name:'Arial',bold:true,size:11,color:{argb:ec}};}
+  }
+  [...sects,{k:'all',l:'الكل',c:CLR.dark}].forEach(({k,l,c})=>{
+    const data=k==='all'?trainers:trainers.filter(t=>t.section===k);
+    if(!data.length)return;
+    const ws=wb.addWorksheet('تحليل - '+l);
+    ws.views=[{rightToLeft:true}];
+    ws.columns=COLS.map((col,i)=>({header:HDRS[i],width:col.w}));
+    const tr=ws.insertRow(1,['تحليل كفاءة التشغيل — '+l+' — '+mo]);
+    ws.mergeCells(1,1,1,HDRS.length);
+    tr.getCell(1).font={name:'Arial',bold:true,size:13,color:{argb:CLR.white}};
+    tr.getCell(1).fill={type:'pattern',pattern:'solid',fgColor:{argb:c}};
+    tr.getCell(1).alignment={horizontal:'center',vertical:'middle'};tr.height=36;
+    sHdr(ws.getRow(2),CLR.teal);
+    ws.views=[{state:'frozen',xSplit:2,ySplit:2,rightToLeft:true}];
+    data.forEach((t,i)=>{
+      const r=ws.addRow([i+1,t.name||'—',sn[t.section]||t.section,
+        t.actualSessions||0,t.expectedSessions||0,t.unusedSessions||0,t.absSessions||0,
+        t.absDays||0,t.leaveP||0,t.permHours||0,t.hrsTot||0,t.hrsAct||0,
+        (t.effSource||0)/100,t.efficiency/100,t.status||'',t.recommendation||'','']);
+      r.getCell(13).numFmt='0.0%';sRow(r,i,t.efficiency);
+    });
+  });
+  // KPIs
+  const wk=wb.addWorksheet('KPIs');wk.views=[{rightToLeft:true}];wk.columns=[{width:35},{width:20},{width:50}];
+  function aT(ws,txt,bg){const r=ws.addRow([txt]);ws.mergeCells(r.number,1,r.number,3);r.getCell(1).font={name:'Arial',bold:true,size:12,color:{argb:CLR.white}};r.getCell(1).fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};r.getCell(1).alignment={horizontal:'center'};r.height=28;}
+  function aH(ws){const r=ws.addRow(['المؤشر','القيمة','الملاحظة']);r.height=24;r.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',bold:true,size:10,color:{argb:CLR.white}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:CLR.teal}};});}
+  function aR(ws,l,v,n,i){const r=ws.addRow([l,v,n||'']);r.height=22;r.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',size:10};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:i%2===0?'FFE8F5F3':CLR.white}};});r.getCell(1).font={name:'Arial',bold:true,size:10};}
+  const avg=trainers.reduce((s,t)=>s+t.efficiency,0)/trainers.length;
+  aT(wk,'ملخص كفاءة التشغيل — '+mo+' — '+trainers.length+' مدرب',CLR.dark);aH(wk);
+  [['متوسط الكفاءة',avg.toFixed(1)+'%',avg>=90?'✅ حقق الهدف':'⚠️ فجوة '+(90-avg).toFixed(1)+'%'],
+   ['مدربون ≥90%',trainers.filter(t=>t.efficiency>=90).length+'/'+trainers.length,''],
+   ['مدربون 70-89%',trainers.filter(t=>t.efficiency>=70&&t.efficiency<90).length,''],
+   ['مدربون <70%',trainers.filter(t=>t.efficiency<70).length,'يحتاجون متابعة'],
+   ['إجمالي الغياب',trainers.reduce((s,t)=>s+(t.absDays||0),0)+' يوم',''],
+   ['حصص مهدرة',trainers.reduce((s,t)=>s+(t.unusedSessions||0),0).toFixed(0)+' حصة',''],
+  ].forEach((r,i)=>aR(wk,r[0],r[1],r[2],i));wk.addRow([]);
+  sects.forEach(({k,l,c})=>{
+    const data=trainers.filter(t=>t.section===k);if(!data.length)return;
+    const sa=data.reduce((s,t)=>s+t.efficiency,0)/data.length;
+    aT(wk,'قسم '+l+' — '+data.length+' مدرب',c);aH(wk);
+    [['متوسط الكفاءة',sa.toFixed(1)+'%',sa>=90?'✅ حقق الهدف':'⚠️ دون الهدف'],
+     ['مدربون ≥90%',data.filter(t=>t.efficiency>=90).length+'/'+data.length,''],
+     ['غياب',data.reduce((s,t)=>s+(t.absDays||0),0)+' يوم',''],
+     ['حصص مهدرة',data.reduce((s,t)=>s+(t.unusedSessions||0),0).toFixed(0),''],
+    ].forEach((r,i)=>aR(wk,r[0],r[1],r[2],i));wk.addRow([]);
+    const t5=wk.addRow(['🏆 أعلى 5 — '+l]);t5.getCell(1).font={name:'Arial',bold:true,size:11,color:{argb:CLR.green}};t5.height=22;
+    [...data].sort((a,b)=>b.efficiency-a.efficiency).slice(0,5).forEach((t,i)=>aR(wk,i+1+'. '+t.name,t.efficiency.toFixed(1)+'%',t.recommendation||'',i));
+    wk.addRow([]);
+    const b5=wk.addRow(['⚠️ أدنى 5 — '+l]);b5.getCell(1).font={name:'Arial',bold:true,size:11,color:{argb:CLR.red}};b5.height=22;
+    [...data].sort((a,b)=>a.efficiency-b.efficiency).slice(0,5).forEach((t,i)=>aR(wk,i+1+'. '+t.name,t.efficiency.toFixed(1)+'%',t.recommendation||'',i));
+    wk.addRow([]);
+  });
+  // التعليمات
+  const wh=wb.addWorksheet('التعليمات');wh.views=[{rightToLeft:true}];wh.columns=[{width:28},{width:18},{width:55},{width:35}];
+  const ht=wh.addRow(['دليل قراءة تقرير كفاءة التشغيل — نورة لتعليم القيادة']);
+  wh.mergeCells(1,1,1,4);ht.getCell(1).font={name:'Arial',bold:true,size:13,color:{argb:CLR.white}};ht.getCell(1).fill={type:'pattern',pattern:'solid',fgColor:{argb:CLR.dark}};ht.getCell(1).alignment={horizontal:'center'};ht.height=36;
+  const hh=wh.addRow(['اسم العمود','المصدر','الشرح','مثال']);hh.height=24;hh.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',bold:true,size:10,color:{argb:CLR.white}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:CLR.teal}};});
+  [['حصص منجزة','ملف التشغيل','الحصص التي نفّذها المدرب فعلياً','80 حصة'],
+   ['الحصص المفترضة','محسوب','ساعات إجمالية ÷ 2','320÷2=160'],
+   ['الحصص الغير مجدولة','محسوب','المفترضة − المنجزة','80 حصة'],
+   ['الحصص المهدرة بسبب الغياب','محسوب','أيام الغياب × 4','2×4=8'],
+   ['غياب','كشف الحضور','رمز: غ، غع، غياب','3 أيام'],
+   ['إجازة','كشف الحضور','رمز: إجازة، اجازة','2 أيام'],
+   ['استئذان (س)','كشف الحضور','رمز: 2hr, 4hr','4 ساعات'],
+   ['ساعات إجمالية','ملف التشغيل','إجمالي ساعات العمل المتاحة','320 ساعة'],
+   ['ساعات فعلية','ملف التشغيل','ساعات العمل الفعلية','290 ساعة'],
+   ['نسبة المنصة','ملف التشغيل','فعلية÷إجمالية للمقارنة','90.6%'],
+   ['كفاءة %','محسوب','حصص منجزة ÷ مفترضة × 100','80÷160=50%'],
+   ['التوصية','محسوب','شرح السبب بناءً على الغياب والحصص','غياب 5 يوم | 80 حصة لم تُنجز'],
+  ].forEach((row,i)=>{const r=wh.addRow(row);r.height=22;r.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',size:10};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:i%2===0?'FFE8F5F3':CLR.white}};});r.getCell(1).font={name:'Arial',bold:true,size:10};});
+  // تنزيل
+  const buf=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='كفاءة_التشغيل_'+mo+'.xlsx';a.click();URL.revokeObjectURL(url);
+  toast('✅ تم تصدير Excel — '+mo);
 }
 
 
