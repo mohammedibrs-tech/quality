@@ -805,6 +805,12 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <p>اختر القسم المناسب — Select a section</p>
     <div class="hero-line"></div>
   </div>
+  
+  <!-- ══ ANIMATED BG — التحسين المستمر ══ -->
+  <div style="position:relative;padding:0 14px;max-width:900px;margin:0 auto;">
+    <canvas id="qualityCanvas" style="position:absolute;inset:0;width:100%;height:100%;opacity:0.18;pointer-events:none;border-radius:20px;"></canvas>
+  </div>
+
   <div class="home-sections">
     <div class="section-card full-w" onclick="showWeeklyTasks()" style="background:linear-gradient(to right,#00C8B4,#0D3040);">
       <div class="s-icon">📋</div>
@@ -9750,6 +9756,146 @@ function closeGame(){clearInterval(_gameTimerInt);document.getElementById('gameM
 async function _gameDeleteScore(playerName,containerId){if(currentUser?.role!=='admin')return;if(!confirm(`حذف نتيجة "${playerName}" من اليوم؟`))return;try{await db.from('game_scores').delete().eq('player_name',playerName).eq('play_date',_todayStr());toast('✅ تم الحذف');await _loadLeader(containerId);_refreshHomeLeader();}catch(e){toast('❌ فشل: '+e.message);}}
 function _showState(state){['Question','Result','End','Already'].forEach(s=>{const el=document.getElementById('game'+s+'State');if(el)el.style.display=(s.toLowerCase()===state)?'block':'none';});}
 setTimeout(()=>{if(currentUser)_refreshHomeLeader();},1500);
+
+
+// ══ Quality Canvas Animation — التحسين المستمر ══
+(function() {
+  function initQualityCanvas() {
+    const canvas = document.getElementById('qualityCanvas');
+    if (!canvas) return;
+    const ctx    = canvas.getContext('2d');
+    let W, H, animFrame;
+
+    function resize() {
+      const parent = canvas.parentElement;
+      W = canvas.width  = parent.offsetWidth;
+      H = canvas.height = parent.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // ── نقاط بيانية صاعدة (خطوط بيانية) ──
+    const lines = Array.from({ length: 4 }, (_, li) => ({
+      points: Array.from({ length: 12 }, (_, i) => ({
+        x: (i / 11) * W,
+        y: H * (0.7 - li * 0.1) - Math.random() * H * 0.2,
+        vy: (Math.random() - 0.5) * 0.3,
+      })),
+      color: `rgba(0,200,180,${0.4 + li * 0.1})`,
+      width: 1 + li * 0.4,
+    }));
+
+    // ── دوائر متموجة ──
+    const circles = Array.from({ length: 6 }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 40 + 10,
+      dr: (Math.random() - 0.5) * 0.2,
+      alpha: Math.random() * 0.15 + 0.05,
+    }));
+
+    // ── أرقام صاعدة ──
+    const numbers = Array.from({ length: 8 }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      val: Math.floor(Math.random() * 100),
+      vy: -(Math.random() * 0.4 + 0.2),
+      alpha: Math.random() * 0.3 + 0.1,
+      size: Math.random() * 8 + 7,
+    }));
+
+    // ── سهام صاعدة ──
+    const arrows = Array.from({ length: 5 }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vy: -(Math.random() * 0.5 + 0.3),
+      alpha: Math.random() * 0.25 + 0.1,
+      size: Math.random() * 10 + 8,
+    }));
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // الخطوط البيانية الصاعدة
+      lines.forEach(line => {
+        // تحريك النقاط تدريجياً للأعلى (تحسين مستمر)
+        line.points.forEach(p => {
+          p.y += p.vy;
+          if (p.y < H * 0.05 || p.y > H * 0.95) p.vy *= -1;
+          // ميل طفيف للأعلى
+          p.y -= 0.05;
+          if (p.y < 0) p.y = H;
+        });
+
+        ctx.beginPath();
+        ctx.moveTo(line.points[0].x, line.points[0].y);
+        for (let i = 1; i < line.points.length; i++) {
+          const cp = line.points[i - 1];
+          const np = line.points[i];
+          ctx.bezierCurveTo(
+            cp.x + (np.x - cp.x) / 3, cp.y,
+            np.x - (np.x - cp.x) / 3, np.y,
+            np.x, np.y
+          );
+        }
+        ctx.strokeStyle = line.color;
+        ctx.lineWidth   = line.width;
+        ctx.stroke();
+
+        // نقاط على الخط
+        line.points.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = line.color;
+          ctx.fill();
+        });
+      });
+
+      // الدوائر المتموجة
+      circles.forEach(c => {
+        c.r += c.dr;
+        if (c.r > 60 || c.r < 5) c.dr *= -1;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(0,200,180,${c.alpha})`;
+        ctx.lineWidth   = 0.8;
+        ctx.stroke();
+      });
+
+      // الأرقام الصاعدة
+      numbers.forEach(n => {
+        n.y += n.vy;
+        if (n.y < -20) { n.y = H + 10; n.val = Math.floor(Math.random() * 100); n.x = Math.random() * W; }
+        ctx.font      = `bold ${n.size}px Arial`;
+        ctx.fillStyle = `rgba(0,200,180,${n.alpha})`;
+        ctx.fillText(n.val + '%', n.x, n.y);
+      });
+
+      // السهام الصاعدة ↑
+      arrows.forEach(a => {
+        a.y += a.vy;
+        if (a.y < -20) { a.y = H + 10; a.x = Math.random() * W; }
+        ctx.font      = `bold ${a.size}px Arial`;
+        ctx.fillStyle = `rgba(0,200,180,${a.alpha})`;
+        ctx.fillText('↑', a.x, a.y);
+      });
+
+      animFrame = requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    // إيقاف عند مغادرة الصفحة
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) cancelAnimationFrame(animFrame);
+      else draw();
+    });
+  }
+
+  // تشغيل بعد تحميل الصفحة
+  if (document.readyState === 'complete') initQualityCanvas();
+  else window.addEventListener('load', initQualityCanvas);
+})();
 
 </script>
 
