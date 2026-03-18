@@ -7400,10 +7400,13 @@ function getOpsAnalysis() {
       const permHours   = att.permHours    || 0; // مجموع ساعات الاستئذان الفعلية
 
       // ══ الحصص والكفاءة ══
-      // الحصص المفترضة = أيام الشهر × 4 — ثابتة لكل مدرب (الهدف الكامل للشهر)
-      const expSessions = workDays * SESSIONS_PER_DAY;
+      // الحصص المفترضة = ساعات العمل الإجمالية ÷ 2 — مباشرة من ملف التشغيل
+      // كل مدرب له ساعاته الخاصة من المنصة (مثل 320 ساعة ÷ 2 = 160 حصة)
+      const expSessions = hrsTot > 0
+        ? Math.round(hrsTot / HOURS_PER_SESSION)
+        : workDays * SESSIONS_PER_DAY; // fallback لو ما في ساعات
 
-      // أيام العمل الفعلية بعد الغياب (تُستخدم في التوصيات والحصص المهدرة بسبب الغياب)
+      // أيام العمل الفعلية بعد الغياب (للتوصيات والحصص المهدرة بسبب الغياب)
       const effWorkDays = Math.max(0, workDays - absDays);
 
       // الحصص المنجزة = عدد الحصص من ملف التشغيل مباشرة
