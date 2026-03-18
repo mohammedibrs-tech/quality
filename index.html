@@ -8321,22 +8321,33 @@ let _gameAnswered  = false;
 
 function _todayStr() { return new Date().toISOString().slice(0,10); }
 
-// اختيار سؤالين يومياً بناءً على التاريخ (ثابتان لكل يوم)
+// اختيار 3 أسئلة يومية مختلفة لكل موظف (بناءً على username + التاريخ)
 function _getDailyQuestions() {
-  const today = _todayStr();
-  const seed  = today.replace(/-/g,'');
-  // خلط محدد بالتاريخ
-  const shuffled = [...QUESTION_BANK].sort((a,b) => {
-    const ha = parseInt(seed + QUESTION_BANK.indexOf(a)) % 97;
-    const hb = parseInt(seed + QUESTION_BANK.indexOf(b)) % 97;
-    return ha - hb;
+  const today    = _todayStr();
+  const username = currentUser?.username || 'guest';
+  // seed فريد لكل موظف في كل يوم
+  const seedStr  = today.replace(/-/g,'') + username;
+  let seed = 0;
+  for (let i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) >>> 0;
+
+  // خلط مخصص لكل موظف
+  const bank = [...QUESTION_BANK];
+  for (let i = bank.length - 1; i > 0; i--) {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    const j = seed % (i + 1);
+    [bank[i], bank[j]] = [bank[j], bank[i]];
+  }
+
+  // نختار سؤالاً من كل فئة مختلفة (3 فئات = 3 أسئلة)
+  const cats    = [...new Set(QUESTION_BANK.map(q => q.cat))];
+  const picked  = [];
+  cats.forEach(cat => {
+    const q = bank.find(b => b.cat === cat && !picked.includes(b));
+    if (q) picked.push(q);
   });
-  // سؤال من فئة مختلفة لكل يوم
-  const cats = [...new Set(QUESTION_BANK.map(q=>q.cat))];
-  const dayIdx = parseInt(seed.slice(-2)) % cats.length;
-  const q1 = shuffled.find(q=>q.cat===cats[dayIdx]) || shuffled[0];
-  const q2 = shuffled.find(q=>q.cat!==q1.cat) || shuffled[1];
-  return [q1, q2];
+  // لو ما كفت الفئات نكمّل من المتبقي
+  bank.forEach(q => { if (picked.length < 3 && !picked.includes(q)) picked.push(q); });
+  return picked.slice(0, 3);
 }
 
 // ── فتح اللعبة ──
@@ -8481,11 +8492,15 @@ async function _loadLeader(containerId) {
     const {data} = await db.from('game_scores').select('player_name,score').eq('play_date',_todayStr()).order('score',{ascending:false}).limit(6);
     if (!data||!data.length){ el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.4);font-size:11px;">لا توجد نتائج اليوم بعد</div>'; return; }
     const medals=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣'];
+    const isAdmin = currentUser?.role==='admin';
     el.innerHTML=data.map((r,i)=>`
       <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,0.07);border-radius:12px;">
         <span style="font-size:18px;">${medals[i]||''}</span>
         <span style="flex:1;font-size:12px;font-weight:700;color:#fff;">${r.player_name}</span>
         <span style="font-size:13px;font-weight:900;color:#FFD700;">${r.score} pt</span>
+        ${isAdmin?`<button onclick="_gameDeleteScore('${r.username||r.player_name}','${containerId}')"
+          style="background:rgba(231,76,60,0.2);border:1px solid rgba(231,76,60,0.4);border-radius:8px;
+          padding:3px 8px;font-size:10px;color:#FF6B6B;cursor:pointer;font-family:'Cairo',sans-serif;">🗑️</button>`:''}
       </div>`).join('');
   } catch(e){}
 }
@@ -8512,6 +8527,21 @@ async function _refreshHomeLeader() {
 }
 
 function closeGame() { clearInterval(_gameTimerInt); document.getElementById('gameModal').style.display='none'; }
+
+// حذف نتيجة موظف (للأدمن فقط)
+async function _gameDeleteScore(username, containerId) {
+  if (currentUser?.role !== 'admin') return;
+  if (!confirm(`حذف نتيجة ${username} من اليوم؟`)) return;
+  try {
+    await db.from('game_scores')
+      .delete()
+      .eq('username', username)
+      .eq('play_date', _todayStr());
+    toast('✅ تم الحذف');
+    await _loadLeader(containerId);
+    _refreshHomeLeader();
+  } catch(e) { toast('❌ فشل الحذف: ' + e.message); }
+}
 
 function _showState(state) {
   ['Loading','Question','Result','End','Already'].forEach(s=>{
