@@ -7400,11 +7400,11 @@ function getOpsAnalysis() {
       const permHours   = att.permHours    || 0; // مجموع ساعات الاستئذان الفعلية
 
       // ══ الحصص والكفاءة ══
-      // أيام العمل الفعلية = أيام الشهر - أيام الغياب
-      const effWorkDays = Math.max(0, workDays - absDays);
+      // الحصص المفترضة = أيام الشهر × 4 — ثابتة لكل مدرب بغض النظر عن الغياب
+      const expSessions = workDays * SESSIONS_PER_DAY;
 
-      // الحصص التدريبية المفترض = أيام العمل الفعلية × 4 حصص/يوم
-      const expSessions = effWorkDays * SESSIONS_PER_DAY;
+      // أيام العمل الفعلية (للمعلومة — تُستخدم في التوصيات فقط)
+      const effWorkDays = Math.max(0, workDays - absDays);
 
       // الحصص المنجزة = عدد الحصص من ملف التشغيل مباشرة
       const trainedSess = sessions; // هذا هو العدد الحقيقي للحصص
@@ -7644,7 +7644,7 @@ function renderOpsTable(sec) {
     <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:820px;">
       <thead>
         <tr style="background:var(--accent);color:#fff;">
-          ${['#','اسم المدرب','القسم','حصص منجزة','الحصص المفترضة','حصص مهدرة','أيام غياب','غياب','إجازة','استئذان (س)','ساعات إجمالية','ساعات فعلية','نسبة المنصة','كفاءة % (منجزة÷متاحة)','تقييم'].map((h,i) =>
+          ${['#','اسم المدرب','القسم','حصص منجزة','الحصص المفترضة','حصص مهدرة','الحصص المهدرة بسبب الغياب','أيام غياب','غياب','إجازة','استئذان (س)','ساعات إجمالية','ساعات فعلية','نسبة المنصة','كفاءة %','تقييم'].map((h,i) =>
             `<th style="padding:10px 7px;text-align:${i===1?'right':'center'};white-space:nowrap;">${h}</th>`
           ).join('')}
         </tr>
@@ -7663,6 +7663,7 @@ function renderOpsTable(sec) {
             <td style="padding:9px 7px;text-align:center;font-weight:700;color:var(--accent);">${t.trainedSessions}</td>
             <td style="padding:9px 7px;text-align:center;">${t.expSessions}</td>
             <td style="padding:9px 7px;text-align:center;color:#E74C3C;font-weight:700;">${t.unusedSessions}</td>
+            <td style="padding:9px 7px;text-align:center;color:#D4AC0D;font-weight:700;">${t.absSessions}</td>
             <td style="padding:9px 7px;text-align:center;">${t.absDays}</td>
             <td style="padding:9px 7px;text-align:center;color:#E74C3C;">${t.absence}</td>
             <td style="padding:9px 7px;text-align:center;color:#8E44AD;">${t.leaveP}</td>
