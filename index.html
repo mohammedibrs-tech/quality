@@ -798,6 +798,29 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   mix-blend-mode: multiply !important;
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.1));
 }
+
+/* ══ زر الرجوع المحسّن ══ */
+.back-btn {
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 20px;
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:30px;
+  font-family:'Cairo',sans-serif;
+  font-size:13px;font-weight:700;
+  color:var(--text);
+  cursor:pointer;
+  margin-bottom:20px;
+  transition:all .2s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+.back-btn:hover {
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+  transform:translateX(4px);
+}
+.back-btn::before { content:'←'; font-size:16px; }
 </style>
 </head>
 <body>
@@ -1061,7 +1084,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 <!-- VIOLATIONS -->
 <div id="page-violations" class="page">
   <div class="container">
-    <button class="back-btn" onclick="goHome()">← الرئيسية / Home</button>
+    <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
     <div class="page-header">
       <div class="p-icon" id="vIcon">👩</div>
       <h1 id="vTitle">رصد المخالفات — القسم النسائي</h1>
@@ -1188,7 +1211,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 <!-- SURVEY -->
 <div id="page-survey" class="page">
   <div class="container">
-    <button class="back-btn" onclick="goHome()">← الرئيسية / Home</button>
+    <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
     <div class="page-header">
       <div class="p-icon survey">⭐</div>
       <h1>استطلاع رضا العملاء</h1>
@@ -1251,7 +1274,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 <!-- FACILITY -->
 <div id="page-facility" class="page">
   <div class="container">
-    <button class="back-btn" onclick="goHome()">← الرئيسية / Home</button>
+    <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
     <div class="page-header">
       <div class="p-icon facility">🔧</div>
       <h1>ملاحظات المرافق والنظافة</h1>
@@ -1645,7 +1668,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 <!-- OPS EFFICIENCY PAGE -->
 <div id="page-ops" class="page">
   <div class="container-wide">
-    <button class="back-btn" onclick="goHome()">← الرئيسية / Home</button>
+    <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
     <div class="page-header">
       <div class="p-icon" style="background:rgba(102,126,234,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">⚙️</div>
       <h1>كفاءة التشغيل</h1>
@@ -1830,7 +1853,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 <div id="page-building" class="page">
   <div class="container">
-    <button class="back-btn" onclick="goHome()">← الرئيسية / Home</button>
+    <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
     <div class="page-header">
       <div class="p-icon" style="background:rgba(100,160,220,0.12);border:1px solid rgba(100,160,220,0.2);">🏢</div>
       <h1>تقرير المبنى الرئيسي</h1>
@@ -8217,87 +8240,138 @@ function renderQuarterlyResults() {
   const d = _qData;
   if (!d) return;
   document.getElementById('qResults').style.display = 'block';
+  document.getElementById('qWelcome').style.display = 'none';
 
-  const qLabel = Q_LABELS[d.q] || `Q${d.q}`;
   const MN = ['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-  const months = Q_MONTHS[d.q];
+  const months = Q_MONTHS[d.q]; // [1,2,3] أو [4,5,6] ...
 
-  // ── دوال مساعدة ──
-  const femViol  = d.violations.filter(v=>v.section==='female');
-  const malViol  = d.violations.filter(v=>v.section==='male');
-  const avgSurvey= d.surveys.length ? Math.round(d.surveys.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/d.surveys.length) : 0;
-  const avgOps   = d.ops.length ? Math.round(d.ops.reduce((s,r)=>s+(r.efficiency_pct||0),0)/d.ops.length) : 0;
-  const femOps   = d.ops.filter(r=>r.zone==='female');
-  const malOps   = d.ops.filter(r=>r.zone==='male');
-  const bikeOps  = d.ops.filter(r=>r.zone==='bike');
-  const avgFemOps= femOps.length ? Math.round(femOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/femOps.length) : 0;
-  const avgMalOps= malOps.length ? Math.round(malOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/malOps.length) : 0;
-  const avgBikeOps=bikeOps.length? Math.round(bikeOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/bikeOps.length): 0;
+  // ── بيانات مقسمة ──
+  const femViol = d.violations.filter(v => v.section==='female');
+  const malViol = d.violations.filter(v => v.section==='male');
+  const femOps  = d.ops.filter(r => r.zone==='female');
+  const malOps  = d.ops.filter(r => r.zone==='male');
+  const bikeOps = d.ops.filter(r => r.zone==='bike');
 
-  // أفضل شهر بالمخالفات (أقل)
+  const avgSurvey  = d.surveys.length ? Math.round(d.surveys.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/d.surveys.length) : 0;
+  const avgFemOps  = femOps.length  ? Math.round(femOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/femOps.length)  : 0;
+  const avgMalOps  = malOps.length  ? Math.round(malOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/malOps.length)  : 0;
+  const avgBikeOps = bikeOps.length ? Math.round(bikeOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/bikeOps.length): 0;
+
+  // ── أفضل شهر لكل مؤشر ──
+  const bestMonth = (list, key, higher=true) => {
+    if (!list.length) return null;
+    const byM = {};
+    months.forEach(m => {
+      const ms = String(m).padStart(2,'0');
+      const items = list.filter(r => (r.date||r.report_date||'').includes(`-${ms}-`) ||
+        String(r.report_month||'') === String(m));
+      byM[m] = items.length ? items.reduce((s,r)=>s+(r[key]||0),0)/items.length : null;
+    });
+    const valid = months.filter(m => byM[m] !== null);
+    if (!valid.length) return null;
+    const best = valid.reduce((a,b) => {
+      if (byM[a]===null) return b; if (byM[b]===null) return a;
+      return higher ? (byM[a]>=byM[b]?a:b) : (byM[a]<=byM[b]?a:b);
+    });
+    return { month: MN[best], value: Math.round(byM[best]*10)/10 };
+  };
+
+  // أفضل شهر بالمخالفات (أقل = أفضل)
   const violByMonth = {};
-  months.forEach(m => {
-    const mStr = String(m).padStart(2,'0');
-    violByMonth[m] = d.violations.filter(v=>(v.date||'').includes(`-${mStr}-`)).length;
-  });
-  const bestViolMonth = months.reduce((a,b) => violByMonth[a]<=violByMonth[b]?a:b);
+  months.forEach(m => { const ms=String(m).padStart(2,'0'); violByMonth[m]=d.violations.filter(v=>(v.date||'').includes(`-${ms}-`)).length; });
+  const bestViolM  = months.reduce((a,b)=>violByMonth[a]<=violByMonth[b]?a:b);
+  const worstViolM = months.reduce((a,b)=>violByMonth[a]>=violByMonth[b]?a:b);
 
-  // أفضل شهر بالرضا (أعلى)
+  // أفضل شهر بالرضا (أعلى = أفضل)
   const survByMonth = {};
   months.forEach(m => {
-    const mStr = String(m).padStart(2,'0');
-    const ms = d.surveys.filter(s=>(s.date||'').includes(`-${mStr}-`));
-    survByMonth[m] = ms.length ? Math.round(ms.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/ms.length) : 0;
+    const ms=String(m).padStart(2,'0');
+    const ms_s=d.surveys.filter(s=>(s.date||'').includes(`-${ms}-`));
+    survByMonth[m]=ms_s.length?Math.round(ms_s.reduce((a,r)=>a+(r.satisfaction_pct||0),0)/ms_s.length):0;
   });
-  const bestSurvMonth = months.reduce((a,b) => survByMonth[a]>=survByMonth[b]?a:b);
+  const bestSurvM = months.reduce((a,b)=>survByMonth[a]>=survByMonth[b]?a:b);
 
-  // ── KPI Cards ──
-  document.getElementById('qKpiCards').style.gridTemplateColumns = 'repeat(auto-fit,minmax(140px,1fr))';
+  // ── مقارنة الأشهر (نمو/انخفاض) ──
+  const monthCompare = (getVal) => {
+    const vals = months.map(m => ({ m, v: getVal(m) }));
+    const changes = vals.slice(1).map((cur, i) => {
+      const prev = vals[i].v;
+      const pct  = prev > 0 ? Math.round((cur.v - prev) / prev * 100) : null;
+      return { from: MN[vals[i].m], to: MN[cur.m], change: pct, dir: pct > 0 ? '↑' : pct < 0 ? '↓' : '→' };
+    });
+    return changes;
+  };
+
+  const violChanges = monthCompare(m => { const ms=String(m).padStart(2,'0'); return d.violations.filter(v=>(v.date||'').includes(`-${ms}-`)).length; });
+  const survChanges = monthCompare(m => survByMonth[m]);
+
+  // ── بناء HTML الإحصاء الشهري ──
+  const renderMonthGrowth = (changes, label, goodDir) => {
+    if (!changes.length) return '';
+    return `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+      ${changes.map(c => {
+        const isGood = goodDir==='down' ? c.change<0 : c.change>0;
+        const color  = c.change===null ? '#888' : isGood ? '#27AE60' : '#E74C3C';
+        const pctStr = c.change===null ? '—' : `${c.dir}${Math.abs(c.change)}%`;
+        return `<div style="background:${color}11;border:1px solid ${color}33;border-radius:10px;padding:4px 10px;font-size:10px;font-weight:700;color:${color};">
+          ${c.from}→${c.to}: ${pctStr}
+        </div>`;
+      }).join('')}
+    </div>`;
+  };
+
+  // ── KPI Cards ══
+  document.getElementById('qKpiCards').style.gridTemplateColumns = 'repeat(auto-fit,minmax(130px,1fr))';
   document.getElementById('qKpiCards').innerHTML = [
-    { icon:'⚖️', label:'مخالفات النسائي',   value:femViol.length,  sub:`A:${femViol.filter(v=>v.grade==='A').length} B:${femViol.filter(v=>v.grade==='B').length} C:${femViol.filter(v=>v.grade==='C').length}`, color:'#E74C3C' },
-    { icon:'⚖️', label:'مخالفات الرجالي',   value:malViol.length,  sub:`A:${malViol.filter(v=>v.grade==='A').length} B:${malViol.filter(v=>v.grade==='B').length} C:${malViol.filter(v=>v.grade==='C').length}`, color:'#C0392B' },
-    { icon:'⭐', label:'رضا العملاء',        value:avgSurvey+'%',   sub:`${d.surveys.length} استطلاع | أفضل: ${MN[bestSurvMonth]}`, color:avgSurvey>=90?'#27AE60':'#D4AC0D' },
-    { icon:'👩', label:'كفاءة نسائي',        value:avgFemOps+'%',   sub:`${femOps.length} مدربة`, color:avgFemOps>=90?'#27AE60':'#D4AC0D' },
-    { icon:'👨', label:'كفاءة رجالي',        value:avgMalOps+'%',   sub:`${malOps.length} مدرب`,  color:avgMalOps>=90?'#27AE60':'#D4AC0D' },
-    { icon:'🏍️', label:'كفاءة دراجات',       value:avgBikeOps+'%',  sub:`${bikeOps.length} مدرب`, color:avgBikeOps>=90?'#27AE60':'#D4AC0D' },
-    { icon:'🔧', label:'المرافق والمبنى',    value:d.facilities.length+d.buildings.length, sub:'تقرير مرافق ومبنى', color:'#2E86C1' },
+    {icon:'👩', label:'مخالفات النسائي',  value:femViol.length,  sub:`A:${femViol.filter(v=>v.grade==='A').length} B:${femViol.filter(v=>v.grade==='B').length} C:${femViol.filter(v=>v.grade==='C').length}`, color:'#E74C3C'},
+    {icon:'👨', label:'مخالفات الرجالي',  value:malViol.length,  sub:`A:${malViol.filter(v=>v.grade==='A').length} B:${malViol.filter(v=>v.grade==='B').length} C:${malViol.filter(v=>v.grade==='C').length}`, color:'#2E86C1'},
+    {icon:'⭐', label:'رضا العملاء',       value:avgSurvey+'%',  sub:`أفضل شهر: ${MN[bestSurvM]} (${survByMonth[bestSurvM]}%)`, color:avgSurvey>=90?'#27AE60':'#D4AC0D'},
+    {icon:'👩‍🏫',label:'كفاءة نسائي',      value:avgFemOps+'%',  sub:`${femOps.length} مدربة`, color:avgFemOps>=90?'#27AE60':'#D4AC0D'},
+    {icon:'👨‍🏫',label:'كفاءة رجالي',      value:avgMalOps+'%',  sub:`${malOps.length} مدرب`,  color:avgMalOps>=90?'#27AE60':'#D4AC0D'},
+    {icon:'🏍️', label:'كفاءة دراجات',     value:avgBikeOps+'%', sub:`${bikeOps.length} مدرب`, color:avgBikeOps>=90?'#27AE60':'#D4AC0D'},
+    {icon:'🔧', label:'المرافق والمبنى',   value:d.facilities.length+d.buildings.length, sub:'تقرير', color:'#7D3C98'},
   ].map(k=>`<div style="background:var(--card2);border-radius:16px;padding:14px 12px;border-right:4px solid ${k.color};box-shadow:0 2px 10px rgba(0,0,0,0.06);">
     <div style="font-size:20px;margin-bottom:6px;">${k.icon}</div>
     <div style="font-size:22px;font-weight:900;color:${k.color};margin-bottom:2px;">${k.value}</div>
-    <div style="font-size:10px;font-weight:700;color:var(--text);margin-bottom:2px;">${k.label}</div>
-    <div style="font-size:9px;color:var(--text-dim);">${k.sub}</div>
+    <div style="font-size:10px;font-weight:700;color:var(--text);">${k.label}</div>
+    <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">${k.sub}</div>
   </div>`).join('');
 
   let html = '';
 
-  // ── المخالفات: نسائي ورجالي منفصلين ──
+  // ══ مقارنة الأشهر — المخالفات ══
   if (d.violations.length) {
     ['female','male'].forEach(sec => {
       const vList = d.violations.filter(v=>v.section===sec);
       if (!vList.length) return;
       const secLabel = sec==='female' ? '👩 القسم النسائي' : '👨 القسم الرجالي';
       const secColor = sec==='female' ? '#E74C3C' : '#2E86C1';
+      const secBg    = sec==='female' ? 'FFFEF0EF' : 'FFEBF5FB';
       const byType = {};
       vList.forEach(v=>{ byType[v.violation_type||'أخرى']=(byType[v.violation_type||'أخرى']||0)+1; });
       const topViol = Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,5);
-      const vByMonth = {};
-      months.forEach(m=>{ const ms=String(m).padStart(2,'0'); vByMonth[m]=vList.filter(v=>(v.date||'').includes(`-${ms}-`)).length; });
-      const bestM = months.reduce((a,b)=>vByMonth[a]<=vByMonth[b]?a:b);
-      const worstM = months.reduce((a,b)=>vByMonth[a]>=vByMonth[b]?a:b);
-      html += `
-      <div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;border-right:4px solid ${secColor};">
-        <div style="font-size:14px;font-weight:900;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
-          <span>${secLabel}</span>
+      const secViolByM = {};
+      months.forEach(m=>{ const ms=String(m).padStart(2,'0'); secViolByM[m]=vList.filter(v=>(v.date||'').includes(`-${ms}-`)).length; });
+      const bestM  = months.reduce((a,b)=>secViolByM[a]<=secViolByM[b]?a:b);
+      const worstM = months.reduce((a,b)=>secViolByM[a]>=secViolByM[b]?a:b);
+      const secChanges = monthCompare(m=>{ const ms=String(m).padStart(2,'0'); return vList.filter(v=>(v.date||'').includes(`-${ms}-`)).length; });
+
+      html += `<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;border-right:4px solid ${secColor};">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+          <span style="font-size:14px;font-weight:900;">${secLabel}</span>
           <span style="background:${secColor}22;color:${secColor};border-radius:20px;padding:2px 10px;font-size:10px;">${vList.length} مخالفة</span>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
           <span style="background:#E74C3C22;color:#E74C3C;border-radius:10px;padding:3px 10px;font-size:11px;font-weight:700;">A: ${vList.filter(v=>v.grade==='A').length}</span>
           <span style="background:#D4AC0D22;color:#D4AC0D;border-radius:10px;padding:3px 10px;font-size:11px;font-weight:700;">B: ${vList.filter(v=>v.grade==='B').length}</span>
           <span style="background:#27AE6022;color:#27AE60;border-radius:10px;padding:3px 10px;font-size:11px;font-weight:700;">C: ${vList.filter(v=>v.grade==='C').length}</span>
-          <span style="background:rgba(0,168,150,0.1);color:var(--accent);border-radius:10px;padding:3px 10px;font-size:11px;">✅ أهدأ شهر: ${MN[bestM]} (${vByMonth[bestM]})</span>
-          <span style="background:rgba(231,76,60,0.1);color:#E74C3C;border-radius:10px;padding:3px 10px;font-size:11px;">⚠️ أكثر شهر: ${MN[worstM]} (${vByMonth[worstM]})</span>
         </div>
-        <div style="font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:8px;">أكثر المخالفات تكراراً:</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+          <span style="background:rgba(39,174,96,0.1);color:#27AE60;border-radius:10px;padding:3px 10px;font-size:10px;">✅ أهدأ شهر: ${MN[bestM]} (${secViolByM[bestM]})</span>
+          <span style="background:rgba(231,76,60,0.1);color:#E74C3C;border-radius:10px;padding:3px 10px;font-size:10px;">⚠️ أكثر شهر: ${MN[worstM]} (${secViolByM[worstM]})</span>
+        </div>
+        ${renderMonthGrowth(secChanges,'مقارنة شهرية','down')}
+        <div style="font-size:11px;font-weight:700;color:var(--text-dim);margin:10px 0 6px;">أكثر المخالفات تكراراً:</div>
         ${topViol.map(([type,cnt],i)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">
           <span style="font-weight:900;color:var(--accent);width:18px;font-size:11px;">${i+1}</span>
           <span style="flex:1;font-size:11px;">${(type||'').split('|')[0].trim().slice(0,50)}</span>
@@ -8307,53 +8381,58 @@ function renderQuarterlyResults() {
     });
   }
 
-  // ── رضا العملاء ──
+  // ══ رضا العملاء مع مقارنة شهرية ══
   if (d.surveys.length) {
-    const byMonth = months.map(m=>({
-      m, label:MN[m],
-      avg: (()=>{ const ms=String(m).padStart(2,'0'); const ss=d.surveys.filter(s=>(s.date||'').includes(`-${ms}-`)); return ss.length?Math.round(ss.reduce((a,r)=>a+(r.satisfaction_pct||0),0)/ss.length):0; })()
-    }));
-    html += `
-    <div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
+    html += `<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
       <div style="font-size:14px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
         <span>⭐</span> رضا العملاء
         <span style="background:rgba(212,172,13,0.1);color:#D4AC0D;border-radius:20px;padding:2px 10px;font-size:10px;">${d.surveys.length} استطلاع</span>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <div style="flex:1;text-align:center;background:rgba(39,174,96,0.08);border-radius:14px;padding:12px;">
-          <div style="font-size:26px;font-weight:900;color:${avgSurvey>=90?'#27AE60':'#D4AC0D'};">${avgSurvey}%</div>
-          <div style="font-size:10px;color:var(--text-dim);">متوسط الربع</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:80px;text-align:center;background:rgba(39,174,96,0.08);border-radius:14px;padding:12px;">
+          <div style="font-size:24px;font-weight:900;color:${avgSurvey>=90?'#27AE60':'#D4AC0D'};">${avgSurvey}%</div>
+          <div style="font-size:9px;color:var(--text-dim);">متوسط الربع</div>
         </div>
-        ${byMonth.map(({label,avg})=>`<div style="flex:1;text-align:center;background:rgba(0,168,150,0.05);border-radius:14px;padding:12px;">
-          <div style="font-size:18px;font-weight:900;color:${avg>=90?'#27AE60':avg>=70?'#D4AC0D':'#E74C3C'};">${avg}%</div>
-          <div style="font-size:9px;color:var(--text-dim);">${label}</div>
+        ${months.map(m=>`<div style="flex:1;min-width:70px;text-align:center;background:rgba(0,168,150,0.05);border-radius:14px;padding:12px;">
+          <div style="font-size:18px;font-weight:900;color:${survByMonth[m]>=90?'#27AE60':survByMonth[m]>=70?'#D4AC0D':'#E74C3C'};">${survByMonth[m]||0}%</div>
+          <div style="font-size:9px;color:var(--text-dim);">${MN[m]}</div>
         </div>`).join('')}
       </div>
-      <div style="font-size:10px;color:var(--text-dim);">
-        ✅ أفضل شهر: <strong>${MN[bestSurvMonth]}</strong> (${survByMonth[bestSurvMonth]}%) |
-        فوق 90%: <strong>${d.surveys.filter(s=>(s.satisfaction_pct||0)>=90).length}</strong> |
-        دون 90%: <strong>${d.surveys.filter(s=>(s.satisfaction_pct||0)<90).length}</strong>
+      ${renderMonthGrowth(survChanges,'مقارنة','up')}
+      <div style="font-size:10px;color:var(--text-dim);margin-top:8px;">
+        ✅ أفضل شهر: <strong>${MN[bestSurvM]}</strong> (${survByMonth[bestSurvM]}%) |
+        ≥90%: <strong>${d.surveys.filter(s=>(s.satisfaction_pct||0)>=90).length}</strong> |
+        &lt;90%: <strong>${d.surveys.filter(s=>(s.satisfaction_pct||0)<90).length}</strong>
       </div>
     </div>`;
   }
 
-  // ── كفاءة التشغيل: منفصل لكل قسم ──
+  // ══ كفاءة التشغيل منفصل ══
   if (d.ops.length) {
-    const sections = [{k:'female',l:'👩 نسائي',c:'#E74C3C',data:femOps,avg:avgFemOps},
-                      {k:'male',l:'👨 رجالي',c:'#2E86C1',data:malOps,avg:avgMalOps},
-                      {k:'bike',l:'🏍️ دراجات',c:'#D4AC0D',data:bikeOps,avg:avgBikeOps}];
+    const sections = [
+      {k:'female',l:'👩 نسائي',c:'#E74C3C',data:femOps,avg:avgFemOps},
+      {k:'male',  l:'👨 رجالي',c:'#2E86C1',data:malOps, avg:avgMalOps},
+      {k:'bike',  l:'🏍️ دراجات',c:'#D4AC0D',data:bikeOps,avg:avgBikeOps},
+    ].filter(s=>s.data.length);
+
     html += `<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
       <div style="font-size:14px;font-weight:900;margin-bottom:12px;">⚙️ كفاءة التشغيل — مقارنة الأقسام</div>
-      ${sections.filter(s=>s.data.length).map(({l,c,data,avg})=>{
-        const top3 = [...data].sort((a,b)=>(b.efficiency_pct||0)-(a.efficiency_pct||0)).slice(0,3);
-        const bot3 = [...data].sort((a,b)=>(a.efficiency_pct||0)-(b.efficiency_pct||0)).slice(0,3);
+      ${sections.map(({l,c,data,avg})=>{
+        const top3=[...data].sort((a,b)=>(b.efficiency_pct||0)-(a.efficiency_pct||0)).slice(0,3);
+        const bot3=[...data].sort((a,b)=>(a.efficiency_pct||0)-(b.efficiency_pct||0)).slice(0,3);
+        // مقارنة شهرية للكفاءة
+        const effChanges = monthCompare(m => {
+          const ms_d = data.filter(r=>String(r.report_month||'')==String(m));
+          return ms_d.length ? ms_d.reduce((s,r)=>s+(r.efficiency_pct||0),0)/ms_d.length : 0;
+        });
         return `<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
             <span style="font-size:13px;font-weight:700;color:${c};">${l}</span>
             <span style="font-size:20px;font-weight:900;color:${avg>=90?'#27AE60':avg>=70?'#D4AC0D':'#E74C3C'};">${avg}%</span>
             <span style="font-size:10px;color:var(--text-dim);">${data.length} مدرب</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          ${renderMonthGrowth(effChanges,'كفاءة','up')}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
             <div>
               <div style="font-size:10px;color:#27AE60;font-weight:700;margin-bottom:4px;">🏆 أعلى 3</div>
               ${top3.map((r,i)=>`<div style="font-size:10px;padding:3px 0;border-bottom:1px solid var(--border);display:flex;gap:6px;">
@@ -8376,7 +8455,7 @@ function renderQuarterlyResults() {
     </div>`;
   }
 
-  // ── مرافق ومبنى ──
+  // ══ مرافق ومبنى ══
   if (d.facilities.length || d.buildings.length) {
     html += `<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
       <div style="font-size:14px;font-weight:900;margin-bottom:12px;">🏗️ المرافق والمبنى</div>
@@ -8393,48 +8472,44 @@ function renderQuarterlyResults() {
     </div>`;
   }
 
-  // ── تقييم المدربين: منفصل ──
+  // ══ تقييم المدربين منفصل ══
   if (d.ratings && d.ratings.length) {
-    const femR = d.ratings.filter(r=>r.section==='female'||r.zone==='female');
-    const malR = d.ratings.filter(r=>r.section==='male'||r.zone==='male');
-    const otherR = d.ratings.filter(r=>!r.section&&!r.zone);
-    const renderRatingList = (list, label, color) => {
+    const renderRatSec = (list, label, color) => {
       if (!list.length) return '';
-      const sorted = [...list].sort((a,b)=>(b.rating||b.avg_rating||0)-(a.rating||a.avg_rating||0));
-      const top3 = sorted.slice(0,3);
-      const bot3 = sorted.slice(-3).reverse();
-      const avg  = Math.round(sorted.reduce((s,r)=>s+(r.rating||r.avg_rating||0),0)/sorted.length*10)/10;
-      return `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+      const sorted=[...list].sort((a,b)=>(b.rating||b.avg_rating||0)-(a.rating||a.avg_rating||0));
+      const avg=Math.round(sorted.reduce((s,r)=>s+(r.rating||r.avg_rating||0),0)/sorted.length*10)/10;
+      return `<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
           <span style="font-size:12px;font-weight:700;color:${color};">${label}</span>
           <span style="font-size:16px;font-weight:900;color:${avg>=4?'#27AE60':avg>=3?'#D4AC0D':'#E74C3C'};">${avg}/5</span>
           <span style="font-size:10px;color:var(--text-dim);">${list.length} تقييم</span>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div><div style="font-size:10px;color:#27AE60;font-weight:700;margin-bottom:4px;">🏆 أعلى 3</div>
-            ${top3.map((r,i)=>`<div style="font-size:10px;padding:2px 0;display:flex;gap:6px;"><span style="color:var(--accent);">${i+1}</span><span style="flex:1;">${r.trainer_name||r.name||'—'}</span><span style="color:#27AE60;font-weight:700;">${(r.rating||r.avg_rating||0).toFixed(1)}</span></div>`).join('')}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div><div style="font-size:10px;color:#27AE60;font-weight:700;margin-bottom:3px;">🏆 أعلى 3</div>
+            ${sorted.slice(0,3).map((r,i)=>`<div style="font-size:10px;display:flex;gap:4px;padding:2px 0;">
+              <span style="color:var(--accent);">${i+1}</span><span style="flex:1;">${r.trainer_name||'—'}</span>
+              <span style="color:#27AE60;font-weight:700;">${(r.rating||r.avg_rating||0).toFixed(1)}</span></div>`).join('')}
           </div>
-          <div><div style="font-size:10px;color:#E74C3C;font-weight:700;margin-bottom:4px;">⚠️ أقل 3</div>
-            ${bot3.map((r,i)=>`<div style="font-size:10px;padding:2px 0;display:flex;gap:6px;"><span style="color:var(--text-dim);">${i+1}</span><span style="flex:1;">${r.trainer_name||r.name||'—'}</span><span style="color:#E74C3C;font-weight:700;">${(r.rating||r.avg_rating||0).toFixed(1)}</span></div>`).join('')}
+          <div><div style="font-size:10px;color:#E74C3C;font-weight:700;margin-bottom:3px;">⚠️ أقل 3</div>
+            ${sorted.slice(-3).reverse().map((r,i)=>`<div style="font-size:10px;display:flex;gap:4px;padding:2px 0;">
+              <span style="color:var(--text-dim);">${i+1}</span><span style="flex:1;">${r.trainer_name||'—'}</span>
+              <span style="color:#E74C3C;font-weight:700;">${(r.rating||r.avg_rating||0).toFixed(1)}</span></div>`).join('')}
           </div>
         </div>
       </div>`;
     };
     html += `<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
       <div style="font-size:14px;font-weight:900;margin-bottom:12px;">🏅 تقييم المدربين</div>
-      ${renderRatingList(femR,'👩 النسائي','#E74C3C')}
-      ${renderRatingList(malR,'👨 الرجالي','#2E86C1')}
-      ${renderRatingList(otherR,'📋 عام','#888')}
+      ${renderRatSec(d.ratings.filter(r=>r.section==='female'||r.zone==='female'),'👩 نسائي','#E74C3C')}
+      ${renderRatSec(d.ratings.filter(r=>r.section==='male'||r.zone==='male'),'👨 رجالي','#2E86C1')}
     </div>`;
   }
 
-  // ── الحوافز ──
+  // ══ الحوافز ══
   if (d.incentives && d.incentives.length) {
-    const femI = d.incentives.filter(r=>r.section==='female'||r.zone==='female');
-    const malI = d.incentives.filter(r=>r.section==='male'||r.zone==='male');
-    const renderInc = (list, label, color) => {
+    const renderIncSec = (list, label, color) => {
       if (!list.length) return '';
-      const top5 = [...list].sort((a,b)=>(b.amount||b.total||0)-(a.amount||a.total||0)).slice(0,5);
+      const top5=[...list].sort((a,b)=>(b.amount||b.total||0)-(a.amount||a.total||0)).slice(0,5);
       return `<div style="margin-bottom:10px;">
         <div style="font-size:11px;font-weight:700;color:${color};margin-bottom:6px;">${label}</div>
         ${top5.map((r,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">
@@ -8447,22 +8522,22 @@ function renderQuarterlyResults() {
     };
     html += `<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
       <div style="font-size:14px;font-weight:900;margin-bottom:12px;">🏆 الحوافز الشهرية</div>
-      ${renderInc(femI,'👩 النسائي','#E74C3C')}
-      ${renderInc(malI,'👨 الرجالي','#2E86C1')}
+      ${renderIncSec(d.incentives.filter(r=>r.section==='female'||r.zone==='female'),'👩 نسائي','#E74C3C')}
+      ${renderIncSec(d.incentives.filter(r=>r.section==='male'||r.zone==='male'),'👨 رجالي','#2E86C1')}
     </div>`;
   }
 
-  if (!html) html = '<div style="text-align:center;color:var(--text-dim);padding:40px;font-size:13px;">لا توجد بيانات لهذا الربع بعد</div>';
+  if (!html) html = '<div style="text-align:center;color:var(--text-dim);padding:40px;">لا توجد بيانات لهذا الربع</div>';
   document.getElementById('qDetails').innerHTML = html;
 
   // تحديث preview الكرت
   const preview = document.getElementById('quarterlyPreview');
   if (preview) {
     preview.innerHTML = [
-      {l:'مخالفات نسائي',v:femViol.length,c:'#E74C3C'},
-      {l:'مخالفات رجالي',v:malViol.length,c:'#C0392B'},
-      {l:'رضا العملاء',v:avgSurvey+'%',c:avgSurvey>=90?'#27AE60':'#D4AC0D'},
-      {l:'كفاءة نسائي',v:avgFemOps+'%',c:avgFemOps>=90?'#27AE60':'#D4AC0D'},
+      {l:'مخالفات نسائي', v:femViol.length, c:'#E74C3C'},
+      {l:'مخالفات رجالي', v:malViol.length, c:'#2E86C1'},
+      {l:'رضا العملاء',   v:avgSurvey+'%',  c:avgSurvey>=90?'#27AE60':'#D4AC0D'},
+      {l:'كفاءة نسائي',  v:avgFemOps+'%',  c:avgFemOps>=90?'#27AE60':'#D4AC0D'},
     ].map(i=>`<div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:4px 10px;text-align:center;">
       <div style="font-size:12px;font-weight:900;color:${i.c};">${i.v}</div>
       <div style="font-size:8px;color:rgba(255,255,255,0.5);">${i.l}</div>
@@ -8659,6 +8734,266 @@ async function exportQuarterlyExcel() {
 
 
 
+
+// ══ GAME JS ══
+const QUESTION_BANK=[
+  {cat:'🏆 إدارة الجودة',q:'ما معنى اختصار TQM؟',opts:['Total Quality Management','Technical Quality Monitoring','Team Quality Measurement','Training Quality Methods'],ans:0,exp:'TQM تعني إدارة الجودة الشاملة.'},
+  {cat:'🏆 إدارة الجودة',q:'من هو مؤسس مفهوم دورة PDCA؟',opts:['جوزيف جوران','إدواردز ديمينغ','فيليب كروسبي','كاورو إيشيكاوا'],ans:1,exp:'إدواردز ديمينغ طوّر دورة PDCA.'},
+  {cat:'🏆 إدارة الجودة',q:'ما هي خطوات دورة PDCA بالترتيب؟',opts:['نفّذ، خطط، تحقق، تصرف','تحقق، خطط، نفّذ، تصرف','خطط، نفّذ، تحقق، تصرف','تصرف، خطط، نفّذ، تحقق'],ans:2,exp:'Plan→Do→Check→Act.'},
+  {cat:'🏆 إدارة الجودة',q:'ما الهدف الرئيسي للتحسين المستمر؟',opts:['تقليل التكاليف','زيادة الإنتاج','سرعة التسليم','رضا العميل'],ans:3,exp:'رضا العميل هو المحور الأساسي.'},
+  {cat:'🏆 إدارة الجودة',q:'ما هو مخطط إيشيكاوا المستخدم لـ؟',opts:['جدولة المهام','حساب التكاليف','تحليل أسباب المشاكل','قياس الإنتاج'],ans:2,exp:'يُستخدم لتحليل الأسباب الجذرية.'},
+  {cat:'🏆 إدارة الجودة',q:'كم مبدأ في ISO 9001:2015؟',opts:['5 مبادئ','10 مبادئ','3 مبادئ','7 مبادئ'],ans:3,exp:'7 مبادئ للجودة.'},
+  {cat:'🏆 إدارة الجودة',q:'ماذا تعني كلمة كايزن؟',opts:['ضبط العمليات','الجودة الشاملة','إدارة الوقت','التحسين المستمر'],ans:3,exp:'كايزن = التحسين المستمر.'},
+  {cat:'🌍 معلومات عامة',q:'كم عدد طبقات الغلاف الجوي؟',opts:['3 طبقات','7 طبقات','4 طبقات','5 طبقات'],ans:3,exp:'5 طبقات.'},
+  {cat:'🌍 معلومات عامة',q:'من اخترع المصباح الكهربائي؟',opts:['نيكولا تسلا','ألبرت أينشتاين','ألكسندر بيل','توماس إديسون'],ans:3,exp:'توماس إديسون 1879م.'},
+  {cat:'🌍 معلومات عامة',q:'ما أكبر محيط في العالم؟',opts:['الأطلسي','الهندي','المتجمد الشمالي','الهادئ'],ans:3,exp:'المحيط الهادئ.'},
+  {cat:'🌍 معلومات عامة',q:'كم دولة في الأمم المتحدة؟',opts:['180','200','150','193'],ans:3,exp:'193 دولة.'},
+  {cat:'🌍 معلومات عامة',q:'ما أطول سلسلة جبال في العالم؟',opts:['الهيمالايا','الألب','الأورال','الأنديز'],ans:3,exp:'جبال الأنديز 7000 كم.'},
+  {cat:'🇸🇦 وطنية',q:'في أي عام تأسست المملكة؟',opts:['1902م','1945م','1960م','1932م'],ans:3,exp:'1932م.'},
+  {cat:'🇸🇦 وطنية',q:'ما شعار رؤية 2030؟',opts:['الاستدامة والتطوير','التحول الرقمي','القيادة والريادة','مجتمع حيوي، اقتصاد مزدهر، وطن طموح'],ans:3,exp:'مجتمع حيوي، اقتصاد مزدهر، وطن طموح.'},
+  {cat:'🇸🇦 وطنية',q:'متى اليوم الوطني السعودي؟',opts:['17 رجب','1 محرم','12 ربيع الأول','23 سبتمبر'],ans:3,exp:'23 سبتمبر.'},
+  {cat:'🇸🇦 وطنية',q:'ما عاصمة المملكة؟',opts:['جدة','مكة المكرمة','المدينة المنورة','الرياض'],ans:3,exp:'الرياض.'},
+  {cat:'🇸🇦 وطنية',q:'أي مدينة تعرف بعروس البحر الأحمر؟',opts:['ينبع','جازان','الليث','جدة'],ans:3,exp:'جدة.'},
+];
+const GAME_TIMER=10;
+let _gameQuestions=[],_gameCurrent=0,_gameScore=0,_gameTimerInt=null,_gameTimeLeft=GAME_TIMER,_gameAnswered=false;
+function _todayStr(){return new Date().toISOString().slice(0,10);}
+function _getDailyQuestions(){
+  const today=_todayStr(),username=currentUser?.username||'guest';
+  const seedStr=today.replace(/-/g,'')+username;
+  let seed=0;for(let i=0;i<seedStr.length;i++)seed=(seed*31+seedStr.charCodeAt(i))>>>0;
+  const bank=[...QUESTION_BANK];
+  for(let i=bank.length-1;i>0;i--){seed=(seed*1664525+1013904223)>>>0;const j=seed%(i+1);[bank[i],bank[j]]=[bank[j],bank[i]];}
+  const cats=[...new Set(QUESTION_BANK.map(q=>q.cat))];
+  const picked=[];
+  cats.forEach(cat=>{const q=bank.find(b=>b.cat===cat&&!picked.includes(b));if(q)picked.push(q);});
+  bank.forEach(q=>{if(picked.length<3&&!picked.includes(q))picked.push(q);});
+  return picked.slice(0,3);
+}
+async function openGameModal(){
+  if(!currentUser){toast('❌ يرجى تسجيل الدخول أولاً');return;}
+  const modal=document.getElementById('gameModal');
+  if(!modal){toast('❌ modal اللعبة غير موجود');return;}
+  modal.style.display='block';
+  const already=await _gameCheckAlready();
+  if(already){
+    _showState('already');
+    const el=document.getElementById('gameAlreadyScore');
+    if(el)el.textContent=`نقاطك اليوم: ${already.score} نقطة`;
+    await _loadLeader('gameLeaderAlready');return;
+  }
+  _gameQuestions=_getDailyQuestions();_gameCurrent=0;_gameScore=0;_showQuestion();
+}
+function _showQuestion(){
+  if(_gameCurrent>=_gameQuestions.length){_gameEnd();return;}
+  _showState('question');_gameAnswered=false;_gameTimeLeft=GAME_TIMER;
+  const q=_gameQuestions[_gameCurrent];
+  document.getElementById('gameQNum').textContent=_gameCurrent+1;
+  document.getElementById('gameQTotal').textContent=_gameQuestions.length;
+  document.getElementById('gameCategory').textContent=q.cat;
+  document.getElementById('gameQuestion').textContent=q.q;
+  const opts=document.getElementById('gameOptions');
+  const labels=['أ','ب','ج','د'];
+  opts.innerHTML=q.opts.map((opt,i)=>`<button onclick="_gameAnswer(${i})" id="gameOpt${i}"
+    style="padding:12px 16px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);
+    border-radius:14px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;
+    color:#fff;text-align:right;display:flex;align-items:center;gap:10px;">
+    <span style="background:rgba(255,255,255,0.12);border-radius:8px;padding:2px 8px;font-size:11px;flex-shrink:0;">${labels[i]}</span>
+    <span>${opt}</span></button>`).join('');
+  _startTimer();
+}
+function _startTimer(){
+  clearInterval(_gameTimerInt);
+  const bar=document.getElementById('gameTimerBar'),el=document.getElementById('gameTimer');
+  if(el){el.textContent=_gameTimeLeft;el.style.color='#fff';}
+  if(bar)bar.style.background='linear-gradient(90deg,#00C8B4,#7D3C98)';
+  _gameTimerInt=setInterval(()=>{
+    _gameTimeLeft--;
+    if(el)el.textContent=_gameTimeLeft;
+    if(bar)bar.style.width=(_gameTimeLeft/GAME_TIMER*100)+'%';
+    if(_gameTimeLeft<=3&&el)el.style.color='#FF6B6B';
+    if(_gameTimeLeft<=0){clearInterval(_gameTimerInt);if(!_gameAnswered)_gameAnswer(-1);}
+  },1000);
+}
+function _gameAnswer(idx){
+  if(_gameAnswered)return;_gameAnswered=true;clearInterval(_gameTimerInt);
+  const q=_gameQuestions[_gameCurrent],correct=q.ans,isRight=idx===correct;
+  q.opts.forEach((_,i)=>{const btn=document.getElementById('gameOpt'+i);if(!btn)return;
+    if(i===correct){btn.style.background='rgba(39,174,96,0.3)';btn.style.borderColor='#27AE60';}
+    else if(i===idx&&!isRight){btn.style.background='rgba(231,76,60,0.3)';btn.style.borderColor='#E74C3C';}
+    btn.style.cursor='default';btn.onclick=null;});
+  const pts=isRight?10+_gameTimeLeft:0;_gameScore+=pts;
+  setTimeout(()=>{
+    _showState('result');
+    document.getElementById('gameResultIcon').textContent=isRight?'✅':(idx===-1?'⏰':'❌');
+    document.getElementById('gameResultText').textContent=isRight?'إجابة صحيحة! 🎉':(idx===-1?'انتهى الوقت!':'إجابة خاطئة!');
+    document.getElementById('gameResultExplain').textContent=q.exp;
+    document.getElementById('gameResultScore').textContent=isRight?`+${pts} نقطة`:`الإجابة: ${q.opts[correct]}`;
+    const nb=document.getElementById('gameNextBtn');
+    if(nb)nb.textContent=_gameCurrent+1>=_gameQuestions.length?'🏆 النتيجة':'التالي ›';
+  },800);
+}
+function gameNext(){_gameCurrent++;_gameCurrent>=_gameQuestions.length?_gameEnd():_showQuestion();}
+async function _gameEnd(){
+  _showState('end');
+  document.getElementById('gameFinalScore').textContent=_gameScore;
+  try{await db.from('game_scores').upsert({player_name:currentUser.name,username:currentUser.username,score:_gameScore,play_date:_todayStr(),questions_count:_gameQuestions.length},{onConflict:'username,play_date'});toast('✅ نقاطك حُفظت!');}catch(e){console.log(e);}
+  await _loadLeader('gameLeaderEnd');_refreshHomeLeader();
+}
+async function _gameCheckAlready(){try{const{data}=await db.from('game_scores').select('score').eq('username',currentUser.username).eq('play_date',_todayStr()).single();return data;}catch(e){return null;}}
+async function _loadLeader(containerId){
+  const el=document.getElementById(containerId);if(!el)return;
+  try{const{data}=await db.from('game_scores').select('player_name,score').eq('play_date',_todayStr()).order('score',{ascending:false}).limit(6);
+    if(!data||!data.length){el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.4);font-size:11px;">لا توجد نتائج اليوم</div>';return;}
+    const medals=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣'];
+    const isAdmin=currentUser?.role==='admin';
+    el.innerHTML=data.map((r,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,0.07);border-radius:12px;">
+      <span style="font-size:18px;">${medals[i]||''}</span>
+      <span style="flex:1;font-size:12px;font-weight:700;color:#fff;">${r.player_name}</span>
+      <span style="font-size:13px;font-weight:900;color:#FFD700;">${r.score} pt</span>
+      ${isAdmin?`<button onclick="_gameDeleteScore('${r.player_name}','${containerId}')" style="background:rgba(231,76,60,0.2);border:1px solid rgba(231,76,60,0.4);border-radius:8px;padding:3px 8px;font-size:10px;color:#FF6B6B;cursor:pointer;">🗑️</button>`:''}
+    </div>`).join('');}catch(e){}
+}
+async function _refreshHomeLeader(){
+  const el=document.getElementById('gameLeaderCard');if(!el)return;
+  try{const{data}=await db.from('game_scores').select('player_name,score').eq('play_date',_todayStr()).order('score',{ascending:false}).limit(3);
+    if(!data||!data.length){el.innerHTML='<div style="font-size:10px;color:rgba(255,255,255,0.4);">كن أول من يلعب اليوم! 🎮</div>';return;}
+    const medals=['🥇','🥈','🥉'];
+    el.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;">${data.map((r,i)=>`<div style="background:rgba(255,255,255,0.1);border-radius:20px;padding:4px 12px;display:flex;align-items:center;gap:6px;">
+      <span>${medals[i]}</span><span style="font-size:11px;font-weight:700;color:#fff;">${r.player_name.split(' ')[0]}</span>
+      <span style="font-size:11px;color:#FFD700;font-weight:900;">${r.score}pt</span></div>`).join('')}</div>`;
+    const badge=document.getElementById('gameTodayBadge');
+    if(badge){const mine=data.find(r=>r.player_name===currentUser?.name);badge.textContent=mine?`نقاطك: ${mine.score} ⭐`:'العب الآن! 🎮';}}catch(e){}
+}
+function closeGame(){clearInterval(_gameTimerInt);const m=document.getElementById('gameModal');if(m)m.style.display='none';}
+async function _gameDeleteScore(playerName,containerId){
+  if(currentUser?.role!=='admin')return;
+  if(!confirm(`حذف نتيجة "${playerName}"؟`))return;
+  try{await db.from('game_scores').delete().eq('player_name',playerName).eq('play_date',_todayStr());
+    toast('✅ تم الحذف');await _loadLeader(containerId);_refreshHomeLeader();}catch(e){toast('❌ '+e.message);}
+}
+function _showState(state){
+  ['Question','Result','End','Already'].forEach(s=>{
+    const el=document.getElementById('game'+s+'State');if(el)el.style.display=(s.toLowerCase()===state)?'block':'none';
+  });
+}
+setTimeout(()=>{if(currentUser)_refreshHomeLeader();},1500);
+
 </script>
+
+<!-- ══ WEEKLY TASKS MODAL ══ -->
+<div id="weeklyTasksModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9200;overflow-y:auto;padding:20px 12px;">
+  <div style="max-width:700px;margin:0 auto;background:var(--card);border-radius:20px;padding:24px 20px;position:relative;">
+    <button onclick="document.getElementById('weeklyTasksModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:16px;font-weight:900;color:var(--text);">📅 المهام الأسبوعية</div>
+      <div style="font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-top:3px;">WEEKLY QUALITY MEMBER TASKS</div>
+    </div>
+    <div id="wtDayBadge" style="display:inline-block;padding:5px 16px;border-radius:20px;font-size:11px;font-weight:700;color:#fff;background:var(--accent);margin-bottom:14px;"></div>
+    <div id="wtTabsRow" style="display:none;gap:6px;flex-wrap:wrap;margin-bottom:14px;"></div>
+    <div id="wtBody"></div>
+  </div>
+</div>
+
+<!-- ══ GAME MODAL ══ -->
+<div id="gameModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);z-index:9500;overflow-y:auto;padding:16px;">
+  <div style="max-width:500px;margin:0 auto;background:linear-gradient(135deg,#1A0533,#3D0B6B);border-radius:24px;padding:24px 20px;position:relative;min-height:60vh;">
+    <button onclick="closeGame()" style="position:absolute;top:16px;left:16px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:#fff;">✕</button>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:32px;margin-bottom:6px;">🎮</div>
+      <div style="font-size:16px;font-weight:900;color:#fff;">لعبة اليوم</div>
+      <div id="gameCategory" style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:3px;letter-spacing:1px;"></div>
+    </div>
+    <div id="gameQuestionState" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="color:rgba(255,255,255,0.6);font-size:11px;">سؤال <span id="gameQNum">1</span> من <span id="gameQTotal">3</span></div>
+        <div id="gameTimer" style="background:rgba(255,255,255,0.15);border-radius:20px;padding:4px 14px;font-size:14px;font-weight:900;color:#fff;">10</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:4px;margin-bottom:20px;overflow:hidden;">
+        <div id="gameTimerBar" style="height:4px;background:linear-gradient(90deg,#00C8B4,#7D3C98);border-radius:4px;width:100%;transition:width 1s linear;"></div>
+      </div>
+      <div id="gameQuestion" style="font-size:15px;font-weight:800;color:#fff;text-align:center;line-height:1.6;margin-bottom:24px;min-height:60px;"></div>
+      <div id="gameOptions" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+    <div id="gameResultState" style="display:none;text-align:center;padding:20px 0;">
+      <div id="gameResultIcon" style="font-size:48px;margin-bottom:12px;"></div>
+      <div id="gameResultText" style="font-size:16px;font-weight:900;color:#fff;margin-bottom:8px;"></div>
+      <div id="gameResultExplain" style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:20px;line-height:1.6;"></div>
+      <div id="gameResultScore" style="background:rgba(255,255,255,0.1);border-radius:14px;padding:10px 20px;font-size:13px;color:#fff;font-weight:700;margin-bottom:16px;"></div>
+      <button id="gameNextBtn" onclick="gameNext()" style="width:100%;padding:14px;background:linear-gradient(135deg,#00C8B4,#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">التالي ›</button>
+    </div>
+    <div id="gameEndState" style="display:none;text-align:center;padding:10px 0;">
+      <div style="font-size:48px;margin-bottom:12px;">🏆</div>
+      <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:6px;">انتهت لعبة اليوم!</div>
+      <div id="gameFinalScore" style="font-size:32px;font-weight:900;color:#FFD700;margin:10px 0;"></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:20px;">نقطة</div>
+      <div style="background:rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:900;color:#fff;margin-bottom:12px;">🏅 لوحة المتصدرين</div>
+        <div id="gameLeaderEnd" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+      <button onclick="closeGame()" style="width:100%;padding:14px;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">إغلاق</button>
+    </div>
+    <div id="gameAlreadyState" style="display:none;text-align:center;padding:20px 0;">
+      <div style="font-size:48px;margin-bottom:12px;">✅</div>
+      <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:8px;">أجبت على أسئلة اليوم!</div>
+      <div id="gameAlreadyScore" style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:20px;"></div>
+      <div style="background:rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:900;color:#fff;margin-bottom:12px;">🏅 الترتيب اليوم</div>
+        <div id="gameLeaderAlready" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+      <button onclick="closeGame()" style="width:100%;padding:14px;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ QUARTERLY MODAL ══ -->
+<div id="quarterlyModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);z-index:9400;overflow-y:auto;padding:16px 12px;">
+  <div style="max-width:900px;margin:0 auto;background:var(--card);border-radius:24px;padding:24px 20px;position:relative;">
+    <button onclick="document.getElementById('quarterlyModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:28px;margin-bottom:6px;">📊</div>
+      <div style="font-size:17px;font-weight:900;color:var(--text);">التقارير الربعية</div>
+      <div style="font-size:10px;color:var(--text-dim);letter-spacing:1px;">QUARTERLY REPORTS & KPIs</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:center;">
+      <select id="qYear" onchange="selectQuarter(_qQuarter||Math.ceil((new Date().getMonth()+1)/3))" style="padding:10px 16px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;"></select>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+        <button onclick="selectQuarter(1)" id="qBtn1" style="padding:10px 18px;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-align:center;">Q1<div style="font-size:9px;color:var(--text-dim);">يناير–مارس</div></button>
+        <button onclick="selectQuarter(2)" id="qBtn2" style="padding:10px 18px;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-align:center;">Q2<div style="font-size:9px;color:var(--text-dim);">أبريل–يونيو</div></button>
+        <button onclick="selectQuarter(3)" id="qBtn3" style="padding:10px 18px;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-align:center;">Q3<div style="font-size:9px;color:var(--text-dim);">يوليو–سبتمبر</div></button>
+        <button onclick="selectQuarter(4)" id="qBtn4" style="padding:10px 18px;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-align:center;">Q4<div style="font-size:9px;color:var(--text-dim);">أكتوبر–ديسمبر</div></button>
+      </div>
+    </div>
+    <div id="qLoading" style="display:none;text-align:center;padding:40px;">
+      <div style="font-size:32px;margin-bottom:10px;">⏳</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text-dim);">جاري جلب البيانات...</div>
+    </div>
+    <div id="qResults" style="display:none;">
+      <div id="qKpiCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;"></div>
+      <div id="qDetails"></div>
+      <button onclick="exportQuarterlyExcel()" style="width:100%;padding:16px;background:linear-gradient(135deg,#00A896,#007B6E);color:#fff;border:none;border-radius:16px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;margin-top:16px;">⬇ تصدير Excel الربعي الكامل</button>
+    </div>
+    <div id="qWelcome" style="text-align:center;padding:40px 20px;">
+      <div style="font-size:48px;margin-bottom:12px;">📅</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text-dim);">اختر السنة والربع لعرض التقرير الشامل</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OPS MONTH MODAL ══ -->
+<div id="opsMonthModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9300;padding:20px 12px;overflow-y:auto;">
+  <div style="max-width:600px;margin:0 auto;background:var(--card);border-radius:20px;padding:24px 20px;position:relative;">
+    <button onclick="document.getElementById('opsMonthModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
+    <div style="text-align:center;margin-bottom:18px;">
+      <div style="font-size:26px;margin-bottom:6px;">📅</div>
+      <div style="font-size:15px;font-weight:900;">سجل كفاءة التشغيل</div>
+    </div>
+    <div id="opsMonthModalList" style="display:flex;flex-direction:column;gap:10px;"></div>
+    <div style="margin-top:16px;text-align:center;">
+      <button onclick="document.getElementById('opsMonthModal').style.display='none';adminOnly('ops')" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">⚙️ فتح كفاءة التشغيل</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
