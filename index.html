@@ -814,7 +814,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
         <div style="flex:0 0 24px;text-align:center;font-size:16px;color:rgba(255,255,255,0.5);">›</div>
       </div>
-      <div id="swOps" onclick="adminOnly('ops')" style="display:flex;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#7D3C98,#4A235A);box-shadow:0 4px 16px rgba(125,60,152,0.3);transition:transform .15s;grid-column:span 2;">
+      <div id="swOps" onclick="showOpsMonthModal()" style="display:flex;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#7D3C98,#4A235A);box-shadow:0 4px 16px rgba(125,60,152,0.3);transition:transform .15s;grid-column:span 2;">
         <div style="flex:0 0 60px;height:70px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(0,0,0,0.15);">⚙️</div>
         <div style="flex:1;padding:0 10px;text-align:right;">
           <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:2px;">كفاءة التشغيل</div>
@@ -7400,11 +7400,11 @@ function getOpsAnalysis() {
       const permHours   = att.permHours    || 0; // مجموع ساعات الاستئذان الفعلية
 
       // ══ الحصص والكفاءة ══
-      // الحصص المفترضة = أيام الشهر × 4 — ثابتة لكل مدرب بغض النظر عن الغياب
-      const expSessions = workDays * SESSIONS_PER_DAY;
-
-      // أيام العمل الفعلية (للمعلومة — تُستخدم في التوصيات فقط)
+      // أيام العمل الفعلية = أيام الشهر - أيام الغياب (تختلف بين المدربين)
       const effWorkDays = Math.max(0, workDays - absDays);
+
+      // الحصص المفترضة = أيام العمل الفعلية × 4 (تختلف حسب غياب كل مدرب)
+      const expSessions = effWorkDays * SESSIONS_PER_DAY;
 
       // الحصص المنجزة = عدد الحصص من ملف التشغيل مباشرة
       const trainedSess = sessions; // هذا هو العدد الحقيقي للحصص
@@ -7644,7 +7644,7 @@ function renderOpsTable(sec) {
     <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:820px;">
       <thead>
         <tr style="background:var(--accent);color:#fff;">
-          ${['#','اسم المدرب','القسم','حصص منجزة','الحصص المفترضة','حصص مهدرة','الحصص المهدرة بسبب الغياب','أيام غياب','غياب','إجازة','استئذان (س)','ساعات إجمالية','ساعات فعلية','نسبة المنصة','كفاءة %','تقييم'].map((h,i) =>
+          ${['#','اسم المدرب','القسم','حصص منجزة','الحصص المفترضة','الحصص الغير مجدولة','الحصص المهدرة بسبب الغياب','غياب','إجازة','استئذان (س)','ساعات إجمالية','ساعات فعلية','نسبة المنصة','كفاءة %','تقييم'].map((h,i) =>
             `<th style="padding:10px 7px;text-align:${i===1?'right':'center'};white-space:nowrap;">${h}</th>`
           ).join('')}
         </tr>
@@ -7664,7 +7664,6 @@ function renderOpsTable(sec) {
             <td style="padding:9px 7px;text-align:center;">${t.expSessions}</td>
             <td style="padding:9px 7px;text-align:center;color:#E74C3C;font-weight:700;">${t.unusedSessions}</td>
             <td style="padding:9px 7px;text-align:center;color:#D4AC0D;font-weight:700;">${t.absSessions}</td>
-            <td style="padding:9px 7px;text-align:center;">${t.absDays}</td>
             <td style="padding:9px 7px;text-align:center;color:#E74C3C;">${t.absence}</td>
             <td style="padding:9px 7px;text-align:center;color:#8E44AD;">${t.leaveP}</td>
             <td style="padding:9px 7px;text-align:center;color:#2E86C1;">${t.permHours}</td>
@@ -7814,6 +7813,58 @@ function renderOpsKPI() {
 }
 
 // ── التنقل بين الأقسام ──
+function showOpsMonthModal() {
+  if(!currentUser){ showLM(); return; }
+  if(currentUser.role!=='admin' && currentUser.username!=='shahad'){ toast('❌ هذه الخانة للمدير فقط'); return; }
+  const modal = document.getElementById('opsMonthModal');
+  const list  = document.getElementById('opsMonthModalList');
+  if(!modal || !list) { adminOnly('ops'); return; }
+
+  const keys = Object.keys(OPS_MONTHS).sort().reverse();
+  if(!keys.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px;font-size:12px;">لا توجد بيانات محفوظة بعد<br>افتح كفاءة التشغيل وأضف الشهر الأول</div>';
+  } else {
+    list.innerHTML = keys.map(key => {
+      const mo = OPS_MONTHS[key];
+      const hO = (mo.ops.female||[]).length+(mo.ops.male||[]).length+(mo.ops.bike||[]).length;
+      const hA = Object.keys(mo.att.female||{}).length+Object.keys(mo.att.male||{}).length+Object.keys(mo.att.bike||{}).length;
+      const avg = hO > 0 ? (() => {
+        const d = [...(mo.ops.female||[]),...(mo.ops.male||[]),...(mo.ops.bike||[])];
+        // نحسب كفاءة تقريبية من نسبة العمل
+        const vals = d.map(r => {
+          const ek = Object.keys(r).find(k=>k.includes('نسبة')||k.includes('كفاءة'));
+          return ek ? parseFloat(String(r[ek]).replace('%',''))||0 : 0;
+        }).filter(v=>v>0);
+        return vals.length ? (vals.reduce((s,v)=>s+v,0)/vals.length).toFixed(1) : '—';
+      })() : '—';
+
+      return `<div onclick="opsSelectFromModal('${key}',${mo.year},${mo.month})"
+        style="background:var(--card2);border:1.5px solid ${key===ACTIVE_MONTH?'var(--accent)':'var(--border)'};
+        border-radius:14px;padding:14px 16px;cursor:pointer;transition:all .2s;
+        display:flex;align-items:center;gap:12px;">
+        <div style="font-size:28px;">📅</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:900;">${mo.label}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:3px;">
+            أيام العمل: ${mo.workDays} يوم &nbsp;|&nbsp; الحصص المفترضة/مدرب: ${mo.workDays*4}
+            ${hO>0?' &nbsp;|&nbsp; 📊 '+hO+' مدرب':''}
+            ${hA>0?' &nbsp;|&nbsp; 👥 '+hA+' حضور':''}
+          </div>
+        </div>
+        ${avg!=='—'?`<div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:${parseFloat(avg)>=90?'#27AE60':parseFloat(avg)>=70?'#D4AC0D':'#E74C3C'};">${avg}%</div><div style="font-size:9px;color:var(--text-dim);">متوسط الكفاءة</div></div>`:''}
+        <div style="font-size:16px;color:var(--text-dim);">›</div>
+      </div>`;
+    }).join('');
+  }
+  modal.style.display = 'block';
+}
+
+function opsSelectFromModal(key, year, month) {
+  document.getElementById('opsMonthModal').style.display = 'none';
+  opsSelectMonth(key, year, month);
+  adminOnly('ops');
+}
+
 function showOpsUpload()   { document.getElementById('opsBody_upload').style.display='block'; document.getElementById('opsBody_analysis').style.display='none'; document.getElementById('opsBody_kpi').style.display='none'; }
 function showOpsAnalysis() { document.getElementById('opsBody_upload').style.display='none';  document.getElementById('opsBody_analysis').style.display='block'; document.getElementById('opsBody_kpi').style.display='none'; renderOpsTable(currentOpsSection); }
 function showOpsKPI()      { document.getElementById('opsBody_upload').style.display='none';  document.getElementById('opsBody_analysis').style.display='none'; document.getElementById('opsBody_kpi').style.display='block'; renderOpsKPI(); }
@@ -7846,243 +7897,327 @@ async function exportOpsExcelFull() {
   if (!trainers.length) { toast('❌ لا توجد بيانات — ارفع الملفات وحلّل أولاً'); return; }
   if (typeof ExcelJS === 'undefined') { toast('❌ ExcelJS غير محملة'); return; }
 
-  const wb = new ExcelJS.Workbook();
+  const wb  = new ExcelJS.Workbook();
   wb.creator = 'نورة لتعليم القيادة';
   wb.created = new Date();
 
-  const T  = 'FF00A896';  // أخضر تيركوازي
-  const D  = 'FF0D1F2D';  // داكن
-  const W  = 'FFFFFFFF';  // أبيض
-  const LG = 'FFE8F5F3';  // أخضر فاتح
-  const LR = 'FFFEF0EF';  // أحمر فاتح
-  const LY = 'FFFEF9E7';  // أصفر فاتح
-  const sn = { female: 'نسائي', male: 'رجالي', bike: 'دراجات' };
+  // ألوان ثابتة
+  const CLR = {
+    teal:  'FF00A896', tealLight:'FFE8F5F3',
+    dark:  'FF0D1F2D', white:'FFFFFFFF',
+    red:   'FFE74C3C', redL:'FFFEF0EF',
+    green: 'FF27AE60', greenL:'FFE9F7EF',
+    gold:  'FFD4AC0D', goldL:'FFFEF9E7',
+    gray:  'FFF5F5F5', blue:'FF2E86C1', purple:'FF7D3C98',
+  };
 
-  const colDef = [
-    { header: '#',              key: 'idx',      width: 5  },
-    { header: 'اسم المدرب',      key: 'name',     width: 32 },
-    { header: 'القسم',           key: 'sec',      width: 12 },
-    { header: 'تم تدريب (حصص)', key: 'trained',  width: 16 },
-    { header: 'حصص متوقعة',     key: 'exp',      width: 14 },
-    { header: 'حصص فعلية',      key: 'act',      width: 14 },
-    { header: 'حصص مهدرة',      key: 'unused',   width: 14 },
-    { header: 'حصص غياب',       key: 'absSess',  width: 12 },
-    { header: 'أيام غياب',      key: 'absDays',  width: 12 },
-    { header: 'غياب',           key: 'absence',  width: 10 },
-    { header: 'إجازة',          key: 'leave',    width: 10 },
-    { header: 'استئذان (ساعة)', key: 'perm',     width: 14 },
-    { header: 'الكفاءة %',      key: 'eff',      width: 12 },
-    { header: 'نسبة المنصة',    key: 'effSrc',   width: 13 },
-    { header: 'أيام العمل',     key: 'wd',       width: 12 },
-    { header: 'أيام عمل فعلية', key: 'ewd',     width: 14 },
-    { header: 'التقييم',        key: 'status',   width: 14 },
-    { header: 'التوصية',        key: 'rec',      width: 45 },
-    { header: 'ملاحظات HR',     key: 'hrNote',   width: 35 },
+  const sects = [
+    { key:'female', label:'نسائي',   color: CLR.red,    bg: CLR.redL   },
+    { key:'male',   label:'رجالي',   color: CLR.blue,   bg: 'FFEBF5FB' },
+    { key:'bike',   label:'دراجات',  color: CLR.gold,   bg: CLR.goldL  },
   ];
 
-  // ── شيت لكل قسم ──
-  ['female', 'male', 'bike'].forEach(sec => {
-    const secName = { female: 'نسائي', male: 'رجالي', bike: 'دراجات' }[sec];
-    const secData = trainers.filter(t => t.section === sec);
-    if (!secData.length) return;
+  // ── دالة تنسيق صف الترويسة ──
+  function styleHeader(row, bgColor) {
+    row.eachCell({ includeEmpty: true }, cell => {
+      cell.font      = { name:'Arial', bold:true, size:10, color:{argb:CLR.white} };
+      cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: bgColor} };
+      cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
+      cell.border    = { bottom:{style:'thin', color:{argb:CLR.white}} };
+    });
+    row.height = 32;
+  }
 
-    const ws = wb.addWorksheet(`تحليل - ${secName}`);
-    ws.views = [{ rightToLeft: true }];
-    ws.columns = colDef;
+  // ── دالة تنسيق صف بيانات ──
+  function styleDataRow(row, bgArgb, effPct) {
+    row.height = 22;
+    row.eachCell({ includeEmpty: true }, (cell, colN) => {
+      if (!cell.fill || cell.fill.fgColor?.argb === CLR.white) {
+        cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb: bgArgb} };
+      }
+      cell.font      = cell.font || { name:'Arial', size:10 };
+      cell.font.name = 'Arial';
+      cell.alignment = { horizontal: colN===2?'right':'center', vertical:'middle', wrapText: colN>=17 };
+      cell.border    = { bottom:{style:'hair', color:{argb:'FFD0E8E4'}} };
+    });
+    // لون خلية الكفاءة
+    if (effPct !== undefined) {
+      const ec = effPct>=90 ? CLR.green : effPct>=70 ? CLR.gold : CLR.red;
+      const effCell = row.getCell(14);
+      effCell.numFmt = '0.0%';
+      effCell.font   = { name:'Arial', bold:true, size:11, color:{argb:ec} };
+    }
+  }
 
-    // صف العنوان الكبير
+  const COLS = [
+    { header:'#',                          key:'idx',      width:5  },
+    { header:'اسم المدرب',                  key:'name',     width:32 },
+    { header:'القسم',                       key:'sec',      width:12 },
+    { header:'حصص منجزة',                   key:'trained',  width:14 },
+    { header:'الحصص المفترضة',              key:'exp',      width:16 },
+    { header:'الحصص الغير مجدولة',          key:'unused',   width:18 },
+    { header:'الحصص المهدرة بسبب الغياب',   key:'absSess',  width:22 },
+    { header:'غياب (أيام)',                 key:'absence',  width:14 },
+    { header:'إجازة (أيام)',                key:'leave',    width:14 },
+    { header:'استئذان (ساعات)',             key:'perm',     width:16 },
+    { header:'ساعات العمل الإجمالية',       key:'hrsTot',   width:20 },
+    { header:'ساعات العمل الفعلية',         key:'hrsAct',   width:20 },
+    { header:'نسبة المنصة',                 key:'effSrc',   width:14 },
+    { header:'كفاءة % (حصص منجزة÷مفترضة)', key:'eff',      width:24 },
+    { header:'التقييم',                     key:'status',   width:14 },
+    { header:'التوصية التفصيلية',           key:'rec',      width:50 },
+    { header:'ملاحظات HR',                  key:'hrNote',   width:35 },
+  ];
+
+  const sn = { female:'نسائي', male:'رجالي', bike:'دراجات' };
+
+  // ══ شيت لكل قسم ══
+  sects.forEach(({ key, label, color, bg }) => {
+    const data = trainers.filter(t => t.section === key);
+    if (!data.length) return;
+
+    const ws = wb.addWorksheet(`تحليل - ${label}`);
+    ws.views = [{ rightToLeft:true }];
+    ws.columns = COLS;
+
+    // عنوان كبير
     ws.spliceRows(1, 0, []);
     const titleRow = ws.getRow(1);
-    titleRow.getCell(1).value = `تحليل كفاءة التشغيل — المدرب/ات (${secName}) — ${new Date().toLocaleDateString('ar-SA')}`;
-    titleRow.getCell(1).font  = { name: 'Arial', bold: true, size: 14, color: { argb: W } };
-    titleRow.getCell(1).fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: D } };
-    titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
-    ws.mergeCells(1, 1, 1, colDef.length);
-    titleRow.height = 36;
+    titleRow.getCell(1).value = `تحليل كفاءة التشغيل — ${label} — ${new Date().toLocaleDateString('ar-SA')}`;
+    titleRow.getCell(1).font  = { name:'Arial', bold:true, size:13, color:{argb:CLR.white} };
+    titleRow.getCell(1).fill  = { type:'pattern', pattern:'solid', fgColor:{argb: color} };
+    titleRow.getCell(1).alignment = { horizontal:'center', vertical:'middle' };
+    ws.mergeCells(1,1,1,COLS.length);
+    titleRow.height = 38;
 
-    // صف الترويسة
-    const hr = ws.getRow(2);
-    colDef.forEach((c, i) => {
-      const cell = hr.getCell(i + 1);
-      cell.value = c.header;
-      cell.font  = { name: 'Arial', bold: true, size: 10, color: { argb: W } };
-      cell.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: T } };
-      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-      cell.border = { bottom: { style: 'thin', color: { argb: W } } };
-    });
-    hr.height = 30;
-    ws.getRow(2).freeze = true;
+    styleHeader(ws.getRow(2), CLR.teal);
+    ws.getRow(2).values = COLS.map(c => c.header);
+    ws.views = [{ state:'frozen', xSplit:2, ySplit:2, rightToLeft:true }];
 
-    // البيانات
-    secData.forEach((t, i) => {
+    data.forEach((t, i) => {
       const r = ws.addRow({
-        idx:     i + 1,
-        name:    t.name,
-        sec:     sn[t.section],
-        trained: t.trainedSessions,
-        exp:     t.expSessions,
-        act:     t.actSessions,
-        unused:  t.unusedSessions,
-        absSess: t.absSessions,
-        absDays: t.absDays,
-        absence: t.absence,
-        leave:   t.leaveP,
-        perm:    t.permHours,
-        eff:     t.efficiency / 100,
-        effSrc:  t.effSource / 100,
-        wd:      t.workDays,
-        ewd:     t.effWorkDays,
-        status:  t.status,
-        rec:     t.recommendation,
-        hrNote:  '',
+        idx:i+1, name:t.name, sec:sn[t.section],
+        trained:t.trainedSessions, exp:t.expSessions,
+        unused:t.unusedSessions, absSess:t.absSessions,
+        absence:t.absence, leave:t.leaveP, perm:t.permHours,
+        hrsTot:t.hrsTot, hrsAct:t.hrsAct,
+        effSrc:t.effSource/100, eff:t.efficiency/100,
+        status:t.status, rec:t.recommendation, hrNote:'',
       });
-      r.height = 22;
-
-      // تنسيق الكفاءة
-      const effCell = r.getCell(13);
-      effCell.numFmt = '0.0%';
-      const ec =
-        t.efficiency >= 90 ? 'FF27AE60' :
-        t.efficiency >= 70 ? 'FFD4AC0D' : 'FFE74C3C';
-      effCell.font = { name: 'Arial', bold: true, color: { argb: ec }, size: 11 };
-
-      r.getCell(14).numFmt = '0.0%';
-
-      // تلوين تناوبي
-      const bg = i % 2 === 0 ? LG : W;
-      r.eachCell({ includeEmpty: true }, (cell, colN) => {
-        if (colN > 1) {
-          cell.font      = cell.font || {};
-          cell.font.name = cell.font.name || 'Arial';
-          cell.font.size = cell.font.size || 10;
-          if (!cell.fill || cell.fill.type !== 'pattern' || cell.fill.fgColor?.argb === 'FFFFFFFF') {
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
-          }
-        }
-        cell.alignment = { horizontal: colN === 2 ? 'right' : 'center', vertical: 'middle', wrapText: colN === 18 || colN === 19 };
-        cell.border = { bottom: { style: 'hair', color: { argb: 'FFD0E8E4' } } };
-      });
-
-      // تلوين خلية الحصص المهدرة
+      r.getCell(13).numFmt = '0.0%';
+      // تلوين الحصص الغير مجدولة
       if (t.unusedSessions > 10) {
-        r.getCell(7).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
-        r.getCell(7).font = { name: 'Arial', bold: true, color: { argb: 'FF856404' }, size: 10 };
+        r.getCell(6).fill = { type:'pattern', pattern:'solid', fgColor:{argb:CLR.goldL} };
+        r.getCell(6).font = { name:'Arial', bold:true, color:{argb:'FF856404'}, size:10 };
       }
-      // تلوين خلية الغياب
-      if (t.absDays > 5) {
-        r.getCell(9).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: LR } };
-        r.getCell(9).font = { name: 'Arial', bold: true, color: { argb: 'FF842029' }, size: 10 };
+      // تلوين الغياب
+      if (t.absence > 3) {
+        r.getCell(8).fill = { type:'pattern', pattern:'solid', fgColor:{argb:CLR.redL} };
+        r.getCell(8).font = { name:'Arial', bold:true, color:{argb:'FF842029'}, size:10 };
       }
+      styleDataRow(r, i%2===0 ? bg : CLR.white, t.efficiency);
     });
-
-    // تجميد الصفوف والأعمدة
-    ws.views = [{ state: 'frozen', xSplit: 2, ySplit: 2, rightToLeft: true }];
   });
 
-  // ── شيت الكل (مجمّع) ──
+  // ══ شيت مجمّع (الكل) ══
   const wsAll = wb.addWorksheet('تحليل - الكل');
-  wsAll.views = [{ rightToLeft: true }];
-  wsAll.columns = colDef;
-  const titleRowAll = wsAll.getRow(1);
-  titleRowAll.getCell(1).value = `تحليل كفاءة التشغيل الشامل — ${trainers.length} مدرب/ة — ${new Date().toLocaleDateString('ar-SA')}`;
-  titleRowAll.getCell(1).font  = { name: 'Arial', bold: true, size: 14, color: { argb: W } };
-  titleRowAll.getCell(1).fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: D } };
-  titleRowAll.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
-  wsAll.mergeCells(1, 1, 1, colDef.length);
-  titleRowAll.height = 36;
-  const hrAll = wsAll.getRow(2);
-  colDef.forEach((c, i) => {
-    const cell = hrAll.getCell(i + 1);
-    cell.value = c.header;
-    cell.font  = { name: 'Arial', bold: true, size: 10, color: { argb: W } };
-    cell.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: T } };
-    cell.alignment = { horizontal: 'center', vertical: 'middle' };
-  });
-  hrAll.height = 30;
+  wsAll.views = [{ rightToLeft:true }];
+  wsAll.columns = COLS;
+  wsAll.spliceRows(1, 0, []);
+  const tAll = wsAll.getRow(1);
+  tAll.getCell(1).value = `تحليل كفاءة التشغيل الشامل — ${trainers.length} مدرب/ة — ${new Date().toLocaleDateString('ar-SA')}`;
+  tAll.getCell(1).font  = { name:'Arial', bold:true, size:13, color:{argb:CLR.white} };
+  tAll.getCell(1).fill  = { type:'pattern', pattern:'solid', fgColor:{argb:CLR.dark} };
+  tAll.getCell(1).alignment = { horizontal:'center', vertical:'middle' };
+  wsAll.mergeCells(1,1,1,COLS.length);
+  tAll.height = 38;
+  styleHeader(wsAll.getRow(2), CLR.teal);
+  wsAll.getRow(2).values = COLS.map(c => c.header);
+  wsAll.views = [{ state:'frozen', xSplit:2, ySplit:2, rightToLeft:true }];
   trainers.forEach((t, i) => {
+    const secColors = { female:CLR.redL, male:'FFEBF5FB', bike:CLR.goldL };
     const r = wsAll.addRow({
-      idx:i+1,name:t.name,sec:sn[t.section],trained:t.trainedSessions,exp:t.expSessions,act:t.actSessions,unused:t.unusedSessions,absSess:t.absSessions,absDays:t.absDays,absence:t.absence,leave:t.leaveP,perm:t.permHours,eff:t.efficiency/100,effSrc:t.effSource/100,wd:t.workDays,ewd:t.effWorkDays,status:t.status,rec:t.recommendation,hrNote:'',
+      idx:i+1, name:t.name, sec:sn[t.section],
+      trained:t.trainedSessions, exp:t.expSessions,
+      unused:t.unusedSessions, absSess:t.absSessions,
+      absence:t.absence, leave:t.leaveP, perm:t.permHours,
+      hrsTot:t.hrsTot, hrsAct:t.hrsAct,
+      effSrc:t.effSource/100, eff:t.efficiency/100,
+      status:t.status, rec:t.recommendation, hrNote:'',
     });
-    r.height = 22;
     r.getCell(13).numFmt = '0.0%';
-    r.getCell(14).numFmt = '0.0%';
-    const ec = t.efficiency >= 90 ? 'FF27AE60' : t.efficiency >= 70 ? 'FFD4AC0D' : 'FFE74C3C';
-    r.getCell(13).font = { name: 'Arial', bold: true, color: { argb: ec }, size: 11 };
-    r.eachCell({ includeEmpty: true }, (cell, colN) => {
-      cell.alignment = { horizontal: colN === 2 ? 'right' : 'center', vertical: 'middle', wrapText: colN >= 18 };
-      cell.border = { bottom: { style: 'hair', color: { argb: 'FFD0E8E4' } } };
-    });
+    styleDataRow(r, i%2===0 ? secColors[t.section] : CLR.white, t.efficiency);
   });
-  wsAll.views = [{ state: 'frozen', xSplit: 2, ySplit: 2, rightToLeft: true }];
 
-  // ── شيت KPIs ──
+  // ══ شيت KPIs — مفصّل لكل قسم ══
   const wsKPI = wb.addWorksheet('KPIs');
-  wsKPI.views = [{ rightToLeft: true }];
-  wsKPI.columns = [{ width: 35 }, { width: 20 }, { width: 45 }];
+  wsKPI.views = [{ rightToLeft:true }];
+  wsKPI.columns = [{ width:35 },{ width:22 },{ width:50 }];
 
-  const kpiTitle = wsKPI.getRow(1);
-  kpiTitle.getCell(1).value = `KPIs — كفاءة التشغيل — ${new Date().toLocaleDateString('ar-SA')}`;
-  kpiTitle.getCell(1).font  = { name: 'Arial', bold: true, size: 14, color: { argb: W } };
-  kpiTitle.getCell(1).fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: D } };
-  wsKPI.mergeCells(1, 1, 1, 3);
-  kpiTitle.height = 36;
+  const addKPITitle = (ws, text, bgArgb) => {
+    const r = ws.addRow([text]);
+    ws.mergeCells(r.number, 1, r.number, 3);
+    r.getCell(1).font  = { name:'Arial', bold:true, size:12, color:{argb:CLR.white} };
+    r.getCell(1).fill  = { type:'pattern', pattern:'solid', fgColor:{argb:bgArgb} };
+    r.getCell(1).alignment = { horizontal:'center', vertical:'middle' };
+    r.height = 30;
+  };
+  const addKPIRow = (ws, label, value, note, i) => {
+    const r = ws.addRow([label, value, note||'']);
+    r.height = 22;
+    r.eachCell({ includeEmpty:true }, (cell, cn) => {
+      cell.font      = { name:'Arial', size:10 };
+      cell.alignment = { vertical:'middle', wrapText:true };
+      cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: i%2===0?CLR.tealLight:CLR.white} };
+      cell.border    = { bottom:{style:'hair', color:{argb:'FFD0E8E4'}} };
+    });
+    r.getCell(1).font = { name:'Arial', bold:true, size:10 };
+  };
+  const addKPIHeader = (ws) => {
+    const r = ws.addRow(['المؤشر','القيمة','الملاحظة']);
+    styleHeader(r, CLR.teal);
+  };
 
-  const kpiHdr = wsKPI.getRow(2);
-  ['المؤشر', 'القيمة', 'الملاحظة'].forEach((h, i) => {
-    kpiHdr.getCell(i + 1).value = h;
-    kpiHdr.getCell(i + 1).font  = { name: 'Arial', bold: true, size: 11, color: { argb: W } };
-    kpiHdr.getCell(i + 1).fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: T } };
-    kpiHdr.getCell(i + 1).alignment = { horizontal: 'center', vertical: 'middle' };
+  // ملخص إجمالي
+  const avgAll = trainers.reduce((s,t)=>s+t.efficiency,0)/trainers.length;
+  addKPITitle(wsKPI, `ملخص الكفاءة الإجمالية — ${trainers.length} مدرب/ة`, CLR.dark);
+  addKPIHeader(wsKPI);
+  [
+    ['الكفاءة الإجمالية', avgAll.toFixed(1)+'%', avgAll>=90?'✅ حقق الهدف 90%':`⚠️ دون الهدف (فجوة ${(90-avgAll).toFixed(1)}%)`],
+    ['مدربون ≥ 90%', trainers.filter(t=>t.efficiency>=90).length+'/'+trainers.length, ''],
+    ['مدربون 70–89%', trainers.filter(t=>t.efficiency>=70&&t.efficiency<90).length+'', ''],
+    ['مدربون < 70%', trainers.filter(t=>t.efficiency<70).length+'', 'يحتاجون متابعة عاجلة'],
+    ['إجمالي الغياب', trainers.reduce((s,t)=>s+t.absence,0)+' يوم', ''],
+    ['إجمالي الإجازات', trainers.reduce((s,t)=>s+t.leaveP,0)+' يوم', ''],
+    ['إجمالي ساعات الاستئذان', trainers.reduce((s,t)=>s+t.permHours,0)+' ساعة', ''],
+    ['إجمالي الحصص الغير مجدولة', trainers.reduce((s,t)=>s+t.unusedSessions,0).toFixed(0)+' حصة', ''],
+    ['أعلى كفاءة', [...trainers].sort((a,b)=>b.efficiency-a.efficiency)[0]?.name||'—', [...trainers].sort((a,b)=>b.efficiency-a.efficiency)[0]?.efficiency.toFixed(1)+'%'],
+    ['أدنى كفاءة', [...trainers].sort((a,b)=>a.efficiency-b.efficiency)[0]?.name||'—', [...trainers].sort((a,b)=>a.efficiency-b.efficiency)[0]?.efficiency.toFixed(1)+'%'],
+  ].forEach((row,i) => addKPIRow(wsKPI, row[0], row[1], row[2], i));
+
+  wsKPI.addRow([]);
+
+  // KPIs لكل قسم
+  sects.forEach(({ key, label, color }) => {
+    const data = trainers.filter(t => t.section === key);
+    if (!data.length) return;
+    const avg = data.reduce((s,t)=>s+t.efficiency,0)/data.length;
+    const totHrsTot = data.reduce((s,t)=>s+t.hrsTot,0);
+    const totHrsAct = data.reduce((s,t)=>s+t.hrsAct,0);
+
+    addKPITitle(wsKPI, `قسم ${label} — ${data.length} مدرب/ة`, color);
+    addKPIHeader(wsKPI);
+    [
+      ['متوسط الكفاءة', avg.toFixed(1)+'%', avg>=90?'✅ حقق الهدف':('⚠️ دون الهدف — فجوة '+(90-avg).toFixed(1)+'%')],
+      ['مدربون ≥ 90%', data.filter(t=>t.efficiency>=90).length+'/'+data.length, ''],
+      ['مدربون 70–89%', data.filter(t=>t.efficiency>=70&&t.efficiency<90).length+'', ''],
+      ['مدربون < 70%', data.filter(t=>t.efficiency<70).length+'', 'يحتاجون متابعة'],
+      ['إجمالي ساعات العمل', totHrsTot.toFixed(0)+' ساعة', ''],
+      ['ساعات العمل الفعلية', totHrsAct.toFixed(0)+' ساعة', ''],
+      ['فجوة الساعات', Math.max(0,totHrsTot-totHrsAct).toFixed(0)+' ساعة', ''],
+      ['إجمالي الغياب', data.reduce((s,t)=>s+t.absence,0)+' يوم', ''],
+      ['إجمالي الإجازات', data.reduce((s,t)=>s+t.leaveP,0)+' يوم', ''],
+      ['ساعات الاستئذان', data.reduce((s,t)=>s+t.permHours,0)+' ساعة', ''],
+      ['الحصص الغير مجدولة', data.reduce((s,t)=>s+t.unusedSessions,0).toFixed(0)+' حصة', ''],
+      ['الحصص المهدرة بسبب الغياب', data.reduce((s,t)=>s+t.absSessions,0)+' حصة', ''],
+    ].forEach((row,i) => addKPIRow(wsKPI, row[0], row[1], row[2], i));
+
+    // أعلى 5 وأدنى 5
+    wsKPI.addRow([]);
+    const r1 = wsKPI.addRow([`🏆 أعلى 5 مدربين كفاءةً — ${label}`]);
+    r1.getCell(1).font = { name:'Arial', bold:true, size:11, color:{argb:CLR.green} };
+    r1.height = 24;
+    [...data].sort((a,b)=>b.efficiency-a.efficiency).slice(0,5).forEach((t,i) => {
+      addKPIRow(wsKPI, `${i+1}. ${t.name}`, t.efficiency.toFixed(1)+'%', t.recommendation, i);
+    });
+
+    wsKPI.addRow([]);
+    const r2 = wsKPI.addRow([`⚠️ أدنى 5 مدربين كفاءةً — ${label}`]);
+    r2.getCell(1).font = { name:'Arial', bold:true, size:11, color:{argb:CLR.red} };
+    r2.height = 24;
+    [...data].sort((a,b)=>a.efficiency-b.efficiency).slice(0,5).forEach((t,i) => {
+      addKPIRow(wsKPI, `${i+1}. ${t.name}`, t.efficiency.toFixed(1)+'%', t.recommendation, i);
+    });
+    wsKPI.addRow([]);
   });
-  kpiHdr.height = 28;
 
-  const avg = trainers.reduce((s, t) => s + t.efficiency, 0) / trainers.length;
-  const kpiRows = [
-    ['الكفاءة الإجمالية',      avg.toFixed(1) + '%',    avg >= 90 ? '✅ حقق الهدف 90%' : `⚠️ دون الهدف (فجوة ${(90 - avg).toFixed(1)}%)`],
-    ['مدربون ≥ 90%',           trainers.filter(t => t.efficiency >= 90).length + ' / ' + trainers.length, ''],
-    ['مدربون 70–89%',          trainers.filter(t => t.efficiency >= 70 && t.efficiency < 90).length + '', ''],
-    ['مدربون < 70%',           trainers.filter(t => t.efficiency < 70).length + '', 'يحتاجون متابعة عاجلة'],
-    ['إجمالي الغياب (أيام)',   trainers.reduce((s,t) => s+t.absDays, 0) + ' يوم', ''],
-    ['إجمالي الحصص المهدرة',  trainers.reduce((s,t) => s+t.unusedSessions, 0).toFixed(0) + ' حصة', (trainers.reduce((s,t)=>s+t.unusedSessions,0)*2).toFixed(0) + ' ساعة تدريب'],
-    ['أعلى كفاءة',            [...trainers].sort((a,b)=>b.efficiency-a.efficiency)[0]?.name || '—', [...trainers].sort((a,b)=>b.efficiency-a.efficiency)[0]?.efficiency.toFixed(1) + '%'],
-    ['أدنى كفاءة',             [...trainers].sort((a,b)=>a.efficiency-b.efficiency)[0]?.name || '—', [...trainers].sort((a,b)=>a.efficiency-b.efficiency)[0]?.efficiency.toFixed(1) + '%'],
-    ['أكثر غياباً',            [...trainers].sort((a,b)=>b.absDays-a.absDays)[0]?.name || '—', [...trainers].sort((a,b)=>b.absDays-a.absDays)[0]?.absDays + ' يوم'],
-    [],
-    ['🏆 أعلى 10 مدربين', '', ''],
-    ...trainers.slice(0, 10).map((t, i) => [`${i+1}. ${t.name}`, t.efficiency.toFixed(1) + '%', `${sn[t.section]} · ${t.actSessions} حصة · ${t.absDays} يوم غياب`]),
-    [],
-    ['⚠️ أقل 10 مدربين', '', ''],
-    ...[...trainers].sort((a,b)=>a.efficiency-b.efficiency).slice(0,10).map((t,i) => [`${i+1}. ${t.name}`, t.efficiency.toFixed(1) + '%', t.recommendation]),
+  // ══ شيت التعليمات ══
+  const wsHelp = wb.addWorksheet('📖 التعليمات');
+  wsHelp.views = [{ rightToLeft:true }];
+  wsHelp.columns = [{ width:28 },{ width:20 },{ width:60 },{ width:40 }];
+
+  const helpTitle = wsHelp.addRow(['دليل قراءة تقرير كفاءة التشغيل — نورة لتعليم القيادة']);
+  wsHelp.mergeCells(1,1,1,4);
+  helpTitle.getCell(1).font  = { name:'Arial', bold:true, size:14, color:{argb:CLR.white} };
+  helpTitle.getCell(1).fill  = { type:'pattern', pattern:'solid', fgColor:{argb:CLR.dark} };
+  helpTitle.getCell(1).alignment = { horizontal:'center', vertical:'middle' };
+  helpTitle.height = 40;
+
+  const helpHdr = wsHelp.addRow(['اسم العمود','المصدر','الشرح','مثال']);
+  styleHeader(helpHdr, CLR.teal);
+
+  const helpRows = [
+    ['اسم المدرب',                   'ملف التشغيل',          'الاسم الكامل للمدرب/ة كما هو مسجّل في المنصة', 'نورة سعد الحريشي'],
+    ['القسم',                         'ملف التشغيل',          'القسم الذي ينتمي إليه المدرب: نسائي / رجالي / دراجات', 'نسائي'],
+    ['حصص منجزة',                     'ملف التشغيل',          'عدد الحصص التدريبية التي نفّذها المدرب فعلياً خلال الشهر', '18 حصة'],
+    ['الحصص المفترضة',                'محسوب',               'أيام العمل الفعلية (بعد طرح الغياب) × 4 حصص/يوم — يختلف من مدرب لآخر حسب غيابه', '20 يوم × 4 = 80 حصة'],
+    ['الحصص الغير مجدولة',            'محسوب',               'الفرق بين الحصص المفترضة والمنجزة — يعني المدرب حضر لكن ما درّب بالكامل', '80 - 18 = 62 حصة'],
+    ['الحصص المهدرة بسبب الغياب',     'محسوب',               'أيام الغياب × 4 — الحصص التي ضاعت بسبب غياب المدرب تحديداً', '2 يوم × 4 = 8 حصص'],
+    ['غياب (أيام)',                   'كشف الحضور',           'عدد أيام الغياب المسجّلة في كشف الحضور (رمز: غ، غع، غياب)', '2 يوم'],
+    ['إجازة (أيام)',                  'كشف الحضور',           'عدد أيام الإجازة المدفوعة (رمز: إجازة، اجازة)', '3 أيام'],
+    ['استئذان (ساعات)',               'كشف الحضور',           'مجموع ساعات الاستئذان (رمز: 2hr، 4hr — كل رقم + hr = عدد ساعات)', '4 ساعات'],
+    ['ساعات العمل الإجمالية',         'ملف التشغيل',          'إجمالي ساعات العمل المتاحة للمدرب حسب ما رُفع من المنصة', '40 ساعة'],
+    ['ساعات العمل الفعلية',           'ملف التشغيل',          'ساعات العمل التي عمل فيها المدرب فعلياً حسب المنصة', '36 ساعة'],
+    ['نسبة المنصة',                   'ملف التشغيل',          'نسبة العمل كما تحسبها المنصة = ساعات فعلية ÷ ساعات إجمالية (للمقارنة فقط)', '36÷40 = 90%'],
+    ['كفاءة % (حصص منجزة÷مفترضة)',   'محسوب',               'الكفاءة الحقيقية = حصص منجزة ÷ الحصص المفترضة × 100 — هذا هو المؤشر الرئيسي', '18÷80 = 22.5%'],
+    ['التقييم',                       'محسوب',               '✅ ممتاز (≥90%) | ⚠️ يحتاج تحسين (70-89%) | ❌ ضعيف (<70%)', '⚠️ يحتاج تحسين'],
+    ['التوصية التفصيلية',             'محسوب',               'شرح سبب الكفاءة: إذا عالية يوضح لماذا، وإذا منخفضة يذكر الغياب والحصص المهدرة', 'غياب 5 يوم | 62 حصة لم تُنجز'],
+    ['ملاحظات HR',                    'يدوي',                 'خانة فارغة لكتابة ملاحظات الموارد البشرية يدوياً', ''],
+    ['','','',''],
+    ['رموز كشف الحضور المدعومة','','',''],
+    ['غ / غع / غياب / غ عذر',        'غياب',                 'يُحسب يوم غياب', ''],
+    ['إجازة / اجازة',                 'إجازة مدفوعة',         'يُحسب يوم إجازة', ''],
+    ['إجازة غير مدفوعة',             'إجازة بدون راتب',      'يُحسب ضمن أيام الغياب الإجمالية', ''],
+    ['2hr / 4hr / 6hr ...',           'استئذان بالساعات',     'الرقم + hr = عدد الساعات المستأذنة', '4hr = 4 ساعات'],
+    ['أحد – خميس',                   'أيام العمل',           'الجمعة والسبت يُتجاهلان تلقائياً', ''],
   ];
 
-  kpiRows.forEach((row, ri) => {
-    const r = wsKPI.addRow(row || []);
+  helpRows.forEach((row, i) => {
+    const r = wsHelp.addRow(row);
     r.height = 22;
-    r.eachCell({ includeEmpty: false }, cell => {
-      cell.font      = { name: 'Arial', size: 10 };
-      cell.alignment = { vertical: 'middle', wrapText: true };
-      if (ri % 2 === 0) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5FFFE' } };
-      cell.border    = { bottom: { style: 'hair', color: { argb: 'FFD0E8E4' } } };
+    if (row[0] === '') {
+      r.height = 10;
+      return;
+    }
+    if (row[1] === '') {
+      // عنوان قسم
+      r.getCell(1).font = { name:'Arial', bold:true, size:11, color:{argb:CLR.white} };
+      r.getCell(1).fill = { type:'pattern', pattern:'solid', fgColor:{argb:CLR.teal} };
+      wsHelp.mergeCells(r.number,1,r.number,4);
+      r.height = 26;
+      return;
+    }
+    r.eachCell({ includeEmpty:true }, (cell,cn) => {
+      cell.font      = { name:'Arial', size:10 };
+      cell.alignment = { vertical:'middle', wrapText:true };
+      cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: i%2===0?CLR.tealLight:CLR.white} };
+      cell.border    = { bottom:{style:'hair', color:{argb:'FFD0E8E4'}} };
     });
-    if (row && row[0] && String(row[0]).startsWith('🏆')) {
-      r.eachCell(c => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF27AE6015' } }; c.font = { name: 'Arial', bold: true, size: 11 }; });
-    }
-    if (row && row[0] && String(row[0]).startsWith('⚠️')) {
-      r.eachCell(c => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF0EF' } }; c.font = { name: 'Arial', bold: true, size: 11 }; });
-    }
+    r.getCell(1).font = { name:'Arial', bold:true, size:10 };
   });
 
   // تنزيل
   const buf  = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href     = url;
   const now  = new Date();
-  a.download = `كفاءة_التشغيل_${now.getFullYear()}_${String(now.getMonth()+1).padStart(2,'0')}.xlsx`;
+  const mo   = ACTIVE_MONTH || (now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'));
+  a.href     = url;
+  a.download = `كفاءة_التشغيل_${mo}.xlsx`;
   a.click();
   URL.revokeObjectURL(url);
-  toast('✅ تم تصدير Excel بنجاح!');
+  toast('✅ تم تصدير Excel بنجاح — ' + mo);
 }
 
 function handleOpsFile(input){handleOpsFileNew(input,'ops');}
@@ -8106,6 +8241,22 @@ setTimeout(()=>{ if(currentUser){loadActiveStaffHome();renderHomeWidgets();rende
     <div id="wtTabsRow" style="display:none;gap:6px;flex-wrap:wrap;margin-bottom:14px;"></div>
     <!-- Body -->
     <div id="wtBody"></div>
+  </div>
+</div>
+
+<!-- ══ MONTHLY OPS MODAL ══ -->
+<div id="opsMonthModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9300;padding:20px 12px;overflow-y:auto;">
+  <div style="max-width:600px;margin:0 auto;background:var(--card);border-radius:20px;padding:24px 20px;position:relative;">
+    <button onclick="document.getElementById('opsMonthModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
+    <div style="text-align:center;margin-bottom:18px;">
+      <div style="font-size:26px;margin-bottom:6px;">📅</div>
+      <div style="font-size:15px;font-weight:900;">سجل كفاءة التشغيل</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:3px;">اضغط على الشهر لعرض بياناته</div>
+    </div>
+    <div id="opsMonthModalList" style="display:flex;flex-direction:column;gap:10px;"></div>
+    <div style="margin-top:16px;text-align:center;">
+      <button onclick="document.getElementById('opsMonthModal').style.display='none';adminOnly('ops')" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">⚙️ فتح كفاءة التشغيل</button>
+    </div>
   </div>
 </div>
 </body>
