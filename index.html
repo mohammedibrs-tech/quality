@@ -7484,12 +7484,14 @@ function getOpsAnalysis(){
   ['female','male','bike'].forEach(sec=>{
     (opsData[sec]||[]).forEach(row=>{
       const keys=Object.keys(row);
-      const nk=keys.find(k=>k.includes('اسم')||k.includes('مدرب'))||keys[0];
-      const sk=keys.find(k=>k.includes('حصة')||k.includes('حصص'));
-      const htk=keys.find(k=>k.includes('إجمالي')||k.includes('اجمالي'));
-      const hak=keys.find(k=>k.includes('فعلية')||k.includes('فعلي'));
-      const trk=keys.find(k=>k.includes('مستفيد')||k.includes('متدرب'));
-      const effk=keys.find(k=>k.includes('نسبة')||k.includes('كفاءة'));
+      const nk = keys.find(k=>k.includes('اسم')||k.includes('مدرب')||k.toLowerCase().includes('name')) || keys[0];
+      const sk  = keys.find(k=>k.includes('حصة')||k.includes('حصص')||k.includes('عدد الح'));
+      const htk = keys.find(k=>(k.includes('إجمالي')||k.includes('اجمالي')||k.includes('ساعات ال'))&&!k.includes('فعل'));
+      const hak = keys.find(k=>k.includes('فعلية')||k.includes('فعلي')||k.includes('الفعل'));
+      const trk = keys.find(k=>k.includes('مستفيد')||k.includes('متدرب')||k.includes('عدد الم'));
+      const effk= keys.find(k=>k.includes('نسبة')||k.includes('كفاءة'));
+      // للتشخيص — نطبع الأعمدة في أول صف
+      if(all.length===0 && sec==='female') console.log('🔍 أعمدة الملف:',keys,'| sk:',sk,'| htk:',htk,'| hak:',hak);
 
       const name=String(row[nk]||'').trim();
       if(!name||name.length<2) return;
@@ -7905,6 +7907,17 @@ setTimeout(()=>{ if(currentUser){loadActiveStaffHome();renderHomeWidgets();rende
 const OPS_MONTHS = {};
 let ACTIVE_MONTH = null;
 const MONTH_NAMES_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+function calcWorkDays(year, month, upToDay) {
+  let count = 0;
+  const lastDay = upToDay || new Date(year, month + 1, 0).getDate();
+  for (let d = 1; d <= lastDay; d++) {
+    const dow = new Date(year, month, d).getDay();
+    if (dow >= 0 && dow <= 4) count++; // أحد=0 ... خميس=4
+  }
+  return count;
+}
+
 function initOpsMonths(){const now=new Date();const key=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');if(!OPS_MONTHS[key])opsSelectMonth(key,now.getFullYear(),now.getMonth());else{ACTIVE_MONTH=key;OPS_DATA.ops=OPS_MONTHS[key].ops;OPS_DATA.att=OPS_MONTHS[key].att;}renderMonthTabs();opsRefreshStatus();}
 function opsAddMonth(){const now=new Date();const def=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');const key=prompt('أدخل الشهر بصيغة YYYY-MM\nمثال: '+def,def);if(!key)return;const m=key.match(/^(\d{4})-(\d{2})$/);if(!m){toast('❌ الصيغة غير صحيحة');return;}const year=parseInt(m[1]),month=parseInt(m[2])-1;if(month<0||month>11){toast('❌ شهر غير صالح');return;}opsSelectMonth(key,year,month);}
 function opsSelectMonth(key,year,month){
