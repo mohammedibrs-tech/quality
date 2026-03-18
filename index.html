@@ -787,7 +787,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       📊 ملخص الشهر الحالي
       <span id="homeMonth" style="background:rgba(0,200,180,0.12);border:1px solid rgba(0,200,180,0.2);padding:2px 10px;border-radius:12px;font-size:9px;color:var(--accent);"></span>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div id="swFemale" onclick="showSection('female')" style="display:flex;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#E74C3C,#922B21);box-shadow:0 4px 16px rgba(231,76,60,0.35);transition:transform .15s;">
         <div style="flex:0 0 60px;height:70px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(0,0,0,0.15);">👩</div>
         <div style="flex:1;padding:0 10px;text-align:right;">
@@ -814,14 +814,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
         <div style="flex:0 0 24px;text-align:center;font-size:16px;color:rgba(255,255,255,0.5);">›</div>
       </div>
-      <div id="swOps" onclick="adminOnly('ops')" style="display:flex;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#7D3C98,#4A235A);box-shadow:0 4px 16px rgba(125,60,152,0.3);transition:transform .15s;">
+      <div id="swOps" onclick="adminOnly('ops')" style="display:flex;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#7D3C98,#4A235A);box-shadow:0 4px 16px rgba(125,60,152,0.3);transition:transform .15s;grid-column:span 2;">
         <div style="flex:0 0 60px;height:70px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(0,0,0,0.15);">⚙️</div>
         <div style="flex:1;padding:0 10px;text-align:right;">
           <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:2px;">كفاءة التشغيل</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.75);">OPERATIONAL EFFICIENCY</div>
+          <div id="swOpsMonth" style="font-size:10px;color:rgba(255,255,255,0.75);">OPERATIONAL EFFICIENCY</div>
         </div>
-        <div style="flex:0 0 54px;text-align:center;">
-          <div id="swOpsNum" style="font-size:20px;font-weight:900;color:#fff;">—</div>
+        <div style="flex:0 0 70px;text-align:center;">
+          <div id="swOpsNum" style="font-size:22px;font-weight:900;color:#fff;">—</div>
+          <div style="font-size:8px;color:rgba(255,255,255,0.7);">متوسط الكفاءة</div>
         </div>
         <div style="flex:0 0 24px;text-align:center;font-size:16px;color:rgba(255,255,255,0.5);">›</div>
       </div>
@@ -1425,6 +1426,14 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <!-- ═══ منطقة رفع الملفات ═══ -->
     <div id="opsBody_upload">
 
+      <!-- ══ تبويب الأشهر ══ -->
+      <div style="background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:900;color:var(--text);margin-bottom:12px;">📅 اختر الشهر للرفع أو المراجعة</div>
+        <div id="opsMonthTabs" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+        <button onclick="opsAddMonth()" style="padding:7px 16px;background:rgba(0,168,150,0.1);border:1.5px dashed var(--accent);color:var(--accent);border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">+ إضافة شهر جديد</button>
+        <div id="opsActiveMonthLabel" style="font-size:11px;color:var(--text-dim);margin-top:8px;display:none;"></div>
+      </div>
+
       <!-- ملف التشغيل الرئيسي -->
       <div style="background:var(--card);border:1.5px dashed var(--accent);border-radius:16px;padding:20px;margin-bottom:14px;">
         <div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:10px;">📊 ملف نسبة كفاءة التشغيل <span style="font-size:10px;color:var(--text-dim);font-weight:600;">(يحتوي 3 شيتات: نساء، رجال، دراجات)</span></div>
@@ -1438,7 +1447,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="opsFileStatus" style="font-size:11px;color:var(--text-dim);min-width:120px;">لم يُرفع بعد</div>
         </div>
         <div style="font-size:10px;color:var(--text-dim);margin-top:8px;line-height:1.6;">
-          الأعمدة المتوقعة: <strong>اسم المدرب | عدد الحصص | إجمالي ساعات العمل | ساعات العمل الفعلية | عدد المستفيدين | نسبة العمل</strong><br><span style="color:var(--accent);font-weight:700;">⚡ الكفاءة = ساعات العمل الفعلية ÷ إجمالي ساعات العمل × 100%</span>
+          الأعمدة المتوقعة: <strong>اسم المدرب | عدد الحصص | إجمالي ساعات العمل | ساعات العمل الفعلية | عدد المستفيدين | نسبة العمل</strong><br>
+          <span style="color:var(--accent);font-weight:700;">⚡ الكفاءة = حصص منجزة ÷ (أيام العمل الفعلية × 4 حصص/يوم) × 100%</span>
         </div>
       </div>
 
@@ -2109,7 +2119,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div style="font-size:16px;font-weight:900;margin-bottom:6px;">اختر القسم للتصدير</div>
     <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Select section to export</div>
     <div id="exportStep1">
-      <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <button onclick="selectExportSection('female')" style="padding:13px;background:rgba(224,114,176,0.1);border:2px solid rgba(224,114,176,0.4);color:var(--text);border-radius:12px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">👩 القسم النسائي / Female</button>
         <button onclick="selectExportSection('male')" style="padding:13px;background:rgba(82,153,224,0.1);border:2px solid rgba(82,153,224,0.4);color:var(--text);border-radius:12px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">👨 القسم الرجالي / Male</button>
         <button onclick="selectExportSection('all')" style="padding:13px;background:rgba(0,168,150,0.08);border:2px solid var(--border);color:var(--accent);border-radius:12px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">📋 كلا القسمين / Both</button>
@@ -2118,7 +2128,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     </div>
     <div id="exportStep2" style="display:none;">
       <div style="font-size:13px;font-weight:700;margin-bottom:14px;color:var(--accent);">كيف تريد التصدير؟</div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <button id="exportEmailBtn" onclick="doExportEmail()" style="padding:13px;background:rgba(0,168,150,0.08);border:2px solid var(--accent);color:var(--accent);border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">📧 إرسال بالإيميل</button>
         <button onclick="doExportDownload()" style="padding:13px;background:rgba(82,153,224,0.08);border:2px solid rgba(82,153,224,0.4);color:var(--text);border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">💾 تنزيل على الحاسوب</button>
         <button onclick="document.getElementById('exportStep2').style.display='none';document.getElementById('exportStep1').style.display='block';" style="padding:10px;background:transparent;border:none;color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;cursor:pointer;">← رجوع</button>
@@ -3172,6 +3182,25 @@ async function renderHomeWidgets(){
     }
 
   }catch(e){console.log('widget error',e);}
+
+  // ══ تحديث كرت كفاءة التشغيل ══
+  try {
+    const {data:opsD} = await db.from('ops_reports')
+      .select('efficiency_pct,report_month,report_year')
+      .order('report_year',{ascending:false})
+      .order('report_month',{ascending:false})
+      .limit(300);
+    if(opsD && opsD.length) {
+      const lm=opsD[0].report_month, ly=opsD[0].report_year;
+      const cur=opsD.filter(r=>r.report_month===lm&&r.report_year===ly);
+      const avg=cur.reduce((s,r)=>s+(r.efficiency_pct||0),0)/cur.length;
+      const elN=document.getElementById('swOpsNum');
+      const elM=document.getElementById('swOpsMonth');
+      if(elN){elN.textContent=avg.toFixed(1)+'%';elN.style.color=avg>=90?'#7FFF9A':avg>=70?'#FFE07F':'#FF9090';}
+      const mn=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      if(elM)elM.textContent=mn[parseInt(lm)]+' '+ly+' — '+cur.length+' مدرب';
+    }
+  }catch(e){console.log('ops widget',e);}
 }
 
 async function loadActiveStaffHome(){
@@ -3836,9 +3865,17 @@ function showViolationsRef(){
 // ── ADMIN ONLY SECTIONS ──
 function adminOnly(sec){
   if(!currentUser){pendingSec='__admin_'+sec;showLM();return;}
-  if(currentUser.role==='admin'){openSec(sec);return;}
+  if(currentUser.role==='admin'){
+    openSec(sec);
+    if(sec==='ops') setTimeout(initOpsMonths, 150);
+    return;
+  }
   // شهد تقدر ترى كفاءة التشغيل
-  if(sec==='ops' && currentUser.username==='shahad'){openSec(sec);return;}
+  if(sec==='ops' && currentUser.username==='shahad'){
+    openSec(sec);
+    setTimeout(initOpsMonths, 150);
+    return;
+  }
   // Show lock message
   const msg=document.createElement('div');
   msg.className='admin-lock-toast';
@@ -3976,7 +4013,7 @@ function exportArchiveExcel(){
       <div style="font-size:30px;margin-bottom:12px;">📊</div>
       <div style="font-size:15px;font-weight:900;margin-bottom:8px;">تصدير الأرشيف</div>
       <div style="font-size:12px;color:var(--text-dim);margin-bottom:20px;">اختر القسم للتصدير</div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <button onclick="doExportArchV('');this.closest('[style*=fixed]').remove()" style="background:var(--accent);color:#fff;border:none;padding:10px;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;font-size:13px;">📋 الكل</button>
         <button onclick="doExportArchV('female');this.closest('[style*=fixed]').remove()" style="background:rgba(224,114,176,0.15);border:1px solid rgba(224,114,176,0.3);color:#C84590;padding:10px;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;font-size:13px;">👩 نسائي فقط</button>
         <button onclick="doExportArchV('male');this.closest('[style*=fixed]').remove()" style="background:rgba(82,153,224,0.12);border:1px solid rgba(82,153,224,0.25);color:#3070C0;padding:10px;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;font-size:13px;">👨 رجالي فقط</button>
@@ -7117,6 +7154,9 @@ function renderBuildingDash(){
 // كفاءة التشغيل — نظام التحليل الشامل
 // ══════════════════════════════════════════════════════════
 const OPS_DATA = { ops:{}, att:{female:{},male:{},bike:{}} };
+// تخزين بيانات الأشهر {monthKey: {ops, att, workDays}}
+const OPS_MONTHS = {}; // مثال: {'2026-03': {ops:{female:[],male:[],bike:[]}, att:{...}, workDays:22}}
+let ACTIVE_MONTH = null; // الشهر المحدد حالياً
 const TARGET_EFF      = 0.90;
 const HOURS_PER_SESSION = 2;
 const SESSIONS_PER_DAY  = 4;
@@ -7134,13 +7174,14 @@ function parsePermHours(val) {
   return 0;
 }
 
-// ── حساب أيام العمل (أحد–خميس) في الشهر الحالي ──
-function calcWorkDays(year, month) {
+// ── حساب أيام العمل (أحد–خميس) — يقبل يوم انتهاء (مو الشهر كامل دايماً) ──
+function calcWorkDays(year, month, upToDay) {
   let count = 0;
-  const days = new Date(year, month + 1, 0).getDate();
-  for (let d = 1; d <= days; d++) {
+  // إذا upToDay محدد نحسب حتى ذلك اليوم، وإلا نحسب الشهر كامل
+  const lastDay = upToDay || new Date(year, month + 1, 0).getDate();
+  for (let d = 1; d <= lastDay; d++) {
     const dow = new Date(year, month, d).getDay();
-    if (dow >= 0 && dow <= 4) count++;
+    if (dow >= 0 && dow <= 4) count++; // أحد=0 ... خميس=4
   }
   return count;
 }
@@ -7169,6 +7210,7 @@ function handleOpsFileNew(input, type) {
 
       if (type === 'ops') {
         // ── ملف التشغيل: 3 شيتات ──
+        if (!ACTIVE_MONTH) { toast('❌ اختر الشهر أولاً'); return; }
         OPS_DATA.ops = {};
         let loaded = 0;
         wb.SheetNames.forEach(shName => {
@@ -7206,6 +7248,11 @@ function handleOpsFileNew(input, type) {
           loaded++;
         });
         setStatus('opsFileStatus', `✅ تم قراءة ${loaded} شيتات (${wb.SheetNames.join('، ')})`, '#27AE60');
+        // حفظ في الشهر المحدد
+        if (ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]) {
+          OPS_MONTHS[ACTIVE_MONTH].ops = {...OPS_DATA.ops};
+          renderMonthTabs();
+        }
 
       } else {
         // ── كشف الحضور ──
@@ -7216,6 +7263,11 @@ function handleOpsFileNew(input, type) {
         const count = Object.keys(OPS_DATA.att[secKey]).length;
         const stId  = { female: 'attFemStatus', male: 'attMalStatus', bike: 'attBikeStatus' }[secKey];
         setStatus(stId, `✅ ${count} مدرب/ة — جاهز`, '#27AE60');
+        // حفظ في الشهر المحدد
+        if (ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]) {
+          OPS_MONTHS[ACTIVE_MONTH].att[secKey] = {...OPS_DATA.att[secKey]};
+          renderMonthTabs();
+        }
       }
     } catch (err) {
       toast('❌ خطأ في قراءة الملف: ' + err.message);
@@ -7303,12 +7355,19 @@ function parseAttendance(json) {
 
 // ── الحساب الأساسي للكفاءة ──
 function getOpsAnalysis() {
-  const now      = new Date();
-  const workDays = calcWorkDays(now.getFullYear(), now.getMonth());
+  // استخدام الشهر المحدد أو الحالي
+  const monthData = ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH] ? OPS_MONTHS[ACTIVE_MONTH] : null;
+  const now       = new Date();
+  // الشهر كامل دائماً لأنك ترفع في نهاية الشهر
+  const workDays  = monthData ? monthData.workDays
+    : calcWorkDays(now.getFullYear(), now.getMonth(), null);
+  // استخدام بيانات الشهر إذا موجودة وإلا OPS_DATA الحالية
+  const activeOps = monthData ? monthData.ops : OPS_DATA.ops;
+  const activeAtt = monthData ? monthData.att : OPS_DATA.att;
   const all      = [];
 
   ['female', 'male', 'bike'].forEach(sec => {
-    (OPS_DATA.ops[sec] || []).forEach(row => {
+    (activeOps[sec] || []).forEach(row => {
       const keys = Object.keys(row);
 
       // إيجاد الأعمدة بذكاء
@@ -7333,50 +7392,72 @@ function getOpsAnalysis() {
       const effSource = parseFloat(String(row[effk] || '').replace('%', '')) || 0; // نسبة العمل من المنصة
 
       // بيانات الحضور
-      const att         = (OPS_DATA.att[sec] && OPS_DATA.att[sec][name]) || {};
+      const att         = (activeAtt[sec] && activeAtt[sec][name]) || {};
       const absDays     = att.totalAbsDays || 0;
       const leaveP      = att.leaveP       || 0;
       const leaveU      = att.leaveU       || 0;
       const absence     = att.absence      || 0;
       const permHours   = att.permHours    || 0; // مجموع ساعات الاستئذان الفعلية
 
-      // حساب الكفاءة
-      // نسبة الكفاءة = ساعات العمل الفعلية ÷ إجمالي ساعات العمل (من ملف التشغيل)
-      const rawEfficiency = hrsTot > 0
-        ? Math.round((hrsAct / hrsTot) * 1000) / 10
-        : effSource; // fallback لنسبة المنصة إذا ما في ساعات إجمالية
-
+      // ══ الحصص والكفاءة ══
+      // أيام العمل الفعلية = أيام الشهر - أيام الغياب
       const effWorkDays = Math.max(0, workDays - absDays);
+
+      // الحصص التدريبية المفترض = أيام العمل الفعلية × 4 حصص/يوم
       const expSessions = effWorkDays * SESSIONS_PER_DAY;
-      const trainedSess = sessions;
-      // الحصص الفعلية من ساعات العمل الفعلية ÷ 2
-      const actSessions = hrsAct > 0 ? hrsAct / HOURS_PER_SESSION : sessions;
-      const unusedSess  = Math.max(0, expSessions - actSessions);
+
+      // الحصص المنجزة = عدد الحصص من ملف التشغيل مباشرة
+      const trainedSess = sessions; // هذا هو العدد الحقيقي للحصص
+
+      // الكفاءة الحقيقية = حصص منجزة ÷ الحصص المفترضة
+      const efficiency = expSessions > 0
+        ? Math.round((trainedSess / expSessions) * 1000) / 10
+        : (effSource || 0); // fallback إذا ما عندنا كشف حضور
+
+      // حصص مهدرة = المتاحة - المنجزة
+      const unusedSess = Math.max(0, expSessions - trainedSess);
       const absSessions = absDays * SESSIONS_PER_DAY;
 
-      // الكفاءة الرئيسية = ساعات فعلية ÷ إجمالي ساعات (الفورمولا المطلوبة)
-      const efficiency = rawEfficiency;
+      // للتوافق مع بقية الكود (ساعات)
+      const actSessions = trainedSess; // نفس الحصص المنجزة
+      const rawEfficiency = hrsTot > 0
+        ? Math.round((hrsAct / hrsTot) * 1000) / 10
+        : effSource; // نسبة المنصة للمقارنة فقط
 
       const status =
         efficiency >= TARGET_EFF * 100 ? '✅ ممتاز' :
         efficiency >= 70               ? '⚠️ يحتاج تحسين' :
                                          '❌ ضعيف';
 
-      // فجوة الساعات
       const hrsGap = Math.max(0, hrsTot - hrsAct);
 
-      // توصية تفصيلية
+      // ══ توصية تفصيلية تشرح السبب بوضوح ══
       let recommendation = '';
       if (efficiency >= TARGET_EFF * 100) {
-        recommendation = 'أداء ممتاز ✅ — حافظ على المستوى';
+        // نسبة عالية — نشرح لماذا
+        const reasons = [];
+        if (absDays === 0)       reasons.push('لا غياب هذا الشهر');
+        else if (absDays <= 2)   reasons.push(`غياب ${absDays} يوم فقط`);
+        const missed = Math.round(unusedSess);
+        if (missed <= 3)         reasons.push(`حصص مهدرة منخفضة (${missed})`);
+        reasons.push(`أنجز ${trainedSess} من ${expSessions} حصة مفترضة`);
+        recommendation = '✅ أداء ممتاز — ' + reasons.join('، ');
       } else {
-        if (absDays > 5) recommendation += `غياب ${absDays} يوم — `;
-        if (hrsGap > 0)  recommendation += `فجوة ${hrsGap.toFixed(0)} ساعة (فعلية ${hrsAct}/${hrsTot}) — `;
-        if (permHours > 0) recommendation += `استئذان ${permHours} ساعة — `;
-        if (!recommendation) recommendation = `كفاءة ${efficiency.toFixed(1)}% — مراجعة الجدول`;
-        recommendation = recommendation.replace(/— $/, '');
+        // نسبة منخفضة — نشرح الأسباب من كشف الحضور
+        const reasons = [];
+        if (absDays > 0) {
+          const parts = [];
+          if (absence > 0) parts.push(`${absence} غياب`);
+          if (leaveP > 0)  parts.push(`${leaveP} إجازة مدفوعة`);
+          if (leaveU > 0)  parts.push(`${leaveU} إجازة غير مدفوعة`);
+          reasons.push(`غياب ${absDays} يوم (${parts.join(' + ')})`);
+        }
+        if (permHours > 0) reasons.push(`استئذان ${permHours} ساعة`);
+        const missed = Math.round(unusedSess);
+        if (missed > 0) reasons.push(`${missed} حصة لم تُنجز من أصل ${expSessions} مفترض`);
+        if (!reasons.length) reasons.push(`أنجز ${trainedSess} من ${expSessions} حصة`);
+        recommendation = `⚠️ كفاءة ${efficiency.toFixed(1)}% — ` + reasons.join(' | ');
       }
-
       all.push({
         name,
         section: sec,
@@ -7409,6 +7490,13 @@ function getOpsAnalysis() {
 
 // ── تشغيل التحليل ──
 function runOpsAnalysis() {
+  if (!ACTIVE_MONTH) { initOpsMonths(); }
+  // تحديث OPS_DATA من الشهر المحدد
+  if (ACTIVE_MONTH && OPS_MONTHS[ACTIVE_MONTH]) {
+    const m = OPS_MONTHS[ACTIVE_MONTH];
+    OPS_DATA.ops = m.ops;
+    OPS_DATA.att = m.att;
+  }
   const opsKeys = Object.keys(OPS_DATA.ops);
   if (!opsKeys.length) { toast('❌ ارفع ملف نسبة كفاءة التشغيل أولاً'); return; }
 
@@ -7423,6 +7511,92 @@ function runOpsAnalysis() {
 
 // ── عرض جدول التحليل ──
 let currentOpsSection = 'all';
+// ══════════════════════════════════════════════════════════
+// نظام الأشهر
+// ══════════════════════════════════════════════════════════
+const MONTH_NAMES_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+function initOpsMonths() {
+  const now = new Date();
+  const key = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  if (!OPS_MONTHS[key]) opsSelectMonth(key, now.getFullYear(), now.getMonth());
+  else { ACTIVE_MONTH=key; OPS_DATA.ops=OPS_MONTHS[key].ops; OPS_DATA.att=OPS_MONTHS[key].att; }
+  renderMonthTabs();
+  opsRefreshStatus();
+}
+
+function opsAddMonth() {
+  const now = new Date();
+  const def = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const key = prompt('أدخل الشهر بصيغة YYYY-MM\nمثال: '+def, def);
+  if (!key) return;
+  const m = key.match(/^(\d{4})-(\d{2})$/);
+  if (!m){ toast('❌ الصيغة غير صحيحة'); return; }
+  const year=parseInt(m[1]), month=parseInt(m[2])-1;
+  if(month<0||month>11){ toast('❌ شهر غير صالح'); return; }
+  opsSelectMonth(key, year, month);
+}
+
+function opsSelectMonth(key, year, month) {
+  if (!OPS_MONTHS[key]) {
+    OPS_MONTHS[key] = { key, year, month,
+      workDays: calcWorkDays(year, month, null),
+      label: MONTH_NAMES_AR[month]+' '+year,
+      ops:{ female:[], male:[], bike:[] },
+      att:{ female:{}, male:{}, bike:{} },
+    };
+  }
+  ACTIVE_MONTH = key;
+  OPS_DATA.ops = OPS_MONTHS[key].ops;
+  OPS_DATA.att = OPS_MONTHS[key].att;
+  renderMonthTabs();
+  opsRefreshStatus();
+}
+
+function renderMonthTabs() {
+  const c = document.getElementById('opsMonthTabs');
+  if (!c) return;
+  const keys = Object.keys(OPS_MONTHS).sort().reverse();
+  if (!keys.length) { c.innerHTML='<div style="font-size:11px;color:var(--text-dim);">لا توجد أشهر — اضغط إضافة شهر جديد</div>'; return; }
+  c.innerHTML = keys.map(k => {
+    const mo = OPS_MONTHS[k];
+    const act = k===ACTIVE_MONTH;
+    const hO = (mo.ops.female||[]).length+(mo.ops.male||[]).length+(mo.ops.bike||[]).length > 0;
+    const hA = Object.keys(mo.att.female||{}).length+Object.keys(mo.att.male||{}).length+Object.keys(mo.att.bike||{}).length > 0;
+    return `<button onclick="opsSelectMonth('${k}',${mo.year},${mo.month})"
+      style="padding:8px 16px;border-radius:12px;border:2px solid ${act?'var(--accent)':'var(--border)'};
+      background:${act?'var(--accent)':'var(--card)'};color:${act?'#fff':'var(--text)'};
+      font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;
+      display:flex;align-items:center;gap:6px;">${mo.label}${hO?' 📊':''}${hA?' 👥':''}</button>`;
+  }).join('');
+}
+
+function opsRefreshStatus() {
+  if (!ACTIVE_MONTH || !OPS_MONTHS[ACTIVE_MONTH]) return;
+  const mo = OPS_MONTHS[ACTIVE_MONTH];
+  const lbl = document.getElementById('opsActiveMonthLabel');
+  if (lbl) {
+    lbl.style.display='block';
+    const hO = (mo.ops.female||[]).length+(mo.ops.male||[]).length+(mo.ops.bike||[]).length;
+    const hA = Object.keys(mo.att.female||{}).length+Object.keys(mo.att.male||{}).length+Object.keys(mo.att.bike||{}).length;
+    lbl.innerHTML = `✅ <strong style="color:var(--accent);">${mo.label}</strong> — `+
+      `أيام العمل: <strong>${mo.workDays} يوم</strong> — `+
+      `الحصص المفترضة/مدرب: <strong>${mo.workDays*4} حصة</strong>`+
+      (hO>0?` <span style="color:#27AE60;font-size:10px;">📊 ${hO} مدرب</span>`:'')+
+      (hA>0?` <span style="color:#27AE60;font-size:10px;">👥 ${hA} مدرب</span>`:'');
+  }
+  const stMap = {opsFileStatus:'ops', attFemStatus:'female', attMalStatus:'male', attBikeStatus:'bike'};
+  Object.entries(stMap).forEach(([id,sec]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cnt = sec==='ops'
+      ? (mo.ops.female||[]).length+(mo.ops.male||[]).length+(mo.ops.bike||[]).length
+      : Object.keys(mo.att[sec]||{}).length;
+    el.textContent = cnt>0 ? `✅ ${cnt} مدرب — ${mo.label}` : 'لم يُرفع بعد';
+    el.style.color = cnt>0 ? '#27AE60' : 'var(--text-dim)';
+  });
+}
+
 function opsSecTab(sec) {
   currentOpsSection = sec;
   ['female', 'male', 'bike', 'all'].forEach(s => {
@@ -7470,7 +7644,7 @@ function renderOpsTable(sec) {
     <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:820px;">
       <thead>
         <tr style="background:var(--accent);color:#fff;">
-          ${['#','اسم المدرب','القسم','تم تدريب','ساعات إجمالية','ساعات فعلية','فجوة الساعات','حصص متوقعة','حصص فعلية','حصص مهدرة','أيام غياب','غياب','إجازة','استئذان (س)','كفاءة % (ف÷إ)','تقييم'].map((h,i) =>
+          ${['#','اسم المدرب','القسم','حصص منجزة','الحصص المفترضة','حصص مهدرة','أيام غياب','غياب','إجازة','استئذان (س)','ساعات إجمالية','ساعات فعلية','نسبة المنصة','كفاءة % (منجزة÷متاحة)','تقييم'].map((h,i) =>
             `<th style="padding:10px 7px;text-align:${i===1?'right':'center'};white-space:nowrap;">${h}</th>`
           ).join('')}
         </tr>
@@ -7486,17 +7660,16 @@ function renderOpsTable(sec) {
             <td style="padding:9px 7px;text-align:center;">
               <span style="background:${sc[t.section]}22;color:${sc[t.section]};border-radius:6px;padding:2px 7px;font-size:10px;font-weight:700;">${sn[t.section]}</span>
             </td>
-            <td style="padding:9px 7px;text-align:center;">${t.trainedSessions}</td>
-            <td style="padding:9px 7px;text-align:center;font-weight:700;color:var(--accent);">${t.hrsTot}</td>
-            <td style="padding:9px 7px;text-align:center;font-weight:700;color:#27AE60;">${t.hrsAct}</td>
-            <td style="padding:9px 7px;text-align:center;color:#E74C3C;font-weight:700;">${Math.max(0,t.hrsTot-t.hrsAct).toFixed(0)}</td>
+            <td style="padding:9px 7px;text-align:center;font-weight:700;color:var(--accent);">${t.trainedSessions}</td>
             <td style="padding:9px 7px;text-align:center;">${t.expSessions}</td>
-            <td style="padding:9px 7px;text-align:center;font-weight:700;">${t.actSessions}</td>
-            <td style="padding:9px 7px;text-align:center;color:#D4AC0D;">${t.unusedSessions}</td>
+            <td style="padding:9px 7px;text-align:center;color:#E74C3C;font-weight:700;">${t.unusedSessions}</td>
             <td style="padding:9px 7px;text-align:center;">${t.absDays}</td>
             <td style="padding:9px 7px;text-align:center;color:#E74C3C;">${t.absence}</td>
             <td style="padding:9px 7px;text-align:center;color:#8E44AD;">${t.leaveP}</td>
             <td style="padding:9px 7px;text-align:center;color:#2E86C1;">${t.permHours}</td>
+            <td style="padding:9px 7px;text-align:center;color:var(--text-dim);">${t.hrsTot}</td>
+            <td style="padding:9px 7px;text-align:center;color:var(--text-dim);">${t.hrsAct}</td>
+            <td style="padding:9px 7px;text-align:center;font-size:10px;color:var(--text-dim);">${t.effSource.toFixed(1)}%</td>
             <td style="padding:9px 7px;text-align:center;min-width:90px;">
               <div style="background:${ec}22;color:${ec};border-radius:8px;padding:3px 7px;font-weight:900;margin-bottom:3px;">${t.efficiency.toFixed(1)}%</div>
               <div style="background:#e0e0e0;border-radius:4px;height:5px;overflow:hidden;">
