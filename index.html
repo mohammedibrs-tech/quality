@@ -3861,7 +3861,10 @@ async function loadActiveStaffHome(){
     // Split multi-observer entries — each observer gets a full point
     const add=(arr)=>(arr||[]).forEach(r=>{
       if(!r.observer) return;
-      splitObservers(r.observer).forEach(name=>{map[name]=(map[name]||0)+1;});
+      splitObservers(r.observer).forEach(name=>{
+        const key=normalizeName(name);
+        map[key]=(map[key]||0)+1;
+      });
     });
     add(vd);add(sd);add(fd);
     const sorted=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -3885,22 +3888,46 @@ const OBS_ABBR={
   'ahmed':'أحمد سحاب','alhamad':'أحمد الحماد','ibrahim':'ابراهيم الحمد',
   'shahad':'شهد المقرن','amjad':'امجاد ابانمي','sumayah':'سمية الخضيري',
 };
-const FULL_NAMES=['أحمد سحاب','احمد سحاب','أحمد الحماد','احمد الحماد','ابراهيم الحمد','شهد المقرن','امجاد ابانمي','سمية الخضيري'];
+const FULL_NAMES=['أحمد سحاب','أحمد الحماد','ابراهيم الحمد','شهد المقرن','امجاد ابانمي','سمية الخضيري'];
+function normalizeName(n){
+  if(!n) return '';
+  n = n.trim();
+  // توحيد الهمزة — أ / ا → أ
+  n = n.replace(/^احمد/, 'أحمد');
+  n = n.replace(/^امجاد/, 'امجاد'); // بدون همزة — الاسم الصحيح
+  // خريطة توحيد كاملة
+  const MAP = {
+    'احمد سحاب':   'أحمد سحاب',
+    'أحمد سحاب':   'أحمد سحاب',
+    'احمد الحماد': 'أحمد الحماد',
+    'أحمد الحماد': 'أحمد الحماد',
+    'ابراهيم الحمد':'ابراهيم الحمد',
+    'إبراهيم الحمد':'ابراهيم الحمد',
+    'شهد المقرن':  'شهد المقرن',
+    'امجاد ابانمي':'امجاد ابانمي',
+    'أمجاد ابانمي':'امجاد ابانمي',
+    'سمية الخضيري':'سمية الخضيري',
+    'سميه الخضيري':'سمية الخضيري',
+  };
+  return MAP[n] || n;
+}
 function splitObservers(raw){
   if(!raw) return [];
-  raw=raw.trim();
-  // If it's already a known full name return as-is
-  if(FULL_NAMES.includes(raw)) return [raw];
-  // Split on common separators: dash, space, comma, slash
-  const parts=raw.split(/[-,\/\s]+/).map(p=>p.trim()).filter(Boolean);
-  const names=[];
+  raw = raw.trim();
+  // اسم موحّد مباشرة
+  const normed = normalizeName(raw);
+  if(FULL_NAMES.includes(normed)) return [normed];
+  // تجربة بعد التوحيد
+  if(OBS_ABBR[raw]) return [normalizeName(OBS_ABBR[raw])];
+  // تقسيم على فواصل
+  const parts = raw.split(/[-,\/\s]+/).map(p=>p.trim()).filter(Boolean);
+  const names = [];
   parts.forEach(p=>{
-    if(OBS_ABBR[p]) names.push(OBS_ABBR[p]);
-    else if(FULL_NAMES.includes(p)) names.push(p);
-    // else skip unknown tokens
+    if(OBS_ABBR[p])            names.push(normalizeName(OBS_ABBR[p]));
+    else if(FULL_NAMES.includes(normalizeName(p))) names.push(normalizeName(p));
   });
-  // If nothing resolved but raw is non-empty, return raw as single entry
-  return names.length ? names : [raw];
+  // إذا ما أُحيل — ارجع الاسم الأصلي بعد التوحيد
+  return names.length ? names : [normed || raw];
 }
 
 
