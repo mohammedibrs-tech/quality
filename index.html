@@ -829,10 +829,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   padding:9px 20px;
   border-radius:30px;
   border:none;
-  background:rgba(255,255,255,0.07);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  color:rgba(255,255,255,0.55);
+  background:transparent;
+  color:#667788;
   font-family:'Cairo',sans-serif;
   font-size:11px;font-weight:700;
   cursor:pointer;
@@ -840,14 +838,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   letter-spacing:.3px;
 }
 .dash-period-btn:hover {
-  background:rgba(255,255,255,0.14);
-  color:#fff;
+  background:rgba(0,0,0,0.06);
+  color:#1a1a2e;
   transform:translateY(-1px);
 }
 .active-period {
-  background:rgba(255,255,255,0.18) !important;
-  color:#fff !important;
-  box-shadow:0 0 0 1px rgba(255,255,255,0.25), 0 4px 16px rgba(0,0,0,0.2) !important;
+  background:#fff !important;
+  color:#1a1a2e !important;
+  box-shadow:0 2px 12px rgba(0,0,0,0.12) !important;
+  font-weight:800 !important;
 }
 
 /* Arcade KPI Card */
@@ -857,16 +856,18 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   padding:18px 16px;
   overflow:hidden;
   cursor:default;
+  border:1px solid rgba(0,0,0,0.06);
+  box-shadow:0 2px 16px rgba(0,0,0,0.07);
   transition:transform .2s cubic-bezier(.4,0,.2,1), box-shadow .2s;
 }
 .arcade-kpi:hover {
   transform:translateY(-3px) scale(1.01);
-  box-shadow:0 12px 40px rgba(0,0,0,0.35) !important;
+  box-shadow:0 10px 32px rgba(0,0,0,0.13) !important;
 }
 .arcade-kpi::before {
   content:'';
   position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(255,255,255,0.12) 0%,rgba(255,255,255,0) 60%);
+  background:linear-gradient(135deg,rgba(255,255,255,0.7) 0%,rgba(255,255,255,0) 60%);
   border-radius:inherit;
   pointer-events:none;
 }
@@ -892,7 +893,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   letter-spacing:.2px;
   margin-bottom:16px;
   display:flex;align-items:center;gap:8px;
-  color:rgba(255,255,255,0.9);
+  color:#1a1a2e;
 }
 .arcade-sub { font-size:9px;color:rgba(255,255,255,0.4);font-weight:400; }
 
@@ -10246,20 +10247,20 @@ function renderDashKPI(violations, ops, sales, buildings, facilities, label) {
   if (!el) return;
   el.innerHTML = kpis.map((k,i) => {
     const gradients = [
-      'linear-gradient(135deg,#1a1a4e,#0d1b2a)',
-      'linear-gradient(135deg,#2d0a0a,#1a0a0a)',
-      'linear-gradient(135deg,#0a2040,#0a1628)',
-      'linear-gradient(135deg,#1a2a0a,#0a1a0a)',
-      'linear-gradient(135deg,#2a1a40,#1a0a2a)',
-      'linear-gradient(135deg,#2a2000,#1a1400)',
-      'linear-gradient(135deg,#002a2a,#001a1a)',
+      'linear-gradient(135deg,#EEF2FF,#E0E7FF)',
+      'linear-gradient(135deg,#FEF2F2,#FEE2E2)',
+      'linear-gradient(135deg,#EFF6FF,#DBEAFE)',
+      'linear-gradient(135deg,#F0FDF4,#DCFCE7)',
+      'linear-gradient(135deg,#F5F3FF,#EDE9FE)',
+      'linear-gradient(135deg,#FFFBEB,#FEF3C7)',
+      'linear-gradient(135deg,#F0FDFA,#CCFBF1)',
     ];
     return `<div class="arcade-kpi" style="background:${gradients[i%gradients.length]};border:1px solid ${k.color}33;box-shadow:0 4px 24px ${k.color}22,inset 0 1px 0 rgba(255,255,255,0.06);">
       <div style="font-size:22px;margin-bottom:8px;">${k.icon}</div>
       <div style="font-size:26px;font-weight:900;color:${k.color};letter-spacing:-.5px;line-height:1;">${k.value}</div>
-      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.7);margin-top:6px;">${k.label}</div>
-      ${k.sub ? `<div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:2px;">${k.sub}</div>` : ''}
-      <div style="position:absolute;bottom:0;right:0;width:60px;height:60px;border-radius:50%;background:${k.color}18;filter:blur(20px);pointer-events:none;"></div>
+      <div style="font-size:10px;font-weight:700;color:#334155;margin-top:6px;">${k.label}</div>
+      ${k.sub ? `<div style="font-size:9px;color:#94a3b8;margin-top:2px;">${k.sub}</div>` : ''}
+      <div style="position:absolute;bottom:0;right:0;width:60px;height:60px;border-radius:50%;background:${k.color}20;filter:blur(16px);pointer-events:none;"></div>
     </div>`;
   }).join('');
 }
@@ -10283,7 +10284,7 @@ function renderDashViolations(violations) {
   if (topEl && top3.length) {
     topEl.innerHTML = '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:8px;">الأكثر تكراراً</div>' +
       top3.map(([t,c],i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-        <span style="font-size:10px;color:rgba(255,255,255,0.7);">${['🥇','🥈','🥉'][i]} ${t}</span>
+        <span style="font-size:10px;color:#334155;">${['🥇','🥈','🥉'][i]} ${t}</span>
         <span style="font-size:11px;font-weight:900;color:#FF6B6B;background:rgba(231,76,60,0.12);border-radius:20px;padding:2px 10px;">${c}</span>
       </div>`).join('');
   }
@@ -10306,7 +10307,7 @@ function renderDashOps(ops) {
   if (topEl && top3.length) {
     topEl.innerHTML = '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:8px;">أعلى 3 مدربين</div>' +
       top3.map((r,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-        <span style="font-size:10px;color:rgba(255,255,255,0.7);">${['🥇','🥈','🥉'][i]} ${r.trainer_name||'—'}</span>
+        <span style="font-size:10px;color:#334155;">${['🥇','🥈','🥉'][i]} ${r.trainer_name||'—'}</span>
         <span style="font-size:11px;font-weight:900;color:#58D68D;background:rgba(39,174,96,0.12);border-radius:20px;padding:2px 10px;">${r.efficiency_pct||0}%</span>
       </div>`).join('');
   }
@@ -10317,13 +10318,13 @@ function renderDashSales(sales) {
   if (!el) return;
   const total = sales.reduce((s,r)=>s+parseFloat(r.total_amount||r.amount||0),0);
   el.innerHTML = `
-    <div style="background:linear-gradient(135deg,rgba(125,60,152,0.2),rgba(80,30,100,0.1));border:1px solid rgba(125,60,152,0.2);border-radius:16px;padding:14px;">
-      <div style="font-size:9px;font-weight:700;color:rgba(200,130,255,0.7);margin-bottom:6px;letter-spacing:.5px;">💰 إجمالي المبيعات</div>
-      <div style="font-size:24px;font-weight:900;color:#C39BD3;">${total>0?total.toLocaleString()+' ر':'—'}</div>
+    <div style="background:linear-gradient(135deg,#F5F3FF,#FAF5FF);border:1px solid #DDD6FE;border-radius:16px;padding:14px;">
+      <div style="font-size:9px;font-weight:700;color:#7C3AED;margin-bottom:6px;letter-spacing:.5px;">💰 إجمالي المبيعات</div>
+      <div style="font-size:24px;font-weight:900;color:#6D28D9;">${total>0?total.toLocaleString()+' ر':'—'}</div>
     </div>
-    <div style="background:linear-gradient(135deg,rgba(125,60,152,0.2),rgba(80,30,100,0.1));border:1px solid rgba(125,60,152,0.2);border-radius:16px;padding:14px;">
-      <div style="font-size:9px;font-weight:700;color:rgba(200,130,255,0.7);margin-bottom:6px;letter-spacing:.5px;">📋 عدد السجلات</div>
-      <div style="font-size:24px;font-weight:900;color:#C39BD3;">${sales.length||'—'}</div>
+    <div style="background:linear-gradient(135deg,#F5F3FF,#FAF5FF);border:1px solid #DDD6FE;border-radius:16px;padding:14px;">
+      <div style="font-size:9px;font-weight:700;color:#7C3AED;margin-bottom:6px;letter-spacing:.5px;">📋 عدد السجلات</div>
+      <div style="font-size:24px;font-weight:900;color:#6D28D9;">${sales.length||'—'}</div>
     </div>`;
 }
 
@@ -10338,7 +10339,7 @@ function renderDashBuildings(buildings, facilities) {
     const top3 = Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,3);
     topEl.innerHTML = '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:8px;">أبرز المشاكل</div>' +
       top3.map(([t,c])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-        <span style="font-size:10px;color:rgba(255,255,255,0.7);">🔧 ${t}</span>
+        <span style="font-size:10px;color:#334155;">🔧 ${t}</span>
         <span style="font-size:11px;font-weight:900;color:#58D68D;background:rgba(39,174,96,0.12);border-radius:20px;padding:2px 10px;">${c}</span>
       </div>`).join('');
   }
@@ -10556,17 +10557,17 @@ function updateDashboardVisibility() {
 
 
 <!-- ══ PAGE: DASHBOARD ══ -->
-<div id="page-dashboard" class="page" style="background:linear-gradient(160deg,#0a0a1a 0%,#0d1b2a 40%,#0a1628 100%);min-height:100vh;">
-  <div style="max-width:1200px;margin:0 auto;padding:24px 20px;">
+<div id="page-dashboard" class="page" style="min-height:100vh;background:linear-gradient(135deg,#f0f4ff 0%,#e8f0fe 30%,#f5f0ff 60%,#f0f7ff 100%);">
+  <div style="max-width:1400px;margin:0 auto;padding:28px 28px 60px;width:100%;box-sizing:border-box;">
 
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;">
       <div>
-        <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-.3px;">لوحة المتابعة</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:2px;margin-top:2px;">QUALITY DASHBOARD</div>
+        <div style="font-size:24px;font-weight:900;color:#1a1a2e;letter-spacing:-.3px;">لوحة المتابعة</div>
+        <div style="font-size:11px;color:#8899aa;letter-spacing:2px;margin-top:2px;">QUALITY DASHBOARD</div>
       </div>
       <!-- فلتر الفترة -->
-      <div style="display:flex;gap:6px;background:rgba(255,255,255,0.05);border-radius:34px;padding:4px;">
+      <div style="display:flex;gap:6px;background:rgba(0,0,0,0.06);border-radius:34px;padding:4px;">
         <button onclick="setDashPeriod('week')"    id="dashBtn_week"    class="dash-period-btn active-period">أسبوع</button>
         <button onclick="setDashPeriod('month')"   id="dashBtn_month"   class="dash-period-btn">شهر</button>
         <button onclick="setDashPeriod('quarter')" id="dashBtn_quarter" class="dash-period-btn">ربع</button>
@@ -10587,15 +10588,15 @@ function updateDashboardVisibility() {
           <div>المخالفات <span class="arcade-sub" id="dashViolPeriod"></span></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-          <div style="background:linear-gradient(135deg,rgba(231,76,60,0.2),rgba(192,57,43,0.1));border:1px solid rgba(231,76,60,0.2);border-radius:16px;padding:14px;">
-            <div style="font-size:10px;font-weight:700;color:rgba(255,120,100,0.8);margin-bottom:6px;">👩 نسائي</div>
-            <div id="dashViolFemCount" style="font-size:32px;font-weight:900;color:#FF6B6B;line-height:1;">—</div>
-            <div id="dashViolFemBreak" style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:4px;"></div>
+          <div style="background:linear-gradient(135deg,#FEF2F2,#FFF5F5);border:1px solid #FECACA;border-radius:16px;padding:14px;">
+            <div style="font-size:10px;font-weight:700;color:#EF4444;margin-bottom:6px;">👩 نسائي</div>
+            <div id="dashViolFemCount" style="font-size:32px;font-weight:900;color:#DC2626;line-height:1;">—</div>
+            <div id="dashViolFemBreak" style="font-size:9px;color:#94a3b8;margin-top:4px;"></div>
           </div>
-          <div style="background:linear-gradient(135deg,rgba(46,134,193,0.2),rgba(31,97,141,0.1));border:1px solid rgba(46,134,193,0.2);border-radius:16px;padding:14px;">
-            <div style="font-size:10px;font-weight:700;color:rgba(100,160,230,0.8);margin-bottom:6px;">👨 رجالي</div>
-            <div id="dashViolMalCount" style="font-size:32px;font-weight:900;color:#5DADE2;line-height:1;">—</div>
-            <div id="dashViolMalBreak" style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:4px;"></div>
+          <div style="background:linear-gradient(135deg,#EFF6FF,#F0F7FF);border:1px solid #BFDBFE;border-radius:16px;padding:14px;">
+            <div style="font-size:10px;font-weight:700;color:#3B82F6;margin-bottom:6px;">👨 رجالي</div>
+            <div id="dashViolMalCount" style="font-size:32px;font-weight:900;color:#2563EB;line-height:1;">—</div>
+            <div id="dashViolMalBreak" style="font-size:9px;color:#94a3b8;margin-top:4px;"></div>
           </div>
         </div>
         <div id="dashViolTopList"></div>
@@ -10610,15 +10611,15 @@ function updateDashboardVisibility() {
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
           <div style="background:linear-gradient(135deg,rgba(231,76,60,0.15),rgba(192,57,43,0.05));border:1px solid rgba(231,76,60,0.15);border-radius:14px;padding:12px;text-align:center;">
             <div style="font-size:9px;color:rgba(255,120,100,0.7);margin-bottom:4px;">👩 نسائي</div>
-            <div id="dashOpsFem" style="font-size:20px;font-weight:900;color:#fff;">—</div>
+            <div id="dashOpsFem" style="font-size:20px;font-weight:900;color:#1e40af;">—</div>
           </div>
-          <div style="background:linear-gradient(135deg,rgba(46,134,193,0.15),rgba(31,97,141,0.05));border:1px solid rgba(46,134,193,0.15);border-radius:14px;padding:12px;text-align:center;">
+          <div style="background:linear-gradient(135deg,#EFF6FF,0.15),rgba(31,97,141,0.05));border:1px solid rgba(46,134,193,0.15);border-radius:14px;padding:12px;text-align:center;">
             <div style="font-size:9px;color:rgba(100,160,230,0.7);margin-bottom:4px;">👨 رجالي</div>
-            <div id="dashOpsMal" style="font-size:20px;font-weight:900;color:#fff;">—</div>
+            <div id="dashOpsMal" style="font-size:20px;font-weight:900;color:#2563EB;">—</div>
           </div>
           <div style="background:linear-gradient(135deg,rgba(212,172,13,0.15),rgba(180,140,0,0.05));border:1px solid rgba(212,172,13,0.15);border-radius:14px;padding:12px;text-align:center;">
             <div style="font-size:9px;color:rgba(230,200,80,0.7);margin-bottom:4px;">🏍️ دراجات</div>
-            <div id="dashOpsBike" style="font-size:20px;font-weight:900;color:#fff;">—</div>
+            <div id="dashOpsBike" style="font-size:20px;font-weight:900;color:#D97706;">—</div>
           </div>
         </div>
         <div id="dashOpsTopList"></div>
