@@ -821,6 +821,20 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   transform:translateX(4px);
 }
 .back-btn::before { content:'←'; font-size:16px; }
+
+/* ══ Dashboard ══ */
+.dash-period-btn {
+  padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);
+  background:var(--card);color:var(--text-dim);
+  font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;
+  cursor:pointer;transition:all .2s;
+}
+.dash-period-btn:hover { border-color:var(--accent); color:var(--accent); }
+.active-period {
+  background:var(--accent) !important;
+  color:#fff !important;
+  border-color:var(--accent) !important;
+}
 </style>
 </head>
 <body>
@@ -846,6 +860,12 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   <div class="sb-item" id="sb-records" onclick="sbNav('records')">
     <span class="sb-icon">📊</span>
     <span class="sb-label">السجلات</span>
+  </div>
+
+  <!-- 3. Dashboard (admin فقط) -->
+  <div class="sb-item" id="sb-dashboard" onclick="showDashboard(this)" style="display:none;">
+    <span class="sb-icon">📈</span>
+    <span class="sb-label">Dashboard</span>
   </div>
 
   <div class="sb-divider"></div>
@@ -930,6 +950,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('home',this)">🏠 الرئيسية</button>
     <button class="nav-tab" onclick="showPage('records',this)">📊 السجلات</button>
+    <button class="nav-tab" id="dashNavBtn" onclick="showDashboard(this)" style="display:none;">📈 Dashboard</button>
   </div>
   <div class="nav-logo">
     <div id="navUser"></div>
@@ -954,15 +975,14 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   
   <div class="home-sections">
 
-    <!-- جدول المهام الأسبوعي — Full Width -->
+    <!-- ══ الخدمات الإلكترونية لموظفي الجودة ══ -->
+    <div class="sec-group-label" style="font-size:12px;font-weight:900;color:var(--accent);background:rgba(0,168,150,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid var(--accent);">🛠️ الخدمات الإلكترونية لموظفي الجودة</div>
+
     <div class="section-card full-w" onclick="showWeeklyTasks()" style="background:linear-gradient(to right,#00C8B4,#0D3040);">
       <div class="s-icon">📋</div>
       <div class="s-text"><div class="s-title-ar" style="text-align:center;">جدول مهامي الأسبوعي</div><div class="s-title-en" style="text-align:center;">MY WEEKLY SCHEDULE</div></div>
       <div class="s-arrow">›</div>
     </div>
-
-    <!-- ══ الخدمات الإلكترونية لموظفي الجودة ══ -->
-    <div class="sec-group-label" style="font-size:12px;font-weight:900;color:var(--accent);background:rgba(0,168,150,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid var(--accent);">🛠️ الخدمات الإلكترونية لموظفي الجودة</div>
 
     <div class="cards-row-2">
       <div class="section-card male card-col" onclick="showSection('male')" style="position:relative;">
@@ -8185,6 +8205,8 @@ function sbUpdateAuth() {
     const el = document.getElementById(id);
     if (el) el.style.filter = `blur(${blur2})`;
   });
+
+  updateDashboardVisibility();
 }
 
 function sbAuthAction() {
@@ -9444,6 +9466,7 @@ setTimeout(()=>{
   loadPinnedFromStorage();
   loadPendingViolations();
   loadIdeas();
+  updateDashboardVisibility();
   renderMonthTabs();
   renderPinnedMonths('ops');
   refreshQuarterlyCard();
@@ -10041,6 +10064,222 @@ function decideIdea(id, decision) {
   renderPendingIdeas();
 }
 
+
+// ══════════════════════════════════════════════════
+// 📈 Dashboard — لوحة المتابعة
+// ══════════════════════════════════════════════════
+let _dashPeriod = 'month';
+
+function showDashboard(el) {
+  if (currentUser?.role !== 'admin') { toast('❌ Dashboard للمدير فقط'); return; }
+  // إخفاء كل الصفحات
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-dashboard')?.classList.add('active');
+  // تحديث nav active
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+  if (el) { el.classList?.add('active'); }
+  document.getElementById('sb-dashboard')?.classList.add('active');
+  loadDashboard();
+}
+
+function setDashPeriod(period) {
+  _dashPeriod = period;
+  document.querySelectorAll('.dash-period-btn').forEach(b => b.classList.remove('active-period'));
+  document.getElementById('dashBtn_' + period)?.classList.add('active-period');
+  loadDashboard();
+}
+
+function _dashDateRange() {
+  const now = new Date();
+  let from, to = new Date();
+  if (_dashPeriod === 'week') {
+    from = new Date(now); from.setDate(now.getDate() - 7);
+  } else if (_dashPeriod === 'month') {
+    from = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else if (_dashPeriod === 'quarter') {
+    const q = Math.floor(now.getMonth() / 3);
+    from = new Date(now.getFullYear(), q * 3, 1);
+  } else {
+    from = new Date(now.getFullYear(), 0, 1);
+  }
+  return {
+    from: from.toISOString().slice(0,10),
+    to:   to.toISOString().slice(0,10),
+    label: _dashPeriod === 'week' ? 'آخر 7 أيام' :
+           _dashPeriod === 'month' ? 'هذا الشهر' :
+           _dashPeriod === 'quarter' ? 'هذا الربع' : 'هذا العام'
+  };
+}
+
+async function loadDashboard() {
+  const { from, to, label } = _dashDateRange();
+
+  // تحديث labels
+  ['dashViolPeriod','dashOpsPeriod'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '— ' + label;
+  });
+
+  try {
+    // جلب من Supabase بالتوازي
+    const [vRes, oRes, sRes, bRes, fRes] = await Promise.all([
+      db.from('violations').select('*').gte('date', from).lte('date', to),
+      db.from('ops_reports').select('*').gte('report_date', from).lte('report_date', to),
+      db.from('sales_reports').select('*').gte('report_date', from).lte('report_date', to),
+      db.from('building_reports').select('*').gte('report_date', from).lte('report_date', to),
+      db.from('facility_reports').select('*').gte('report_date', from).lte('report_date', to),
+    ]);
+
+    // دمج مع APP_DATA المحلي
+    const localV = (APP_DATA.violations || []).filter(r => r.date >= from && r.date <= to);
+    const localO = (APP_DATA.ops || []).filter(r => (r.report_date||'') >= from);
+    const localS = (APP_DATA.sales || []).filter(r => (r.report_date||r.date||'') >= from);
+    const localB = (APP_DATA.buildings || []).filter(r => (r.report_date||r.date||'') >= from);
+    const localF = (APP_DATA.facilities || []).filter(r => (r.report_date||r.date||'') >= from);
+
+    const merge = (arr1, arr2, key) => {
+      const seen = new Set((arr1||[]).map(r => r[key]||''));
+      return [...(arr1||[]), ...(arr2||[]).filter(r => !seen.has(r[key]||''))];
+    };
+
+    const violations = merge(vRes.data||[], localV, 'trainer_name');
+    const ops        = merge(oRes.data||[], localO, 'trainer_name');
+    const sales      = merge(sRes.data||[], localS, 'report_date');
+    const buildings  = merge(bRes.data||[], localB, 'report_date');
+    const facilities = merge(fRes.data||[], localF, 'report_date');
+
+    renderDashKPI(violations, ops, sales, buildings, facilities, label);
+    renderDashViolations(violations);
+    renderDashOps(ops);
+    renderDashSales(sales);
+    renderDashBuildings(buildings, facilities);
+
+  } catch(e) {
+    console.error('dashboard:', e);
+    toast('❌ خطأ في تحميل البيانات: ' + e.message);
+  }
+}
+
+function renderDashKPI(violations, ops, sales, buildings, facilities, label) {
+  const femV = violations.filter(v => v.section === 'female').length;
+  const malV = violations.filter(v => v.section === 'male').length;
+  const avgOps = ops.length ? Math.round(ops.reduce((s,r)=>s+(r.efficiency_pct||0),0)/ops.length) : 0;
+  const totSales = sales.reduce((s,r)=>s+parseFloat(r.total_amount||r.amount||0),0);
+  const totalViol = violations.length;
+  const gradeA = violations.filter(v=>v.grade==='A').length;
+
+  const kpis = [
+    { icon:'⚖️', label:'إجمالي المخالفات', value: totalViol, sub: `A: ${gradeA}`, color: totalViol===0?'#27AE60':'#E74C3C' },
+    { icon:'👩', label:'مخالفات نسائي',    value: femV,       sub: '',            color:'#E74C3C' },
+    { icon:'👨', label:'مخالفات رجالي',    value: malV,       sub: '',            color:'#2E86C1' },
+    { icon:'⚙️', label:'متوسط الكفاءة',    value: avgOps+'%', sub: `${ops.length} مدرب`, color: avgOps>=90?'#27AE60':avgOps>=70?'#D4AC0D':'#E74C3C' },
+    { icon:'🏢', label:'تقارير المبنى',     value: buildings.length, sub:'', color:'#2E86C1' },
+    { icon:'🔧', label:'ملاحظات المرافق',   value: facilities.length, sub:'', color:'#27AE60' },
+  ];
+  if (sales.length || totSales > 0) {
+    kpis.splice(3, 0, { icon:'💼', label:'المبيعات', value: totSales>0?totSales.toLocaleString()+' ر':sales.length+' سجل', sub:'', color:'#7D3C98' });
+  }
+
+  const el = document.getElementById('dashKpiRow');
+  if (!el) return;
+  el.innerHTML = kpis.map(k => `
+    <div style="background:var(--card);border-radius:16px;padding:14px;border-right:4px solid ${k.color};box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+      <div style="font-size:20px;margin-bottom:6px;">${k.icon}</div>
+      <div style="font-size:22px;font-weight:900;color:${k.color};">${k.value}</div>
+      <div style="font-size:10px;font-weight:700;color:var(--text);margin-top:2px;">${k.label}</div>
+      ${k.sub ? `<div style="font-size:9px;color:var(--text-dim);">${k.sub}</div>` : ''}
+    </div>`).join('');
+}
+
+function renderDashViolations(violations) {
+  const femV = violations.filter(v=>v.section==='female');
+  const malV = violations.filter(v=>v.section==='male');
+  const gradeStr = (arr) => `A:${arr.filter(v=>v.grade==='A').length} B:${arr.filter(v=>v.grade==='B').length} C:${arr.filter(v=>v.grade==='C').length}`;
+
+  const setEl = (id, val) => { const e=document.getElementById(id); if(e) e.textContent=val; };
+  setEl('dashViolFemCount', femV.length);
+  setEl('dashViolMalBreak', gradeStr(malV));
+  setEl('dashViolMalCount', malV.length);
+  setEl('dashViolFemBreak', gradeStr(femV));
+
+  // أكثر المخالفات تكراراً
+  const byType = {};
+  violations.forEach(v => { const t=(v.violation_type||'').split('|')[0].trim().slice(0,30); byType[t]=(byType[t]||0)+1; });
+  const top3 = Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const topEl = document.getElementById('dashViolTopList');
+  if (topEl && top3.length) {
+    topEl.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:6px;">الأكثر تكراراً:</div>' +
+      top3.map(([t,c],i)=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:10px;">
+        <span>${['🥇','🥈','🥉'][i]} ${t}</span>
+        <span style="font-weight:700;color:#E74C3C;">${c}</span>
+      </div>`).join('');
+  }
+}
+
+function renderDashOps(ops) {
+  const femO  = ops.filter(r=>r.zone==='female'||r.section==='female');
+  const malO  = ops.filter(r=>r.zone==='male'  ||r.section==='male');
+  const bikO  = ops.filter(r=>r.zone==='bike'  ||r.section==='bike');
+  const avg   = arr => arr.length ? Math.round(arr.reduce((s,r)=>s+(r.efficiency_pct||0),0)/arr.length) : 0;
+  const ec    = v => v>=90?'#27AE60':v>=70?'#D4AC0D':'#E74C3C';
+  const aF=avg(femO), aM=avg(malO), aB=avg(bikO);
+  const setEl = (id,val,color) => { const e=document.getElementById(id); if(e){e.textContent=val; if(color)e.style.color=color;} };
+  setEl('dashOpsFem',  aF+'%', ec(aF));
+  setEl('dashOpsMal',  aM+'%', ec(aM));
+  setEl('dashOpsBike', aB+'%', ec(aB));
+  // أعلى 3 مدربين
+  const top3 = [...ops].sort((a,b)=>(b.efficiency_pct||0)-(a.efficiency_pct||0)).slice(0,3);
+  const topEl = document.getElementById('dashOpsTopList');
+  if (topEl && top3.length) {
+    topEl.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:6px;">أعلى 3 مدربين:</div>' +
+      top3.map((r,i)=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:10px;">
+        <span>${['🥇','🥈','🥉'][i]} ${r.trainer_name||'—'}</span>
+        <span style="font-weight:700;color:#27AE60;">${r.efficiency_pct||0}%</span>
+      </div>`).join('');
+  }
+}
+
+function renderDashSales(sales) {
+  const el = document.getElementById('dashSalesContent');
+  if (!el) return;
+  const total = sales.reduce((s,r)=>s+parseFloat(r.total_amount||r.amount||0),0);
+  el.innerHTML = `
+    <div style="background:rgba(125,60,152,0.06);border-radius:14px;padding:14px;border-right:3px solid #7D3C98;">
+      <div style="font-size:11px;font-weight:700;color:#7D3C98;margin-bottom:6px;">💰 إجمالي المبيعات</div>
+      <div style="font-size:24px;font-weight:900;color:#7D3C98;">${total>0?total.toLocaleString()+' ر':'—'}</div>
+    </div>
+    <div style="background:rgba(125,60,152,0.06);border-radius:14px;padding:14px;border-right:3px solid #7D3C98;">
+      <div style="font-size:11px;font-weight:700;color:#7D3C98;margin-bottom:6px;">📋 عدد السجلات</div>
+      <div style="font-size:24px;font-weight:900;color:#7D3C98;">${sales.length||'—'}</div>
+    </div>`;
+}
+
+function renderDashBuildings(buildings, facilities) {
+  const setEl = (id,val) => { const e=document.getElementById(id); if(e) e.textContent=val; };
+  setEl('dashBuildCount', buildings.length||'0');
+  setEl('dashFacilCount', facilities.length||'0');
+  const topEl = document.getElementById('dashFacilList');
+  if (topEl && facilities.length) {
+    const byType = {};
+    facilities.forEach(f=>{ const t=f.problem_type||'غير محدد'; byType[t]=(byType[t]||0)+1; });
+    const top3 = Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    topEl.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:6px;">أبرز المشاكل:</div>' +
+      top3.map(([t,c])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:10px;">
+        <span>🔧 ${t}</span><span style="font-weight:700;color:#27AE60;">${c}</span>
+      </div>`).join('');
+  }
+}
+
+// إظهار زر Dashboard للـ admin عند تسجيل الدخول
+function updateDashboardVisibility() {
+  const isAdmin = currentUser?.role === 'admin';
+  const navBtn  = document.getElementById('dashNavBtn');
+  const sbBtn   = document.getElementById('sb-dashboard');
+  if (navBtn) navBtn.style.display = isAdmin ? 'flex' : 'none';
+  if (sbBtn)  sbBtn.style.display  = isAdmin ? 'flex' : 'none';
+}
+
 </script>
 
 <!-- ══ WEEKLY TASKS MODAL ══ -->
@@ -10239,6 +10478,102 @@ function decideIdea(id, decision) {
     <div id="ideasAdminTab" style="display:none;">
       <div id="pendingIdeasList"></div>
     </div>
+  </div>
+</div>
+
+
+<!-- ══ PAGE: DASHBOARD ══ -->
+<div id="page-dashboard" class="page">
+  <div class="container-wide">
+    <div class="page-header">
+      <div class="p-icon" style="background:rgba(0,168,150,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">📊</div>
+      <h1>لوحة المتابعة</h1>
+      <div class="sub">DASHBOARD</div>
+    </div>
+
+    <!-- فلتر الفترة -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:center;">
+      <button onclick="setDashPeriod('week')"   id="dashBtn_week"   class="dash-period-btn active-period">هذا الأسبوع</button>
+      <button onclick="setDashPeriod('month')"  id="dashBtn_month"  class="dash-period-btn">هذا الشهر</button>
+      <button onclick="setDashPeriod('quarter')" id="dashBtn_quarter" class="dash-period-btn">هذا الربع</button>
+      <button onclick="setDashPeriod('year')"   id="dashBtn_year"   class="dash-period-btn">هذا العام</button>
+    </div>
+
+    <!-- KPI Cards -->
+    <div id="dashKpiRow" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px;"></div>
+
+    <!-- ══ تقارير المخالفات ══ -->
+    <div style="background:var(--card);border-radius:18px;padding:18px;margin-bottom:16px;">
+      <div style="font-size:14px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+        <span>⚖️</span> تقارير المخالفات
+        <span style="font-size:10px;color:var(--text-dim);font-weight:400;" id="dashViolPeriod"></span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+        <div style="background:rgba(231,76,60,0.06);border-radius:14px;padding:14px;border-right:3px solid #E74C3C;">
+          <div style="font-size:11px;font-weight:700;color:#E74C3C;margin-bottom:6px;">👩 نسائي</div>
+          <div id="dashViolFemCount" style="font-size:28px;font-weight:900;color:#E74C3C;">—</div>
+          <div id="dashViolFemBreak" style="font-size:10px;color:var(--text-dim);margin-top:4px;"></div>
+        </div>
+        <div style="background:rgba(46,134,193,0.06);border-radius:14px;padding:14px;border-right:3px solid #2E86C1;">
+          <div style="font-size:11px;font-weight:700;color:#2E86C1;margin-bottom:6px;">👨 رجالي</div>
+          <div id="dashViolMalCount" style="font-size:28px;font-weight:900;color:#2E86C1;">—</div>
+          <div id="dashViolMalBreak" style="font-size:10px;color:var(--text-dim);margin-top:4px;"></div>
+        </div>
+      </div>
+      <div id="dashViolTopList" style="font-size:11px;color:var(--text-dim);"></div>
+    </div>
+
+    <!-- ══ كفاءة التشغيل ══ -->
+    <div style="background:var(--card);border-radius:18px;padding:18px;margin-bottom:16px;">
+      <div style="font-size:14px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+        <span>⚙️</span> كفاءة التشغيل
+        <span id="dashOpsPeriod" style="font-size:10px;color:var(--text-dim);font-weight:400;"></span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div style="text-align:center;background:rgba(231,76,60,0.06);border-radius:14px;padding:12px;">
+          <div style="font-size:10px;color:#E74C3C;font-weight:700;margin-bottom:4px;">👩 نسائي</div>
+          <div id="dashOpsFem" style="font-size:22px;font-weight:900;color:var(--text);">—</div>
+        </div>
+        <div style="text-align:center;background:rgba(46,134,193,0.06);border-radius:14px;padding:12px;">
+          <div style="font-size:10px;color:#2E86C1;font-weight:700;margin-bottom:4px;">👨 رجالي</div>
+          <div id="dashOpsMal" style="font-size:22px;font-weight:900;color:var(--text);">—</div>
+        </div>
+        <div style="text-align:center;background:rgba(212,172,13,0.06);border-radius:14px;padding:12px;">
+          <div style="font-size:10px;color:#D4AC0D;font-weight:700;margin-bottom:4px;">🏍️ دراجات</div>
+          <div id="dashOpsBike" style="font-size:22px;font-weight:900;color:var(--text);">—</div>
+        </div>
+      </div>
+      <div id="dashOpsTopList" style="font-size:11px;color:var(--text-dim);"></div>
+    </div>
+
+    <!-- ══ المبيعات ══ -->
+    <div style="background:var(--card);border-radius:18px;padding:18px;margin-bottom:16px;">
+      <div style="font-size:14px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+        <span>💼</span> قسم المبيعات — عملاء الاسترداد
+      </div>
+      <div id="dashSalesContent" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
+    </div>
+
+    <!-- ══ تقرير المبنى والمرافق ══ -->
+    <div style="background:var(--card);border-radius:18px;padding:18px;margin-bottom:16px;">
+      <div style="font-size:14px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+        <span>🏢</span> المبنى والمرافق
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="background:rgba(46,134,193,0.06);border-radius:14px;padding:14px;border-right:3px solid #2E86C1;">
+          <div style="font-size:11px;font-weight:700;color:#2E86C1;margin-bottom:6px;">🏢 المبنى الرئيسي</div>
+          <div id="dashBuildCount" style="font-size:28px;font-weight:900;color:#2E86C1;">—</div>
+          <div style="font-size:10px;color:var(--text-dim);">تقرير</div>
+        </div>
+        <div style="background:rgba(39,174,96,0.06);border-radius:14px;padding:14px;border-right:3px solid #27AE60;">
+          <div style="font-size:11px;font-weight:700;color:#27AE60;margin-bottom:6px;">🔧 ملاحظات المرافق</div>
+          <div id="dashFacilCount" style="font-size:28px;font-weight:900;color:#27AE60;">—</div>
+          <div style="font-size:10px;color:var(--text-dim);">ملاحظة</div>
+        </div>
+      </div>
+      <div id="dashFacilList" style="margin-top:12px;font-size:11px;color:var(--text-dim);"></div>
+    </div>
+
   </div>
 </div>
 
