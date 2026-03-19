@@ -781,7 +781,23 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     margin:6px auto;
   }
   /* دفع المحتوى لليسار */
-  #app { margin-right:200px; width:calc(100% - 200px); }
+  #app {
+    margin-right:200px;
+    width:calc(100% - 200px);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  .page {
+    width:100%;
+    box-sizing:border-box;
+    flex:1;
+  }
+  #page-dashboard {
+    width:100% !important;
+    max-width:100% !important;
+    box-sizing:border-box;
+  }
 }
 @media (max-width: 899px) {
   #desktopSidebar { display:none !important; }
@@ -822,71 +838,91 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 }
 .back-btn::before { content:'←'; font-size:16px; }
 
-/* ══ Dashboard — Apple Arcade Style ══ */
-@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;700;900&display=swap');
-
+/* ══ Dashboard Professional ══ */
+.db-card {
+  background:#fff;
+  border-radius:16px;
+  border:1px solid #E2E8F0;
+  box-shadow:0 1px 8px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04);
+  overflow:hidden;
+  transition:box-shadow .2s, transform .2s;
+}
+.db-card:hover {
+  box-shadow:0 4px 24px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.05);
+  transform:translateY(-2px);
+}
+.db-card-header {
+  padding:18px 20px 14px;
+  border-bottom:2px solid #F1F5F9;
+  border-right:4px solid #E2E8F0;
+  background:#FAFBFD;
+}
+.db-card-title {
+  font-size:13px;font-weight:800;color:#0F172A;
+}
+.db-card-sub {
+  font-size:10px;color:#94A3B8;margin-top:2px;
+}
+.db-stat-box {
+  border-radius:12px;padding:12px 14px;
+  border:1px solid #E2E8F0;
+  transition:transform .15s;
+}
+.db-stat-box:hover { transform:scale(1.02); }
+.db-stat-label { font-size:10px;font-weight:700;margin-bottom:4px; }
+.db-stat-num   { font-size:26px;font-weight:900;line-height:1; }
+.db-stat-detail{ font-size:9px;color:#94A3B8;margin-top:3px; }
+.db-insights {
+  padding:0 4px;
+}
+.db-insight-row {
+  display:flex;align-items:flex-start;gap:8px;
+  padding:7px 0;border-bottom:1px solid #F1F5F9;
+  font-size:11px;line-height:1.5;
+}
+.db-insight-row:last-child { border-bottom:none; }
+.db-insight-badge {
+  flex-shrink:0;border-radius:6px;padding:2px 8px;
+  font-size:9px;font-weight:800;letter-spacing:.3px;
+  margin-top:1px;
+}
+.db-section-label {
+  font-size:9px;font-weight:800;color:#94A3B8;
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:8px;padding-bottom:4px;
+  border-bottom:1px solid #F1F5F9;
+}
+/* Period buttons */
 .dash-period-btn {
-  padding:9px 20px;
-  border-radius:30px;
-  border:none;
-  background:transparent;
-  color:#667788;
-  font-family:'Cairo',sans-serif;
-  font-size:11px;font-weight:700;
-  cursor:pointer;
-  transition:all .25s cubic-bezier(.4,0,.2,1);
-  letter-spacing:.3px;
+  padding:7px 14px;border-radius:8px;border:none;
+  background:transparent;color:#64748B;
+  font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;
+  cursor:pointer;transition:all .18s;
 }
-.dash-period-btn:hover {
-  background:rgba(0,0,0,0.06);
-  color:#1a1a2e;
-  transform:translateY(-1px);
-}
+.dash-period-btn:hover { background:#fff;color:#0F172A; }
 .active-period {
-  background:#fff !important;
-  color:#1a1a2e !important;
-  box-shadow:0 2px 12px rgba(0,0,0,0.12) !important;
+  background:#fff !important;color:#0F172A !important;
+  box-shadow:0 1px 6px rgba(0,0,0,0.12) !important;
   font-weight:800 !important;
 }
-
-/* Arcade KPI Card */
+/* KPI strip */
 .arcade-kpi {
-  position:relative;
-  border-radius:20px;
-  padding:18px 16px;
-  overflow:hidden;
-  cursor:default;
-  border:1px solid rgba(0,0,0,0.06);
-  box-shadow:0 2px 16px rgba(0,0,0,0.07);
-  transition:transform .2s cubic-bezier(.4,0,.2,1), box-shadow .2s;
+  background:#fff;border-radius:14px;padding:16px;
+  border:1px solid #E2E8F0;
+  box-shadow:0 1px 8px rgba(0,0,0,0.05);
+  position:relative;overflow:hidden;
+  transition:transform .18s, box-shadow .18s;
 }
 .arcade-kpi:hover {
-  transform:translateY(-3px) scale(1.01);
-  box-shadow:0 10px 32px rgba(0,0,0,0.13) !important;
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(0,0,0,0.09);
 }
-.arcade-kpi::before {
-  content:'';
-  position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(255,255,255,0.7) 0%,rgba(255,255,255,0) 60%);
-  border-radius:inherit;
-  pointer-events:none;
-}
-.arcade-section {
-  background:rgba(255,255,255,0.04);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  border:1px solid rgba(255,255,255,0.09);
-  border-radius:24px;
-  padding:22px;
-  margin-bottom:16px;
-  transition:border-color .2s;
-}
-.arcade-section:hover {
-  border-color:rgba(255,255,255,0.16);
-}
-@media(max-width:700px){
+/* Responsive */
+@media(max-width:900px){
   #dashMainGrid { grid-template-columns:1fr !important; }
-  #dashKpiRow   { grid-template-columns:repeat(2,1fr) !important; }
+}
+@media(max-width:600px){
+  #dashKpiRow { grid-template-columns:repeat(2,1fr) !important; }
 }
 .arcade-section-title {
   font-size:13px;font-weight:800;
@@ -10129,232 +10165,329 @@ function decideIdea(id, decision) {
 
 // ══════════════════════════════════════════════════
 // 📈 Dashboard — لوحة المتابعة
-// ══════════════════════════════════════════════════
 let _dashPeriod = 'month';
 
 function showDashboard(el) {
   if (currentUser?.role !== 'admin') { toast('❌ Dashboard للمدير فقط'); return; }
-  // إخفاء كل الصفحات
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-dashboard')?.classList.add('active');
-  // تحديث nav active
-  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
-  if (el) { el.classList?.add('active'); }
+  document.querySelectorAll('.nav-tab, .sb-item').forEach(b => b.classList.remove('active'));
+  if (el?.classList) el.classList.add('active');
   document.getElementById('sb-dashboard')?.classList.add('active');
   loadDashboard();
 }
 
-function setDashPeriod(period) {
-  _dashPeriod = period;
+function setDashPeriod(p) {
+  _dashPeriod = p;
   document.querySelectorAll('.dash-period-btn').forEach(b => b.classList.remove('active-period'));
-  document.getElementById('dashBtn_' + period)?.classList.add('active-period');
+  document.getElementById('dashBtn_' + p)?.classList.add('active-period');
   loadDashboard();
 }
 
-function _dashDateRange() {
+function _dashRange() {
   const now = new Date();
-  let from, to = new Date();
-  if (_dashPeriod === 'week') {
-    from = new Date(now); from.setDate(now.getDate() - 7);
-  } else if (_dashPeriod === 'month') {
-    from = new Date(now.getFullYear(), now.getMonth(), 1);
-  } else if (_dashPeriod === 'quarter') {
-    const q = Math.floor(now.getMonth() / 3);
-    from = new Date(now.getFullYear(), q * 3, 1);
-  } else {
-    from = new Date(now.getFullYear(), 0, 1);
-  }
-  return {
-    from: from.toISOString().slice(0,10),
-    to:   to.toISOString().slice(0,10),
-    label: _dashPeriod === 'week' ? 'آخر 7 أيام' :
-           _dashPeriod === 'month' ? 'هذا الشهر' :
-           _dashPeriod === 'quarter' ? 'هذا الربع' : 'هذا العام'
-  };
+  let from = new Date();
+  const labels = { week:'آخر 7 أيام', month:'هذا الشهر', quarter:'هذا الربع', year:'هذا العام' };
+  if (_dashPeriod === 'week')    from.setDate(now.getDate() - 7);
+  else if (_dashPeriod === 'month')   from = new Date(now.getFullYear(), now.getMonth(), 1);
+  else if (_dashPeriod === 'quarter') from = new Date(now.getFullYear(), Math.floor(now.getMonth()/3)*3, 1);
+  else from = new Date(now.getFullYear(), 0, 1);
+  return { from: from.toISOString().slice(0,10), to: now.toISOString().slice(0,10), label: labels[_dashPeriod] };
 }
 
 async function loadDashboard() {
-  const { from, to, label } = _dashDateRange();
-
-  // تحديث labels
-  ['dashViolPeriod','dashOpsPeriod'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = '— ' + label;
-  });
-
+  const { from, to, label } = _dashRange();
+  ['dashViolPeriod','dashOpsPeriod'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent = label; });
   try {
-    // جلب من Supabase بالتوازي
-    const [vRes, oRes, sRes, bRes, fRes] = await Promise.all([
-      db.from('violations').select('*').gte('date', from).lte('date', to),
-      db.from('ops_reports').select('*').gte('report_date', from).lte('report_date', to),
-      db.from('sales_reports').select('*').gte('report_date', from).lte('report_date', to),
-      db.from('building_reports').select('*').gte('report_date', from).lte('report_date', to),
-      db.from('facility_reports').select('*').gte('report_date', from).lte('report_date', to),
+    const [vR,oR,sR,bR,fR] = await Promise.all([
+      db.from('violations').select('*').gte('date',from).lte('date',to),
+      db.from('ops_reports').select('*').gte('report_date',from).lte('report_date',to),
+      db.from('sales_reports').select('*').gte('report_date',from).lte('report_date',to),
+      db.from('building_reports').select('*').gte('report_date',from).lte('report_date',to),
+      db.from('facility_reports').select('*').gte('report_date',from).lte('report_date',to),
     ]);
-
-    // دمج مع APP_DATA المحلي
-    const localV = (APP_DATA.violations || []).filter(r => r.date >= from && r.date <= to);
-    const localO = (APP_DATA.ops || []).filter(r => (r.report_date||'') >= from);
-    const localS = (APP_DATA.sales || []).filter(r => (r.report_date||r.date||'') >= from);
-    const localB = (APP_DATA.buildings || []).filter(r => (r.report_date||r.date||'') >= from);
-    const localF = (APP_DATA.facilities || []).filter(r => (r.report_date||r.date||'') >= from);
-
-    const merge = (arr1, arr2, key) => {
-      const seen = new Set((arr1||[]).map(r => r[key]||''));
-      return [...(arr1||[]), ...(arr2||[]).filter(r => !seen.has(r[key]||''))];
-    };
-
-    const violations = merge(vRes.data||[], localV, 'trainer_name');
-    const ops        = merge(oRes.data||[], localO, 'trainer_name');
-    const sales      = merge(sRes.data||[], localS, 'report_date');
-    const buildings  = merge(bRes.data||[], localB, 'report_date');
-    const facilities = merge(fRes.data||[], localF, 'report_date');
-
-    renderDashKPI(violations, ops, sales, buildings, facilities, label);
-    renderDashViolations(violations);
-    renderDashOps(ops);
-    renderDashSales(sales);
-    renderDashBuildings(buildings, facilities);
-
-  } catch(e) {
-    console.error('dashboard:', e);
-    toast('❌ خطأ في تحميل البيانات: ' + e.message);
-  }
+    const merge = (a1,a2,k) => { const s=new Set((a1||[]).map(r=>r[k]||'')); return [...(a1||[]),...(a2||[]).filter(r=>!s.has(r[k]||''))]; };
+    const V  = merge(vR.data||[], (APP_DATA.violations||[]).filter(r=>r.date>=from), 'trainer_name');
+    const O  = merge(oR.data||[], APP_DATA.ops||[], 'trainer_name');
+    const S  = merge(sR.data||[], APP_DATA.sales||[], 'report_date');
+    const B  = merge(bR.data||[], APP_DATA.buildings||[], 'report_date');
+    const F  = merge(fR.data||[], APP_DATA.facilities||[], 'report_date');
+    _renderKPI(V,O,S,B,F);
+    _renderViol(V);
+    _renderOps(O);
+    _renderSales(S);
+    _renderBuilding(B,F);
+  } catch(e) { console.error(e); toast('❌ '+e.message); }
 }
 
-function renderDashKPI(violations, ops, sales, buildings, facilities, label) {
-  const femV = violations.filter(v => v.section === 'female').length;
-  const malV = violations.filter(v => v.section === 'male').length;
-  const avgOps = ops.length ? Math.round(ops.reduce((s,r)=>s+(r.efficiency_pct||0),0)/ops.length) : 0;
-  const totSales = sales.reduce((s,r)=>s+parseFloat(r.total_amount||r.amount||0),0);
-  const totalViol = violations.length;
-  const gradeA = violations.filter(v=>v.grade==='A').length;
-
-  const kpis = [
-    { icon:'⚖️', label:'إجمالي المخالفات', value: totalViol, sub: `A: ${gradeA}`, color: totalViol===0?'#27AE60':'#E74C3C' },
-    { icon:'👩', label:'مخالفات نسائي',    value: femV,       sub: '',            color:'#E74C3C' },
-    { icon:'👨', label:'مخالفات رجالي',    value: malV,       sub: '',            color:'#2E86C1' },
-    { icon:'⚙️', label:'متوسط الكفاءة',    value: avgOps+'%', sub: `${ops.length} مدرب`, color: avgOps>=90?'#27AE60':avgOps>=70?'#D4AC0D':'#E74C3C' },
-    { icon:'🏢', label:'تقارير المبنى',     value: buildings.length, sub:'', color:'#2E86C1' },
-    { icon:'🔧', label:'ملاحظات المرافق',   value: facilities.length, sub:'', color:'#27AE60' },
+function _renderKPI(V,O,S,B,F) {
+  const femV=V.filter(v=>v.section==='female').length;
+  const malV=V.filter(v=>v.section==='male').length;
+  const avgO=O.length?Math.round(O.reduce((s,r)=>s+(r.efficiency_pct||0),0)/O.length):0;
+  const totS=S.reduce((s,r)=>s+parseFloat(r.total_amount||r.amount||0),0);
+  const grA=V.filter(v=>v.grade==='A').length;
+  const ec=v=>v>=90?'#16A34A':v>=70?'#D97706':'#DC2626';
+  const kpis=[
+    {icon:'⚖️',label:'إجمالي المخالفات',value:V.length,sub:`A:${grA}`,color:'#DC2626',bg:'#FEF2F2'},
+    {icon:'👩',label:'مخالفات نسائي',value:femV,sub:'',color:'#EF4444',bg:'#FFF5F5'},
+    {icon:'👨',label:'مخالفات رجالي',value:malV,sub:'',color:'#3B82F6',bg:'#EFF6FF'},
+    {icon:'⚙️',label:'متوسط الكفاءة',value:avgO+'%',sub:`${O.length} مدرب`,color:ec(avgO),bg:'#F0FDF4'},
+    {icon:'🏢',label:'تقارير المبنى',value:B.length,sub:'',color:'#2563EB',bg:'#EFF6FF'},
+    {icon:'🔧',label:'المرافق',value:F.length,sub:'',color:'#16A34A',bg:'#F0FDF4'},
   ];
-  if (sales.length || totSales > 0) {
-    kpis.splice(3, 0, { icon:'💼', label:'المبيعات', value: totSales>0?totSales.toLocaleString()+' ر':sales.length+' سجل', sub:'', color:'#7D3C98' });
-  }
-
-  const el = document.getElementById('dashKpiRow');
-  if (!el) return;
-  el.innerHTML = kpis.map((k,i) => {
-    const gradients = [
-      'linear-gradient(135deg,#EEF2FF,#E0E7FF)',
-      'linear-gradient(135deg,#FEF2F2,#FEE2E2)',
-      'linear-gradient(135deg,#EFF6FF,#DBEAFE)',
-      'linear-gradient(135deg,#F0FDF4,#DCFCE7)',
-      'linear-gradient(135deg,#F5F3FF,#EDE9FE)',
-      'linear-gradient(135deg,#FFFBEB,#FEF3C7)',
-      'linear-gradient(135deg,#F0FDFA,#CCFBF1)',
-    ];
-    return `<div class="arcade-kpi" style="background:${gradients[i%gradients.length]};border:1px solid ${k.color}33;box-shadow:0 4px 24px ${k.color}22,inset 0 1px 0 rgba(255,255,255,0.06);">
+  if(totS>0||S.length) kpis.splice(3,0,{icon:'💼',label:'المبيعات',value:totS>0?totS.toLocaleString()+' ر':S.length+'',sub:'',color:'#7C3AED',bg:'#F5F3FF'});
+  const el=document.getElementById('dashKpiRow');
+  if(!el)return;
+  el.innerHTML=kpis.map(k=>`
+    <div class="arcade-kpi" style="background:${k.bg};border-color:${k.color}22;">
       <div style="font-size:22px;margin-bottom:8px;">${k.icon}</div>
-      <div style="font-size:26px;font-weight:900;color:${k.color};letter-spacing:-.5px;line-height:1;">${k.value}</div>
-      <div style="font-size:10px;font-weight:700;color:#334155;margin-top:6px;">${k.label}</div>
-      ${k.sub ? `<div style="font-size:9px;color:#94a3b8;margin-top:2px;">${k.sub}</div>` : ''}
-      <div style="position:absolute;bottom:0;right:0;width:60px;height:60px;border-radius:50%;background:${k.color}20;filter:blur(16px);pointer-events:none;"></div>
-    </div>`;
-  }).join('');
+      <div style="font-size:24px;font-weight:900;color:${k.color};line-height:1;">${k.value}</div>
+      <div style="font-size:10px;font-weight:700;color:#334155;margin-top:5px;">${k.label}</div>
+      ${k.sub?`<div style="font-size:9px;color:#94A3B8;margin-top:2px;">${k.sub}</div>`:''}
+    </div>`).join('');
 }
 
-function renderDashViolations(violations) {
-  const femV = violations.filter(v=>v.section==='female');
-  const malV = violations.filter(v=>v.section==='male');
-  const gradeStr = (arr) => `A:${arr.filter(v=>v.grade==='A').length} B:${arr.filter(v=>v.grade==='B').length} C:${arr.filter(v=>v.grade==='C').length}`;
-
-  const setEl = (id, val) => { const e=document.getElementById(id); if(e) e.textContent=val; };
-  setEl('dashViolFemCount', femV.length);
-  setEl('dashViolMalBreak', gradeStr(malV));
-  setEl('dashViolMalCount', malV.length);
-  setEl('dashViolFemBreak', gradeStr(femV));
-
-  // أكثر المخالفات تكراراً
-  const byType = {};
-  violations.forEach(v => { const t=(v.violation_type||'').split('|')[0].trim().slice(0,30); byType[t]=(byType[t]||0)+1; });
-  const top3 = Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,3);
-  const topEl = document.getElementById('dashViolTopList');
-  if (topEl && top3.length) {
-    topEl.innerHTML = '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:8px;">الأكثر تكراراً</div>' +
-      top3.map(([t,c],i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-        <span style="font-size:10px;color:#334155;">${['🥇','🥈','🥉'][i]} ${t}</span>
-        <span style="font-size:11px;font-weight:900;color:#FF6B6B;background:rgba(231,76,60,0.12);border-radius:20px;padding:2px 10px;">${c}</span>
-      </div>`).join('');
-  }
-}
-
-function renderDashOps(ops) {
-  const femO  = ops.filter(r=>r.zone==='female'||r.section==='female');
-  const malO  = ops.filter(r=>r.zone==='male'  ||r.section==='male');
-  const bikO  = ops.filter(r=>r.zone==='bike'  ||r.section==='bike');
-  const avg   = arr => arr.length ? Math.round(arr.reduce((s,r)=>s+(r.efficiency_pct||0),0)/arr.length) : 0;
-  const ec    = v => v>=90?'#27AE60':v>=70?'#D4AC0D':'#E74C3C';
-  const aF=avg(femO), aM=avg(malO), aB=avg(bikO);
-  const setEl = (id,val,color) => { const e=document.getElementById(id); if(e){e.textContent=val; if(color)e.style.color=color;} };
-  setEl('dashOpsFem',  aF+'%', ec(aF));
-  setEl('dashOpsMal',  aM+'%', ec(aM));
-  setEl('dashOpsBike', aB+'%', ec(aB));
-  // أعلى 3 مدربين
-  const top3 = [...ops].sort((a,b)=>(b.efficiency_pct||0)-(a.efficiency_pct||0)).slice(0,3);
-  const topEl = document.getElementById('dashOpsTopList');
-  if (topEl && top3.length) {
-    topEl.innerHTML = '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:8px;">أعلى 3 مدربين</div>' +
-      top3.map((r,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-        <span style="font-size:10px;color:#334155;">${['🥇','🥈','🥉'][i]} ${r.trainer_name||'—'}</span>
-        <span style="font-size:11px;font-weight:900;color:#58D68D;background:rgba(39,174,96,0.12);border-radius:20px;padding:2px 10px;">${r.efficiency_pct||0}%</span>
-      </div>`).join('');
-  }
-}
-
-function renderDashSales(sales) {
-  const el = document.getElementById('dashSalesContent');
-  if (!el) return;
-  const total = sales.reduce((s,r)=>s+parseFloat(r.total_amount||r.amount||0),0);
-  el.innerHTML = `
-    <div style="background:linear-gradient(135deg,#F5F3FF,#FAF5FF);border:1px solid #DDD6FE;border-radius:16px;padding:14px;">
-      <div style="font-size:9px;font-weight:700;color:#7C3AED;margin-bottom:6px;letter-spacing:.5px;">💰 إجمالي المبيعات</div>
-      <div style="font-size:24px;font-weight:900;color:#6D28D9;">${total>0?total.toLocaleString()+' ر':'—'}</div>
+function _insightRow(icon, badge, badgeColor, badgeBg, text) {
+  return `<div class="db-insight-row">
+    <span style="font-size:14px;flex-shrink:0;">${icon}</span>
+    <div>
+      <span class="db-insight-badge" style="color:${badgeColor};background:${badgeBg};">${badge}</span>
+      <span style="color:#475569;margin-right:6px;">${text}</span>
     </div>
-    <div style="background:linear-gradient(135deg,#F5F3FF,#FAF5FF);border:1px solid #DDD6FE;border-radius:16px;padding:14px;">
-      <div style="font-size:9px;font-weight:700;color:#7C3AED;margin-bottom:6px;letter-spacing:.5px;">📋 عدد السجلات</div>
-      <div style="font-size:24px;font-weight:900;color:#6D28D9;">${sales.length||'—'}</div>
-    </div>`;
+  </div>`;
 }
 
-function renderDashBuildings(buildings, facilities) {
-  const setEl = (id,val) => { const e=document.getElementById(id); if(e) e.textContent=val; };
-  setEl('dashBuildCount', buildings.length||'0');
-  setEl('dashFacilCount', facilities.length||'0');
-  const topEl = document.getElementById('dashFacilList');
-  if (topEl && facilities.length) {
-    const byType = {};
-    facilities.forEach(f=>{ const t=f.problem_type||'غير محدد'; byType[t]=(byType[t]||0)+1; });
-    const top3 = Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,3);
-    topEl.innerHTML = '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:8px;">أبرز المشاكل</div>' +
-      top3.map(([t,c])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-        <span style="font-size:10px;color:#334155;">🔧 ${t}</span>
-        <span style="font-size:11px;font-weight:900;color:#58D68D;background:rgba(39,174,96,0.12);border-radius:20px;padding:2px 10px;">${c}</span>
-      </div>`).join('');
+function _renderViol(V) {
+  const femV=V.filter(v=>v.section==='female');
+  const malV=V.filter(v=>v.section==='male');
+  const grStr=arr=>`A:${arr.filter(v=>v.grade==='A').length} · B:${arr.filter(v=>v.grade==='B').length} · C:${arr.filter(v=>v.grade==='C').length}`;
+  const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  setEl('dashViolFemCount',femV.length); setEl('dashViolFemBreak',grStr(femV));
+  setEl('dashViolMalCount',malV.length); setEl('dashViolMalBreak',grStr(malV));
+
+  // أبرز المخالفات + توصيات
+  const byType={};
+  V.forEach(v=>{const t=(v.violation_type||'').split('|')[0].trim().slice(0,35);byType[t]=(byType[t]||0)+1;});
+  const top3=Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const gradeA=V.filter(v=>v.grade==='A').length;
+  let html='';
+  if(top3.length){
+    html+='<div class="db-section-label">أبرز المخالفات</div>';
+    html+=top3.map(([t,c],i)=>_insightRow(['🥇','🥈','🥉'][i],c+' مرة','#DC2626','#FEF2F2',t)).join('');
   }
+  html+='<div class="db-section-label" style="margin-top:10px;">التوصيات</div>';
+  if(gradeA>0) html+=_insightRow('⚠️','عاجل','#fff','#DC2626',`${gradeA} مخالفة من الدرجة A تستوجب إجراءً فورياً`);
+  if(femV.length>malV.length*1.5) html+=_insightRow('📌','ملاحظة','#D97706','#FFFBEB','القسم النسائي يسجل نسبة مخالفات أعلى — يحتاج متابعة');
+  else if(malV.length>femV.length*1.5) html+=_insightRow('📌','ملاحظة','#D97706','#FFFBEB','القسم الرجالي يسجل نسبة مخالفات أعلى — يحتاج متابعة');
+  if(V.length===0) html+=_insightRow('✅','ممتاز','#16A34A','#F0FDF4','لا مخالفات مسجلة في هذه الفترة');
+  document.getElementById('dashViolInsights').innerHTML=html;
 }
 
-// إظهار زر Dashboard للـ admin عند تسجيل الدخول
+function _renderOps(O) {
+  const femO=O.filter(r=>r.zone==='female'||r.section==='female');
+  const malO=O.filter(r=>r.zone==='male'  ||r.section==='male');
+  const bikO=O.filter(r=>r.zone==='bike'  ||r.section==='bike');
+  const avg=arr=>arr.length?Math.round(arr.reduce((s,r)=>s+(r.efficiency_pct||0),0)/arr.length):0;
+  const ec=v=>v>=90?'#16A34A':v>=70?'#D97706':'#DC2626';
+  const aF=avg(femO),aM=avg(malO),aB=avg(bikO);
+  const setEl=(id,v,c)=>{const e=document.getElementById(id);if(e){e.textContent=v;if(c)e.style.color=c;}};
+  setEl('dashOpsFem',aF?aF+'%':'—',ec(aF));
+  setEl('dashOpsMal',aM?aM+'%':'—',ec(aM));
+  setEl('dashOpsBike',aB?aB+'%':'—',ec(aB));
+
+  const top3=[...O].sort((a,b)=>(b.efficiency_pct||0)-(a.efficiency_pct||0)).slice(0,3);
+  const bot2=[...O].sort((a,b)=>(a.efficiency_pct||0)-(b.efficiency_pct||0)).slice(0,2);
+  let html='';
+  if(top3.length){
+    html+='<div class="db-section-label">أعلى أداءً</div>';
+    html+=top3.map((r,i)=>_insightRow(['🥇','🥈','🥉'][i],(r.efficiency_pct||0)+'%','#16A34A','#F0FDF4',r.trainer_name||'—')).join('');
+  }
+  html+='<div class="db-section-label" style="margin-top:10px;">التوصيات</div>';
+  if(bot2.length&&bot2[0].efficiency_pct<70) html+=_insightRow('⚠️','تدخل','#DC2626','#FEF2F2',`${bot2[0].trainer_name||'مدرب'} — كفاءة ${bot2[0].efficiency_pct||0}% دون الهدف`);
+  const overall=avg(O);
+  if(overall>=90) html+=_insightRow('✅','ممتاز','#16A34A','#F0FDF4','الكفاءة الإجمالية تحقق الهدف المستهدف 90%');
+  else if(overall>0) html+=_insightRow('📊','متابعة','#D97706','#FFFBEB',`الكفاءة الإجمالية ${overall}% — الهدف 90%، الفجوة ${90-overall}%`);
+  if(!O.length) html+=_insightRow('ℹ️','لا بيانات','#94A3B8','#F8FAFC','لم يتم رفع ملفات كفاءة التشغيل لهذه الفترة');
+  document.getElementById('dashOpsInsights').innerHTML=html;
+}
+
+function _renderSales(S) {
+  const total=S.reduce((s,r)=>s+parseFloat(r.total_amount||r.amount||0),0);
+  const byType={};
+  S.forEach(r=>{const t=r.sale_type||r.type||r.description||'غير محدد';byType[t]=(byType[t]||0)+1;});
+  const topTypes=Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,3);
+
+  document.getElementById('dashSalesContent').innerHTML=`
+    <div class="db-stat-box" style="background:#F5F3FF;border-color:#DDD6FE;">
+      <div class="db-stat-label" style="color:#7C3AED;">💰 إجمالي</div>
+      <div class="db-stat-num" style="color:#6D28D9;font-size:18px;">${total>0?total.toLocaleString()+' ر':'—'}</div>
+    </div>
+    <div class="db-stat-box" style="background:#F5F3FF;border-color:#DDD6FE;">
+      <div class="db-stat-label" style="color:#7C3AED;">📋 سجلات</div>
+      <div class="db-stat-num" style="color:#6D28D9;">${S.length||'—'}</div>
+    </div>`;
+
+  let html='';
+  if(topTypes.length){
+    html+='<div class="db-section-label">الأعلى استرداداً</div>';
+    html+=topTypes.map(([t,c],i)=>_insightRow(['🥇','🥈','🥉'][i],c+' حالة','#7C3AED','#F5F3FF',t)).join('');
+  }
+  html+='<div class="db-section-label" style="margin-top:10px;">التوصيات</div>';
+  if(!S.length) html+=_insightRow('ℹ️','لا بيانات','#94A3B8','#F8FAFC','لم يتم رفع بيانات المبيعات لهذه الفترة');
+  else {
+    html+=_insightRow('📊','تقرير','#7C3AED','#F5F3FF',`${S.length} حالة استرداد — متوسط ${S.length>0?Math.round(total/S.length).toLocaleString():0} ر للحالة`);
+    if(topTypes[0]) html+=_insightRow('🔍','أبرز','#2563EB','#EFF6FF',`النوع الأكثر: ${topTypes[0][0]} (${topTypes[0][1]} حالة)`);
+  }
+  document.getElementById('dashSalesInsights').innerHTML=html;
+}
+
+function _renderBuilding(B,F) {
+  const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  setEl('dashBuildCount',B.length||'0');
+  setEl('dashFacilCount',F.length||'0');
+
+  // أبرز مشاكل المرافق
+  const byType={};
+  F.forEach(f=>{const t=f.problem_type||'غير محدد';byType[t]=(byType[t]||0)+1;});
+  const topF=Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,3);
+
+  // أبرز مشاكل المبنى
+  const bScores=B.map(b=>({
+    date:b.date||b.report_date||'',
+    recep:b.recep_crowd||b.recep_staff||'',
+    notes:b.general_notes||b.notes||''
+  })).filter(b=>b.notes);
+
+  let html='';
+  if(topF.length){
+    html+='<div class="db-section-label">أبرز مشاكل المرافق</div>';
+    html+=topF.map(([t,c],i)=>_insightRow(['🥇','🥈','🥉'][i],c+' مرة','#16A34A','#F0FDF4',t)).join('');
+  }
+  if(bScores.length){
+    html+='<div class="db-section-label" style="margin-top:10px;">ملاحظات المبنى</div>';
+    html+=bScores.slice(0,2).map(b=>_insightRow('📋','تقرير','#2563EB','#EFF6FF',b.notes.slice(0,60))).join('');
+  }
+  html+='<div class="db-section-label" style="margin-top:10px;">تحليل وتوصيات</div>';
+  if(!F.length&&!B.length) html+=_insightRow('ℹ️','لا بيانات','#94A3B8','#F8FAFC','لم يتم تسجيل تقارير المبنى والمرافق');
+  else {
+    if(F.length>5) html+=_insightRow('⚠️','متابعة','#D97706','#FFFBEB',`${F.length} ملاحظة مرافق — يحتاج متابعة دورية`);
+    else html+=_insightRow('✅','جيد','#16A34A','#F0FDF4',`${F.length} ملاحظة مرافق — المستوى مقبول`);
+    if(topF[0]) html+=_insightRow('🔧','إجراء','#DC2626','#FEF2F2',`أكثر مشكلة: ${topF[0][0]} (${topF[0][1]} مرة) — يحتاج صيانة`);
+  }
+  document.getElementById('dashBuildInsights').innerHTML=html;
+}
+
 function updateDashboardVisibility() {
   const isAdmin = currentUser?.role === 'admin';
-  const navBtn  = document.getElementById('dashNavBtn');
-  const sbBtn   = document.getElementById('sb-dashboard');
-  if (navBtn) navBtn.style.display = isAdmin ? 'flex' : 'none';
-  if (sbBtn)  sbBtn.style.display  = isAdmin ? 'flex' : 'none';
+  const navBtn = document.getElementById('dashNavBtn');
+  const sbBtn  = document.getElementById('sb-dashboard');
+  if(navBtn) navBtn.style.display = isAdmin ? 'flex' : 'none';
+  if(sbBtn)  sbBtn.style.display  = isAdmin ? 'flex' : 'none';
 }
 
 </script>
+
+<!-- ══ PAGE: DASHBOARD ══ -->
+<div id="page-dashboard" class="page" style="background:#F7F9FC;min-height:100vh;width:100%;box-sizing:border-box;">
+  <div style="max-width:100%;padding:28px 32px 60px;box-sizing:border-box;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:14px;border-bottom:1px solid #E2E8F0;padding-bottom:20px;">
+      <div>
+        <div style="font-size:20px;font-weight:900;color:#0F172A;letter-spacing:-.3px;">لوحة المتابعة</div>
+        <div style="font-size:10px;color:#94A3B8;letter-spacing:2.5px;margin-top:3px;font-weight:600;">QUALITY DASHBOARD</div>
+      </div>
+      <div style="display:flex;gap:4px;background:#EEF2F7;border-radius:12px;padding:4px;">
+        <button onclick="setDashPeriod('week')"    id="dashBtn_week"    class="dash-period-btn active-period">أسبوع</button>
+        <button onclick="setDashPeriod('month')"   id="dashBtn_month"   class="dash-period-btn">شهر</button>
+        <button onclick="setDashPeriod('quarter')" id="dashBtn_quarter" class="dash-period-btn">ربع</button>
+        <button onclick="setDashPeriod('year')"    id="dashBtn_year"    class="dash-period-btn">سنة</button>
+      </div>
+    </div>
+    <div id="dashKpiRow" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px;"></div>
+    <div id="dashMainGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+      <div class="db-card">
+        <div class="db-card-header" style="border-color:#FCA5A5;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:#FEF2F2;display:flex;align-items:center;justify-content:center;font-size:18px;">⚖️</div>
+            <div><div class="db-card-title">تقارير المخالفات</div><div class="db-card-sub" id="dashViolPeriod">—</div></div>
+          </div>
+        </div>
+        <div style="padding:16px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+            <div class="db-stat-box" style="background:#FEF2F2;border-color:#FECACA;">
+              <div class="db-stat-label" style="color:#EF4444;">👩 نسائي</div>
+              <div id="dashViolFemCount" class="db-stat-num" style="color:#DC2626;">—</div>
+              <div id="dashViolFemBreak" class="db-stat-detail"></div>
+            </div>
+            <div class="db-stat-box" style="background:#EFF6FF;border-color:#BFDBFE;">
+              <div class="db-stat-label" style="color:#3B82F6;">👨 رجالي</div>
+              <div id="dashViolMalCount" class="db-stat-num" style="color:#2563EB;">—</div>
+              <div id="dashViolMalBreak" class="db-stat-detail"></div>
+            </div>
+          </div>
+          <div id="dashViolInsights" class="db-insights"></div>
+        </div>
+      </div>
+      <div class="db-card">
+        <div class="db-card-header" style="border-color:#6EE7B7;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:#F0FDF4;display:flex;align-items:center;justify-content:center;font-size:18px;">⚙️</div>
+            <div><div class="db-card-title">كفاءة التشغيل</div><div class="db-card-sub" id="dashOpsPeriod">—</div></div>
+          </div>
+        </div>
+        <div style="padding:16px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+            <div class="db-stat-box" style="background:#FEF2F2;border-color:#FECACA;">
+              <div class="db-stat-label" style="color:#EF4444;">👩 نسائي</div>
+              <div id="dashOpsFem" class="db-stat-num" style="color:#DC2626;">—</div>
+            </div>
+            <div class="db-stat-box" style="background:#EFF6FF;border-color:#BFDBFE;">
+              <div class="db-stat-label" style="color:#3B82F6;">👨 رجالي</div>
+              <div id="dashOpsMal" class="db-stat-num" style="color:#2563EB;">—</div>
+            </div>
+            <div class="db-stat-box" style="background:#FFFBEB;border-color:#FDE68A;">
+              <div class="db-stat-label" style="color:#D97706;">🏍️ دراجات</div>
+              <div id="dashOpsBike" class="db-stat-num" style="color:#B45309;">—</div>
+            </div>
+          </div>
+          <div id="dashOpsInsights" class="db-insights"></div>
+        </div>
+      </div>
+      <div class="db-card">
+        <div class="db-card-header" style="border-color:#C4B5FD;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:#F5F3FF;display:flex;align-items:center;justify-content:center;font-size:18px;">💼</div>
+            <div><div class="db-card-title">قسم المبيعات — الاسترداد</div><div class="db-card-sub">عملاء الاسترداد والتأجيه</div></div>
+          </div>
+        </div>
+        <div style="padding:16px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;" id="dashSalesContent"></div>
+          <div id="dashSalesInsights" class="db-insights"></div>
+        </div>
+      </div>
+      <div class="db-card">
+        <div class="db-card-header" style="border-color:#93C5FD;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:18px;">🏢</div>
+            <div><div class="db-card-title">المبنى والمرافق</div><div class="db-card-sub">الأوضاع والتحليل</div></div>
+          </div>
+        </div>
+        <div style="padding:16px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+            <div class="db-stat-box" style="background:#EFF6FF;border-color:#BFDBFE;">
+              <div class="db-stat-label" style="color:#3B82F6;">🏢 تقارير المبنى</div>
+              <div id="dashBuildCount" class="db-stat-num" style="color:#2563EB;">—</div>
+            </div>
+            <div class="db-stat-box" style="background:#F0FDF4;border-color:#BBF7D0;">
+              <div class="db-stat-label" style="color:#16A34A;">🔧 ملاحظات المرافق</div>
+              <div id="dashFacilCount" class="db-stat-num" style="color:#15803D;">—</div>
+            </div>
+          </div>
+          <div id="dashBuildInsights" class="db-insights"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ══ WEEKLY TASKS MODAL ══ -->
 <div id="weeklyTasksModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9200;overflow-y:auto;padding:20px 12px;">
@@ -10384,7 +10517,7 @@ function updateDashboardVisibility() {
         <div style="color:rgba(255,255,255,0.6);font-size:11px;">سؤال <span id="gameQNum">1</span> من <span id="gameQTotal">3</span></div>
         <div id="gameTimer" style="background:rgba(255,255,255,0.15);border-radius:20px;padding:4px 14px;font-size:14px;font-weight:900;color:#fff;">10</div>
       </div>
-      <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:4px;margin-bottom:20px;overflow:hidden;">
+      <div style="background:rgba(255,255,255,0.08);border-radius:4px;height:4px;margin-bottom:20px;overflow:hidden;">
         <div id="gameTimerBar" style="height:4px;background:linear-gradient(90deg,#00C8B4,#7D3C98);border-radius:4px;width:100%;transition:width 1s linear;"></div>
       </div>
       <div id="gameQuestion" style="font-size:15px;font-weight:800;color:#fff;text-align:center;line-height:1.6;margin-bottom:24px;min-height:60px;"></div>
@@ -10470,12 +10603,10 @@ function updateDashboardVisibility() {
   </div>
 </div>
 
-
 <!-- ══ PENDING VIOLATIONS MODAL ══ -->
 <div id="pendingViolationsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:9600;overflow-y:auto;padding:16px 12px;">
   <div style="max-width:600px;margin:0 auto;background:var(--card);border-radius:24px;padding:24px 20px;position:relative;">
-    <button onclick="document.getElementById('pendingViolationsModal').style.display='none'"
-      style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
+    <button onclick="document.getElementById('pendingViolationsModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
     <div style="text-align:center;margin-bottom:20px;">
       <div style="font-size:28px;margin-bottom:6px;">⚖️</div>
       <div style="font-size:16px;font-weight:900;color:var(--text);">مراجعة المخالفات المعلقة</div>
@@ -10485,37 +10616,20 @@ function updateDashboardVisibility() {
   </div>
 </div>
 
-
 <!-- ══ IDEAS BANK MODAL ══ -->
 <div id="ideasBankModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(14px);z-index:9500;overflow-y:auto;padding:16px 12px;">
   <div style="max-width:640px;margin:0 auto;background:var(--card);border-radius:24px;padding:24px 20px;position:relative;">
-    <button onclick="document.getElementById('ideasBankModal').style.display='none'"
-      style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
-
-    <!-- Header -->
+    <button onclick="document.getElementById('ideasBankModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
     <div style="text-align:center;margin-bottom:20px;">
       <div style="font-size:32px;margin-bottom:6px;">💡</div>
       <div style="font-size:17px;font-weight:900;color:var(--text);">بنك الأفكار</div>
       <div style="font-size:10px;color:var(--text-dim);letter-spacing:1px;">IDEAS BANK</div>
     </div>
-
-    <!-- تبويبات -->
     <div style="display:flex;gap:8px;margin-bottom:20px;background:var(--card2);border-radius:14px;padding:4px;">
-      <button onclick="switchIdeasTab('submit')" id="ideasTabSubmit"
-        style="flex:1;padding:10px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;transition:all .2s;">
-        💡 اقترح فكرة
-      </button>
-      <button onclick="switchIdeasTab('approved')" id="ideasTabApproved"
-        style="flex:1;padding:10px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .2s;">
-        ✅ الأفكار المقبولة
-      </button>
-      <button onclick="switchIdeasTab('admin')" id="ideasTabAdmin"
-        style="display:none;flex:1;padding:10px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .2s;">
-        ⚙️ المراجعة
-      </button>
+      <button onclick="switchIdeasTab('submit')" id="ideasTabSubmit" style="flex:1;padding:10px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;transition:all .2s;">💡 اقترح فكرة</button>
+      <button onclick="switchIdeasTab('approved')" id="ideasTabApproved" style="flex:1;padding:10px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .2s;">✅ الأفكار المقبولة</button>
+      <button onclick="switchIdeasTab('admin')" id="ideasTabAdmin" style="display:none;flex:1;padding:10px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .2s;">⚙️ المراجعة</button>
     </div>
-
-    <!-- تبويب: اقترح فكرة -->
     <div id="ideasSubmitTab">
       <div style="background:var(--card2);border-radius:16px;padding:18px;margin-bottom:16px;">
         <div style="font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:8px;">📋 الفئة</div>
@@ -10530,132 +10644,15 @@ function updateDashboardVisibility() {
           <option value="أخرى">💬 أخرى</option>
         </select>
         <div style="font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:8px;">💡 عنوان الفكرة</div>
-        <input id="ideaTitle" type="text" placeholder="عنوان مختصر وواضح..." maxlength="80"
-          style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;margin-bottom:14px;box-sizing:border-box;">
+        <input id="ideaTitle" type="text" placeholder="عنوان مختصر وواضح..." maxlength="80" style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;margin-bottom:14px;box-sizing:border-box;">
         <div style="font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:8px;">📝 تفاصيل الفكرة</div>
-        <textarea id="ideaDetails" placeholder="اشرح فكرتك بالتفصيل — ما المشكلة؟ وكيف تحلها؟" rows="4" maxlength="500"
-          style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;resize:none;box-sizing:border-box;"></textarea>
+        <textarea id="ideaDetails" placeholder="اشرح فكرتك بالتفصيل — ما المشكلة؟ وكيف تحلها؟" rows="4" maxlength="500" style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;resize:none;box-sizing:border-box;"></textarea>
         <div id="ideaCharCount" style="font-size:10px;color:var(--text-dim);text-align:left;margin-top:4px;">0 / 500</div>
       </div>
-      <button onclick="submitIdea()"
-        style="width:100%;padding:14px;background:linear-gradient(135deg,#F39C12,#D68910);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 4px 14px rgba(243,156,18,0.3);">
-        💡 إرسال الفكرة
-      </button>
+      <button onclick="submitIdea()" style="width:100%;padding:14px;background:linear-gradient(135deg,#F39C12,#D68910);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">💡 إرسال الفكرة</button>
     </div>
-
-    <!-- تبويب: الأفكار المقبولة -->
-    <div id="ideasApprovedTab" style="display:none;">
-      <div id="approvedIdeasList"></div>
-    </div>
-
-    <!-- تبويب: المراجعة (admin فقط) -->
-    <div id="ideasAdminTab" style="display:none;">
-      <div id="pendingIdeasList"></div>
-    </div>
-  </div>
-</div>
-
-
-<!-- ══ PAGE: DASHBOARD ══ -->
-<div id="page-dashboard" class="page" style="min-height:100vh;background:linear-gradient(135deg,#f0f4ff 0%,#e8f0fe 30%,#f5f0ff 60%,#f0f7ff 100%);">
-  <div style="max-width:1400px;margin:0 auto;padding:28px 28px 60px;width:100%;box-sizing:border-box;">
-
-    <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;">
-      <div>
-        <div style="font-size:24px;font-weight:900;color:#1a1a2e;letter-spacing:-.3px;">لوحة المتابعة</div>
-        <div style="font-size:11px;color:#8899aa;letter-spacing:2px;margin-top:2px;">QUALITY DASHBOARD</div>
-      </div>
-      <!-- فلتر الفترة -->
-      <div style="display:flex;gap:6px;background:rgba(0,0,0,0.06);border-radius:34px;padding:4px;">
-        <button onclick="setDashPeriod('week')"    id="dashBtn_week"    class="dash-period-btn active-period">أسبوع</button>
-        <button onclick="setDashPeriod('month')"   id="dashBtn_month"   class="dash-period-btn">شهر</button>
-        <button onclick="setDashPeriod('quarter')" id="dashBtn_quarter" class="dash-period-btn">ربع</button>
-        <button onclick="setDashPeriod('year')"    id="dashBtn_year"    class="dash-period-btn">سنة</button>
-      </div>
-    </div>
-
-    <!-- KPI Cards Row -->
-    <div id="dashKpiRow" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px;"></div>
-
-    <!-- Grid Layout للكمبيوتر -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="dashMainGrid">
-
-      <!-- ══ المخالفات ══ -->
-      <div class="arcade-section">
-        <div class="arcade-section-title">
-          <span style="font-size:18px;">⚖️</span>
-          <div>المخالفات <span class="arcade-sub" id="dashViolPeriod"></span></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-          <div style="background:linear-gradient(135deg,#FEF2F2,#FFF5F5);border:1px solid #FECACA;border-radius:16px;padding:14px;">
-            <div style="font-size:10px;font-weight:700;color:#EF4444;margin-bottom:6px;">👩 نسائي</div>
-            <div id="dashViolFemCount" style="font-size:32px;font-weight:900;color:#DC2626;line-height:1;">—</div>
-            <div id="dashViolFemBreak" style="font-size:9px;color:#94a3b8;margin-top:4px;"></div>
-          </div>
-          <div style="background:linear-gradient(135deg,#EFF6FF,#F0F7FF);border:1px solid #BFDBFE;border-radius:16px;padding:14px;">
-            <div style="font-size:10px;font-weight:700;color:#3B82F6;margin-bottom:6px;">👨 رجالي</div>
-            <div id="dashViolMalCount" style="font-size:32px;font-weight:900;color:#2563EB;line-height:1;">—</div>
-            <div id="dashViolMalBreak" style="font-size:9px;color:#94a3b8;margin-top:4px;"></div>
-          </div>
-        </div>
-        <div id="dashViolTopList"></div>
-      </div>
-
-      <!-- ══ كفاءة التشغيل ══ -->
-      <div class="arcade-section">
-        <div class="arcade-section-title">
-          <span style="font-size:18px;">⚙️</span>
-          <div>كفاءة التشغيل <span class="arcade-sub" id="dashOpsPeriod"></span></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
-          <div style="background:linear-gradient(135deg,rgba(231,76,60,0.15),rgba(192,57,43,0.05));border:1px solid rgba(231,76,60,0.15);border-radius:14px;padding:12px;text-align:center;">
-            <div style="font-size:9px;color:rgba(255,120,100,0.7);margin-bottom:4px;">👩 نسائي</div>
-            <div id="dashOpsFem" style="font-size:20px;font-weight:900;color:#1e40af;">—</div>
-          </div>
-          <div style="background:linear-gradient(135deg,#EFF6FF,0.15),rgba(31,97,141,0.05));border:1px solid rgba(46,134,193,0.15);border-radius:14px;padding:12px;text-align:center;">
-            <div style="font-size:9px;color:rgba(100,160,230,0.7);margin-bottom:4px;">👨 رجالي</div>
-            <div id="dashOpsMal" style="font-size:20px;font-weight:900;color:#2563EB;">—</div>
-          </div>
-          <div style="background:linear-gradient(135deg,rgba(212,172,13,0.15),rgba(180,140,0,0.05));border:1px solid rgba(212,172,13,0.15);border-radius:14px;padding:12px;text-align:center;">
-            <div style="font-size:9px;color:rgba(230,200,80,0.7);margin-bottom:4px;">🏍️ دراجات</div>
-            <div id="dashOpsBike" style="font-size:20px;font-weight:900;color:#D97706;">—</div>
-          </div>
-        </div>
-        <div id="dashOpsTopList"></div>
-      </div>
-
-      <!-- ══ المبيعات ══ -->
-      <div class="arcade-section">
-        <div class="arcade-section-title">
-          <span style="font-size:18px;">💼</span>
-          <div>المبيعات — عملاء الاسترداد</div>
-        </div>
-        <div id="dashSalesContent" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
-      </div>
-
-      <!-- ══ المبنى والمرافق ══ -->
-      <div class="arcade-section">
-        <div class="arcade-section-title">
-          <span style="font-size:18px;">🏢</span>
-          <div>المبنى والمرافق</div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-          <div style="background:linear-gradient(135deg,rgba(46,134,193,0.15),rgba(31,97,141,0.05));border:1px solid rgba(46,134,193,0.15);border-radius:16px;padding:14px;">
-            <div style="font-size:9px;color:rgba(100,160,230,0.7);margin-bottom:6px;">🏢 المبنى الرئيسي</div>
-            <div id="dashBuildCount" style="font-size:28px;font-weight:900;color:#5DADE2;">—</div>
-            <div style="font-size:9px;color:rgba(255,255,255,0.3);">تقرير</div>
-          </div>
-          <div style="background:linear-gradient(135deg,rgba(39,174,96,0.15),rgba(27,120,67,0.05));border:1px solid rgba(39,174,96,0.15);border-radius:16px;padding:14px;">
-            <div style="font-size:9px;color:rgba(100,220,140,0.7);margin-bottom:6px;">🔧 المرافق</div>
-            <div id="dashFacilCount" style="font-size:28px;font-weight:900;color:#58D68D;">—</div>
-            <div style="font-size:9px;color:rgba(255,255,255,0.3);">ملاحظة</div>
-          </div>
-        </div>
-        <div id="dashFacilList"></div>
-      </div>
-
-    </div><!-- end grid -->
+    <div id="ideasApprovedTab" style="display:none;"><div id="approvedIdeasList"></div></div>
+    <div id="ideasAdminTab" style="display:none;"><div id="pendingIdeasList"></div></div>
   </div>
 </div>
 
