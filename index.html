@@ -8601,471 +8601,451 @@ function renderQuarterlyResults() {
 
 
 async function exportQuarterlyExcel() {
+  // ── حماية: تحقق من البيانات ──
+  if (!_qData) { toast('❌ افتح التقرير الربعي أولاً واختر الربع'); return; }
+  if (typeof ExcelJS === 'undefined') { toast('❌ مكتبة ExcelJS غير محملة'); return; }
+
   const d = _qData;
-  if (!d) { toast('❌ لا توجد بيانات — اضغط على ربع أولاً'); return; }
-  if (typeof ExcelJS === 'undefined') { toast('❌ ExcelJS غير محملة'); return; }
+  // ضمان وجود كل الحقول
+  const safeD = {
+    q:          d.q || 1,
+    year:       d.year || new Date().getFullYear(),
+    violations: Array.isArray(d.violations) ? d.violations : [],
+    surveys:    Array.isArray(d.surveys)    ? d.surveys    : [],
+    facilities: Array.isArray(d.facilities) ? d.facilities : [],
+    buildings:  Array.isArray(d.buildings)  ? d.buildings  : [],
+    ops:        Array.isArray(d.ops)        ? d.ops        : [],
+    sales:      Array.isArray(d.sales)      ? d.sales      : [],
+    ratings:    Array.isArray(d.ratings)    ? d.ratings    : [],
+    incentives: Array.isArray(d.incentives) ? d.incentives : [],
+  };
+
   toast('⏳ جاري بناء التقرير...');
+
   try {
-
-  const wb = new ExcelJS.Workbook();
-  wb.creator = 'نورة لتعليم القيادة'; wb.created = new Date();
-  const qLabel = Q_LABELS[d.q] || `Q${d.q}`;
-  const MN = ['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-  const months = Q_MONTHS[d.q];
-  const C = {
-    teal:'FF00A896', white:'FFFFFFFF', dark:'FF0D1F2D',
-    red:'FFE74C3C',  green:'FF27AE60', gold:'FFD4AC0D',
-    blue:'FF2E86C1', purple:'FF7D3C98', orange:'FFCA6F1E',
-    lt:'FFE8F5F3',   ltR:'FFFEF0EF',   ltB:'FFEBF5FB',
-    ltG:'FFFEF9E7',  ltP:'FFF3E8FE',   gray:'FFF5F5F5'
-  };
-
-  // ─── أدوات ───
-  const addTitle = (ws, txt, bg, cols) => {
-    const r = ws.addRow([txt]);
-    ws.mergeCells(r.number,1,r.number,cols);
-    r.getCell(1).font = {name:'Arial',bold:true,size:14,color:{argb:C.white}};
-    r.getCell(1).fill = {type:'pattern',pattern:'solid',fgColor:{argb:bg}};
-    r.getCell(1).alignment = {horizontal:'center',vertical:'middle'};
-    r.height = 40;
-  };
-  const addSub = (ws, txt, bg, cols) => {
-    ws.addRow([]);
-    const r = ws.addRow([txt]);
-    ws.mergeCells(r.number,1,r.number,cols);
-    r.getCell(1).font = {name:'Arial',bold:true,size:12,color:{argb:C.white}};
-    r.getCell(1).fill = {type:'pattern',pattern:'solid',fgColor:{argb:bg}};
-    r.getCell(1).alignment = {horizontal:'right',vertical:'middle'};
-    r.height = 28;
-    ws.addRow([]);
-  };
-  const sHdr = (row, bg) => {
-    row.height = 28;
-    row.eachCell({includeEmpty:true}, c => {
-      c.font = {name:'Arial',bold:true,size:10,color:{argb:C.white}};
-      c.fill = {type:'pattern',pattern:'solid',fgColor:{argb:bg}};
-      c.alignment = {horizontal:'center',vertical:'middle',wrapText:true};
-      c.border = {bottom:{style:'thin',color:{argb:C.teal}}};
-    });
-  };
-  const sRow = (row, bg, bold) => {
-    row.height = 22;
-    row.eachCell({includeEmpty:true}, c => {
-      c.font = {name:'Arial',size:10,bold:!!bold};
-      c.fill = {type:'pattern',pattern:'solid',fgColor:{argb:bg||C.white}};
-      c.alignment = {vertical:'middle'};
-    });
-  };
-  const colored = (cell, val, goodHigh, numFmt) => {
-    const v = parseFloat(val);
-    const ec = goodHigh
-      ? (v>=90?C.green:v>=70?C.gold:C.red)
-      : (v<=5?C.green:v<=15?C.gold:C.red);
-    cell.font = {name:'Arial',bold:true,size:11,color:{argb:ec}};
-    cell.alignment = {horizontal:'center',vertical:'middle'};
-    if (numFmt) cell.numFmt = numFmt;
-  };
-  const growthStr = (prev, cur) => {
-    if (!prev || prev===0) return '—';
-    const p = Math.round((cur-prev)/prev*100);
-    return (p>=0?'↑ +':'↓ ')+Math.abs(p)+'%';
-  };
-  const growthColor = (prev, cur, goodUp) => {
-    if (!prev) return C.dark;
-    return (goodUp ? cur>prev : cur<prev) ? C.green : C.red;
-  };
-
-  // ─── بيانات مقسمة بالشهر ───
-  const BM = {};
-  months.forEach(m => {
-    const ms = String(m).padStart(2,'0'), mStr = String(m);
-    const inMonth = (arr, dateKey) => arr.filter(r => {
-      const dt = r[dateKey]||r.date||r.report_date||'';
-      return dt.includes(`-${ms}-`) || String(r.report_month||'')==mStr;
-    });
-    BM[m] = {
-      label:    MN[m],
-      femViol:  d.violations.filter(v=>v.section==='female'&&(v.date||'').includes(`-${ms}-`)),
-      malViol:  d.violations.filter(v=>v.section==='male'  &&(v.date||'').includes(`-${ms}-`)),
-      surveys:  d.surveys.filter(s=>(s.date||'').includes(`-${ms}-`)),
-      femOps:   d.ops.filter(r=>r.zone==='female' &&String(r.report_month||'')==mStr),
-      malOps:   d.ops.filter(r=>r.zone==='male'   &&String(r.report_month||'')==mStr),
-      bikeOps:  d.ops.filter(r=>r.zone==='bike'   &&String(r.report_month||'')==mStr),
-      facilities: d.facilities.filter(f=>(f.report_date||f.date||'').includes(`-${ms}-`)),
-      buildings:  d.buildings.filter(b=>(b.report_date||b.date||'').includes(`-${ms}-`)),
-      sales:    (d.sales||[]).filter(r=>(r.report_date||r.date||'').includes(`-${ms}-`)||String(r.report_month||'')==mStr),
-      ratings:  (d.ratings||[]).filter(r=>(r.report_date||r.date||'').includes(`-${ms}-`)||String(r.report_month||'')==mStr),
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'نورة لتعليم القيادة';
+    wb.created = new Date();
+    const qLabel = (Q_LABELS && Q_LABELS[safeD.q]) || `Q${safeD.q}`;
+    const MN = ['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const months = (Q_MONTHS && Q_MONTHS[safeD.q]) || [1,2,3];
+    const [m1,m2,m3] = months;
+    const C = {
+      teal:'FF00A896', white:'FFFFFFFF', dark:'FF0D1F2D',
+      red:'FFE74C3C',  green:'FF27AE60', gold:'FFD4AC0D',
+      blue:'FF2E86C1', purple:'FF7D3C98', orange:'FFCA6F1E',
+      lt:'FFE8F5F3',   ltR:'FFFEF0EF',  ltB:'FFEBF5FB', ltG:'FFFEF9E7'
     };
-    const b = BM[m];
-    b.avgSurv    = b.surveys.length  ? Math.round(b.surveys.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/b.surveys.length)    : 0;
-    b.avgFemOps  = b.femOps.length   ? Math.round(b.femOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/b.femOps.length)        : 0;
-    b.avgMalOps  = b.malOps.length   ? Math.round(b.malOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/b.malOps.length)        : 0;
-    b.avgBikeOps = b.bikeOps.length  ? Math.round(b.bikeOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/b.bikeOps.length)      : 0;
-    b.avgRating  = b.ratings.length  ? Math.round(b.ratings.reduce((s,r)=>s+(r.rating||r.avg_rating||0),0)/b.ratings.length*10)/10 : 0;
-    b.totalSales = b.sales.reduce((s,r)=>s+parseFloat(r.total_amount||r.amount||r.revenue||0),0);
-  });
-  const [m1,m2,m3] = months;
 
-  // إجماليات الربع
-  const femViol = d.violations.filter(v=>v.section==='female');
-  const malViol = d.violations.filter(v=>v.section==='male');
-  const femOps  = d.ops.filter(r=>r.zone==='female');
-  const malOps  = d.ops.filter(r=>r.zone==='male');
-  const bikeOps = d.ops.filter(r=>r.zone==='bike');
-  const avgSurv = d.surveys.length ? Math.round(d.surveys.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/d.surveys.length) : 0;
-  const avgFemOps  = femOps.length  ? Math.round(femOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/femOps.length)   : 0;
-  const avgMalOps  = malOps.length  ? Math.round(malOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/malOps.length)   : 0;
-  const avgBikeOps = bikeOps.length ? Math.round(bikeOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/bikeOps.length) : 0;
-  const avgRating  = (d.ratings||[]).length ? Math.round((d.ratings||[]).reduce((s,r)=>s+(r.rating||r.avg_rating||0),0)/(d.ratings||[]).length*10)/10 : 0;
-  const totalSalesQ = (d.sales||[]).reduce((s,r)=>s+parseFloat(r.total_amount||r.amount||r.revenue||0),0);
-
-  // ════════════════════════════════════════
-  // شيت ١: الملخص التنفيذي
-  // ════════════════════════════════════════
-  const wsSum = wb.addWorksheet('📋 الملخص التنفيذي');
-  wsSum.views = [{rightToLeft:true}];
-  wsSum.columns = [{width:32},{width:16},{width:16},{width:16},{width:18},{width:14},{width:40}];
-  addTitle(wsSum, `التقرير الربعي الشامل — ${qLabel} ${d.year}`, C.dark, 7);
-
-  addSub(wsSum, '📊 مقارنة شهرية لكل المؤشرات', C.teal, 7);
-  sHdr(wsSum.addRow(['المؤشر', BM[m1].label, BM[m2].label, BM[m3].label, 'متوسط/مجموع الربع', 'التوجه', 'التوصية']), C.teal);
-
-  const compRows = [
-    ['مخالفات النسائي',   BM[m1].femViol.length, BM[m2].femViol.length, BM[m3].femViol.length, femViol.length, false],
-    ['مخالفات الرجالي',   BM[m1].malViol.length, BM[m2].malViol.length, BM[m3].malViol.length, malViol.length, false],
-    ['رضا العملاء %',     BM[m1].avgSurv,  BM[m2].avgSurv,  BM[m3].avgSurv,  avgSurv,  true],
-    ['كفاءة نسائي %',     BM[m1].avgFemOps, BM[m2].avgFemOps, BM[m3].avgFemOps, avgFemOps, true],
-    ['كفاءة رجالي %',     BM[m1].avgMalOps, BM[m2].avgMalOps, BM[m3].avgMalOps, avgMalOps, true],
-    ['كفاءة دراجات %',    BM[m1].avgBikeOps,BM[m2].avgBikeOps,BM[m3].avgBikeOps,avgBikeOps,true],
-    ['تقييم المدربين /5', BM[m1].avgRating, BM[m2].avgRating, BM[m3].avgRating, avgRating, true],
-    ['مبيعات (ريال)',     BM[m1].totalSales,BM[m2].totalSales,BM[m3].totalSales,totalSalesQ,true],
-    ['ملاحظات المرافق',   BM[m1].facilities.length,BM[m2].facilities.length,BM[m3].facilities.length,d.facilities.length,false],
-  ];
-  compRows.forEach((row,i) => {
-    const [label,v1,v2,v3,total,goodHigh] = row;
-    const trend = v1===0&&v2===0&&v3===0 ? '—'
-      : v3>v2&&v2>=v1 ? '📈 تصاعدي'
-      : v3<v2&&v2<=v1 ? '📉 تراجع'
-      : v3>v1 ? '↗ تحسن' : v3<v1 ? '↘ تراجع' : '→ مستقر';
-    const g13 = v1>0 ? Math.round((v3-v1)/v1*100) : 0;
-    const rec = goodHigh
-      ? (g13>10?`نمو ${g13}% خلال الربع ✅`:g13<-10?`تراجع ${Math.abs(g13)}% ⚠️`:'أداء مستقر')
-      : (g13<-10?`تحسن ${Math.abs(g13)}% ✅`:g13>10?`زيادة ${g13}% ⚠️`:'مستقر');
-    const r = wsSum.addRow([label,v1||0,v2||0,v3||0,total||0,trend,rec]);
-    sRow(r, i%2===0?C.lt:C.white);
-    [2,3,4].forEach(n => { r.getCell(n).alignment={horizontal:'center',vertical:'middle'}; });
-    r.getCell(5).font = {name:'Arial',bold:true,size:11};
-    r.getCell(5).alignment = {horizontal:'center',vertical:'middle'};
-  });
-
-  addSub(wsSum, '📈 نسبة التغيير بين الأشهر', C.purple, 7);
-  sHdr(wsSum.addRow(['المؤشر', `${MN[m1]}→${MN[m2]}`, `${MN[m2]}→${MN[m3]}`, `${MN[m1]}→${MN[m3]}`, 'التقييم', 'الملاحظة', 'التوصية الإدارية']), C.purple);
-  const growRows = [
-    ['مخالفات النسائي', BM[m1].femViol.length, BM[m2].femViol.length, BM[m3].femViol.length, false],
-    ['مخالفات الرجالي', BM[m1].malViol.length, BM[m2].malViol.length, BM[m3].malViol.length, false],
-    ['رضا العملاء',     BM[m1].avgSurv,  BM[m2].avgSurv,  BM[m3].avgSurv,  true],
-    ['كفاءة نسائي',     BM[m1].avgFemOps, BM[m2].avgFemOps, BM[m3].avgFemOps, true],
-    ['كفاءة رجالي',     BM[m1].avgMalOps, BM[m2].avgMalOps, BM[m3].avgMalOps, true],
-    ['تقييم المدربين',  BM[m1].avgRating, BM[m2].avgRating, BM[m3].avgRating, true],
-    ['المبيعات',        BM[m1].totalSales,BM[m2].totalSales,BM[m3].totalSales,true],
-  ];
-  growRows.forEach((row,i) => {
-    const [label,v1,v2,v3,goodHigh] = row;
-    const g12 = v1>0?Math.round((v2-v1)/v1*100):0;
-    const g23 = v2>0?Math.round((v3-v2)/v2*100):0;
-    const g13 = v1>0?Math.round((v3-v1)/v1*100):0;
-    const ok = v => goodHigh?v>0:v<0;
-    const evalTxt = ok(g13)?'✅ تحسن':g13===0?'➡ مستقر':'⚠️ تراجع';
-    const note = `${MN[m1]}: ${v1} | ${MN[m2]}: ${v2} | ${MN[m3]}: ${v3}`;
-    const rec  = ok(g13>5)?`تحسن ملموس ${Math.abs(g13)}%`:Math.abs(g13)>10?`فجوة ${Math.abs(g13)}% تحتاج متابعة`:'أداء مستقر';
-    const r = wsSum.addRow([label, (g12>=0?'+':'')+g12+'%', (g23>=0?'+':'')+g23+'%', (g13>=0?'+':'')+g13+'%', evalTxt, note, rec]);
-    sRow(r, i%2===0?C.lt:C.white);
-    [2,3,4].forEach(n => {
-      const val = parseInt(r.getCell(n).value);
-      r.getCell(n).font = {name:'Arial',bold:true,size:11,color:{argb:ok(val)?C.green:val===0?C.dark:C.red}};
-      r.getCell(n).alignment = {horizontal:'center',vertical:'middle'};
-    });
-  });
-
-  // ════════════════════════════════════════
-  // شيت ٢: KPIs الشاملة — كل الأقسام
-  // ════════════════════════════════════════
-  const wsKPI = wb.addWorksheet('🎯 KPIs الشاملة');
-  wsKPI.views = [{rightToLeft:true}];
-  wsKPI.columns = [{width:35},{width:18},{width:18},{width:18},{width:20},{width:40}];
-  addTitle(wsKPI, `مؤشرات الأداء الرئيسية — ${qLabel} ${d.year}`, C.dark, 6);
-
-  const kpiBlocks = [
-    { title:'⚖️ المخالفات — النسائي', color:C.red, rows:[
-      ['إجمالي المخالفات', BM[m1].femViol.length, BM[m2].femViol.length, BM[m3].femViol.length, femViol.length, femViol.length<5?'✅ ممتاز':femViol.length<15?'⚠️ متوسط':'❌ مرتفع'],
-      ['درجة A', BM[m1].femViol.filter(v=>v.grade==='A').length, BM[m2].femViol.filter(v=>v.grade==='A').length, BM[m3].femViol.filter(v=>v.grade==='A').length, femViol.filter(v=>v.grade==='A').length, femViol.filter(v=>v.grade==='A').length===0?'✅ لا مخالفات خطيرة':'❌ تستوجب إجراء فوري'],
-      ['درجة B', BM[m1].femViol.filter(v=>v.grade==='B').length, BM[m2].femViol.filter(v=>v.grade==='B').length, BM[m3].femViol.filter(v=>v.grade==='B').length, femViol.filter(v=>v.grade==='B').length, ''],
-      ['درجة C', BM[m1].femViol.filter(v=>v.grade==='C').length, BM[m2].femViol.filter(v=>v.grade==='C').length, BM[m3].femViol.filter(v=>v.grade==='C').length, femViol.filter(v=>v.grade==='C').length, ''],
-    ]},
-    { title:'⚖️ المخالفات — الرجالي', color:C.blue, rows:[
-      ['إجمالي المخالفات', BM[m1].malViol.length, BM[m2].malViol.length, BM[m3].malViol.length, malViol.length, malViol.length<5?'✅ ممتاز':malViol.length<15?'⚠️ متوسط':'❌ مرتفع'],
-      ['درجة A', BM[m1].malViol.filter(v=>v.grade==='A').length, BM[m2].malViol.filter(v=>v.grade==='A').length, BM[m3].malViol.filter(v=>v.grade==='A').length, malViol.filter(v=>v.grade==='A').length, malViol.filter(v=>v.grade==='A').length===0?'✅':'❌ تستوجب إجراء فوري'],
-      ['درجة B', BM[m1].malViol.filter(v=>v.grade==='B').length, BM[m2].malViol.filter(v=>v.grade==='B').length, BM[m3].malViol.filter(v=>v.grade==='B').length, malViol.filter(v=>v.grade==='B').length, ''],
-      ['درجة C', BM[m1].malViol.filter(v=>v.grade==='C').length, BM[m2].malViol.filter(v=>v.grade==='C').length, BM[m3].malViol.filter(v=>v.grade==='C').length, malViol.filter(v=>v.grade==='C').length, ''],
-    ]},
-    { title:'⭐ رضا العملاء', color:C.gold, rows:[
-      ['متوسط الرضا %', BM[m1].avgSurv, BM[m2].avgSurv, BM[m3].avgSurv, avgSurv, avgSurv>=90?'✅ ممتاز':avgSurv>=70?'⚠️ يحتاج تحسين':'❌ ضعيف'],
-      ['عدد الاستطلاعات', BM[m1].surveys.length, BM[m2].surveys.length, BM[m3].surveys.length, d.surveys.length, ''],
-      ['≥90% (ممتاز)', BM[m1].surveys.filter(s=>(s.satisfaction_pct||0)>=90).length, BM[m2].surveys.filter(s=>(s.satisfaction_pct||0)>=90).length, BM[m3].surveys.filter(s=>(s.satisfaction_pct||0)>=90).length, d.surveys.filter(s=>(s.satisfaction_pct||0)>=90).length, ''],
-      ['<70% (ضعيف)',  BM[m1].surveys.filter(s=>(s.satisfaction_pct||0)<70).length,  BM[m2].surveys.filter(s=>(s.satisfaction_pct||0)<70).length,  BM[m3].surveys.filter(s=>(s.satisfaction_pct||0)<70).length,  d.surveys.filter(s=>(s.satisfaction_pct||0)<70).length, d.surveys.filter(s=>(s.satisfaction_pct||0)<70).length>0?'⚠️ متابعة':'✅'],
-    ]},
-    { title:'⚙️ كفاءة التشغيل — نسائي', color:C.red, rows:[
-      ['متوسط الكفاءة %', BM[m1].avgFemOps, BM[m2].avgFemOps, BM[m3].avgFemOps, avgFemOps, avgFemOps>=90?'✅ حقق الهدف':avgFemOps>=70?`⚠️ فجوة ${90-avgFemOps}%`:`❌ تحت الهدف`],
-      ['عدد المدربات',    BM[m1].femOps.length, BM[m2].femOps.length, BM[m3].femOps.length, femOps.length, ''],
-      ['مدربات ≥90%', BM[m1].femOps.filter(r=>(r.efficiency_pct||0)>=90).length, BM[m2].femOps.filter(r=>(r.efficiency_pct||0)>=90).length, BM[m3].femOps.filter(r=>(r.efficiency_pct||0)>=90).length, femOps.filter(r=>(r.efficiency_pct||0)>=90).length, ''],
-      ['مدربات <70%', BM[m1].femOps.filter(r=>(r.efficiency_pct||0)<70).length,  BM[m2].femOps.filter(r=>(r.efficiency_pct||0)<70).length,  BM[m3].femOps.filter(r=>(r.efficiency_pct||0)<70).length,  femOps.filter(r=>(r.efficiency_pct||0)<70).length,  femOps.filter(r=>(r.efficiency_pct||0)<70).length>0?'⚠️':'✅'],
-    ]},
-    { title:'⚙️ كفاءة التشغيل — رجالي', color:C.blue, rows:[
-      ['متوسط الكفاءة %', BM[m1].avgMalOps, BM[m2].avgMalOps, BM[m3].avgMalOps, avgMalOps, avgMalOps>=90?'✅ حقق الهدف':avgMalOps>=70?`⚠️ فجوة ${90-avgMalOps}%`:`❌ تحت الهدف`],
-      ['عدد المدربين',    BM[m1].malOps.length, BM[m2].malOps.length, BM[m3].malOps.length, malOps.length, ''],
-      ['مدربون ≥90%', BM[m1].malOps.filter(r=>(r.efficiency_pct||0)>=90).length, BM[m2].malOps.filter(r=>(r.efficiency_pct||0)>=90).length, BM[m3].malOps.filter(r=>(r.efficiency_pct||0)>=90).length, malOps.filter(r=>(r.efficiency_pct||0)>=90).length, ''],
-      ['مدربون <70%', BM[m1].malOps.filter(r=>(r.efficiency_pct||0)<70).length,  BM[m2].malOps.filter(r=>(r.efficiency_pct||0)<70).length,  BM[m3].malOps.filter(r=>(r.efficiency_pct||0)<70).length,  malOps.filter(r=>(r.efficiency_pct||0)<70).length,  malOps.filter(r=>(r.efficiency_pct||0)<70).length>0?'⚠️':'✅'],
-    ]},
-    { title:'⚙️ كفاءة التشغيل — دراجات', color:C.gold, rows:[
-      ['متوسط الكفاءة %', BM[m1].avgBikeOps, BM[m2].avgBikeOps, BM[m3].avgBikeOps, avgBikeOps, avgBikeOps>=90?'✅ حقق الهدف':avgBikeOps>=70?`⚠️ فجوة ${90-avgBikeOps}%`:`❌ تحت الهدف`],
-      ['عدد المدربين',    BM[m1].bikeOps.length, BM[m2].bikeOps.length, BM[m3].bikeOps.length, bikeOps.length, ''],
-    ]},
-    { title:'🏅 تقييم المدربين', color:C.orange, rows:[
-      ['متوسط التقييم /5', BM[m1].avgRating, BM[m2].avgRating, BM[m3].avgRating, avgRating, avgRating>=4?'✅ ممتاز':avgRating>=3?'⚠️ جيد':avgRating>0?'❌ يحتاج تحسين':'— لا بيانات'],
-      ['عدد التقييمات',   BM[m1].ratings.length, BM[m2].ratings.length, BM[m3].ratings.length, (d.ratings||[]).length, ''],
-      ['تقييم ≥4',  BM[m1].ratings.filter(r=>(r.rating||r.avg_rating||0)>=4).length, BM[m2].ratings.filter(r=>(r.rating||r.avg_rating||0)>=4).length, BM[m3].ratings.filter(r=>(r.rating||r.avg_rating||0)>=4).length, (d.ratings||[]).filter(r=>(r.rating||r.avg_rating||0)>=4).length, ''],
-      ['تقييم <3',  BM[m1].ratings.filter(r=>(r.rating||r.avg_rating||0)<3&&(r.rating||r.avg_rating||0)>0).length, BM[m2].ratings.filter(r=>(r.rating||r.avg_rating||0)<3&&(r.rating||r.avg_rating||0)>0).length, BM[m3].ratings.filter(r=>(r.rating||r.avg_rating||0)<3&&(r.rating||r.avg_rating||0)>0).length, (d.ratings||[]).filter(r=>(r.rating||r.avg_rating||0)<3&&(r.rating||r.avg_rating||0)>0).length, (d.ratings||[]).filter(r=>(r.rating||r.avg_rating||0)<3&&(r.rating||r.avg_rating||0)>0).length>0?'⚠️ يحتاج متابعة':'✅'],
-    ]},
-    { title:'💼 المبيعات', color:C.purple, rows:[
-      ['إجمالي المبيعات (ريال)', BM[m1].totalSales.toLocaleString(), BM[m2].totalSales.toLocaleString(), BM[m3].totalSales.toLocaleString(), totalSalesQ.toLocaleString(), totalSalesQ>0?'✅ يوجد بيانات':'— لا بيانات'],
-      ['عدد السجلات',            BM[m1].sales.length, BM[m2].sales.length, BM[m3].sales.length, (d.sales||[]).length, ''],
-    ]},
-  ];
-
-  kpiBlocks.forEach(block => {
-    addSub(wsKPI, block.title, block.color, 6);
-    sHdr(wsKPI.addRow(['المؤشر', BM[m1].label, BM[m2].label, BM[m3].label, 'الربع كله', 'التقييم']), block.color);
-    block.rows.forEach((row,i) => {
-      const r = wsKPI.addRow(row.slice(0,6));
-      sRow(r, i%2===0?C.lt:C.white);
-      [2,3,4,5].forEach(n => r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
-    });
-  });
-
-  // ════════════════════════════════════════
-  // شيت ٣ + ٤: المخالفات (نسائي / رجالي)
-  // ════════════════════════════════════════
-  const makeViolSheet = (vList, byMon, secLabel, secColor, lightBg, sheetName) => {
-    if (!vList.length) return;
-    const ws = wb.addWorksheet(sheetName);
-    ws.views = [{rightToLeft:true}];
-    ws.columns = [{width:6},{width:28},{width:40},{width:10},{width:12},{width:15},{width:12}];
-    addTitle(ws, `${sheetName} — ${qLabel} ${d.year}`, secColor, 7);
-    addSub(ws, '📊 توزيع شهري مع نسبة التغيير', secColor, 7);
-    sHdr(ws.addRow(['الشهر','إجمالي','A','B','C','التغيير %','التوجه']), secColor);
-    months.forEach((m,idx) => {
-      const mv = byMon[m]; const prev = idx>0?byMon[months[idx-1]].length:null;
-      const g = prev!==null&&prev>0?Math.round((mv.length-prev)/prev*100):null;
-      const r = ws.addRow([MN[m], mv.length, mv.filter(v=>v.grade==='A').length, mv.filter(v=>v.grade==='B').length, mv.filter(v=>v.grade==='C').length, g!==null?(g>=0?'+':'')+g+'%':'أول شهر', mv.length<(prev||mv.length)?'↓ تحسن':mv.length>(prev||0)?'↑ زيادة':'→ مستقر']);
-      sRow(r, idx%2===0?lightBg:C.white);
-      r.getCell(2).font={name:'Arial',bold:true,size:12,color:{argb:mv.length<5?C.green:mv.length<15?C.gold:C.red}};
-      [2,3,4,5,6,7].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
-      if(g!==null) r.getCell(6).font={name:'Arial',bold:true,size:10,color:{argb:g<=0?C.green:C.red}};
-    });
-    ws.addRow([]);
-    addSub(ws,'📋 تفاصيل المخالفات',secColor,7);
-    sHdr(ws.addRow(['#','الاسم','نوع المخالفة','الدرجة','التاريخ','المشرف','الشهر']),secColor);
-    vList.forEach((v,i)=>{
-      const r=ws.addRow([i+1,v.trainer_name||'—',(v.violation_type||'').split('|')[0].trim(),v.grade||'—',v.date||'',v.observer||'',MN[parseInt((v.date||'').split('-')[1])]||'—']);
-      sRow(r,i%2===0?lightBg:C.white);
-      const gc=v.grade==='A'?C.red:v.grade==='B'?C.gold:C.green;
-      r.getCell(4).font={name:'Arial',bold:true,size:11,color:{argb:gc}};
-      [4,5,6,7].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
-    });
-  };
-  makeViolSheet(femViol, m=>BM[m].femViol, 'نسائي', C.red,  C.ltR, '👩 مخالفات نسائي');
-  makeViolSheet(malViol, m=>BM[m].malViol, 'رجالي', C.blue, C.ltB, '👨 مخالفات رجالي');
-
-  // ════════════════════════════════════════
-  // شيت ٥: رضا العملاء
-  // ════════════════════════════════════════
-  if (d.surveys.length) {
-    const wsS = wb.addWorksheet('⭐ رضا العملاء');
-    wsS.views = [{rightToLeft:true}];
-    wsS.columns = [{width:6},{width:22},{width:12},{width:10},{width:10},{width:10},{width:10},{width:10},{width:14},{width:12}];
-    addTitle(wsS, `رضا العملاء — ${qLabel} ${d.year}`, C.gold, 10);
-    addSub(wsS,'📊 مقارنة شهرية',C.gold,10);
-    sHdr(wsS.addRow(['الشهر','عدد الاستطلاعات','متوسط %','≥90%','70-89%','<70%','أعلى','أدنى','التغيير','التقييم']),C.gold);
-    months.forEach((m,idx)=>{
-      const ss=BM[m].surveys; const avg=BM[m].avgSurv; const prev=idx>0?BM[months[idx-1]].avgSurv:null;
-      const g=prev!==null&&prev>0?Math.round((avg-prev)/prev*100):null;
-      const r=wsS.addRow([MN[m],ss.length,avg+'%',ss.filter(s=>(s.satisfaction_pct||0)>=90).length,ss.filter(s=>{const p=s.satisfaction_pct||0;return p>=70&&p<90;}).length,ss.filter(s=>(s.satisfaction_pct||0)<70).length,ss.length?Math.max(...ss.map(s=>s.satisfaction_pct||0))+'%':'—',ss.length?Math.min(...ss.map(s=>s.satisfaction_pct||0))+'%':'—',g!==null?(g>=0?'+':'')+g+'%':'أول شهر',avg>=90?'✅ ممتاز':avg>=70?'⚠️':'❌ ضعيف']);
-      sRow(r,idx%2===0?C.ltG:C.white);
-      r.getCell(3).font={name:'Arial',bold:true,size:12,color:{argb:avg>=90?C.green:avg>=70?C.gold:C.red}};
-      [2,3,4,5,6,7,8,9,10].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
-    });
-    wsS.addRow([]);
-    wsS.addRow([]);
-    addSub(wsS,'📋 تفاصيل الاستطلاعات',C.gold,10);
-    sHdr(wsS.addRow(['#','اسم العميل','التاريخ','س1','س2','س3','س4','س5','النسبة %','التقييم']),C.gold);
-    [...d.surveys].sort((a,b)=>(b.satisfaction_pct||0)-(a.satisfaction_pct||0)).forEach((s,i)=>{
-      const pc=s.satisfaction_pct||0;
-      const r=wsS.addRow([i+1,s.client_name||'—',s.date||'',s.q1||0,s.q2||0,s.q3||0,s.q4||0,s.q5||0,pc+'%',pc>=90?'✅ ممتاز':pc>=70?'⚠️':'❌']);
-      sRow(r,i%2===0?C.ltG:C.white);
-      r.getCell(9).font={name:'Arial',bold:true,size:11,color:{argb:pc>=90?C.green:pc>=70?C.gold:C.red}};
-      [4,5,6,7,8,9,10].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
-    });
-  }
-
-  // ════════════════════════════════════════
-  // شيت ٦+٧+٨: كفاءة التشغيل (ديناميكي بالشهر)
-  // ════════════════════════════════════════
-  const makeOpsSheet = (data, secKey, sheetLabel, bg, ltBg) => {
-    if (!data.length) return;
-    const ws = wb.addWorksheet(sheetLabel);
-    ws.views = [{rightToLeft:true}];
-    ws.columns = [{width:6},{width:28},{width:14},{width:14},{width:14},{width:14},{width:16},{width:40}];
-    addTitle(ws, `${sheetLabel} — ${qLabel} ${d.year}`, bg, 8);
-
-    addSub(ws,'📊 مقارنة شهرية للكفاءة',bg,8);
-    sHdr(ws.addRow(['الشهر','عدد المدربين','متوسط الكفاءة','≥90%','70-89%','<70%','التغيير %','التوصية']),bg);
-    months.forEach((m,idx)=>{
-      const md = BM[m][secKey+'Ops'];
-      const avgKey = 'avg'+secKey.charAt(0).toUpperCase()+secKey.slice(1)+'Ops';
-      const avg = BM[m][avgKey];
-      const prev = idx>0 ? BM[months[idx-1]][avgKey] : null;
-      const g = prev!==null&&prev>0 ? Math.round((avg-prev)/prev*100) : null;
-      const rec = avg>=90?'✅ حقق الهدف':avg>=70?`⚠️ فجوة ${90-avg}%`:`❌ يحتاج تدخل (${90-avg}% عن الهدف)`;
-      const r = ws.addRow([MN[m], md.length, avg+'%', md.filter(r=>(r.efficiency_pct||0)>=90).length, md.filter(r=>{const e=r.efficiency_pct||0;return e>=70&&e<90;}).length, md.filter(r=>(r.efficiency_pct||0)<70).length, g!==null?(g>=0?'+':'')+g+'%':'أول شهر', rec]);
-      sRow(r,idx%2===0?ltBg:C.white);
-      r.getCell(3).font={name:'Arial',bold:true,size:12,color:{argb:avg>=90?C.green:avg>=70?C.gold:C.red}};
-      [2,3,4,5,6,7].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
-      if(g!==null) r.getCell(7).font={name:'Arial',bold:true,size:10,color:{argb:g>=0?C.green:C.red}};
-    });
-
-    ws.addRow([]);
-    addSub(ws,'📋 تفاصيل المدربين — مرتب تنازلياً',bg,8);
-    sHdr(ws.addRow(['#','اسم المدرب','الشهر','حصص منجزة','حصص مفترضة','المستفيدون','الكفاءة %','التوصية']),bg);
-    [...data].sort((a,b)=>(b.efficiency_pct||0)-(a.efficiency_pct||0)).forEach((r,i)=>{
-      const eff=r.efficiency_pct||0;
-      const mn = MN[parseInt(r.report_month)]||`شهر ${r.report_month}`;
-      const rec=eff>=90?'✅ ممتاز':eff>=70?'⚠️ يحتاج تحسين':'❌ يحتاج متابعة عاجلة';
-      const row=ws.addRow([i+1,r.trainer_name||'—',mn,r.sessions||0,r.available_hours?Math.round(r.available_hours/2):0,r.trainees||0,eff+'%',rec]);
-      sRow(row,i%2===0?ltBg:C.white);
-      row.getCell(7).font={name:'Arial',bold:true,size:11,color:{argb:eff>=90?C.green:eff>=70?C.gold:C.red}};
-      [3,4,5,6,7].forEach(n=>row.getCell(n).alignment={horizontal:'center',vertical:'middle'});
-    });
-  };
-  makeOpsSheet(femOps,  'fem',  '👩 كفاءة نسائي',   C.red,    C.ltR);
-  makeOpsSheet(malOps,  'mal',  '👨 كفاءة رجالي',   C.blue,   C.ltB);
-  makeOpsSheet(bikeOps, 'bike', '🏍️ كفاءة دراجات', C.gold,   C.ltG);
-
-  // ════════════════════════════════════════
-  // شيت ٩: تقييم المدربين (نسائي / رجالي)
-  // ════════════════════════════════════════
-  if ((d.ratings||[]).length) {
-    const wsR = wb.addWorksheet('🏅 تقييم المدربين');
-    wsR.views = [{rightToLeft:true}];
-    wsR.columns = [{width:6},{width:28},{width:14},{width:12},{width:14},{width:14},{width:40}];
-    addTitle(wsR, `تقييم المدربين — ${qLabel} ${d.year}`, C.orange, 7);
-
-    addSub(wsR,'📊 مقارنة شهرية للتقييم',C.orange,7);
-    sHdr(wsR.addRow(['الشهر','عدد التقييمات','متوسط /5','≥4 (ممتاز)','3-4 (جيد)','<3 (ضعيف)','التغيير']),C.orange);
-    months.forEach((m,idx)=>{
-      const rt=BM[m].ratings; const avg=BM[m].avgRating; const prev=idx>0?BM[months[idx-1]].avgRating:null;
-      const g=prev!==null&&prev>0?Math.round((avg-prev)/prev*100):null;
-      const r=wsR.addRow([MN[m],rt.length,avg>0?avg.toFixed(1):'—',rt.filter(r=>(r.rating||r.avg_rating||0)>=4).length,rt.filter(r=>{const v=r.rating||r.avg_rating||0;return v>=3&&v<4;}).length,rt.filter(r=>(r.rating||r.avg_rating||0)>0&&(r.rating||r.avg_rating||0)<3).length,g!==null?(g>=0?'+':'')+g+'%':'أول شهر']);
-      sRow(r,idx%2===0?C.ltG:C.white);
-      if(avg>0) r.getCell(3).font={name:'Arial',bold:true,size:12,color:{argb:avg>=4?C.green:avg>=3?C.gold:C.red}};
-      [2,3,4,5,6,7].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
-    });
-    wsR.addRow([]);
-
-    ['female','male'].forEach(sec=>{
-      const list=(d.ratings||[]).filter(r=>(r.section||r.zone)===sec);
-      if(!list.length) return;
-      const secLabel=sec==='female'?'👩 نسائي':'👨 رجالي';
-      const secColor=sec==='female'?C.red:C.blue;
-      const secBg=sec==='female'?C.ltR:C.ltB;
-      addSub(wsR,secLabel,secColor,7);
-      sHdr(wsR.addRow(['#','اسم المدرب','القسم','التاريخ / الشهر','التقييم /5','التصنيف','التوصية']),secColor);
-      [...list].sort((a,b)=>(b.rating||b.avg_rating||0)-(a.rating||a.avg_rating||0)).forEach((r,i)=>{
-        const rv=parseFloat(r.rating||r.avg_rating||0);
-        const cat=rv>=4?'✅ ممتاز':rv>=3?'⚠️ جيد':rv>=2?'⚠️ مقبول':'❌ ضعيف';
-        const rec=rv>=4?'يستحق تقدير وتحفيز':rv>=3?'أداء جيد — يحتاج تطوير':rv>=2?'يحتاج خطة تطوير':'يحتاج تدخل عاجل';
-        const mn=MN[parseInt((r.report_date||r.date||'').split('-')[1])]||`شهر ${r.report_month||'—'}`;
-        const row=wsR.addRow([i+1,r.trainer_name||r.name||'—',sec==='female'?'نسائي':'رجالي',mn,rv>0?rv.toFixed(2):'—',cat,rec]);
-        sRow(row,i%2===0?secBg:C.white);
-        if(rv>0) row.getCell(5).font={name:'Arial',bold:true,size:12,color:{argb:rv>=4?C.green:rv>=3?C.gold:C.red}};
-        [3,4,5,6].forEach(n=>row.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+    // ── أدوات ──
+    const addT = (ws, txt, bg, cols) => {
+      const r = ws.addRow([txt]);
+      try { ws.mergeCells(r.number,1,r.number,cols); } catch(e){}
+      r.getCell(1).font = {name:'Arial',bold:true,size:13,color:{argb:C.white}};
+      r.getCell(1).fill = {type:'pattern',pattern:'solid',fgColor:{argb:bg||C.dark}};
+      r.getCell(1).alignment = {horizontal:'center',vertical:'middle'};
+      r.height = 36;
+    };
+    const addS = (ws, txt, bg, cols) => {
+      ws.addRow([]);
+      const r = ws.addRow([txt]);
+      try { ws.mergeCells(r.number,1,r.number,cols); } catch(e){}
+      r.getCell(1).font = {name:'Arial',bold:true,size:11,color:{argb:C.white}};
+      r.getCell(1).fill = {type:'pattern',pattern:'solid',fgColor:{argb:bg||C.teal}};
+      r.getCell(1).alignment = {horizontal:'right',vertical:'middle'};
+      r.height = 26;
+    };
+    const sH = (row, bg) => {
+      row.height = 26;
+      row.eachCell({includeEmpty:true}, c => {
+        c.font = {name:'Arial',bold:true,size:10,color:{argb:C.white}};
+        c.fill = {type:'pattern',pattern:'solid',fgColor:{argb:bg||C.teal}};
+        c.alignment = {horizontal:'center',vertical:'middle'};
       });
-      // متوسط القسم
-      const secAvg=list.length?Math.round(list.reduce((s,r)=>s+(r.rating||r.avg_rating||0),0)/list.length*10)/10:0;
-      const ar=wsR.addRow(['','متوسط القسم','','',secAvg>0?secAvg.toFixed(2):'—','','']);
-      ar.getCell(2).font={name:'Arial',bold:true,size:11};
-      if(secAvg>0) ar.getCell(5).font={name:'Arial',bold:true,size:13,color:{argb:secAvg>=4?C.green:secAvg>=3?C.gold:C.red}};
-      ar.getCell(5).alignment={horizontal:'center',vertical:'middle'};
-      wsR.addRow([]);
+    };
+    const sR = (row, bg) => {
+      row.height = 20;
+      row.eachCell({includeEmpty:true}, c => {
+        c.font = {name:'Arial',size:10};
+        c.fill = {type:'pattern',pattern:'solid',fgColor:{argb:bg||C.white}};
+        c.alignment = {vertical:'middle'};
+      });
+    };
+    const gr = (prev, cur) => {
+      if (!prev) return '—';
+      const p = Math.round((cur - prev) / prev * 100);
+      return (p >= 0 ? '↑ +' : '↓ ') + Math.abs(p) + '%';
+    };
+    const grC = (prev, cur, goodUp) => {
+      if (!prev) return C.dark;
+      return (goodUp ? cur > prev : cur < prev) ? C.green : C.red;
+    };
+    const ec = (v, hi) => hi
+      ? (v >= 90 ? C.green : v >= 70 ? C.gold : C.red)
+      : (v <= 5  ? C.green : v <= 15 ? C.gold : C.red);
+
+    // ── بيانات مقسمة بالشهر ──
+    const BM = {};
+    months.forEach(m => {
+      const ms = String(m).padStart(2,'0'), mStr = String(m);
+      const inM = (arr, key) => (arr||[]).filter(r => {
+        const dt = r[key]||r.date||r.report_date||'';
+        return dt.includes(`-${ms}-`) || String(r.report_month||'') === mStr;
+      });
+      const fv = inM(safeD.violations,'date').filter(v=>v.section==='female');
+      const mv = inM(safeD.violations,'date').filter(v=>v.section==='male');
+      const ss = inM(safeD.surveys,'date');
+      const fo = safeD.ops.filter(r=>r.zone==='female'&&String(r.report_month||'')==mStr);
+      const mo = safeD.ops.filter(r=>r.zone==='male'  &&String(r.report_month||'')==mStr);
+      const bo = safeD.ops.filter(r=>r.zone==='bike'  &&String(r.report_month||'')==mStr);
+      const rt = inM(safeD.ratings,'report_date');
+      const sl = inM(safeD.sales,'report_date');
+      const ic = inM(safeD.incentives,'report_date');
+      BM[m] = {
+        label: MN[m]||String(m),
+        fv, mv, ss, fo, mo, bo, rt, sl, ic,
+        avgS:  ss.length ? Math.round(ss.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/ss.length) : 0,
+        avgFO: fo.length ? Math.round(fo.reduce((s,r)=>s+(r.efficiency_pct||0),0)/fo.length)   : 0,
+        avgMO: mo.length ? Math.round(mo.reduce((s,r)=>s+(r.efficiency_pct||0),0)/mo.length)   : 0,
+        avgBO: bo.length ? Math.round(bo.reduce((s,r)=>s+(r.efficiency_pct||0),0)/bo.length)   : 0,
+        avgR:  rt.length ? Math.round(rt.reduce((s,r)=>s+(r.rating||r.avg_rating||0),0)/rt.length*10)/10 : 0,
+        totSl: sl.reduce((s,r)=>s+parseFloat(r.total_amount||r.amount||r.revenue||0),0),
+      };
     });
-  }
 
-  // ════════════════════════════════════════
-  // شيت ١٠: المبيعات
-  // ════════════════════════════════════════
-  if ((d.sales||[]).length) {
-    const wsSal = wb.addWorksheet('💼 المبيعات');
-    wsSal.views = [{rightToLeft:true}];
-    wsSal.columns = [{width:6},{width:20},{width:20},{width:18},{width:18},{width:15}];
-    addTitle(wsSal, `تقارير المبيعات — ${qLabel} ${d.year}`, C.purple, 6);
+    // إجماليات
+    const femV  = safeD.violations.filter(v=>v.section==='female');
+    const malV  = safeD.violations.filter(v=>v.section==='male');
+    const femO  = safeD.ops.filter(r=>r.zone==='female');
+    const malO  = safeD.ops.filter(r=>r.zone==='male');
+    const bikO  = safeD.ops.filter(r=>r.zone==='bike');
+    const avgS  = safeD.surveys.length  ? Math.round(safeD.surveys.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/safeD.surveys.length) : 0;
+    const avgFO = femO.length ? Math.round(femO.reduce((s,r)=>s+(r.efficiency_pct||0),0)/femO.length) : 0;
+    const avgMO = malO.length ? Math.round(malO.reduce((s,r)=>s+(r.efficiency_pct||0),0)/malO.length) : 0;
+    const avgBO = bikO.length ? Math.round(bikO.reduce((s,r)=>s+(r.efficiency_pct||0),0)/bikO.length) : 0;
+    const avgR  = safeD.ratings.length  ? Math.round(safeD.ratings.reduce((s,r)=>s+(r.rating||r.avg_rating||0),0)/safeD.ratings.length*10)/10 : 0;
+    const totSl = safeD.sales.reduce((s,r)=>s+parseFloat(r.total_amount||r.amount||r.revenue||0),0);
+    const totIn = safeD.incentives.reduce((s,r)=>s+parseFloat(r.amount||r.total||0),0);
 
-    addSub(wsSal,'📊 مقارنة شهرية',C.purple,6);
-    sHdr(wsSal.addRow(['الشهر','عدد السجلات','إجمالي المبيعات','التغيير %','أعلى صفقة','التقييم']),C.purple);
-    months.forEach((m,idx)=>{
-      const sm=BM[m].sales; const tot=BM[m].totalSales; const prev=idx>0?BM[months[idx-1]].totalSales:null;
-      const g=prev!==null&&prev>0?Math.round((tot-prev)/prev*100):null;
-      const maxSale=sm.length?Math.max(...sm.map(r=>parseFloat(r.total_amount||r.amount||r.revenue||0))):0;
-      const r=wsSal.addRow([MN[m],sm.length,tot.toLocaleString()+' ريال',g!==null?(g>=0?'+':'')+g+'%':' — ',maxSale.toLocaleString()+' ريال',tot>0?'✅ يوجد مبيعات':'— لا بيانات']);
-      sRow(r,idx%2===0?C.ltP:C.white);
-      r.getCell(3).font={name:'Arial',bold:true,size:11,color:{argb:tot>0?C.green:C.dark}};
-      [2,3,4,5,6].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
-      if(g!==null) r.getCell(4).font={name:'Arial',bold:true,size:10,color:{argb:g>=0?C.green:C.red}};
+    // ═══════════════════════════════════════
+    // شيت ١: الملخص التنفيذي
+    // ═══════════════════════════════════════
+    const ws1 = wb.addWorksheet('📋 الملخص التنفيذي');
+    ws1.views = [{rightToLeft:true}];
+    ws1.columns = [{width:30},{width:14},{width:14},{width:14},{width:16},{width:14},{width:40}];
+    addT(ws1, `التقرير الربعي — ${qLabel} ${safeD.year}`, C.dark, 7);
+    addS(ws1,'📊 مقارنة شهرية',C.teal,7);
+    sH(ws1.addRow(['المؤشر',BM[m1].label,BM[m2].label,BM[m3].label,'مجموع/متوسط','التوجه','التوصية']),C.teal);
+    [
+      ['مخالفات نسائي',BM[m1].fv.length,BM[m2].fv.length,BM[m3].fv.length,femV.length,false],
+      ['مخالفات رجالي',BM[m1].mv.length,BM[m2].mv.length,BM[m3].mv.length,malV.length,false],
+      ['رضا العملاء %',BM[m1].avgS,BM[m2].avgS,BM[m3].avgS,avgS,true],
+      ['كفاءة نسائي %',BM[m1].avgFO,BM[m2].avgFO,BM[m3].avgFO,avgFO,true],
+      ['كفاءة رجالي %',BM[m1].avgMO,BM[m2].avgMO,BM[m3].avgMO,avgMO,true],
+      ['كفاءة دراجات %',BM[m1].avgBO,BM[m2].avgBO,BM[m3].avgBO,avgBO,true],
+      ['تقييم المدربين',BM[m1].avgR,BM[m2].avgR,BM[m3].avgR,avgR,true],
+      ['المبيعات (ريال)',BM[m1].totSl,BM[m2].totSl,BM[m3].totSl,totSl,true],
+      ['المرافق+المبنى',BM[m1].ic.length,BM[m2].ic.length,BM[m3].ic.length,safeD.facilities.length+safeD.buildings.length,false],
+    ].forEach((row,i) => {
+      const [label,v1,v2,v3,tot,goodHigh] = row;
+      const trend = v3>v2&&v2>=v1?'📈':v3<v2&&v2<=v1?'📉':v3>v1?'↗':v3<v1?'↘':'→';
+      const g13 = v1>0?Math.round((v3-v1)/v1*100):0;
+      const rec = goodHigh?(g13>10?`نمو ${g13}% ✅`:g13<-10?`تراجع ${Math.abs(g13)}% ⚠️`:'مستقر'):(g13<-10?`تحسن ✅`:g13>10?`زيادة ⚠️`:'مستقر');
+      const r = ws1.addRow([label,v1||0,v2||0,v3||0,tot||0,trend,rec]);
+      sR(r, i%2===0?C.lt:C.white);
+      r.getCell(1).font={name:'Arial',bold:true,size:10};
+      [2,3,4,5].forEach(n=>{r.getCell(n).alignment={horizontal:'center',vertical:'middle'};});
     });
-    wsSal.addRow([]);
 
-    addSub(wsSal,'📋 تفاصيل المبيعات',C.purple,6);
-    const salKeys=Object.keys((d.sales||[])[0]||{notes:'',date:'',amount:''});
-    const cols=['#',...salKeys.slice(0,5)];
-    wsSal.columns = cols.map((c,i)=>({header:c,width:i===0?6:22}));
-    sHdr(wsSal.addRow(cols),C.purple);
-    d.sales.forEach((r,i)=>{
-      const row=wsSal.addRow([i+1,...salKeys.slice(0,5).map(k=>r[k]||'')]);
-      sRow(row,i%2===0?C.ltP:C.white);
+    addS(ws1,'📈 نسب التغيير بين الأشهر',C.purple,7);
+    sH(ws1.addRow(['المؤشر',`${MN[m1]}→${MN[m2]}`,`${MN[m2]}→${MN[m3]}`,`${MN[m1]}→${MN[m3]}`,'التقييم','','التوصية']),C.purple);
+    [
+      ['مخالفات نسائي',BM[m1].fv.length,BM[m2].fv.length,BM[m3].fv.length,false],
+      ['مخالفات رجالي',BM[m1].mv.length,BM[m2].mv.length,BM[m3].mv.length,false],
+      ['رضا العملاء',BM[m1].avgS,BM[m2].avgS,BM[m3].avgS,true],
+      ['كفاءة نسائي',BM[m1].avgFO,BM[m2].avgFO,BM[m3].avgFO,true],
+      ['كفاءة رجالي',BM[m1].avgMO,BM[m2].avgMO,BM[m3].avgMO,true],
+    ].forEach((row,i)=>{
+      const [label,v1,v2,v3,goodHigh]=row;
+      const g12=v1>0?Math.round((v2-v1)/v1*100):0;
+      const g23=v2>0?Math.round((v3-v2)/v2*100):0;
+      const g13=v1>0?Math.round((v3-v1)/v1*100):0;
+      const ok=goodHigh?g13>0:g13<0;
+      const r=ws1.addRow([label,(g12>=0?'+':'')+g12+'%',(g23>=0?'+':'')+g23+'%',(g13>=0?'+':'')+g13+'%',ok?'✅ تحسن':g13===0?'→ مستقر':'⚠️ تراجع','',ok?'استمر على هذا المسار':'يحتاج مراجعة']);
+      sR(r,i%2===0?C.lt:C.white);
+      [2,3,4,5].forEach(n=>{
+        const val=parseInt(r.getCell(n).value);
+        r.getCell(n).font={name:'Arial',bold:true,size:10,color:{argb:(goodHigh?val>0:val<0)?C.green:val===0?C.dark:C.red}};
+        r.getCell(n).alignment={horizontal:'center',vertical:'middle'};
+      });
     });
 
-    // إجمالي
-    wsSal.addRow([]);
-    const totRow=wsSal.addRow(['','الإجمالي',(d.sales||[]).length+' سجل',totalSalesQ.toLocaleString()+' ريال','','']);
-    totRow.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',bold:true,size:12};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:C.lt}};});
-    totRow.getCell(4).font={name:'Arial',bold:true,size:13,color:{argb:C.green}};
-  }
+    // ═══════════════════════════════════════
+    // شيت ٢: KPIs الشاملة
+    // ═══════════════════════════════════════
+    const ws2 = wb.addWorksheet('🎯 KPIs الشاملة');
+    ws2.views = [{rightToLeft:true}];
+    ws2.columns = [{width:32},{width:14},{width:14},{width:14},{width:18},{width:40}];
+    addT(ws2,`KPIs — ${qLabel} ${safeD.year}`,C.dark,6);
+    const kBlocks = [
+      {t:'⚖️ مخالفات نسائي',c:C.red,rows:[
+        ['إجمالي',BM[m1].fv.length,BM[m2].fv.length,BM[m3].fv.length,femV.length,femV.length<5?'✅ ممتاز':'⚠️ مرتفع'],
+        ['درجة A',BM[m1].fv.filter(v=>v.grade==='A').length,BM[m2].fv.filter(v=>v.grade==='A').length,BM[m3].fv.filter(v=>v.grade==='A').length,femV.filter(v=>v.grade==='A').length,femV.filter(v=>v.grade==='A').length===0?'✅ لا مخالفات خطيرة':'❌ إجراء فوري'],
+        ['درجة B',BM[m1].fv.filter(v=>v.grade==='B').length,BM[m2].fv.filter(v=>v.grade==='B').length,BM[m3].fv.filter(v=>v.grade==='B').length,femV.filter(v=>v.grade==='B').length,''],
+        ['درجة C',BM[m1].fv.filter(v=>v.grade==='C').length,BM[m2].fv.filter(v=>v.grade==='C').length,BM[m3].fv.filter(v=>v.grade==='C').length,femV.filter(v=>v.grade==='C').length,''],
+      ]},
+      {t:'⚖️ مخالفات رجالي',c:C.blue,rows:[
+        ['إجمالي',BM[m1].mv.length,BM[m2].mv.length,BM[m3].mv.length,malV.length,malV.length<5?'✅ ممتاز':'⚠️ مرتفع'],
+        ['درجة A',BM[m1].mv.filter(v=>v.grade==='A').length,BM[m2].mv.filter(v=>v.grade==='A').length,BM[m3].mv.filter(v=>v.grade==='A').length,malV.filter(v=>v.grade==='A').length,malV.filter(v=>v.grade==='A').length===0?'✅':'❌ إجراء فوري'],
+        ['درجة B',BM[m1].mv.filter(v=>v.grade==='B').length,BM[m2].mv.filter(v=>v.grade==='B').length,BM[m3].mv.filter(v=>v.grade==='B').length,malV.filter(v=>v.grade==='B').length,''],
+        ['درجة C',BM[m1].mv.filter(v=>v.grade==='C').length,BM[m2].mv.filter(v=>v.grade==='C').length,BM[m3].mv.filter(v=>v.grade==='C').length,malV.filter(v=>v.grade==='C').length,''],
+      ]},
+      {t:'⭐ رضا العملاء',c:C.gold,rows:[
+        ['متوسط %',BM[m1].avgS,BM[m2].avgS,BM[m3].avgS,avgS,avgS>=90?'✅ ممتاز':avgS>=70?'⚠️ تحسين':'❌ ضعيف'],
+        ['عدد الاستطلاعات',BM[m1].ss.length,BM[m2].ss.length,BM[m3].ss.length,safeD.surveys.length,''],
+        ['≥90%',BM[m1].ss.filter(s=>(s.satisfaction_pct||0)>=90).length,BM[m2].ss.filter(s=>(s.satisfaction_pct||0)>=90).length,BM[m3].ss.filter(s=>(s.satisfaction_pct||0)>=90).length,safeD.surveys.filter(s=>(s.satisfaction_pct||0)>=90).length,''],
+      ]},
+      {t:'⚙️ كفاءة نسائي',c:C.red,rows:[
+        ['متوسط %',BM[m1].avgFO,BM[m2].avgFO,BM[m3].avgFO,avgFO,avgFO>=90?'✅ حقق الهدف':'⚠️ فجوة '+(90-avgFO)+'%'],
+        ['عدد المدربات',BM[m1].fo.length,BM[m2].fo.length,BM[m3].fo.length,femO.length,''],
+        ['≥90%',BM[m1].fo.filter(r=>(r.efficiency_pct||0)>=90).length,BM[m2].fo.filter(r=>(r.efficiency_pct||0)>=90).length,BM[m3].fo.filter(r=>(r.efficiency_pct||0)>=90).length,femO.filter(r=>(r.efficiency_pct||0)>=90).length,''],
+      ]},
+      {t:'⚙️ كفاءة رجالي',c:C.blue,rows:[
+        ['متوسط %',BM[m1].avgMO,BM[m2].avgMO,BM[m3].avgMO,avgMO,avgMO>=90?'✅ حقق الهدف':'⚠️ فجوة '+(90-avgMO)+'%'],
+        ['عدد المدربين',BM[m1].mo.length,BM[m2].mo.length,BM[m3].mo.length,malO.length,''],
+        ['≥90%',BM[m1].mo.filter(r=>(r.efficiency_pct||0)>=90).length,BM[m2].mo.filter(r=>(r.efficiency_pct||0)>=90).length,BM[m3].mo.filter(r=>(r.efficiency_pct||0)>=90).length,malO.filter(r=>(r.efficiency_pct||0)>=90).length,''],
+      ]},
+      {t:'⚙️ كفاءة دراجات',c:C.gold,rows:[
+        ['متوسط %',BM[m1].avgBO,BM[m2].avgBO,BM[m3].avgBO,avgBO,avgBO>=90?'✅ حقق الهدف':'⚠️ فجوة '+(90-avgBO)+'%'],
+        ['عدد المدربين',BM[m1].bo.length,BM[m2].bo.length,BM[m3].bo.length,bikO.length,''],
+      ]},
+      {t:'🏅 تقييم المدربين',c:C.orange,rows:[
+        ['متوسط /5',BM[m1].avgR,BM[m2].avgR,BM[m3].avgR,avgR,avgR>=4?'✅ ممتاز':avgR>=3?'⚠️ جيد':avgR>0?'❌ يحتاج تحسين':'— لا بيانات'],
+        ['عدد التقييمات',BM[m1].rt.length,BM[m2].rt.length,BM[m3].rt.length,safeD.ratings.length,''],
+      ]},
+      {t:'💼 المبيعات',c:C.purple,rows:[
+        ['إجمالي (ريال)',BM[m1].totSl.toLocaleString(),BM[m2].totSl.toLocaleString(),BM[m3].totSl.toLocaleString(),totSl.toLocaleString(),totSl>0?'✅ يوجد بيانات':'— لا بيانات'],
+        ['عدد السجلات',BM[m1].sl.length,BM[m2].sl.length,BM[m3].sl.length,safeD.sales.length,''],
+      ]},
+      {t:'🏆 الحوافز الشهرية',c:C.gold,rows:[
+        ['عدد السجلات',BM[m1].ic.length,BM[m2].ic.length,BM[m3].ic.length,safeD.incentives.length,''],
+        ['إجمالي (ريال)',BM[m1].ic.reduce((s,r)=>s+parseFloat(r.amount||r.total||0),0).toLocaleString(),BM[m2].ic.reduce((s,r)=>s+parseFloat(r.amount||r.total||0),0).toLocaleString(),BM[m3].ic.reduce((s,r)=>s+parseFloat(r.amount||r.total||0),0).toLocaleString(),totIn.toLocaleString(),''],
+      ]},
+      {t:'🔧 المرافق والمبنى',c:C.blue,rows:[
+        ['ملاحظات مرافق',BM[m1].ic.length,BM[m2].ic.length,BM[m3].ic.length,safeD.facilities.length,''],
+        ['تقارير مبنى',0,0,0,safeD.buildings.length,''],
+      ]},
+    ];
+    kBlocks.forEach(block=>{
+      addS(ws2,block.t,block.c,6);
+      sH(ws2.addRow(['المؤشر',BM[m1].label,BM[m2].label,BM[m3].label,'الربع','التقييم']),block.c);
+      block.rows.forEach((row,i)=>{
+        const r=ws2.addRow(row.slice(0,6));
+        sR(r,i%2===0?C.lt:C.white);
+        r.getCell(1).font={name:'Arial',bold:true,size:10};
+        [2,3,4,5].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+      });
+    });
 
-  // تنزيل
-  const buf=await wb.xlsx.writeBuffer();
-  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download=`التقرير_الربعي_Q${d.q}_${d.year}.xlsx`;
-  a.style.display='none';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(()=>{ try{document.body.removeChild(a);}catch(e){} URL.revokeObjectURL(url); }, 100);
+    // ═══════════════════════════════════════
+    // شيت ٣ + ٤: المخالفات
+    // ═══════════════════════════════════════
+    const addViolSheet = (vList, bmKey, label, bg, ltBg) => {
+      if (!vList || !vList.length) return;
+      const ws = wb.addWorksheet(label);
+      ws.views=[{rightToLeft:true}];
+      ws.columns=[{width:5},{width:28},{width:38},{width:10},{width:12},{width:14}];
+      addT(ws,`${label} — ${qLabel} ${safeD.year}`,bg,6);
+      addS(ws,'📊 توزيع شهري',bg,6);
+      sH(ws.addRow(['الشهر','إجمالي','A','B','C','التغيير']),bg);
+      months.forEach((m,idx)=>{
+        const mv=BM[m][bmKey]||[];
+        const prev=idx>0?(BM[months[idx-1]][bmKey]||[]).length:null;
+        const g=prev!==null&&prev>0?Math.round((mv.length-prev)/prev*100):null;
+        const r=ws.addRow([MN[m],mv.length,mv.filter(v=>v.grade==='A').length,mv.filter(v=>v.grade==='B').length,mv.filter(v=>v.grade==='C').length,g!==null?(g>=0?'+':'')+g+'%':'—']);
+        sR(r,idx%2===0?ltBg:C.white);
+        r.getCell(2).font={name:'Arial',bold:true,size:11,color:{argb:mv.length<5?C.green:mv.length<15?C.gold:C.red}};
+        [2,3,4,5,6].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+        if(g!==null)r.getCell(6).font={name:'Arial',bold:true,size:10,color:{argb:g<=0?C.green:C.red}};
+      });
+      ws.addRow([]);
+      addS(ws,'📋 التفاصيل',bg,6);
+      sH(ws.addRow(['#','الاسم','نوع المخالفة','الدرجة','التاريخ','المشرف']),bg);
+      vList.forEach((v,i)=>{
+        const r=ws.addRow([i+1,v.trainer_name||'—',(v.violation_type||'').split('|')[0].trim().slice(0,45),v.grade||'—',v.date||'',v.observer||'']);
+        sR(r,i%2===0?ltBg:C.white);
+        const gc=v.grade==='A'?C.red:v.grade==='B'?C.gold:C.green;
+        r.getCell(4).font={name:'Arial',bold:true,size:11,color:{argb:gc}};
+        r.getCell(4).alignment={horizontal:'center',vertical:'middle'};
+      });
+    };
+    addViolSheet(femV,'fv','👩 مخالفات نسائي',C.red,C.ltR);
+    addViolSheet(malV,'mv','👨 مخالفات رجالي',C.blue,C.ltB);
+
+    // ═══════════════════════════════════════
+    // شيت ٥: رضا العملاء
+    // ═══════════════════════════════════════
+    if (safeD.surveys.length) {
+      const ws5 = wb.addWorksheet('⭐ رضا العملاء');
+      ws5.views=[{rightToLeft:true}];
+      ws5.columns=[{width:5},{width:22},{width:12},{width:10},{width:10},{width:10},{width:10},{width:10},{width:14}];
+      addT(ws5,`رضا العملاء — ${qLabel} ${safeD.year}`,C.gold,9);
+      addS(ws5,'📊 مقارنة شهرية',C.gold,9);
+      sH(ws5.addRow(['الشهر','استطلاعات','متوسط %','≥90%','70-89%','<70%','أعلى','أدنى','التغيير']),C.gold);
+      months.forEach((m,idx)=>{
+        const ss=BM[m].ss||[];const avg=BM[m].avgS;const prev=idx>0?BM[months[idx-1]].avgS:null;
+        const g=prev!==null&&prev>0?Math.round((avg-prev)/prev*100):null;
+        const r=ws5.addRow([MN[m],ss.length,avg+'%',ss.filter(s=>(s.satisfaction_pct||0)>=90).length,ss.filter(s=>{const p=s.satisfaction_pct||0;return p>=70&&p<90;}).length,ss.filter(s=>(s.satisfaction_pct||0)<70).length,ss.length?Math.max(...ss.map(s=>s.satisfaction_pct||0))+'%':'—',ss.length?Math.min(...ss.map(s=>s.satisfaction_pct||0))+'%':'—',g!==null?(g>=0?'+':'')+g+'%':'—']);
+        sR(r,idx%2===0?C.ltG:C.white);
+        r.getCell(3).font={name:'Arial',bold:true,size:11,color:{argb:avg>=90?C.green:avg>=70?C.gold:C.red}};
+        [2,3,4,5,6,7,8,9].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+      });
+      ws5.addRow([]);
+      addS(ws5,'📋 التفاصيل',C.gold,9);
+      sH(ws5.addRow(['#','اسم العميل','التاريخ','س1','س2','س3','س4','س5','النسبة %']),C.gold);
+      [...safeD.surveys].sort((a,b)=>(b.satisfaction_pct||0)-(a.satisfaction_pct||0)).forEach((s,i)=>{
+        const pc=s.satisfaction_pct||0;
+        const r=ws5.addRow([i+1,s.client_name||'—',s.date||'',s.q1||0,s.q2||0,s.q3||0,s.q4||0,s.q5||0,pc+'%']);
+        sR(r,i%2===0?C.ltG:C.white);
+        r.getCell(9).font={name:'Arial',bold:true,size:11,color:{argb:pc>=90?C.green:pc>=70?C.gold:C.red}};
+        [4,5,6,7,8,9].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+      });
+    }
+
+    // ═══════════════════════════════════════
+    // شيت ٦+٧+٨: كفاءة التشغيل
+    // ═══════════════════════════════════════
+    const addOpsSheet = (ops, bmKey, avgKey, label, bg, ltBg) => {
+      if (!ops||!ops.length) return;
+      const ws=wb.addWorksheet(label);
+      ws.views=[{rightToLeft:true}];
+      ws.columns=[{width:5},{width:28},{width:12},{width:14},{width:14},{width:14},{width:14},{width:38}];
+      addT(ws,`${label} — ${qLabel} ${safeD.year}`,bg,8);
+      addS(ws,'📊 مقارنة شهرية',bg,8);
+      sH(ws.addRow(['الشهر','عدد','متوسط %','≥90%','70-89%','<70%','التغيير','التوصية']),bg);
+      months.forEach((m,idx)=>{
+        const md=BM[m][bmKey]||[];const avg=BM[m][avgKey]||0;const prev=idx>0?BM[months[idx-1]][avgKey]||0:null;
+        const g=prev!==null&&prev>0?Math.round((avg-prev)/prev*100):null;
+        const rec=avg>=90?'✅ حقق الهدف':avg>=70?`⚠️ فجوة ${90-avg}%`:`❌ تحت الهدف`;
+        const r=ws.addRow([MN[m],md.length,avg+'%',md.filter(r=>(r.efficiency_pct||0)>=90).length,md.filter(r=>{const e=r.efficiency_pct||0;return e>=70&&e<90;}).length,md.filter(r=>(r.efficiency_pct||0)<70).length,g!==null?(g>=0?'+':'')+g+'%':'—',rec]);
+        sR(r,idx%2===0?ltBg:C.white);
+        r.getCell(3).font={name:'Arial',bold:true,size:11,color:{argb:avg>=90?C.green:avg>=70?C.gold:C.red}};
+        [2,3,4,5,6,7].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+      });
+      ws.addRow([]);
+      addS(ws,'📋 تفاصيل المدربين',bg,8);
+      sH(ws.addRow(['#','الاسم','الشهر','حصص منجزة','حصص مفترضة','المستفيدون','الكفاءة %','التوصية']),bg);
+      [...ops].sort((a,b)=>(b.efficiency_pct||0)-(a.efficiency_pct||0)).forEach((t,i)=>{
+        const eff=t.efficiency_pct||0;
+        const mn=MN[parseInt(t.report_month)]||`شهر ${t.report_month||''}`;
+        const rec=eff>=90?'✅ ممتاز':eff>=70?'⚠️ يحتاج تحسين':'❌ متابعة عاجلة';
+        const r=ws.addRow([i+1,t.trainer_name||'—',mn,t.sessions||t.actualSessions||0,t.expectedSessions||0,t.trainees||0,eff+'%',rec]);
+        sR(r,i%2===0?ltBg:C.white);
+        r.getCell(7).font={name:'Arial',bold:true,size:11,color:{argb:eff>=90?C.green:eff>=70?C.gold:C.red}};
+        [3,4,5,6,7].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+      });
+    };
+    addOpsSheet(femO,'fo','avgFO','👩 كفاءة نسائي',C.red,C.ltR);
+    addOpsSheet(malO,'mo','avgMO','👨 كفاءة رجالي',C.blue,C.ltB);
+    addOpsSheet(bikO,'bo','avgBO','🏍️ كفاءة دراجات',C.gold,C.ltG);
+
+    // ═══════════════════════════════════════
+    // شيت ٩: تقييم المدربين
+    // ═══════════════════════════════════════
+    if (safeD.ratings.length) {
+      const ws9=wb.addWorksheet('🏅 تقييم المدربين');
+      ws9.views=[{rightToLeft:true}];
+      ws9.columns=[{width:5},{width:28},{width:14},{width:12},{width:14},{width:38}];
+      addT(ws9,`تقييم المدربين — ${qLabel} ${safeD.year}`,C.orange,6);
+      ['female','male'].forEach(sec=>{
+        const list=safeD.ratings.filter(r=>(r.section||r.zone)===sec);
+        if(!list.length)return;
+        const label=sec==='female'?'👩 نسائي':'👨 رجالي';
+        const bg=sec==='female'?C.red:C.blue;
+        const ltBg=sec==='female'?C.ltR:C.ltB;
+        addS(ws9,label,bg,6);
+        sH(ws9.addRow(['#','الاسم','التاريخ','التقييم /5','التصنيف','التوصية']),bg);
+        const secAvg=list.length?Math.round(list.reduce((s,r)=>s+(r.rating||r.avg_rating||0),0)/list.length*10)/10:0;
+        [...list].sort((a,b)=>(b.rating||b.avg_rating||0)-(a.rating||a.avg_rating||0)).forEach((r,i)=>{
+          const rv=parseFloat(r.rating||r.avg_rating||0);
+          const cat=rv>=4?'✅ ممتاز':rv>=3?'⚠️ جيد':rv>=2?'⚠️ مقبول':'❌ ضعيف';
+          const rec=rv>=4?'يستحق تحفيز':rv>=3?'يحتاج تطوير':rv>=2?'خطة تطوير':'تدخل عاجل';
+          const row=ws9.addRow([i+1,r.trainer_name||r.name||'—',r.report_date||r.date||'',rv>0?rv.toFixed(2):'—',cat,rec]);
+          sR(row,i%2===0?ltBg:C.white);
+          if(rv>0)row.getCell(4).font={name:'Arial',bold:true,size:12,color:{argb:rv>=4?C.green:rv>=3?C.gold:C.red}};
+          [3,4,5].forEach(n=>row.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+        });
+        const ar=ws9.addRow(['','متوسط القسم','',secAvg>0?secAvg.toFixed(2):'—','','']);
+        ar.getCell(2).font={name:'Arial',bold:true,size:11};
+        if(secAvg>0)ar.getCell(4).font={name:'Arial',bold:true,size:13,color:{argb:secAvg>=4?C.green:secAvg>=3?C.gold:C.red}};
+        ar.getCell(4).alignment={horizontal:'center',vertical:'middle'};
+      });
+    }
+
+    // ═══════════════════════════════════════
+    // شيت ١٠: المبيعات
+    // ═══════════════════════════════════════
+    if (safeD.sales.length) {
+      const ws10=wb.addWorksheet('💼 المبيعات');
+      ws10.views=[{rightToLeft:true}];
+      ws10.columns=[{width:5},{width:20},{width:20},{width:18},{width:15}];
+      addT(ws10,`المبيعات — ${qLabel} ${safeD.year}`,C.purple,5);
+      addS(ws10,'📊 مقارنة شهرية',C.purple,5);
+      sH(ws10.addRow(['الشهر','عدد السجلات','إجمالي الريال','التغيير','التقييم']),C.purple);
+      months.forEach((m,idx)=>{
+        const sl=BM[m].sl||[];const tot=BM[m].totSl||0;const prev=idx>0?BM[months[idx-1]].totSl||0:null;
+        const g=prev!==null&&prev>0?Math.round((tot-prev)/prev*100):null;
+        const r=ws10.addRow([MN[m],sl.length,tot.toLocaleString()+'ريال',g!==null?(g>=0?'+':'')+g+'%':'—',tot>0?'✅ يوجد':'—']);
+        sR(r,idx%2===0?'FFF3E8FE':C.white);
+        r.getCell(3).font={name:'Arial',bold:true,size:11,color:{argb:tot>0?C.green:C.dark}};
+        [2,3,4,5].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+      });
+    }
+
+    // ═══════════════════════════════════════
+    // شيت ١١: الحوافز
+    // ═══════════════════════════════════════
+    if (safeD.incentives.length) {
+      const ws11=wb.addWorksheet('🏆 الحوافز');
+      ws11.views=[{rightToLeft:true}];
+      ws11.columns=[{width:5},{width:28},{width:14},{width:12},{width:14}];
+      addT(ws11,`الحوافز الشهرية — ${qLabel} ${safeD.year}`,C.gold,5);
+      addS(ws11,'📊 توزيع الحوافز',C.gold,5);
+      sH(ws11.addRow(['#','الاسم','القسم','الشهر','المبلغ (ريال)']),C.gold);
+      [...safeD.incentives].sort((a,b)=>(b.amount||b.total||0)-(a.amount||a.total||0)).forEach((r,i)=>{
+        const row=ws11.addRow([i+1,r.trainer_name||r.name||'—',r.section||r.zone||'—',MN[parseInt(r.month)]||r.month||'—',(r.amount||r.total||0).toLocaleString()]);
+        sR(row,i%2===0?C.ltG:C.white);
+        row.getCell(5).font={name:'Arial',bold:true,size:11,color:{argb:C.gold}};
+        [3,4,5].forEach(n=>row.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+      });
+    }
+
+    // ═══════════════════════════════════════
+    // تنزيل
+    // ═══════════════════════════════════════
+    const buf  = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `التقرير_الربعي_Q${safeD.q}_${safeD.year}.xlsx`;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      try { document.body.removeChild(a); } catch(e){}
+      URL.revokeObjectURL(url);
+    }, 300);
     toast(`✅ تم تصدير التقرير — ${wb.worksheets.length} شيتات`);
+
   } catch(err) {
     console.error('Export error:', err);
     toast('❌ خطأ في التصدير: ' + err.message);
   }
 }
+
+
+
 
 
 // ══ تثبيت + تصدير التقييم ══
