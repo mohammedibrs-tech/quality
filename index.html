@@ -2731,7 +2731,7 @@ async function submitViolation(){
   const _vKey = (rows[0]?.date||new Date().toISOString().slice(0,10)).slice(0,7);
   if(_vKey){
     if(!PINNED_DATA.violations[_vKey]) PINNED_DATA.violations[_vKey]={data:[],label:_monthLabel(_vKey),pinnedAt:''};
-    rows.forEach(r=>PINNED_DATA.violations[_vKey].data.push(r));
+    rows.forEach(r=>{ PINNED_DATA.violations[_vKey].data.push(r); addToAppData('violations', r); });
     PINNED_DATA.violations[_vKey].pinnedAt=new Date().toLocaleString('ar');
     savePinnedToStorage();
     refreshQuarterlyCard();
@@ -2787,7 +2787,9 @@ async function submitSurvey(){
   const _sKeyPin = (date||new Date().toISOString().slice(0,10)).slice(0,7);
   if(_sKeyPin){
     if(!PINNED_DATA.surveys[_sKeyPin]) PINNED_DATA.surveys[_sKeyPin]={data:[],label:_monthLabel(_sKeyPin),pinnedAt:''};
-    PINNED_DATA.surveys[_sKeyPin].data.push({client_name:document.getElementById('sClient')?.value||'',date,satisfaction_pct:pct,q1:scores[0],q2:scores[1],q3:scores[2],q4:scores[3],q5:scores[4]});
+    const _survRec = {client_name:document.getElementById('sClient')?.value||'',date,satisfaction_pct:pct,q1:scores[0],q2:scores[1],q3:scores[2],q4:scores[3],q5:scores[4]};
+  PINNED_DATA.surveys[_sKeyPin].data.push(_survRec);
+  addToAppData('surveys', _survRec);
     PINNED_DATA.surveys[_sKeyPin].pinnedAt=new Date().toLocaleString('ar');
   savePinnedToStorage();
   }
@@ -2831,7 +2833,9 @@ async function submitFacility(){
   const _fKey = (dateVal||new Date().toISOString().slice(0,10)).slice(0,7);
   if(_fKey){
     if(!PINNED_DATA.facility[_fKey]) PINNED_DATA.facility[_fKey]={data:[],label:_monthLabel(_fKey),pinnedAt:''};
-    PINNED_DATA.facility[_fKey].data.push({problem_type:type,location:loc,date:dateVal,observer:obs,description:desc||''});
+    const _facRec = {problem_type:type,location:loc,date:dateVal,report_date:dateVal,observer:obs,description:desc||''};
+  PINNED_DATA.facility[_fKey].data.push(_facRec);
+  addToAppData('facilities', _facRec);
     PINNED_DATA.facility[_fKey].pinnedAt=new Date().toLocaleString('ar');
     savePinnedToStorage();
     refreshQuarterlyCard();
@@ -5096,7 +5100,9 @@ async function submitIncentive(){
     // تثبيت تلقائي في PINNED_DATA
     const _incKey = (year||new Date().getFullYear())+'-'+String(month||'1').padStart(2,'0');
     if(!PINNED_DATA.incentives[_incKey]) PINNED_DATA.incentives[_incKey]={data:[],label:_monthLabel(_incKey),pinnedAt:''};
-    PINNED_DATA.incentives[_incKey].data.push({trainer_name:staff,month,year,amount:document.getElementById('incScore')?.value||0});
+    const _incRec = {trainer_name:staff,month,year,amount:document.getElementById('incScore')?.value||0};
+    PINNED_DATA.incentives[_incKey].data.push(_incRec);
+    addToAppData('incentives', _incRec);
     PINNED_DATA.incentives[_incKey].pinnedAt=new Date().toLocaleString('ar');
     savePinnedToStorage();
     refreshQuarterlyCard();
@@ -5137,7 +5143,9 @@ async function deleteIncentive(id){
     // تثبيت تلقائي في PINNED_DATA
     const _incKey = (year||new Date().getFullYear())+'-'+String(month||'1').padStart(2,'0');
     if(!PINNED_DATA.incentives[_incKey]) PINNED_DATA.incentives[_incKey]={data:[],label:_monthLabel(_incKey),pinnedAt:''};
-    PINNED_DATA.incentives[_incKey].data.push({trainer_name:staff,month,year,amount:document.getElementById('incScore')?.value||0});
+    const _incRec = {trainer_name:staff,month,year,amount:document.getElementById('incScore')?.value||0};
+    PINNED_DATA.incentives[_incKey].data.push(_incRec);
+    addToAppData('incentives', _incRec);
     PINNED_DATA.incentives[_incKey].pinnedAt=new Date().toLocaleString('ar');
     savePinnedToStorage();
     refreshQuarterlyCard();
@@ -7057,7 +7065,7 @@ async function submitBuilding(){
     const _bKey = (data.date||new Date().toISOString().slice(0,10)).slice(0,7);
     if(_bKey){
       if(!PINNED_DATA.building[_bKey]) PINNED_DATA.building[_bKey]={data:[],label:_monthLabel(_bKey),pinnedAt:''};
-      PINNED_DATA.building[_bKey].data.push({...data});
+      PINNED_DATA.building[_bKey].data.push({...data}); addToAppData('buildings', data);
       PINNED_DATA.building[_bKey].pinnedAt=new Date().toLocaleString('ar');
     savePinnedToStorage();
     }
@@ -8276,25 +8284,23 @@ async function loadQuarterlyData(q, year) {
       db.from('incentives').select('*').in('month', monthStrs).eq('year', String(year)),
     ]);
 
-    // جلب البيانات المثبتة محلياً ودمجها مع Supabase
-    const _pinned = getPinnedForQuarter(q, year);
+    // ══ دمج من ٣ مصادر: Supabase + APP_DATA + OPS_MONTHS ══
+    const _local = getAppDataForQuarter(q, year);
     const _merge = (arr1, arr2, keyFn) => {
       const seen = new Set((arr1||[]).map(keyFn));
-      return [...(arr1||[]), ...(arr2||[]).filter(r => !seen.has(keyFn(r)))];
+      return [...(arr1||[]), ...(arr2||[]).filter(r => r && !seen.has(keyFn(r)))];
     };
 
-    // ══ دمج تلقائي من OPS_MONTHS + Supabase + PINNED_DATA ══
-    const _opsFromMonths = _pinned.ops || [];
     _qData = {
       q, year,
-      violations: _merge(vRes.data||[], _pinned.violations, r=>(r.trainer_name||'')+(r.date||'')),
-      surveys:    _merge(sRes.data||[], _pinned.surveys,    r=>(r.client_name||'')+(r.date||'')),
-      facilities: _merge(fRes.data||[], _pinned.facility,   r=>(r.location||'')+(r.date||r.report_date||'')),
-      buildings:  _merge(bRes.data||[], _pinned.building,   r=>(r.date||r.report_date||'')),
-      ops:        _merge(oRes.data||[], _opsFromMonths,     r=>(r.trainer_name||'')+(r.report_month||'')),
-      sales:      _merge(salRes.data||[], _pinned.sales||[], r=>(r.description||'')+(r.report_date||r.date||'')),
-      ratings:    _merge(ratRes.data||[], _pinned.ratings||[], r=>(r.trainer_name||r.name||'')+(r.report_date||r.date||'')),
-      incentives: _merge(incRes.data||[], _pinned.incentives||[], r=>(r.trainer_name||r.name||'')+(r.month||'')),
+      violations: _merge(vRes.data||[], _local.violations||[], r=>(r.trainer_name||'')+(r.date||'')),
+      surveys:    _merge(sRes.data||[], _local.surveys||[],    r=>(r.client_name||'')+(r.date||'')),
+      facilities: _merge(fRes.data||[], _local.facilities||[], r=>(r.location||'')+(r.report_date||r.date||'')),
+      buildings:  _merge(bRes.data||[], _local.buildings||[],  r=>(r.report_date||r.date||'')),
+      ops:        _merge(oRes.data||[], _local.ops||[],        r=>(r.trainer_name||'')+(r.report_month||'')),
+      sales:      _merge(salRes.data||[], _local.sales||[],    r=>(r.report_date||r.date||'')),
+      ratings:    _merge(ratRes.data||[], _local.ratings||[],  r=>(r.trainer_name||r.name||'')+(r.report_date||r.date||'')),
+      incentives: _merge(incRes.data||[], _local.incentives||[], r=>(r.trainer_name||r.name||'')+(r.month||'')),
     };
 
     renderQuarterlyResults();
@@ -9380,6 +9386,7 @@ async function _gameDeleteScore(playerName,containerId){
 function _showState(state){['Question','Result','End','Already'].forEach(s=>{const el=document.getElementById('game'+s+'State');if(el)el.style.display=(s.toLowerCase()===state)?'block':'none';});}
 setTimeout(()=>{if(currentUser)_refreshHomeLeader();},1500);
 setTimeout(()=>{
+  loadAppData();
   loadPinnedFromStorage();
   renderMonthTabs();
   renderPinnedMonths('ops');
@@ -9531,6 +9538,75 @@ function loadPinnedFromStorage() {
     renderPinnedMonths('ops');
     refreshQuarterlyCard();
   } catch(e) { console.log('load pinned:', e); }
+}
+
+
+// ══ APP_DATA: مستودع مركزي لكل بيانات التطبيق ══
+// كل كرت يحفظ بياناته هنا تلقائياً
+const APP_DATA = {
+  violations: [],    // من كرت المخالفات
+  surveys:    [],    // من كرت الاستطلاع
+  facilities: [],    // من كرت المرافق
+  buildings:  [],    // من كرت المبنى
+  sales:      [],    // من كرت المبيعات
+  ratings:    [],    // من كرت الأعلى بالتقييم
+  incentives: [],    // من كرت الحوافز
+  ops:        [],    // من كرت كفاءة التشغيل
+};
+
+// حفظ في localStorage
+function saveAppData() {
+  try { localStorage.setItem('nq_app_data_v1', JSON.stringify(APP_DATA)); } catch(e) {}
+}
+
+// تحميل من localStorage
+function loadAppData() {
+  try {
+    const saved = localStorage.getItem('nq_app_data_v1');
+    if (!saved) return;
+    const parsed = JSON.parse(saved);
+    Object.keys(parsed).forEach(k => {
+      if (Array.isArray(parsed[k])) APP_DATA[k] = parsed[k];
+    });
+  } catch(e) {}
+}
+
+// إضافة سجل لـ APP_DATA
+function addToAppData(type, record) {
+  if (!APP_DATA[type]) APP_DATA[type] = [];
+  APP_DATA[type].push({...record, _savedAt: new Date().toISOString()});
+  saveAppData();
+  refreshQuarterlyCard();
+}
+
+// جلب بيانات ربع معين من APP_DATA
+function getAppDataForQuarter(q, year) {
+  const months = Q_MONTHS[q] || [1,2,3];
+  const result = {};
+  Object.keys(APP_DATA).forEach(type => {
+    result[type] = (APP_DATA[type] || []).filter(r => {
+      const date = r.date || r.report_date || '';
+      const month = parseInt((date.split('-')[1] || r.report_month || r.month || '0'));
+      const yr = parseInt((date.split('-')[0] || r.report_year || r.year || '0'));
+      return months.includes(month) && (yr === year || yr === 0);
+    });
+  });
+  // أيضاً من OPS_MONTHS
+  result.ops = result.ops || [];
+  months.forEach(m => {
+    const key = year + '-' + String(m).padStart(2,'0');
+    if (OPS_MONTHS && OPS_MONTHS[key]) {
+      const mo = OPS_MONTHS[key];
+      if (mo.analysis && mo.analysis.length) {
+        mo.analysis.forEach(t => {
+          if (!result.ops.find(r => r.trainer_name === t.trainer_name && String(r.report_month) === String(m))) {
+            result.ops.push({...t, report_month: String(m), report_year: String(year)});
+          }
+        });
+      }
+    }
+  });
+  return result;
 }
 
 </script>
