@@ -953,44 +953,57 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
   
   <div class="home-sections">
+
+    <!-- جدول المهام الأسبوعي — Full Width -->
     <div class="section-card full-w" onclick="showWeeklyTasks()" style="background:linear-gradient(to right,#00C8B4,#0D3040);">
       <div class="s-icon">📋</div>
       <div class="s-text"><div class="s-title-ar" style="text-align:center;">جدول مهامي الأسبوعي</div><div class="s-title-en" style="text-align:center;">MY WEEKLY SCHEDULE</div></div>
       <div class="s-arrow">›</div>
     </div>
-    <div class="sec-group-label">رصد المخالفات</div>
+
+    <!-- ══ الخدمات الإلكترونية لموظفي الجودة ══ -->
+    <div class="sec-group-label" style="font-size:12px;font-weight:900;color:var(--accent);background:rgba(0,168,150,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid var(--accent);">🛠️ الخدمات الإلكترونية لموظفي الجودة</div>
+
     <div class="cards-row-2">
-      <div class="section-card female card-col" onclick="showSection('female')"><div class="s-icon">👩</div><div class="s-text"><div class="s-title-ar">القسم النسائي</div><div class="s-title-en">FEMALE</div></div></div>
-      <div class="section-card male card-col" onclick="showSection('male')"><div class="s-icon">👨</div><div class="s-text"><div class="s-title-ar">القسم الرجالي</div><div class="s-title-en">MALE</div></div></div>
+      <div class="section-card male card-col" onclick="showSection('male')" style="position:relative;">
+        <div class="s-icon">👨</div>
+        <div class="s-text"><div class="s-title-ar">القسم الرجالي</div><div class="s-title-en">MALE</div></div>
+        <span id="pendingBadgeMale" style="display:none;position:absolute;top:8px;left:8px;background:#E74C3C;color:#fff;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:900;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(231,76,60,0.5);">0</span>
+      </div>
+      <div class="section-card female card-col" onclick="showSection('female')" style="position:relative;">
+        <div class="s-icon">👩</div>
+        <div class="s-text"><div class="s-title-ar">القسم النسائي</div><div class="s-title-en">FEMALE</div></div>
+        <span id="pendingBadgeFemale" style="display:none;position:absolute;top:8px;left:8px;background:#E74C3C;color:#fff;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:900;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(231,76,60,0.5);">0</span>
+      </div>
     </div>
-    <div class="sec-group-label">الخدمات والتقارير</div>
+
     <div class="section-card survey" onclick="showSection('survey')"><div class="s-icon">⭐</div><div class="s-text"><div class="s-title-ar">استطلاع رضا العملاء</div><div class="s-title-en">CUSTOMER SATISFACTION SURVEY</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card attend" onclick="adminOnly('attend')"><div class="s-icon">🕐</div><div class="s-text"><div class="s-title-ar">الحضور والانصراف</div><div class="s-title-en">ATTENDANCE &amp; DEPARTURE</div></div><div class="s-arrow">›</div></div>
     <div class="section-card facility" onclick="showSection('facility')"><div class="s-icon">🔧</div><div class="s-text"><div class="s-title-ar">ملاحظات المرافق</div><div class="s-title-en">FACILITY REPORTS</div></div><div class="s-arrow">›</div></div>
     <div class="section-card building" onclick="showSection('building')"><div class="s-icon">🏢</div><div class="s-text"><div class="s-title-ar">تقرير المبنى الرئيسي</div><div class="s-title-en">MAIN BUILDING REPORT</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card ops" onclick="adminOnly('ops')"><div class="s-icon">⚙️</div><div class="s-text"><div class="s-title-ar">كفاءة التشغيل</div><div class="s-title-en">OPERATIONAL EFFICIENCY</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card incentives" onclick="adminOnly('incentives')"><div class="s-icon">🏆</div><div class="s-text"><div class="s-title-ar">الحوافز الشهرية</div><div class="s-title-en">MONTHLY INCENTIVES</div></div><div class="s-arrow">›</div></div>
+
+    <!-- ══ التقارير الإدارية ══ -->
+    <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#7D3C98;background:rgba(125,60,152,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #7D3C98;">📊 التقارير الإدارية</div>
+
+    <div class="section-card ops" onclick="showOpsMonthModal()"><div class="s-icon">⚙️</div><div class="s-text"><div class="s-title-ar">كفاءة التشغيل</div><div class="s-title-en">OPERATIONAL EFFICIENCY</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card attend" onclick="adminOnly('attend')"><div class="s-icon">🕐</div><div class="s-text"><div class="s-title-ar">الحضور والانصراف</div><div class="s-title-en">ATTENDANCE & DEPARTURE</div></div><div class="s-arrow">›</div></div>
     <div class="section-card sales" onclick="adminOnly('sales')"><div class="s-icon">💼</div><div class="s-text"><div class="s-title-ar">قسم المبيعات</div><div class="s-title-en">SALES DEPARTMENT</div></div><div class="s-arrow">›</div></div>
     <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon">🌟</div><div class="s-text"><div class="s-title-ar">الأعلى بالتقييم</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
     <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon">🗂️</div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card vref" onclick="showViolationsRef()"><div class="s-icon">📋</div><div class="s-text"><div class="s-title-ar">جدول المخالفات وتصنيفها</div><div class="s-title-en">VIOLATIONS TABLE</div></div><div class="s-arrow">›</div></div>
-  </div>
 
-  <!-- ══ DAILY BULLETIN ══ -->
-  <div style="padding:0 14px 8px;max-width:900px;margin:0 auto;">
-    <div id="dailyBulletin" style="display:none;border-radius:16px;overflow:hidden;cursor:pointer;" onclick="showBulletinPopup()"></div>
-  </div>
+    <!-- ══ الأنشطة والفعاليات ══ -->
+    <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#6A0DAD;background:rgba(106,13,173,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #6A0DAD;">🎯 الأنشطة والفعاليات</div>
 
-  <!-- Active Staff Widget -->
-  <div style="padding:0 14px 12px;max-width:900px;margin:0 auto;">
-    <div style="background:linear-gradient(to right,#00C8B4,#00897A);border-radius:18px;padding:14px 16px;box-shadow:0 4px 16px rgba(0,200,180,0.3);">
-      <div style="font-size:11px;font-weight:700;color:#fff;letter-spacing:1px;margin-bottom:10px;">⚡ أكثر الموظفين نشاطاً في تنفيذ المهام اليومية بالمنصة</div>
-      <div id="homeActiveStaff" style="display:flex;gap:8px;flex-wrap:wrap;">
-        <div style="font-size:11px;color:#fff;">جاري التحميل...</div>
+    <div class="section-card" onclick="openIdeasBank()" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);position:relative;">
+      <div class="s-icon">💡</div>
+      <div class="s-text">
+        <div class="s-title-ar">بنك الأفكار</div>
+        <div class="s-title-en">IDEAS BANK</div>
       </div>
+      <span id="ideasPendingBadge" style="display:none;position:absolute;top:10px;left:10px;background:#F39C12;color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:900;"></span>
+      <div class="s-arrow">›</div>
     </div>
-  </div>
 
+  </div>
 
   <!-- ══ GAME OF THE DAY CARD ══ -->
   <div style="padding:0 14px 16px;max-width:900px;margin:0 auto;">
@@ -1014,6 +1027,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     </div>
   </div>
 
+  <!-- ══ QUARTERLY REPORTS LABEL ══ -->
+  <div style="padding:0 14px 8px;max-width:900px;margin:0 auto;">
+    <div style="font-size:12px;font-weight:900;color:#00C8B4;background:rgba(0,200,180,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #00C8B4;">📋 التقارير الربعية</div>
+  </div>
 
   <!-- ══ QUARTERLY REPORTS CARD ══ -->
   <div style="padding:0 14px 16px;max-width:900px;margin:0 auto;">
@@ -1032,6 +1049,23 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div id="quarterlyPreview" style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;"></div>
     </div>
   </div>
+
+  <!-- ══ DAILY BULLETIN ══ -->
+  <div style="padding:0 14px 8px;max-width:900px;margin:0 auto;">
+    <div id="dailyBulletin" style="display:none;border-radius:16px;overflow:hidden;cursor:pointer;" onclick="showBulletinPopup()"></div>
+  </div>
+
+  <!-- Active Staff Widget -->
+  <div style="padding:0 14px 12px;max-width:900px;margin:0 auto;">
+    <div style="background:linear-gradient(to right,#00C8B4,#00897A);border-radius:18px;padding:14px 16px;box-shadow:0 4px 16px rgba(0,200,180,0.3);">
+      <div style="font-size:11px;font-weight:700;color:#fff;letter-spacing:1px;margin-bottom:10px;">⚡ أكثر الموظفين نشاطاً في تنفيذ المهام اليومية بالمنصة</div>
+      <div id="homeActiveStaff" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div style="font-size:11px;color:#fff;">جاري التحميل...</div>
+      </div>
+    </div>
+  </div>
+
+
 
   <!-- QUICK SUMMARY WIDGETS -->
   <div style="padding:0 14px 20px;max-width:900px;margin:0 auto;">
@@ -1089,6 +1123,20 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="p-icon" id="vIcon">👩</div>
       <h1 id="vTitle">رصد المخالفات — القسم النسائي</h1>
       <div class="sub" id="vSub">VIOLATIONS — FEMALE SECTION</div>
+    </div>
+
+    <!-- زر مراجعة المعلقة (admin فقط) -->
+    <div id="pendingReviewBanner" style="display:none;background:rgba(231,76,60,0.08);border:1.5px solid rgba(231,76,60,0.3);border-radius:14px;padding:12px 16px;margin-bottom:14px;cursor:pointer;" onclick="openPendingModal()">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:20px;">⚖️</span>
+          <div>
+            <div style="font-size:12px;font-weight:900;color:#E74C3C;">مخالفات بانتظار موافقتك</div>
+            <div style="font-size:10px;color:var(--text-dim);">اضغط للمراجعة والقبول أو الرفض</div>
+          </div>
+        </div>
+        <span id="pendingCountBadge" style="display:none;background:#E74C3C;color:#fff;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:900;"></span>
+      </div>
     </div>
 
     <!-- ✅ NOTICE BANNER -->
@@ -1200,8 +1248,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
       <div class="success-msg" id="vOk">
         <div class="success-icon">✓</div>
-        <h2>تم التسجيل! / Recorded!</h2>
-        <p>حُفظت المخالفة تلقائياً في قاعدة البيانات</p>
+        <h2>تم الإرسال! / Submitted!</h2>
+        <p id="vOkMsg">✅ تم إرسال المخالفة — بانتظار موافقة الإدارة</p>
         <button class="new-btn" onclick="resetV()">+ تسجيل جديد / New Entry</button>
       </div>
     </div>
@@ -2609,6 +2657,13 @@ function showSection(t){
 function openSec(type){
   curSec=type;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  // تحديث banner المراجعة عند فتح صفحة المخالفات
+  if ((type==='female'||type==='male') && currentUser?.role==='admin') {
+    const banner = document.getElementById('pendingReviewBanner');
+    const cnt = (PENDING_VIOLATIONS||[]).filter(v=>v.status==='pending').length;
+    if (banner) banner.style.display = cnt > 0 ? 'block' : 'none';
+    updatePendingBadge();
+  }
   if(type==='__rec__'){
     document.getElementById('page-records').classList.add('active');
     document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
@@ -2720,24 +2775,23 @@ async function submitViolation(){
   }
   if(!rows.length){toast('⚠️ أضف بيانات مدرب واحد على الأقل');return;}
 
-  const btn=document.getElementById('vBtn');btn.disabled=true;btn.textContent='⏳ جاري الحفظ...';
-  const{error}=await db.from('violations').insert(rows);
-  if(error){toast('❌ '+error.message);btn.disabled=false;btn.textContent='✦ تسجيل المخالفة / Submit';return;}
-  // GS sync
-  const _gsType = curSec==='male'?'violations_male':'violations_female';
-  const _gsRows = rows.map(r=>[r.date,r.time||'',r.observer,r.trainer_name,r.zone||'',r.violation_type,r.grade,'',r.description||'']);
-  sendToSheets(_gsType, _gsRows);
-  // تثبيت تلقائي
-  const _vKey = (rows[0]?.date||new Date().toISOString().slice(0,10)).slice(0,7);
-  if(_vKey){
-    if(!PINNED_DATA.violations[_vKey]) PINNED_DATA.violations[_vKey]={data:[],label:_monthLabel(_vKey),pinnedAt:''};
-    rows.forEach(r=>{ PINNED_DATA.violations[_vKey].data.push(r); addToAppData('violations', r); });
-    PINNED_DATA.violations[_vKey].pinnedAt=new Date().toLocaleString('ar');
-    savePinnedToStorage();
-    refreshQuarterlyCard();
-  }
+  const btn=document.getElementById('vBtn');btn.disabled=true;btn.textContent='⏳ جاري الإرسال...';
+
+  // ── حفظ كـ pending بانتظار موافقة الإدارة ──
+  const pendingId = 'vp_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  const pendingRecord = {
+    id: pendingId,
+    rows,
+    section: curSec,
+    submittedBy: currentUser?.name || currentUser?.username || 'موظف',
+    submittedAt: new Date().toISOString(),
+    status: 'pending'
+  };
+  addPendingViolation(pendingRecord);
+  btn.disabled=false; btn.textContent='✦ تسجيل المخالفة / Submit';
   document.getElementById('vForm').style.display='none';
   document.getElementById('vOk').style.display='block';
+  document.getElementById('vOkMsg').textContent = '✅ تم إرسال المخالفة — بانتظار موافقة الإدارة';
 }
 function resetV(){
   // Reset trainer entries — keep only first
@@ -9388,6 +9442,8 @@ setTimeout(()=>{if(currentUser)_refreshHomeLeader();},1500);
 setTimeout(()=>{
   loadAppData();
   loadPinnedFromStorage();
+  loadPendingViolations();
+  loadIdeas();
   renderMonthTabs();
   renderPinnedMonths('ops');
   refreshQuarterlyCard();
@@ -9609,6 +9665,382 @@ function getAppDataForQuarter(q, year) {
   return result;
 }
 
+
+// ══════════════════════════════════════════════════════
+// ⚖️ نظام موافقة المخالفات — Violation Approval System
+// ══════════════════════════════════════════════════════
+let PENDING_VIOLATIONS = []; // قائمة المخالفات المعلقة
+
+function loadPendingViolations() {
+  try {
+    const saved = localStorage.getItem('nq_pending_violations_v1');
+    if (saved) PENDING_VIOLATIONS = JSON.parse(saved);
+  } catch(e) { PENDING_VIOLATIONS = []; }
+  updatePendingBadge();
+}
+
+function savePendingViolations() {
+  try { localStorage.setItem('nq_pending_violations_v1', JSON.stringify(PENDING_VIOLATIONS)); } catch(e) {}
+}
+
+function addPendingViolation(record) {
+  PENDING_VIOLATIONS.push(record);
+  savePendingViolations();
+  updatePendingBadge();
+}
+
+function updatePendingBadge() {
+  const count = PENDING_VIOLATIONS.filter(v => v.status === 'pending').length;
+  // Badge على كرتي المخالفات في الرئيسية
+  ['pendingBadgeFemale','pendingBadgeMale'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (count > 0 && currentUser?.role === 'admin') {
+      el.style.display = 'flex';
+      el.textContent = count;
+    } else {
+      el.style.display = 'none';
+    }
+  });
+  // badge في كرت المخالفات (داخل الصفحة)
+  const inPageBadge = document.getElementById('pendingCountBadge');
+  if (inPageBadge) {
+    inPageBadge.textContent = count > 0 ? `${count} معلقة` : '';
+    inPageBadge.style.display = count > 0 && currentUser?.role === 'admin' ? 'inline-flex' : 'none';
+  }
+}
+
+function openPendingModal() {
+  if (currentUser?.role !== 'admin') { toast('❌ للمدير فقط'); return; }
+  const pending = PENDING_VIOLATIONS.filter(v => v.status === 'pending');
+  const modal = document.getElementById('pendingViolationsModal');
+  if (!modal) return;
+
+  const list = document.getElementById('pendingList');
+  if (!pending.length) {
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-dim);">
+      <div style="font-size:40px;margin-bottom:10px;">✅</div>
+      <div style="font-size:13px;font-weight:700;">لا توجد مخالفات معلقة</div>
+    </div>`;
+  } else {
+    list.innerHTML = pending.map(record => {
+      const sec = record.section === 'female' ? '👩 نسائي' : '👨 رجالي';
+      const date = new Date(record.submittedAt).toLocaleString('ar');
+      return `<div style="background:var(--card2);border-radius:16px;padding:16px;margin-bottom:12px;border-right:4px solid var(--accent);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+          <div>
+            <span style="font-size:12px;font-weight:900;">${sec}</span>
+            <span style="font-size:10px;color:var(--text-dim);margin-right:8px;">بواسطة: ${record.submittedBy}</span>
+          </div>
+          <span style="font-size:9px;color:var(--text-dim);">${date}</span>
+        </div>
+        ${record.rows.map(r => `
+          <div style="background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px;">
+            <div style="font-size:12px;font-weight:900;margin-bottom:4px;">👤 ${r.trainer_name}</div>
+            <div style="font-size:11px;color:var(--text-dim);margin-bottom:2px;">📋 ${(r.violation_type||'').split('|')[0].trim()}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+              <span style="background:${r.grade==='A'?'rgba(231,76,60,0.15)':r.grade==='B'?'rgba(212,172,13,0.15)':'rgba(39,174,96,0.15)'};
+                color:${r.grade==='A'?'#E74C3C':r.grade==='B'?'#D4AC0D':'#27AE60'};
+                border-radius:8px;padding:2px 10px;font-size:11px;font-weight:700;">درجة ${r.grade||'—'}</span>
+              <span style="font-size:10px;color:var(--text-dim);">📅 ${r.date||'—'}</span>
+              <span style="font-size:10px;color:var(--text-dim);">👁️ ${r.observer||'—'}</span>
+            </div>
+            ${r.description ? `<div style="font-size:10px;color:var(--text-dim);margin-top:4px;">📝 ${r.description}</div>` : ''}
+          </div>`).join('')}
+        <div style="display:flex;gap:10px;margin-top:12px;">
+          <button onclick="approveViolation('${record.id}')"
+            style="flex:1;padding:12px;background:linear-gradient(135deg,#27AE60,#1A8040);color:#fff;border:none;border-radius:12px;
+            font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">
+            ✅ قبول وحفظ
+          </button>
+          <button onclick="rejectViolation('${record.id}')"
+            style="flex:1;padding:12px;background:rgba(231,76,60,0.1);border:1.5px solid #E74C3C;color:#E74C3C;border-radius:12px;
+            font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">
+            ❌ رفض
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  modal.style.display = 'block';
+}
+
+async function approveViolation(id) {
+  const record = PENDING_VIOLATIONS.find(v => v.id === id);
+  if (!record) return;
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
+  try {
+    // حفظ في Supabase
+    const { error } = await db.from('violations').insert(record.rows);
+    if (error) throw error;
+    // GS sync
+    const _gsType = record.section === 'male' ? 'violations_male' : 'violations_female';
+    const _gsRows = record.rows.map(r=>[r.date,r.time||'',r.observer,r.trainer_name,r.zone||'',r.violation_type,r.grade,'',r.description||'']);
+    sendToSheets(_gsType, _gsRows);
+    // تثبيت في APP_DATA
+    const _vKey = (record.rows[0]?.date||'').slice(0,7);
+    if (_vKey) {
+      if (!PINNED_DATA.violations[_vKey]) PINNED_DATA.violations[_vKey]={data:[],label:_monthLabel(_vKey),pinnedAt:''};
+      record.rows.forEach(r=>{ PINNED_DATA.violations[_vKey].data.push(r); addToAppData('violations', r); });
+      PINNED_DATA.violations[_vKey].pinnedAt = new Date().toLocaleString('ar');
+      savePinnedToStorage();
+      refreshQuarterlyCard();
+    }
+    // تحديث الحالة
+    record.status = 'approved';
+    record.approvedAt = new Date().toISOString();
+    savePendingViolations();
+    updatePendingBadge();
+    toast('✅ تم قبول المخالفة وحفظها');
+    openPendingModal(); // تحديث العرض
+  } catch(e) {
+    toast('❌ خطأ: ' + e.message);
+    btn.disabled = false; btn.textContent = '✅ قبول وحفظ';
+  }
+}
+
+function rejectViolation(id) {
+  if (!confirm('هل تريد رفض هذه المخالفة وحذفها نهائياً؟')) return;
+  const idx = PENDING_VIOLATIONS.findIndex(v => v.id === id);
+  if (idx === -1) return;
+  PENDING_VIOLATIONS[idx].status = 'rejected';
+  PENDING_VIOLATIONS[idx].rejectedAt = new Date().toISOString();
+  savePendingViolations();
+  updatePendingBadge();
+  toast('🗑️ تم رفض المخالفة');
+  openPendingModal();
+}
+
+
+// ══════════════════════════════════════════════════
+// 💡 بنك الأفكار — Ideas Bank
+// ══════════════════════════════════════════════════
+
+let IDEAS_DATA = []; // كل الأفكار محلياً
+
+function loadIdeas() {
+  try {
+    const saved = localStorage.getItem('nq_ideas_v1');
+    if (saved) IDEAS_DATA = JSON.parse(saved);
+  } catch(e) { IDEAS_DATA = []; }
+  updateIdeasBadge();
+}
+
+function saveIdeas() {
+  try { localStorage.setItem('nq_ideas_v1', JSON.stringify(IDEAS_DATA)); } catch(e) {}
+}
+
+function updateIdeasBadge() {
+  const badge = document.getElementById('ideasPendingBadge');
+  if (!badge) return;
+  if (currentUser?.role === 'admin') {
+    const pending = IDEAS_DATA.filter(i => i.status === 'pending').length;
+    badge.textContent = pending > 0 ? `${pending} جديدة` : '';
+    badge.style.display = pending > 0 ? 'inline-block' : 'none';
+  } else {
+    const approved = IDEAS_DATA.filter(i => i.status === 'approved').length;
+    badge.textContent = approved > 0 ? `${approved} فكرة` : '';
+    badge.style.display = approved > 0 ? 'inline-block' : 'none';
+  }
+}
+
+function openIdeasBank() {
+  if (!currentUser) { toast('❌ يرجى تسجيل الدخول أولاً'); return; }
+  loadIdeas();
+  const modal = document.getElementById('ideasBankModal');
+  if (!modal) return;
+  modal.style.display = 'block';
+
+  // إظهار تبويب المراجعة للـ admin فقط
+  const adminTab = document.getElementById('ideasTabAdmin');
+  if (adminTab) adminTab.style.display = currentUser.role === 'admin' ? 'flex' : 'none';
+
+  // الـ admin يفتح على تبويب المراجعة إذا في pending
+  const pending = IDEAS_DATA.filter(i => i.status === 'pending').length;
+  if (currentUser.role === 'admin' && pending > 0) {
+    switchIdeasTab('admin');
+  } else {
+    switchIdeasTab(currentUser.role === 'admin' ? 'approved' : 'submit');
+  }
+
+  // textarea counter
+  const textarea = document.getElementById('ideaDetails');
+  if (textarea) {
+    textarea.addEventListener('input', () => {
+      const counter = document.getElementById('ideaCharCount');
+      if (counter) counter.textContent = `${textarea.value.length} / 500`;
+    });
+  }
+}
+
+function switchIdeasTab(tab) {
+  ['submit','approved','admin'].forEach(t => {
+    const content = document.getElementById(`ideas${t.charAt(0).toUpperCase()+t.slice(1)}Tab`);
+    const btn     = document.getElementById(`ideasTab${t.charAt(0).toUpperCase()+t.slice(1)}`);
+    if (content) content.style.display = t === tab ? 'block' : 'none';
+    if (btn) {
+      btn.style.background = t === tab ? 'var(--accent)' : 'transparent';
+      btn.style.color      = t === tab ? '#fff'          : 'var(--text-dim)';
+    }
+  });
+  if (tab === 'approved') renderApprovedIdeas();
+  if (tab === 'admin')    renderPendingIdeas();
+}
+
+function submitIdea() {
+  if (!currentUser || currentUser.role === 'admin') {
+    toast('❌ بنك الأفكار للموظفين فقط'); return;
+  }
+  const category = document.getElementById('ideaCategory')?.value;
+  const title    = document.getElementById('ideaTitle')?.value.trim();
+  const details  = document.getElementById('ideaDetails')?.value.trim();
+
+  if (!category) { toast('⚠️ اختر الفئة'); return; }
+  if (!title)    { toast('⚠️ أدخل عنوان الفكرة'); return; }
+  if (!details || details.length < 20) { toast('⚠️ اشرح فكرتك بأكثر من 20 حرف'); return; }
+
+  const idea = {
+    id:          'idea_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    category,
+    title,
+    details,
+    submittedBy: currentUser.name,
+    username:    currentUser.username,
+    submittedAt: new Date().toISOString(),
+    status:      'pending',
+    adminNote:   '',
+  };
+
+  IDEAS_DATA.push(idea);
+  saveIdeas();
+  updateIdeasBadge();
+
+  // مسح الفورم
+  document.getElementById('ideaCategory').value = '';
+  document.getElementById('ideaTitle').value    = '';
+  document.getElementById('ideaDetails').value  = '';
+  document.getElementById('ideaCharCount').textContent = '0 / 500';
+
+  // رسالة نجاح
+  toast('✅ تم إرسال فكرتك — بانتظار مراجعة الإدارة 💡');
+}
+
+function renderApprovedIdeas() {
+  const list = document.getElementById('approvedIdeasList');
+  if (!list) return;
+  const approved = IDEAS_DATA.filter(i => i.status === 'approved').sort((a,b) => new Date(b.approvedAt||0) - new Date(a.approvedAt||0));
+
+  if (!approved.length) {
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-dim);">
+      <div style="font-size:40px;margin-bottom:10px;">💡</div>
+      <div style="font-size:13px;font-weight:700;">لا توجد أفكار مقبولة بعد</div>
+      <div style="font-size:11px;margin-top:6px;">كن أول من يقترح!</div>
+    </div>`;
+    return;
+  }
+
+  const cats = { جودة:'⭐', عمليات:'⚙️', بيئة:'🏢', تقنية:'💻', تدريب:'📚', عملاء:'😊', أخرى:'💬' };
+  list.innerHTML = approved.map(idea => `
+    <div style="background:var(--card2);border-radius:16px;padding:16px;margin-bottom:12px;border-right:4px solid #27AE60;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;">
+          <span style="font-size:18px;">${cats[idea.category]||'💡'}</span>
+          <div>
+            <div style="font-size:13px;font-weight:900;color:var(--text);">${idea.title}</div>
+            <div style="font-size:10px;color:var(--text-dim);">${idea.category}</div>
+          </div>
+        </div>
+        <span style="background:rgba(39,174,96,0.12);color:#27AE60;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;white-space:nowrap;">✅ مقبولة</span>
+      </div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:10px;">${idea.details}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#007B6E);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;">${idea.submittedBy.charAt(0)}</div>
+          <span style="font-size:11px;font-weight:700;color:var(--text);">${idea.submittedBy}</span>
+        </div>
+        <span style="font-size:10px;color:var(--text-dim);">${new Date(idea.approvedAt||idea.submittedAt).toLocaleDateString('ar')}</span>
+      </div>
+      ${idea.adminNote ? `<div style="margin-top:8px;background:rgba(39,174,96,0.08);border-radius:10px;padding:8px 12px;font-size:11px;color:#27AE60;">💬 ${idea.adminNote}</div>` : ''}
+    </div>`).join('');
+}
+
+function renderPendingIdeas() {
+  const list = document.getElementById('pendingIdeasList');
+  if (!list) return;
+  if (currentUser?.role !== 'admin') { list.innerHTML = ''; return; }
+
+  const pending = IDEAS_DATA.filter(i => i.status === 'pending').sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+  const all     = IDEAS_DATA.filter(i => i.status !== 'pending').sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+
+  const cats = { جودة:'⭐', عمليات:'⚙️', بيئة:'🏢', تقنية:'💻', تدريب:'📚', عملاء:'😊', أخرى:'💬' };
+
+  const renderCard = (idea, isPending) => `
+    <div style="background:var(--card2);border-radius:16px;padding:16px;margin-bottom:12px;border-right:4px solid ${idea.status==='approved'?'#27AE60':idea.status==='rejected'?'#E74C3C':'#F39C12'};">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;">
+          <span style="font-size:18px;">${cats[idea.category]||'💡'}</span>
+          <div>
+            <div style="font-size:13px;font-weight:900;">${idea.title}</div>
+            <div style="font-size:10px;color:var(--text-dim);">${idea.category} — ${idea.submittedBy}</div>
+          </div>
+        </div>
+        <span style="border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;white-space:nowrap;
+          background:${idea.status==='approved'?'rgba(39,174,96,0.12)':idea.status==='rejected'?'rgba(231,76,60,0.12)':'rgba(243,156,18,0.12)'};
+          color:${idea.status==='approved'?'#27AE60':idea.status==='rejected'?'#E74C3C':'#F39C12'};">
+          ${idea.status==='approved'?'✅ مقبولة':idea.status==='rejected'?'❌ مرفوضة':'⏳ معلقة'}
+        </span>
+      </div>
+      <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:10px;">${idea.details}</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:${isPending?'12px':'0'};">
+        ${new Date(idea.submittedAt).toLocaleString('ar')}
+      </div>
+      ${isPending ? `
+        <input id="adminNote_${idea.id}" type="text" placeholder="تعليق للموظف (اختياري)..."
+          style="width:100%;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:11px;margin-bottom:10px;box-sizing:border-box;">
+        <div style="display:flex;gap:8px;">
+          <button onclick="decideIdea('${idea.id}','approved')"
+            style="flex:1;padding:10px;background:linear-gradient(135deg,#27AE60,#1A8040);color:#fff;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:900;cursor:pointer;">
+            ✅ قبول ونشر
+          </button>
+          <button onclick="decideIdea('${idea.id}','rejected')"
+            style="flex:1;padding:10px;background:rgba(231,76,60,0.1);border:1.5px solid #E74C3C;color:#E74C3C;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+            ❌ رفض
+          </button>
+        </div>` : ''}
+    </div>`;
+
+  let html = '';
+  if (pending.length) {
+    html += `<div style="font-size:11px;font-weight:900;color:#F39C12;margin-bottom:10px;">⏳ بانتظار المراجعة (${pending.length})</div>`;
+    html += pending.map(i => renderCard(i, true)).join('');
+  }
+  if (all.length) {
+    html += `<div style="font-size:11px;font-weight:900;color:var(--text-dim);margin:16px 0 10px;">📋 السجل السابق</div>`;
+    html += all.map(i => renderCard(i, false)).join('');
+  }
+  if (!pending.length && !all.length) {
+    html = `<div style="text-align:center;padding:40px;color:var(--text-dim);">
+      <div style="font-size:40px;margin-bottom:10px;">📭</div>
+      <div style="font-size:13px;font-weight:700;">لا توجد أفكار بعد</div>
+    </div>`;
+  }
+  list.innerHTML = html;
+}
+
+function decideIdea(id, decision) {
+  const idea = IDEAS_DATA.find(i => i.id === id);
+  if (!idea) return;
+  const noteEl = document.getElementById('adminNote_' + id);
+  idea.status    = decision;
+  idea.adminNote = noteEl?.value.trim() || '';
+  idea[decision === 'approved' ? 'approvedAt' : 'rejectedAt'] = new Date().toISOString();
+  saveIdeas();
+  updateIdeasBadge();
+  toast(decision === 'approved' ? '✅ تم قبول الفكرة ونشرها' : '🗑️ تم رفض الفكرة');
+  renderPendingIdeas();
+}
+
 </script>
 
 <!-- ══ WEEKLY TASKS MODAL ══ -->
@@ -9721,6 +10153,91 @@ function getAppDataForQuarter(q, year) {
     <div id="opsMonthModalList" style="display:flex;flex-direction:column;gap:10px;"></div>
     <div style="margin-top:16px;text-align:center;">
       <button onclick="document.getElementById('opsMonthModal').style.display='none';adminOnly('ops')" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">⚙️ فتح كفاءة التشغيل</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ PENDING VIOLATIONS MODAL ══ -->
+<div id="pendingViolationsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:9600;overflow-y:auto;padding:16px 12px;">
+  <div style="max-width:600px;margin:0 auto;background:var(--card);border-radius:24px;padding:24px 20px;position:relative;">
+    <button onclick="document.getElementById('pendingViolationsModal').style.display='none'"
+      style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:28px;margin-bottom:6px;">⚖️</div>
+      <div style="font-size:16px;font-weight:900;color:var(--text);">مراجعة المخالفات المعلقة</div>
+      <div style="font-size:10px;color:var(--text-dim);letter-spacing:1px;">PENDING VIOLATIONS REVIEW</div>
+    </div>
+    <div id="pendingList"></div>
+  </div>
+</div>
+
+
+<!-- ══ IDEAS BANK MODAL ══ -->
+<div id="ideasBankModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(14px);z-index:9500;overflow-y:auto;padding:16px 12px;">
+  <div style="max-width:640px;margin:0 auto;background:var(--card);border-radius:24px;padding:24px 20px;position:relative;">
+    <button onclick="document.getElementById('ideasBankModal').style.display='none'"
+      style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:32px;margin-bottom:6px;">💡</div>
+      <div style="font-size:17px;font-weight:900;color:var(--text);">بنك الأفكار</div>
+      <div style="font-size:10px;color:var(--text-dim);letter-spacing:1px;">IDEAS BANK</div>
+    </div>
+
+    <!-- تبويبات -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;background:var(--card2);border-radius:14px;padding:4px;">
+      <button onclick="switchIdeasTab('submit')" id="ideasTabSubmit"
+        style="flex:1;padding:10px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;transition:all .2s;">
+        💡 اقترح فكرة
+      </button>
+      <button onclick="switchIdeasTab('approved')" id="ideasTabApproved"
+        style="flex:1;padding:10px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .2s;">
+        ✅ الأفكار المقبولة
+      </button>
+      <button onclick="switchIdeasTab('admin')" id="ideasTabAdmin"
+        style="display:none;flex:1;padding:10px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .2s;">
+        ⚙️ المراجعة
+      </button>
+    </div>
+
+    <!-- تبويب: اقترح فكرة -->
+    <div id="ideasSubmitTab">
+      <div style="background:var(--card2);border-radius:16px;padding:18px;margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:8px;">📋 الفئة</div>
+        <select id="ideaCategory" style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;margin-bottom:14px;">
+          <option value="">اختر الفئة...</option>
+          <option value="جودة">⭐ تحسين الجودة</option>
+          <option value="عمليات">⚙️ تطوير العمليات</option>
+          <option value="بيئة">🏢 بيئة العمل</option>
+          <option value="تقنية">💻 الجانب التقني</option>
+          <option value="تدريب">📚 التدريب والتطوير</option>
+          <option value="عملاء">😊 خدمة العملاء</option>
+          <option value="أخرى">💬 أخرى</option>
+        </select>
+        <div style="font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:8px;">💡 عنوان الفكرة</div>
+        <input id="ideaTitle" type="text" placeholder="عنوان مختصر وواضح..." maxlength="80"
+          style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;margin-bottom:14px;box-sizing:border-box;">
+        <div style="font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:8px;">📝 تفاصيل الفكرة</div>
+        <textarea id="ideaDetails" placeholder="اشرح فكرتك بالتفصيل — ما المشكلة؟ وكيف تحلها؟" rows="4" maxlength="500"
+          style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;resize:none;box-sizing:border-box;"></textarea>
+        <div id="ideaCharCount" style="font-size:10px;color:var(--text-dim);text-align:left;margin-top:4px;">0 / 500</div>
+      </div>
+      <button onclick="submitIdea()"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#F39C12,#D68910);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 4px 14px rgba(243,156,18,0.3);">
+        💡 إرسال الفكرة
+      </button>
+    </div>
+
+    <!-- تبويب: الأفكار المقبولة -->
+    <div id="ideasApprovedTab" style="display:none;">
+      <div id="approvedIdeasList"></div>
+    </div>
+
+    <!-- تبويب: المراجعة (admin فقط) -->
+    <div id="ideasAdminTab" style="display:none;">
+      <div id="pendingIdeasList"></div>
     </div>
   </div>
 </div>
