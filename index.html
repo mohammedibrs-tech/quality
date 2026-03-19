@@ -8313,16 +8313,26 @@ function renderQuarterlyResults() {
   document.getElementById('qWelcome').style.display = 'none';
 
   const MN = ['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-  const months = Q_MONTHS[d.q]; // [1,2,3] أو [4,5,6] ...
+  const months = Q_MONTHS[d.q] || [1,2,3];
+
+  // ── حماية كل المصفوفات ──
+  const violations = Array.isArray(d.violations) ? d.violations : [];
+  const surveys    = Array.isArray(d.surveys)    ? d.surveys    : [];
+  const ops        = Array.isArray(d.ops)        ? d.ops        : [];
+  const facilities = Array.isArray(d.facilities) ? d.facilities : [];
+  const buildings  = Array.isArray(d.buildings)  ? d.buildings  : [];
+  const ratings    = Array.isArray(d.ratings)    ? d.ratings    : [];
+  const incentives = Array.isArray(d.incentives) ? d.incentives : [];
+  const sales      = Array.isArray(d.sales)      ? d.sales      : [];
 
   // ── بيانات مقسمة ──
-  const femViol = d.violations.filter(v => v.section==='female');
-  const malViol = d.violations.filter(v => v.section==='male');
-  const femOps  = d.ops.filter(r => r.zone==='female');
-  const malOps  = d.ops.filter(r => r.zone==='male');
-  const bikeOps = d.ops.filter(r => r.zone==='bike');
+  const femViol = violations.filter(v => v.section==='female');
+  const malViol = violations.filter(v => v.section==='male');
+  const femOps  = ops.filter(r => r.zone==='female' || r.section==='female');
+  const malOps  = ops.filter(r => r.zone==='male'   || r.section==='male');
+  const bikeOps = ops.filter(r => r.zone==='bike'   || r.section==='bike');
 
-  const avgSurvey  = d.surveys.length ? Math.round(d.surveys.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/d.surveys.length) : 0;
+  const avgSurvey  = surveys.length ? Math.round(surveys.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/surveys.length) : 0;
   const avgFemOps  = femOps.length  ? Math.round(femOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/femOps.length)  : 0;
   const avgMalOps  = malOps.length  ? Math.round(malOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/malOps.length)  : 0;
   const avgBikeOps = bikeOps.length ? Math.round(bikeOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/bikeOps.length): 0;
@@ -8348,7 +8358,7 @@ function renderQuarterlyResults() {
 
   // أفضل شهر بالمخالفات (أقل = أفضل)
   const violByMonth = {};
-  months.forEach(m => { const ms=String(m).padStart(2,'0'); violByMonth[m]=d.violations.filter(v=>(v.date||'').includes(`-${ms}-`)).length; });
+  months.forEach(m => { const ms=String(m).padStart(2,'0'); violByMonth[m]=violations.filter(v=>(v.date||'').includes(`-${ms}-`)).length; });
   const bestViolM  = months.reduce((a,b)=>violByMonth[a]<=violByMonth[b]?a:b);
   const worstViolM = months.reduce((a,b)=>violByMonth[a]>=violByMonth[b]?a:b);
 
@@ -8356,7 +8366,7 @@ function renderQuarterlyResults() {
   const survByMonth = {};
   months.forEach(m => {
     const ms=String(m).padStart(2,'0');
-    const ms_s=d.surveys.filter(s=>(s.date||'').includes(`-${ms}-`));
+    const ms_s=surveys.filter(s=>(s.date||'').includes(`-${ms}-`));
     survByMonth[m]=ms_s.length?Math.round(ms_s.reduce((a,r)=>a+(r.satisfaction_pct||0),0)/ms_s.length):0;
   });
   const bestSurvM = months.reduce((a,b)=>survByMonth[a]>=survByMonth[b]?a:b);
@@ -8372,7 +8382,7 @@ function renderQuarterlyResults() {
     return changes;
   };
 
-  const violChanges = monthCompare(m => { const ms=String(m).padStart(2,'0'); return d.violations.filter(v=>(v.date||'').includes(`-${ms}-`)).length; });
+  const violChanges = monthCompare(m => { const ms=String(m).padStart(2,'0'); return violations.filter(v=>(v.date||'').includes(`-${ms}-`)).length; });
   const survChanges = monthCompare(m => survByMonth[m]);
 
   // ── بناء HTML الإحصاء الشهري ──
@@ -8399,7 +8409,7 @@ function renderQuarterlyResults() {
     {icon:'👩‍🏫',label:'كفاءة نسائي',      value:avgFemOps+'%',  sub:`${femOps.length} مدربة`, color:avgFemOps>=90?'#27AE60':'#D4AC0D'},
     {icon:'👨‍🏫',label:'كفاءة رجالي',      value:avgMalOps+'%',  sub:`${malOps.length} مدرب`,  color:avgMalOps>=90?'#27AE60':'#D4AC0D'},
     {icon:'🏍️', label:'كفاءة دراجات',     value:avgBikeOps+'%', sub:`${bikeOps.length} مدرب`, color:avgBikeOps>=90?'#27AE60':'#D4AC0D'},
-    {icon:'🔧', label:'المرافق والمبنى',   value:d.facilities.length+d.buildings.length, sub:'تقرير', color:'#7D3C98'},
+    {icon:'🔧', label:'المرافق والمبنى',   value:facilities.length+buildings.length, sub:'تقرير', color:'#7D3C98'},
   ].map(k=>`<div style="background:var(--card2);border-radius:16px;padding:14px 12px;border-right:4px solid ${k.color};box-shadow:0 2px 10px rgba(0,0,0,0.06);">
     <div style="font-size:20px;margin-bottom:6px;">${k.icon}</div>
     <div style="font-size:22px;font-weight:900;color:${k.color};margin-bottom:2px;">${k.value}</div>
@@ -8410,9 +8420,9 @@ function renderQuarterlyResults() {
   let html = '';
 
   // ══ مقارنة الأشهر — المخالفات ══
-  if (d.violations.length) {
+  if (violations.length) {
     ['female','male'].forEach(sec => {
-      const vList = d.violations.filter(v=>v.section===sec);
+      const vList = violations.filter(v=>v.section===sec);
       if (!vList.length) return;
       const secLabel = sec==='female' ? '👩 القسم النسائي' : '👨 القسم الرجالي';
       const secColor = sec==='female' ? '#E74C3C' : '#2E86C1';
@@ -8452,11 +8462,11 @@ function renderQuarterlyResults() {
   }
 
   // ══ رضا العملاء مع مقارنة شهرية ══
-  if (d.surveys.length) {
+  if (surveys.length) {
     html += `<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
       <div style="font-size:14px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
         <span>⭐</span> رضا العملاء
-        <span style="background:rgba(212,172,13,0.1);color:#D4AC0D;border-radius:20px;padding:2px 10px;font-size:10px;">${d.surveys.length} استطلاع</span>
+        <span style="background:rgba(212,172,13,0.1);color:#D4AC0D;border-radius:20px;padding:2px 10px;font-size:10px;">${surveys.length} استطلاع</span>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
         <div style="flex:1;min-width:80px;text-align:center;background:rgba(39,174,96,0.08);border-radius:14px;padding:12px;">
@@ -8471,14 +8481,14 @@ function renderQuarterlyResults() {
       ${renderMonthGrowth(survChanges,'مقارنة','up')}
       <div style="font-size:10px;color:var(--text-dim);margin-top:8px;">
         ✅ أفضل شهر: <strong>${MN[bestSurvM]}</strong> (${survByMonth[bestSurvM]}%) |
-        ≥90%: <strong>${d.surveys.filter(s=>(s.satisfaction_pct||0)>=90).length}</strong> |
-        &lt;90%: <strong>${d.surveys.filter(s=>(s.satisfaction_pct||0)<90).length}</strong>
+        ≥90%: <strong>${surveys.filter(s=>(s.satisfaction_pct||0)>=90).length}</strong> |
+        &lt;90%: <strong>${surveys.filter(s=>(s.satisfaction_pct||0)<90).length}</strong>
       </div>
     </div>`;
   }
 
   // ══ كفاءة التشغيل منفصل ══
-  if (d.ops.length) {
+  if (ops.length) {
     const sections = [
       {k:'female',l:'👩 نسائي',c:'#E74C3C',data:femOps,avg:avgFemOps},
       {k:'male',  l:'👨 رجالي',c:'#2E86C1',data:malOps, avg:avgMalOps},
@@ -8526,16 +8536,16 @@ function renderQuarterlyResults() {
   }
 
   // ══ مرافق ومبنى ══
-  if (d.facilities.length || d.buildings.length) {
+  if (facilities.length || buildings.length) {
     html += `<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
       <div style="font-size:14px;font-weight:900;margin-bottom:12px;">🏗️ المرافق والمبنى</div>
       <div style="display:flex;gap:10px;">
         <div style="flex:1;text-align:center;background:rgba(39,174,96,0.08);border-radius:14px;padding:14px;">
-          <div style="font-size:24px;font-weight:900;color:#27AE60;">${d.facilities.length}</div>
+          <div style="font-size:24px;font-weight:900;color:#27AE60;">${facilities.length}</div>
           <div style="font-size:10px;color:var(--text-dim);">🔧 ملاحظة مرافق</div>
         </div>
         <div style="flex:1;text-align:center;background:rgba(46,134,193,0.08);border-radius:14px;padding:14px;">
-          <div style="font-size:24px;font-weight:900;color:#2E86C1;">${d.buildings.length}</div>
+          <div style="font-size:24px;font-weight:900;color:#2E86C1;">${buildings.length}</div>
           <div style="font-size:10px;color:var(--text-dim);">🏢 تقرير مبنى</div>
         </div>
       </div>
@@ -8543,7 +8553,7 @@ function renderQuarterlyResults() {
   }
 
   // ══ تقييم المدربين منفصل ══
-  if (d.ratings && d.ratings.length) {
+  if (ratings && ratings.length) {
     const renderRatSec = (list, label, color) => {
       if (!list.length) return '';
       const sorted=[...list].sort((a,b)=>(b.rating||b.avg_rating||0)-(a.rating||a.avg_rating||0));
@@ -8570,13 +8580,13 @@ function renderQuarterlyResults() {
     };
     html += `<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
       <div style="font-size:14px;font-weight:900;margin-bottom:12px;">🏅 تقييم المدربين</div>
-      ${renderRatSec(d.ratings.filter(r=>r.section==='female'||r.zone==='female'),'👩 نسائي','#E74C3C')}
-      ${renderRatSec(d.ratings.filter(r=>r.section==='male'||r.zone==='male'),'👨 رجالي','#2E86C1')}
+      ${renderRatSec(ratings.filter(r=>r.section==='female'||r.zone==='female'),'👩 نسائي','#E74C3C')}
+      ${renderRatSec(ratings.filter(r=>r.section==='male'||r.zone==='male'),'👨 رجالي','#2E86C1')}
     </div>`;
   }
 
   // ══ الحوافز ══
-  if (d.incentives && d.incentives.length) {
+  if (incentives && incentives.length) {
     const renderIncSec = (list, label, color) => {
       if (!list.length) return '';
       const top5=[...list].sort((a,b)=>(b.amount||b.total||0)-(a.amount||a.total||0)).slice(0,5);
@@ -8592,8 +8602,8 @@ function renderQuarterlyResults() {
     };
     html += `<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
       <div style="font-size:14px;font-weight:900;margin-bottom:12px;">🏆 الحوافز الشهرية</div>
-      ${renderIncSec(d.incentives.filter(r=>r.section==='female'||r.zone==='female'),'👩 نسائي','#E74C3C')}
-      ${renderIncSec(d.incentives.filter(r=>r.section==='male'||r.zone==='male'),'👨 رجالي','#2E86C1')}
+      ${renderIncSec(incentives.filter(r=>r.section==='female'||r.zone==='female'),'👩 نسائي','#E74C3C')}
+      ${renderIncSec(incentives.filter(r=>r.section==='male'||r.zone==='male'),'👨 رجالي','#2E86C1')}
     </div>`;
   }
 
