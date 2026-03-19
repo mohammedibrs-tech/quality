@@ -2733,6 +2733,7 @@ async function submitViolation(){
     if(!PINNED_DATA.violations[_vKey]) PINNED_DATA.violations[_vKey]={data:[],label:_monthLabel(_vKey),pinnedAt:''};
     rows.forEach(r=>PINNED_DATA.violations[_vKey].data.push(r));
     PINNED_DATA.violations[_vKey].pinnedAt=new Date().toLocaleString('ar');
+    savePinnedToStorage();
     refreshQuarterlyCard();
   }
   document.getElementById('vForm').style.display='none';
@@ -2788,6 +2789,7 @@ async function submitSurvey(){
     if(!PINNED_DATA.surveys[_sKeyPin]) PINNED_DATA.surveys[_sKeyPin]={data:[],label:_monthLabel(_sKeyPin),pinnedAt:''};
     PINNED_DATA.surveys[_sKeyPin].data.push({client_name:document.getElementById('sClient')?.value||'',date,satisfaction_pct:pct,q1:scores[0],q2:scores[1],q3:scores[2],q4:scores[3],q5:scores[4]});
     PINNED_DATA.surveys[_sKeyPin].pinnedAt=new Date().toLocaleString('ar');
+  savePinnedToStorage();
   }
   document.getElementById('sForm').style.display='none';document.getElementById('sOk').style.display='block';
 }
@@ -2831,6 +2833,7 @@ async function submitFacility(){
     if(!PINNED_DATA.facility[_fKey]) PINNED_DATA.facility[_fKey]={data:[],label:_monthLabel(_fKey),pinnedAt:''};
     PINNED_DATA.facility[_fKey].data.push({problem_type:type,location:loc,date:dateVal,observer:obs,description:desc||''});
     PINNED_DATA.facility[_fKey].pinnedAt=new Date().toLocaleString('ar');
+    savePinnedToStorage();
     refreshQuarterlyCard();
   }
   document.getElementById('fForm').style.display='none';document.getElementById('fOk').style.display='block';
@@ -3310,8 +3313,8 @@ function dlCSV(rows,fname){
   const csv='\uFEFF'+rows.map(r=>Array.isArray(r)?r.map(c=>`"${(c==null?'':c).toString().replace(/"/g,'""')}"`).join(','):'').join('\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=fname+'.csv';a.click();
-  URL.revokeObjectURL(url);
+  const a=document.createElement('a');a.href=url;a.download=fname+'.csv';a.style.display='none';document.body.appendChild(a);a.click();
+  setTimeout(()=>{try{document.body.removeChild(a);}catch(e){}URL.revokeObjectURL(url);},200);
 }
 
 // Wrapper: try SheetJS XLSX, fallback to CSV
@@ -7042,6 +7045,7 @@ async function submitBuilding(){
       if(!PINNED_DATA.building[_bKey]) PINNED_DATA.building[_bKey]={data:[],label:_monthLabel(_bKey),pinnedAt:''};
       PINNED_DATA.building[_bKey].data.push({...data});
       PINNED_DATA.building[_bKey].pinnedAt=new Date().toLocaleString('ar');
+    savePinnedToStorage();
     }
     document.getElementById('bForm').style.display='none';
     document.getElementById('bOk').style.display='block';
@@ -7937,7 +7941,7 @@ async function exportOpsExcelFull(){
   const buf=await wb.xlsx.writeBuffer();
   const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='كفاءة_التشغيل_'+mo+'.xlsx';a.click();URL.revokeObjectURL(url);
+  const a=document.createElement('a');a.href=url;a.download='كفاءة_التشغيل_'+mo+'.xlsx';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{try{document.body.removeChild(a);}catch(e){}URL.revokeObjectURL(url);},200);
   toast('✅ تم تصدير Excel — '+mo);
 }
 
@@ -7976,7 +7980,7 @@ async function exportOpsExcelNew(){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url; const now=new Date(); a.download=`كفاءة_التشغيل_${now.getFullYear()}_${now.getMonth()+1}.xlsx`;
-  a.click(); URL.revokeObjectURL(url); toast('✅ تم التصدير');
+  a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{try{document.body.removeChild(a);}catch(e){}URL.revokeObjectURL(url);},200); toast('✅ تم التصدير');
 }
 function handleOpsFile(input){handleOpsFileNew(input,'ops');}
 
@@ -8185,20 +8189,24 @@ function openQuarterlyModalAuth() {
 function openQuarterlyModal() {
   if (!currentUser) { toast('❌ يرجى تسجيل الدخول أولاً'); return; }
   const modal = document.getElementById('quarterlyModal');
+  if (!modal) return;
   modal.style.display = 'block';
 
-  // تعبئة السنوات
-  const sel = document.getElementById('qYear');
   const now = new Date();
-  sel.innerHTML = '';
-  for (let y = now.getFullYear(); y >= now.getFullYear()-3; y--) {
-    sel.innerHTML += `<option value="${y}">${y}</option>`;
+  const sel = document.getElementById('qYear');
+  if (sel) {
+    sel.innerHTML = '';
+    for (let y = now.getFullYear(); y >= now.getFullYear()-3; y--) {
+      sel.innerHTML += `<option value="${y}">${y}</option>`;
+    }
+    sel.onchange = () => selectQuarter(_qQuarter || Math.ceil((now.getMonth()+1)/3));
   }
-  sel.onchange = () => selectQuarter(_qQuarter || Math.ceil((now.getMonth()+1)/3));
 
-  // الربع الحالي تلقائياً
+  // الربع الحالي تلقائياً دائماً
   const curQ = Math.ceil((now.getMonth()+1)/3);
-  selectQuarter(curQ);
+  _qQuarter = _qQuarter || curQ;
+  _qYear    = _qYear    || now.getFullYear();
+  selectQuarter(_qQuarter);
 }
 
 function selectQuarter(q) {
@@ -8594,9 +8602,10 @@ function renderQuarterlyResults() {
 
 async function exportQuarterlyExcel() {
   const d = _qData;
-  if (!d) { toast('❌ اختر الربع أولاً'); return; }
+  if (!d) { toast('❌ لا توجد بيانات — اضغط على ربع أولاً'); return; }
   if (typeof ExcelJS === 'undefined') { toast('❌ ExcelJS غير محملة'); return; }
   toast('⏳ جاري بناء التقرير...');
+  try {
 
   const wb = new ExcelJS.Workbook();
   wb.creator = 'نورة لتعليم القيادة'; wb.created = new Date();
@@ -9047,9 +9056,15 @@ async function exportQuarterlyExcel() {
   const a=document.createElement('a');
   a.href=url;
   a.download=`التقرير_الربعي_Q${d.q}_${d.year}.xlsx`;
+  a.style.display='none';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
-  toast(`✅ تم تصدير التقرير — ${wb.worksheets.length} شيتات`);
+  setTimeout(()=>{ try{document.body.removeChild(a);}catch(e){} URL.revokeObjectURL(url); }, 100);
+    toast(`✅ تم تصدير التقرير — ${wb.worksheets.length} شيتات`);
+  } catch(err) {
+    console.error('Export error:', err);
+    toast('❌ خطأ في التصدير: ' + err.message);
+  }
 }
 
 
@@ -9131,8 +9146,8 @@ async function exportRatingsExcelFull() {
   const buf=await wb.xlsx.writeBuffer();
   const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   const url=URL.createObjectURL(blob); const a=document.createElement('a');
-  a.href=url; a.download=`تقييم_المدربين_${new Date().toISOString().slice(0,10)}.xlsx`; a.click();
-  URL.revokeObjectURL(url);
+  a.href=url; a.download=`تقييم_المدربين_${new Date().toISOString().slice(0,10)}.xlsx`; a.style.display='none';document.body.appendChild(a);a.click();
+  setTimeout(()=>{try{document.body.removeChild(a);}catch(e){}URL.revokeObjectURL(url);},200);
   toast('✅ تم تصدير تقرير التقييم');
 }
 
@@ -9199,8 +9214,8 @@ async function exportSalesExcelFull() {
   const buf=await wb.xlsx.writeBuffer();
   const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   const url=URL.createObjectURL(blob); const a=document.createElement('a');
-  a.href=url; a.download=`المبيعات_${new Date().toISOString().slice(0,10)}.xlsx`; a.click();
-  URL.revokeObjectURL(url);
+  a.href=url; a.download=`المبيعات_${new Date().toISOString().slice(0,10)}.xlsx`; a.style.display='none';document.body.appendChild(a);a.click();
+  setTimeout(()=>{try{document.body.removeChild(a);}catch(e){}URL.revokeObjectURL(url);},200);
   toast('✅ تم تصدير تقرير المبيعات');
 }
 
@@ -9359,7 +9374,12 @@ async function _gameDeleteScore(playerName,containerId){
 }
 function _showState(state){['Question','Result','End','Already'].forEach(s=>{const el=document.getElementById('game'+s+'State');if(el)el.style.display=(s.toLowerCase()===state)?'block':'none';});}
 setTimeout(()=>{if(currentUser)_refreshHomeLeader();},1500);
-setTimeout(()=>{refreshQuarterlyCard();},2000);
+setTimeout(()=>{
+  loadPinnedFromStorage();
+  renderMonthTabs();
+  renderPinnedMonths('ops');
+  refreshQuarterlyCard();
+},2000);
 
 
 // ══ نظام PINNED_DATA ══
@@ -9381,6 +9401,7 @@ function pinMonthData(){
     label:mo.label, workDays:mo.workDays, pinnedAt:new Date().toLocaleString('ar')
   };
   renderPinnedMonths('ops');
+  savePinnedToStorage();
   toast('✅ تم تثبيت بيانات '+mo.label);
   refreshQuarterlyCard();
 }
@@ -9440,6 +9461,41 @@ function getPinnedForQuarter(q,year){
     if(PINNED_DATA.ratings[key])    result.ratings.push(...PINNED_DATA.ratings[key].data);
   });
   return result;
+}
+
+
+// ══ حفظ PINNED_DATA في localStorage ══
+function savePinnedToStorage() {
+  try {
+    localStorage.setItem('nq_pinned_v2', JSON.stringify(PINNED_DATA));
+  } catch(e) { console.log('save pinned:', e); }
+}
+function loadPinnedFromStorage() {
+  try {
+    const saved = localStorage.getItem('nq_pinned_v2');
+    if (!saved) return;
+    const parsed = JSON.parse(saved);
+    Object.keys(parsed).forEach(type => {
+      if (PINNED_DATA[type] !== undefined) {
+        Object.assign(PINNED_DATA[type], parsed[type]);
+      }
+    });
+    // تحميل الأشهر المثبتة في OPS_MONTHS
+    Object.entries(PINNED_DATA.ops).forEach(([key, mo]) => {
+      if (!OPS_MONTHS[key]) {
+        const [y,m] = key.split('-');
+        OPS_MONTHS[key] = {
+          key, year:parseInt(y), month:parseInt(m)-1,
+          workDays:mo.workDays||22, label:mo.label,
+          ops:JSON.parse(JSON.stringify(mo.ops)),
+          att:JSON.parse(JSON.stringify(mo.att)),
+          analysis:mo.analysis ? JSON.parse(JSON.stringify(mo.analysis)) : [],
+        };
+      }
+    });
+    renderPinnedMonths('ops');
+    refreshQuarterlyCard();
+  } catch(e) { console.log('load pinned:', e); }
 }
 
 </script>
