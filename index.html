@@ -5093,6 +5093,13 @@ async function submitIncentive(){
     ['incMonth','incStaff','incSection','incScore','incNotes'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('incViolations').value='0';
     loadIncentives();
+    // تثبيت تلقائي في PINNED_DATA
+    const _incKey = (year||new Date().getFullYear())+'-'+String(month||'1').padStart(2,'0');
+    if(!PINNED_DATA.incentives[_incKey]) PINNED_DATA.incentives[_incKey]={data:[],label:_monthLabel(_incKey),pinnedAt:''};
+    PINNED_DATA.incentives[_incKey].data.push({trainer_name:staff,month,year,amount:document.getElementById('incScore')?.value||0});
+    PINNED_DATA.incentives[_incKey].pinnedAt=new Date().toLocaleString('ar');
+    savePinnedToStorage();
+    refreshQuarterlyCard();
   }catch(e){toast('❌ '+e.message);}
 }
 
@@ -5127,6 +5134,13 @@ async function deleteIncentive(id){
     await db.from('incentives').delete().eq('id',id);
     toast('✅ تم الحذف');
     loadIncentives();
+    // تثبيت تلقائي في PINNED_DATA
+    const _incKey = (year||new Date().getFullYear())+'-'+String(month||'1').padStart(2,'0');
+    if(!PINNED_DATA.incentives[_incKey]) PINNED_DATA.incentives[_incKey]={data:[],label:_monthLabel(_incKey),pinnedAt:''};
+    PINNED_DATA.incentives[_incKey].data.push({trainer_name:staff,month,year,amount:document.getElementById('incScore')?.value||0});
+    PINNED_DATA.incentives[_incKey].pinnedAt=new Date().toLocaleString('ar');
+    savePinnedToStorage();
+    refreshQuarterlyCard();
   }catch(e){toast('❌ '+e.message);}
 }
 
@@ -8265,20 +8279,22 @@ async function loadQuarterlyData(q, year) {
     // جلب البيانات المثبتة محلياً ودمجها مع Supabase
     const _pinned = getPinnedForQuarter(q, year);
     const _merge = (arr1, arr2, keyFn) => {
-      const seen = new Set(arr1.map(keyFn));
-      return [...arr1, ...arr2.filter(r => !seen.has(keyFn(r)))];
+      const seen = new Set((arr1||[]).map(keyFn));
+      return [...(arr1||[]), ...(arr2||[]).filter(r => !seen.has(keyFn(r)))];
     };
 
+    // ══ دمج تلقائي من OPS_MONTHS + Supabase + PINNED_DATA ══
+    const _opsFromMonths = _pinned.ops || [];
     _qData = {
       q, year,
       violations: _merge(vRes.data||[], _pinned.violations, r=>(r.trainer_name||'')+(r.date||'')),
       surveys:    _merge(sRes.data||[], _pinned.surveys,    r=>(r.client_name||'')+(r.date||'')),
       facilities: _merge(fRes.data||[], _pinned.facility,   r=>(r.location||'')+(r.date||r.report_date||'')),
       buildings:  _merge(bRes.data||[], _pinned.building,   r=>(r.date||r.report_date||'')),
-      ops:        _merge(oRes.data||[], _pinned.ops,        r=>(r.trainer_name||'')+(r.report_month||'')),
-      sales:      salRes.data || [],
-      ratings:    ratRes.data || [],
-      incentives: incRes.data || [],
+      ops:        _merge(oRes.data||[], _opsFromMonths,     r=>(r.trainer_name||'')+(r.report_month||'')),
+      sales:      _merge(salRes.data||[], _pinned.sales||[], r=>(r.description||'')+(r.report_date||r.date||'')),
+      ratings:    _merge(ratRes.data||[], _pinned.ratings||[], r=>(r.trainer_name||r.name||'')+(r.report_date||r.date||'')),
+      incentives: _merge(incRes.data||[], _pinned.incentives||[], r=>(r.trainer_name||r.name||'')+(r.month||'')),
     };
 
     renderQuarterlyResults();
@@ -9205,12 +9221,11 @@ function refreshQuarterlyCard() {
   const now = new Date();
   const curQ = Math.ceil((now.getMonth()+1)/3);
   const year = now.getFullYear();
-  const months = Q_MONTHS[curQ];
   const badge  = document.getElementById('quarterlyBadge');
   const preview= document.getElementById('quarterlyPreview');
   if (badge) badge.textContent = `Q${curQ} ${year}`;
 
-  // تجميع من PINNED_DATA
+  // تجميع من OPS_MONTHS + PINNED_DATA تلقائياً
   const pinned = getPinnedForQuarter(curQ, year);
   const femViol = pinned.violations.filter(v=>v.section==='female');
   const malViol = pinned.violations.filter(v=>v.section==='male');
@@ -9364,7 +9379,7 @@ setTimeout(()=>{
 
 // ══ نظام PINNED_DATA ══
 const PINNED_DATA = {
-  ops:{}, violations:{}, surveys:{}, facility:{}, building:{}, sales:{}, ratings:{}
+  ops:{}, violations:{}, surveys:{}, facility:{}, building:{}, sales:{}, ratings:{}, incentives:{}
 };
 const MONTH_NAMES_AR2=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 function _currentMonthKey(){const now=new Date();return now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');}
@@ -9425,20 +9440,50 @@ function unpinMonth(type,key){
 }
 function getPinnedForQuarter(q,year){
   const months=Q_MONTHS[q];
-  const result={ops:[],att:{female:{},male:{},bike:{}},violations:[],surveys:[],facility:[],building:[],sales:[],ratings:[]};
+  const result={ops:[],att:{female:{},male:{},bike:{}},violations:[],surveys:[],facility:[],building:[],sales:[],ratings:[],incentives:[]};
   months.forEach(m=>{
     const key=year+'-'+String(m).padStart(2,'0');
+    const mStr=String(m);
+
+    // ══ كفاءة التشغيل: من OPS_MONTHS مباشرة (بدون تثبيت يدوي) ══
+    if(OPS_MONTHS && OPS_MONTHS[key]){
+      const mo=OPS_MONTHS[key];
+      // أولوية: التحليل المحفوظ
+      if(mo.analysis&&mo.analysis.length){
+        mo.analysis.forEach(t=>result.ops.push({
+          ...t, report_month:mStr, report_year:String(year),
+          report_month_label:(typeof MONTH_NAMES_AR!=='undefined'?MONTH_NAMES_AR[m]:'')
+        }));
+      } else {
+        // بيانات الملف الخام
+        ['female','male','bike'].forEach(sec=>{
+          (mo.ops[sec]||[]).forEach(row=>result.ops.push({
+            ...row, zone:sec, section:sec,
+            report_month:mStr, report_year:String(year)
+          }));
+        });
+      }
+    }
+    // ══ من PINNED_DATA.ops (إذا ثبّت يدوياً) ══
     if(PINNED_DATA.ops[key]){
       const po=PINNED_DATA.ops[key];
-      if(po.analysis&&po.analysis.length) result.ops.push(...po.analysis);
-      else ['female','male','bike'].forEach(sec=>(po.ops[sec]||[]).forEach(row=>result.ops.push({...row,zone:sec,report_month:String(m),report_year:String(year)})));
+      if(po.analysis&&po.analysis.length){
+        po.analysis.forEach(t=>{
+          if(!result.ops.find(r=>r.trainer_name===t.trainer_name&&r.report_month===mStr))
+            result.ops.push({...t,report_month:mStr,report_year:String(year)});
+        });
+      }
     }
-    if(PINNED_DATA.violations[key]) result.violations.push(...PINNED_DATA.violations[key].data);
-    if(PINNED_DATA.surveys[key])    result.surveys.push(...PINNED_DATA.surveys[key].data);
-    if(PINNED_DATA.facility[key])   result.facility.push(...PINNED_DATA.facility[key].data);
-    if(PINNED_DATA.building[key])   result.building.push(...PINNED_DATA.building[key].data);
-    if(PINNED_DATA.sales[key])      result.sales.push(...PINNED_DATA.sales[key].data);
-    if(PINNED_DATA.ratings[key])    result.ratings.push(...PINNED_DATA.ratings[key].data);
+
+    // ══ باقي الكروت من PINNED_DATA ══
+    if(PINNED_DATA.violations[key]) result.violations.push(...(PINNED_DATA.violations[key].data||[]));
+    if(PINNED_DATA.surveys[key])    result.surveys.push(...(PINNED_DATA.surveys[key].data||[]));
+    if(PINNED_DATA.facility[key])   result.facility.push(...(PINNED_DATA.facility[key].data||[]));
+    if(PINNED_DATA.building[key])   result.building.push(...(PINNED_DATA.building[key].data||[]));
+    if(PINNED_DATA.sales[key])      result.sales.push(...(PINNED_DATA.sales[key].data||[]));
+    if(PINNED_DATA.ratings[key])    result.ratings.push(...(PINNED_DATA.ratings[key].data||[]));
+    if(PINNED_DATA.incentives&&PINNED_DATA.incentives[key])
+      result.incentives.push(...(PINNED_DATA.incentives[key].data||[]));
   });
   return result;
 }
