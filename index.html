@@ -3262,7 +3262,7 @@ async function switchTab(tab,el){
 function getQ(d){if(!d)return 1;const m=new Date(d).getMonth()+1;return m<=3?1:m<=6?2:m<=9?3:4;}
 
 async function loadAll(){
-  const{data:vd}=await db.from('violations').select('*').order('created_at',{ascending:false});
+  const{data:vd}=await db.from('violations').select('*').gte('date','2026-02-01').order('created_at',{ascending:false});
   allV=vd||[];window._cachedViolations=allV;updateVStats();renderV(allV);
   const{data:sd}=await db.from('surveys').select('*').order('created_at',{ascending:false});
   allS=sd||[];renderS(allS);
@@ -3851,10 +3851,11 @@ async function loadActiveStaffHome(){
   const el=document.getElementById('homeActiveStaff');
   if(!el||!currentUser) return;
   try{
+    const START_DATE='2026-03-01';
     const[{data:vd},{data:sd},{data:fd}]=await Promise.all([
-      db.from('violations').select('observer'),
-      db.from('surveys').select('observer'),
-      db.from('facility_reports').select('observer'),
+      db.from('violations').select('observer').gte('date',START_DATE),
+      db.from('surveys').select('observer').gte('date',START_DATE),
+      db.from('facility_reports').select('observer').gte('report_date',START_DATE),
     ]);
     const map={};
     // Split multi-observer entries — each observer gets a full point
@@ -4543,7 +4544,7 @@ function archiveTab(tab, el){
 async function loadArchiveTab(tab){
   if(tab==='vt'){
     if(!archAllV.length){
-      const{data}=await db.from('violations').select('*').order('created_at',{ascending:false});
+      const{data}=await db.from('violations').select('*').gte('date','2026-02-01').order('created_at',{ascending:false});
       archAllV=data||[];
       populateArchMonths();
     }
