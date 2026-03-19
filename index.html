@@ -822,19 +822,80 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 }
 .back-btn::before { content:'←'; font-size:16px; }
 
-/* ══ Dashboard ══ */
+/* ══ Dashboard — Apple Arcade Style ══ */
+@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;700;900&display=swap');
+
 .dash-period-btn {
-  padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);
-  background:var(--card);color:var(--text-dim);
-  font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;
-  cursor:pointer;transition:all .2s;
+  padding:9px 20px;
+  border-radius:30px;
+  border:none;
+  background:rgba(255,255,255,0.07);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  color:rgba(255,255,255,0.55);
+  font-family:'Cairo',sans-serif;
+  font-size:11px;font-weight:700;
+  cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  letter-spacing:.3px;
 }
-.dash-period-btn:hover { border-color:var(--accent); color:var(--accent); }
+.dash-period-btn:hover {
+  background:rgba(255,255,255,0.14);
+  color:#fff;
+  transform:translateY(-1px);
+}
 .active-period {
-  background:var(--accent) !important;
+  background:rgba(255,255,255,0.18) !important;
   color:#fff !important;
-  border-color:var(--accent) !important;
+  box-shadow:0 0 0 1px rgba(255,255,255,0.25), 0 4px 16px rgba(0,0,0,0.2) !important;
 }
+
+/* Arcade KPI Card */
+.arcade-kpi {
+  position:relative;
+  border-radius:20px;
+  padding:18px 16px;
+  overflow:hidden;
+  cursor:default;
+  transition:transform .2s cubic-bezier(.4,0,.2,1), box-shadow .2s;
+}
+.arcade-kpi:hover {
+  transform:translateY(-3px) scale(1.01);
+  box-shadow:0 12px 40px rgba(0,0,0,0.35) !important;
+}
+.arcade-kpi::before {
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.12) 0%,rgba(255,255,255,0) 60%);
+  border-radius:inherit;
+  pointer-events:none;
+}
+.arcade-section {
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.09);
+  border-radius:24px;
+  padding:22px;
+  margin-bottom:16px;
+  transition:border-color .2s;
+}
+.arcade-section:hover {
+  border-color:rgba(255,255,255,0.16);
+}
+@media(max-width:700px){
+  #dashMainGrid { grid-template-columns:1fr !important; }
+  #dashKpiRow   { grid-template-columns:repeat(2,1fr) !important; }
+}
+.arcade-section-title {
+  font-size:13px;font-weight:800;
+  letter-spacing:.2px;
+  margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+  color:rgba(255,255,255,0.9);
+}
+.arcade-sub { font-size:9px;color:rgba(255,255,255,0.4);font-weight:400; }
+
 </style>
 </head>
 <body>
@@ -10183,13 +10244,24 @@ function renderDashKPI(violations, ops, sales, buildings, facilities, label) {
 
   const el = document.getElementById('dashKpiRow');
   if (!el) return;
-  el.innerHTML = kpis.map(k => `
-    <div style="background:var(--card);border-radius:16px;padding:14px;border-right:4px solid ${k.color};box-shadow:0 2px 10px rgba(0,0,0,0.06);">
-      <div style="font-size:20px;margin-bottom:6px;">${k.icon}</div>
-      <div style="font-size:22px;font-weight:900;color:${k.color};">${k.value}</div>
-      <div style="font-size:10px;font-weight:700;color:var(--text);margin-top:2px;">${k.label}</div>
-      ${k.sub ? `<div style="font-size:9px;color:var(--text-dim);">${k.sub}</div>` : ''}
-    </div>`).join('');
+  el.innerHTML = kpis.map((k,i) => {
+    const gradients = [
+      'linear-gradient(135deg,#1a1a4e,#0d1b2a)',
+      'linear-gradient(135deg,#2d0a0a,#1a0a0a)',
+      'linear-gradient(135deg,#0a2040,#0a1628)',
+      'linear-gradient(135deg,#1a2a0a,#0a1a0a)',
+      'linear-gradient(135deg,#2a1a40,#1a0a2a)',
+      'linear-gradient(135deg,#2a2000,#1a1400)',
+      'linear-gradient(135deg,#002a2a,#001a1a)',
+    ];
+    return `<div class="arcade-kpi" style="background:${gradients[i%gradients.length]};border:1px solid ${k.color}33;box-shadow:0 4px 24px ${k.color}22,inset 0 1px 0 rgba(255,255,255,0.06);">
+      <div style="font-size:22px;margin-bottom:8px;">${k.icon}</div>
+      <div style="font-size:26px;font-weight:900;color:${k.color};letter-spacing:-.5px;line-height:1;">${k.value}</div>
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.7);margin-top:6px;">${k.label}</div>
+      ${k.sub ? `<div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:2px;">${k.sub}</div>` : ''}
+      <div style="position:absolute;bottom:0;right:0;width:60px;height:60px;border-radius:50%;background:${k.color}18;filter:blur(20px);pointer-events:none;"></div>
+    </div>`;
+  }).join('');
 }
 
 function renderDashViolations(violations) {
@@ -10209,10 +10281,10 @@ function renderDashViolations(violations) {
   const top3 = Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,3);
   const topEl = document.getElementById('dashViolTopList');
   if (topEl && top3.length) {
-    topEl.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:6px;">الأكثر تكراراً:</div>' +
-      top3.map(([t,c],i)=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:10px;">
-        <span>${['🥇','🥈','🥉'][i]} ${t}</span>
-        <span style="font-weight:700;color:#E74C3C;">${c}</span>
+    topEl.innerHTML = '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:8px;">الأكثر تكراراً</div>' +
+      top3.map(([t,c],i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span style="font-size:10px;color:rgba(255,255,255,0.7);">${['🥇','🥈','🥉'][i]} ${t}</span>
+        <span style="font-size:11px;font-weight:900;color:#FF6B6B;background:rgba(231,76,60,0.12);border-radius:20px;padding:2px 10px;">${c}</span>
       </div>`).join('');
   }
 }
@@ -10232,10 +10304,10 @@ function renderDashOps(ops) {
   const top3 = [...ops].sort((a,b)=>(b.efficiency_pct||0)-(a.efficiency_pct||0)).slice(0,3);
   const topEl = document.getElementById('dashOpsTopList');
   if (topEl && top3.length) {
-    topEl.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:6px;">أعلى 3 مدربين:</div>' +
-      top3.map((r,i)=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:10px;">
-        <span>${['🥇','🥈','🥉'][i]} ${r.trainer_name||'—'}</span>
-        <span style="font-weight:700;color:#27AE60;">${r.efficiency_pct||0}%</span>
+    topEl.innerHTML = '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:8px;">أعلى 3 مدربين</div>' +
+      top3.map((r,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span style="font-size:10px;color:rgba(255,255,255,0.7);">${['🥇','🥈','🥉'][i]} ${r.trainer_name||'—'}</span>
+        <span style="font-size:11px;font-weight:900;color:#58D68D;background:rgba(39,174,96,0.12);border-radius:20px;padding:2px 10px;">${r.efficiency_pct||0}%</span>
       </div>`).join('');
   }
 }
@@ -10245,13 +10317,13 @@ function renderDashSales(sales) {
   if (!el) return;
   const total = sales.reduce((s,r)=>s+parseFloat(r.total_amount||r.amount||0),0);
   el.innerHTML = `
-    <div style="background:rgba(125,60,152,0.06);border-radius:14px;padding:14px;border-right:3px solid #7D3C98;">
-      <div style="font-size:11px;font-weight:700;color:#7D3C98;margin-bottom:6px;">💰 إجمالي المبيعات</div>
-      <div style="font-size:24px;font-weight:900;color:#7D3C98;">${total>0?total.toLocaleString()+' ر':'—'}</div>
+    <div style="background:linear-gradient(135deg,rgba(125,60,152,0.2),rgba(80,30,100,0.1));border:1px solid rgba(125,60,152,0.2);border-radius:16px;padding:14px;">
+      <div style="font-size:9px;font-weight:700;color:rgba(200,130,255,0.7);margin-bottom:6px;letter-spacing:.5px;">💰 إجمالي المبيعات</div>
+      <div style="font-size:24px;font-weight:900;color:#C39BD3;">${total>0?total.toLocaleString()+' ر':'—'}</div>
     </div>
-    <div style="background:rgba(125,60,152,0.06);border-radius:14px;padding:14px;border-right:3px solid #7D3C98;">
-      <div style="font-size:11px;font-weight:700;color:#7D3C98;margin-bottom:6px;">📋 عدد السجلات</div>
-      <div style="font-size:24px;font-weight:900;color:#7D3C98;">${sales.length||'—'}</div>
+    <div style="background:linear-gradient(135deg,rgba(125,60,152,0.2),rgba(80,30,100,0.1));border:1px solid rgba(125,60,152,0.2);border-radius:16px;padding:14px;">
+      <div style="font-size:9px;font-weight:700;color:rgba(200,130,255,0.7);margin-bottom:6px;letter-spacing:.5px;">📋 عدد السجلات</div>
+      <div style="font-size:24px;font-weight:900;color:#C39BD3;">${sales.length||'—'}</div>
     </div>`;
 }
 
@@ -10264,9 +10336,10 @@ function renderDashBuildings(buildings, facilities) {
     const byType = {};
     facilities.forEach(f=>{ const t=f.problem_type||'غير محدد'; byType[t]=(byType[t]||0)+1; });
     const top3 = Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,3);
-    topEl.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:6px;">أبرز المشاكل:</div>' +
-      top3.map(([t,c])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:10px;">
-        <span>🔧 ${t}</span><span style="font-weight:700;color:#27AE60;">${c}</span>
+    topEl.innerHTML = '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:8px;">أبرز المشاكل</div>' +
+      top3.map(([t,c])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span style="font-size:10px;color:rgba(255,255,255,0.7);">🔧 ${t}</span>
+        <span style="font-size:11px;font-weight:900;color:#58D68D;background:rgba(39,174,96,0.12);border-radius:20px;padding:2px 10px;">${c}</span>
       </div>`).join('');
   }
 }
@@ -10483,97 +10556,105 @@ function updateDashboardVisibility() {
 
 
 <!-- ══ PAGE: DASHBOARD ══ -->
-<div id="page-dashboard" class="page">
-  <div class="container-wide">
-    <div class="page-header">
-      <div class="p-icon" style="background:rgba(0,168,150,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">📊</div>
-      <h1>لوحة المتابعة</h1>
-      <div class="sub">DASHBOARD</div>
+<div id="page-dashboard" class="page" style="background:linear-gradient(160deg,#0a0a1a 0%,#0d1b2a 40%,#0a1628 100%);min-height:100vh;">
+  <div style="max-width:1200px;margin:0 auto;padding:24px 20px;">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-.3px;">لوحة المتابعة</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:2px;margin-top:2px;">QUALITY DASHBOARD</div>
+      </div>
+      <!-- فلتر الفترة -->
+      <div style="display:flex;gap:6px;background:rgba(255,255,255,0.05);border-radius:34px;padding:4px;">
+        <button onclick="setDashPeriod('week')"    id="dashBtn_week"    class="dash-period-btn active-period">أسبوع</button>
+        <button onclick="setDashPeriod('month')"   id="dashBtn_month"   class="dash-period-btn">شهر</button>
+        <button onclick="setDashPeriod('quarter')" id="dashBtn_quarter" class="dash-period-btn">ربع</button>
+        <button onclick="setDashPeriod('year')"    id="dashBtn_year"    class="dash-period-btn">سنة</button>
+      </div>
     </div>
 
-    <!-- فلتر الفترة -->
-    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:center;">
-      <button onclick="setDashPeriod('week')"   id="dashBtn_week"   class="dash-period-btn active-period">هذا الأسبوع</button>
-      <button onclick="setDashPeriod('month')"  id="dashBtn_month"  class="dash-period-btn">هذا الشهر</button>
-      <button onclick="setDashPeriod('quarter')" id="dashBtn_quarter" class="dash-period-btn">هذا الربع</button>
-      <button onclick="setDashPeriod('year')"   id="dashBtn_year"   class="dash-period-btn">هذا العام</button>
-    </div>
+    <!-- KPI Cards Row -->
+    <div id="dashKpiRow" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px;"></div>
 
-    <!-- KPI Cards -->
-    <div id="dashKpiRow" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px;"></div>
+    <!-- Grid Layout للكمبيوتر -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="dashMainGrid">
 
-    <!-- ══ تقارير المخالفات ══ -->
-    <div style="background:var(--card);border-radius:18px;padding:18px;margin-bottom:16px;">
-      <div style="font-size:14px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-        <span>⚖️</span> تقارير المخالفات
-        <span style="font-size:10px;color:var(--text-dim);font-weight:400;" id="dashViolPeriod"></span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
-        <div style="background:rgba(231,76,60,0.06);border-radius:14px;padding:14px;border-right:3px solid #E74C3C;">
-          <div style="font-size:11px;font-weight:700;color:#E74C3C;margin-bottom:6px;">👩 نسائي</div>
-          <div id="dashViolFemCount" style="font-size:28px;font-weight:900;color:#E74C3C;">—</div>
-          <div id="dashViolFemBreak" style="font-size:10px;color:var(--text-dim);margin-top:4px;"></div>
+      <!-- ══ المخالفات ══ -->
+      <div class="arcade-section">
+        <div class="arcade-section-title">
+          <span style="font-size:18px;">⚖️</span>
+          <div>المخالفات <span class="arcade-sub" id="dashViolPeriod"></span></div>
         </div>
-        <div style="background:rgba(46,134,193,0.06);border-radius:14px;padding:14px;border-right:3px solid #2E86C1;">
-          <div style="font-size:11px;font-weight:700;color:#2E86C1;margin-bottom:6px;">👨 رجالي</div>
-          <div id="dashViolMalCount" style="font-size:28px;font-weight:900;color:#2E86C1;">—</div>
-          <div id="dashViolMalBreak" style="font-size:10px;color:var(--text-dim);margin-top:4px;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div style="background:linear-gradient(135deg,rgba(231,76,60,0.2),rgba(192,57,43,0.1));border:1px solid rgba(231,76,60,0.2);border-radius:16px;padding:14px;">
+            <div style="font-size:10px;font-weight:700;color:rgba(255,120,100,0.8);margin-bottom:6px;">👩 نسائي</div>
+            <div id="dashViolFemCount" style="font-size:32px;font-weight:900;color:#FF6B6B;line-height:1;">—</div>
+            <div id="dashViolFemBreak" style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:4px;"></div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(46,134,193,0.2),rgba(31,97,141,0.1));border:1px solid rgba(46,134,193,0.2);border-radius:16px;padding:14px;">
+            <div style="font-size:10px;font-weight:700;color:rgba(100,160,230,0.8);margin-bottom:6px;">👨 رجالي</div>
+            <div id="dashViolMalCount" style="font-size:32px;font-weight:900;color:#5DADE2;line-height:1;">—</div>
+            <div id="dashViolMalBreak" style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:4px;"></div>
+          </div>
         </div>
+        <div id="dashViolTopList"></div>
       </div>
-      <div id="dashViolTopList" style="font-size:11px;color:var(--text-dim);"></div>
-    </div>
 
-    <!-- ══ كفاءة التشغيل ══ -->
-    <div style="background:var(--card);border-radius:18px;padding:18px;margin-bottom:16px;">
-      <div style="font-size:14px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-        <span>⚙️</span> كفاءة التشغيل
-        <span id="dashOpsPeriod" style="font-size:10px;color:var(--text-dim);font-weight:400;"></span>
+      <!-- ══ كفاءة التشغيل ══ -->
+      <div class="arcade-section">
+        <div class="arcade-section-title">
+          <span style="font-size:18px;">⚙️</span>
+          <div>كفاءة التشغيل <span class="arcade-sub" id="dashOpsPeriod"></span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+          <div style="background:linear-gradient(135deg,rgba(231,76,60,0.15),rgba(192,57,43,0.05));border:1px solid rgba(231,76,60,0.15);border-radius:14px;padding:12px;text-align:center;">
+            <div style="font-size:9px;color:rgba(255,120,100,0.7);margin-bottom:4px;">👩 نسائي</div>
+            <div id="dashOpsFem" style="font-size:20px;font-weight:900;color:#fff;">—</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(46,134,193,0.15),rgba(31,97,141,0.05));border:1px solid rgba(46,134,193,0.15);border-radius:14px;padding:12px;text-align:center;">
+            <div style="font-size:9px;color:rgba(100,160,230,0.7);margin-bottom:4px;">👨 رجالي</div>
+            <div id="dashOpsMal" style="font-size:20px;font-weight:900;color:#fff;">—</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(212,172,13,0.15),rgba(180,140,0,0.05));border:1px solid rgba(212,172,13,0.15);border-radius:14px;padding:12px;text-align:center;">
+            <div style="font-size:9px;color:rgba(230,200,80,0.7);margin-bottom:4px;">🏍️ دراجات</div>
+            <div id="dashOpsBike" style="font-size:20px;font-weight:900;color:#fff;">—</div>
+          </div>
+        </div>
+        <div id="dashOpsTopList"></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div style="text-align:center;background:rgba(231,76,60,0.06);border-radius:14px;padding:12px;">
-          <div style="font-size:10px;color:#E74C3C;font-weight:700;margin-bottom:4px;">👩 نسائي</div>
-          <div id="dashOpsFem" style="font-size:22px;font-weight:900;color:var(--text);">—</div>
-        </div>
-        <div style="text-align:center;background:rgba(46,134,193,0.06);border-radius:14px;padding:12px;">
-          <div style="font-size:10px;color:#2E86C1;font-weight:700;margin-bottom:4px;">👨 رجالي</div>
-          <div id="dashOpsMal" style="font-size:22px;font-weight:900;color:var(--text);">—</div>
-        </div>
-        <div style="text-align:center;background:rgba(212,172,13,0.06);border-radius:14px;padding:12px;">
-          <div style="font-size:10px;color:#D4AC0D;font-weight:700;margin-bottom:4px;">🏍️ دراجات</div>
-          <div id="dashOpsBike" style="font-size:22px;font-weight:900;color:var(--text);">—</div>
-        </div>
-      </div>
-      <div id="dashOpsTopList" style="font-size:11px;color:var(--text-dim);"></div>
-    </div>
 
-    <!-- ══ المبيعات ══ -->
-    <div style="background:var(--card);border-radius:18px;padding:18px;margin-bottom:16px;">
-      <div style="font-size:14px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-        <span>💼</span> قسم المبيعات — عملاء الاسترداد
-      </div>
-      <div id="dashSalesContent" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
-    </div>
-
-    <!-- ══ تقرير المبنى والمرافق ══ -->
-    <div style="background:var(--card);border-radius:18px;padding:18px;margin-bottom:16px;">
-      <div style="font-size:14px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-        <span>🏢</span> المبنى والمرافق
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div style="background:rgba(46,134,193,0.06);border-radius:14px;padding:14px;border-right:3px solid #2E86C1;">
-          <div style="font-size:11px;font-weight:700;color:#2E86C1;margin-bottom:6px;">🏢 المبنى الرئيسي</div>
-          <div id="dashBuildCount" style="font-size:28px;font-weight:900;color:#2E86C1;">—</div>
-          <div style="font-size:10px;color:var(--text-dim);">تقرير</div>
+      <!-- ══ المبيعات ══ -->
+      <div class="arcade-section">
+        <div class="arcade-section-title">
+          <span style="font-size:18px;">💼</span>
+          <div>المبيعات — عملاء الاسترداد</div>
         </div>
-        <div style="background:rgba(39,174,96,0.06);border-radius:14px;padding:14px;border-right:3px solid #27AE60;">
-          <div style="font-size:11px;font-weight:700;color:#27AE60;margin-bottom:6px;">🔧 ملاحظات المرافق</div>
-          <div id="dashFacilCount" style="font-size:28px;font-weight:900;color:#27AE60;">—</div>
-          <div style="font-size:10px;color:var(--text-dim);">ملاحظة</div>
-        </div>
+        <div id="dashSalesContent" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
       </div>
-      <div id="dashFacilList" style="margin-top:12px;font-size:11px;color:var(--text-dim);"></div>
-    </div>
 
+      <!-- ══ المبنى والمرافق ══ -->
+      <div class="arcade-section">
+        <div class="arcade-section-title">
+          <span style="font-size:18px;">🏢</span>
+          <div>المبنى والمرافق</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div style="background:linear-gradient(135deg,rgba(46,134,193,0.15),rgba(31,97,141,0.05));border:1px solid rgba(46,134,193,0.15);border-radius:16px;padding:14px;">
+            <div style="font-size:9px;color:rgba(100,160,230,0.7);margin-bottom:6px;">🏢 المبنى الرئيسي</div>
+            <div id="dashBuildCount" style="font-size:28px;font-weight:900;color:#5DADE2;">—</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);">تقرير</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(39,174,96,0.15),rgba(27,120,67,0.05));border:1px solid rgba(39,174,96,0.15);border-radius:16px;padding:14px;">
+            <div style="font-size:9px;color:rgba(100,220,140,0.7);margin-bottom:6px;">🔧 المرافق</div>
+            <div id="dashFacilCount" style="font-size:28px;font-weight:900;color:#58D68D;">—</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);">ملاحظة</div>
+          </div>
+        </div>
+        <div id="dashFacilList"></div>
+      </div>
+
+    </div><!-- end grid -->
   </div>
 </div>
 
