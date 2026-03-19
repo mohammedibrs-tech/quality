@@ -3851,7 +3851,7 @@ async function loadActiveStaffHome(){
   const el=document.getElementById('homeActiveStaff');
   if(!el||!currentUser) return;
   try{
-    const START_DATE='2026-03-01';
+    const START_DATE='2026-02-01';
     const[{data:vd},{data:sd},{data:fd}]=await Promise.all([
       db.from('violations').select('observer').gte('date',START_DATE),
       db.from('surveys').select('observer').gte('date',START_DATE),
@@ -6170,7 +6170,7 @@ async function doExportViolations(choice){
   const btn = event?.target;
   if(btn){btn.disabled=true;btn.textContent='⏳ جاري البناء...';}
   try{
-    const {data:all} = await db.from('violations').select('*').order('date',{ascending:false});
+    const {data:all} = await db.from('violations').select('*').gte('date','2026-02-01').order('date',{ascending:false});
     const recs = all||[];
     const female = recs.filter(r=>r.section==='female');
     const male = recs.filter(r=>r.section==='male');
