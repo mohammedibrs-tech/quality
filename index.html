@@ -9038,10 +9038,10 @@ async function loadQuarterlyData(q, year) {
     };
 
     // كفاءة التشغيل: Supabase أولاً + OPS_MONTHS كـ fallback تلقائي
-    const opsFromPinned = getPinnedForQuarter(q, year);
+    const _pinned = getPinnedForQuarter(q, year);
     const allOps = _merge(
       oRes.data||[],
-      [...(_local.ops||[]), ...(opsFromPinned||[])],
+      [...(_local.ops||[]), ...(_pinned.ops||[])],
       r=>(r.trainer_name||'')+(r.report_month||'')+(r.zone||r.section||'')
     );
 
