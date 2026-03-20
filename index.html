@@ -5333,6 +5333,7 @@ async function addSalesManual(){
     await db.from('sales_reports').insert([{
       client_name:newRec.name, request_type:newRec.type,
       fees:newRec.fees||null, request_date:newRec.date,
+      report_date:newRec.date||new Date().toISOString().split('T')[0],
       client_reason:newRec.reason||null, sales_notes:newRec.notes||null,
       week_label:new Date().toLocaleDateString('ar-SA'),
       uploaded_by:currentUser?.name||'admin'
@@ -5925,9 +5926,15 @@ async function saveOpsToSupabase(data, section){
   if(!data||!data.length) return;
   try{
     const now = new Date();
+    // استخدام ACTIVE_MONTH لتحديد الشهر الصحيح للملف المرفوع
+    let _opsMon = now.getMonth()+1, _opsYr = now.getFullYear();
+    if(typeof ACTIVE_MONTH === 'string' && ACTIVE_MONTH.match(/^\d{4}-\d{2}$/)){
+      const parts = ACTIVE_MONTH.split('-');
+      _opsYr = parseInt(parts[0]); _opsMon = parseInt(parts[1]);
+    }
     const rows = data.map(r=>({
-      report_month: String(now.getMonth()+1),
-      report_year: String(now.getFullYear()),
+      report_month: String(_opsMon),
+      report_year: String(_opsYr),
       section: section||'—',
       trainer_name: r.name||r.trainer_name||'—',
       zone: r.zone||r.section||'—',
@@ -7473,7 +7480,11 @@ async function exportRatingExcel(){
     await db.from('trainer_ratings').delete().eq('upload_date', uploadDate);
     const ratingRows = data.map((r,i)=>({
       upload_date: uploadDate,
+      report_date: uploadDate,
       trainer_name: r.name,
+      section: r.section||'—',
+      rating: r.pct||0,
+      avg_rating: parseFloat((r.pct/20||0).toFixed(1)),
       mention_count: r.count,
       mention_pct: r.pct,
       rank_position: i+1,
@@ -8614,7 +8625,11 @@ function processOpsAnalysis(){
 async function saveOpsToSupabase(trainers){
   try{
     const now=new Date();
-    await db.from('ops_reports').upsert(trainers.map(t=>({report_month:String(now.getMonth()+1),report_year:String(now.getFullYear()),trainer_name:t.name,zone:t.section,available_hours:t.hrsTot,sessions:t.sessions,trainees:t.trainees,efficiency_pct:Math.round(t.efficiency),uploaded_by:currentUser?.name||'admin'})),{onConflict:'trainer_name,report_month,report_year'});
+    let _opsMon2=now.getMonth()+1, _opsYr2=now.getFullYear();
+    if(typeof ACTIVE_MONTH==='string'&&ACTIVE_MONTH.match(/^\d{4}-\d{2}$/)){
+      const _p=ACTIVE_MONTH.split('-'); _opsYr2=parseInt(_p[0]); _opsMon2=parseInt(_p[1]);
+    }
+    await db.from('ops_reports').upsert(trainers.map(t=>({report_month:String(_opsMon2),report_year:String(_opsYr2),trainer_name:t.name,zone:t.section,available_hours:t.hrsTot,sessions:t.sessions,trainees:t.trainees,efficiency_pct:Math.round(t.efficiency),uploaded_by:currentUser?.name||'admin'})),{onConflict:'trainer_name,report_month,report_year'});
     toast('✅ تم الحفظ في Supabase');
   }catch(e){console.log('ops save:',e);}
 }
@@ -9025,9 +9040,9 @@ async function loadQuarterlyData(q, year) {
       db.from('surveys').select('*').gte('date',dateFrom).lte('date',dateTo),
       db.from('facility_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo),
       db.from('building_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo),
-      db.from('ops_reports').select('*').in('report_month',monthStrs).eq('report_year',String(year)),
-      db.from('sales_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo),
-      db.from('trainer_ratings').select('*').gte('report_date',dateFrom).lte('report_date',dateTo),
+      db.from('ops_reports').select('*').in('report_month',[...monthStrs,...months.map(m=>String(m).padStart(2,'0'))]).eq('report_year',String(year)),
+      db.from('sales_reports').select('*').gte('created_at',dateFrom+'T00:00:00').lte('created_at',dateTo+'T23:59:59'),
+      db.from('trainer_ratings').select('*').gte('upload_date',dateFrom).lte('upload_date',dateTo),
       db.from('incentives').select('*').in('month',monthStrs).eq('year',String(year)),
     ]);
 
@@ -9053,7 +9068,7 @@ async function loadQuarterlyData(q, year) {
       buildings:  _merge(bRes.data||[], _local.buildings||[],  r=>(r.employee_name||'')+(r.report_date||r.date||'')),
       ops:        allOps,
       sales:      _merge(salRes.data||[], _local.sales||[],    r=>(r.staff_name||'')+(r.client_name||'')+(r.report_date||'')),
-      ratings:    _merge(ratRes.data||[], _local.ratings||[],  r=>(r.trainer_name||'')+(r.report_date||r.date||'')),
+      ratings:    _merge(ratRes.data||[], _local.ratings||[],  r=>(r.trainer_name||'')+(r.upload_date||r.report_date||r.date||'')),
       incentives: _merge(incRes.data||[], _local.incentives||[], r=>(r.trainer_name||r.name||'')+(r.month||'')),
     };
 
