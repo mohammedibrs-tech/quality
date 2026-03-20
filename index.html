@@ -1226,6 +1226,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="section-card sales" onclick="adminOnly('sales')"><div class="s-icon">💼</div><div class="s-text"><div class="s-title-ar">قسم المبيعات</div><div class="s-title-en">SALES DEPARTMENT</div></div><div class="s-arrow">›</div></div>
     <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon">🌟</div><div class="s-text"><div class="s-title-ar">الأعلى بالتقييم</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
     <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon">🗂️</div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card" onclick="openQuarterlyPage()" style="background:linear-gradient(135deg,#0D1F2D,#1A3A5C);"><div class="s-icon" style="color:#00C8B4;">📋</div><div class="s-text"><div class="s-title-ar" style="color:#fff;">التقارير الربعية</div><div class="s-title-en" style="color:rgba(0,200,180,0.8);">QUARTERLY REPORTS</div></div><div class="s-arrow" style="color:#00C8B4;">›</div></div>
 
     <!-- ══ الأنشطة والفعاليات ══ -->
     <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#6A0DAD;background:rgba(106,13,173,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #6A0DAD;">🎯 الأنشطة والفعاليات</div>
@@ -1264,28 +1265,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     </div>
   </div>
 
-  <!-- ══ QUARTERLY REPORTS LABEL ══ -->
-  <div style="padding:0 14px 8px;max-width:900px;margin:0 auto;">
-    <div style="font-size:12px;font-weight:900;color:#00C8B4;background:rgba(0,200,180,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #00C8B4;">📋 التقارير الربعية</div>
-  </div>
 
-  <!-- ══ QUARTERLY REPORTS CARD ══ -->
-  <div style="padding:0 14px 16px;max-width:900px;margin:0 auto;">
-    <div onclick="openQuarterlyModalAuth()" style="background:linear-gradient(135deg,#0D1F2D,#1A3A5C,#0D2E3A);border-radius:22px;padding:18px 20px;cursor:pointer;box-shadow:0 8px 32px rgba(0,168,150,0.25);position:relative;overflow:hidden;transition:transform .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-      <div style="position:absolute;inset:0;opacity:0.08;background:repeating-linear-gradient(45deg,#00C8B4 0px,#00C8B4 1px,transparent 1px,transparent 12px);"></div>
-      <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="font-size:30px;">📊</div>
-          <div>
-            <div style="font-size:14px;font-weight:900;color:#fff;">التقارير الربعية</div>
-            <div style="font-size:9px;color:rgba(0,200,180,0.8);letter-spacing:2px;margin-top:2px;">QUARTERLY REPORTS & KPIs</div>
-          </div>
-        </div>
-        <div id="quarterlyBadge" style="background:rgba(0,200,180,0.15);border:1px solid rgba(0,200,180,0.4);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;color:#00C8B4;">اختر الربع</div>
-      </div>
-      <div id="quarterlyPreview" style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;"></div>
-    </div>
-  </div>
 
   <!-- ══ DAILY BULLETIN ══ -->
   <div style="padding:0 14px 8px;max-width:900px;margin:0 auto;">
@@ -1723,6 +1703,57 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         <div id="fobs_sec_rating" style="text-align:center;margin-bottom:16px;"></div>
         <button onclick="submitFacObs('sec')" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">💾 حفظ التقييم</button>
       </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══ PAGE: QUARTERLY REPORTS ══ -->
+<div id="page-quarterly" class="page">
+  <div class="container-wide">
+    <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
+    <div class="page-header">
+      <div class="p-icon" style="background:rgba(0,168,150,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">📋</div>
+      <h1>التقارير الربعية</h1>
+      <div class="sub">QUARTERLY REPORTS & KPIs</div>
+    </div>
+
+    <!-- اختيار الربع والسنة -->
+    <div style="display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;align-items:center;justify-content:center;">
+      <select id="qYear" onchange="selectQuarter(_qQuarter||Math.ceil((new Date().getMonth()+1)/3))"
+        style="padding:10px 16px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;"></select>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+        <button onclick="selectQuarter(1)" id="qBtn1" style="padding:10px 18px;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;">Q1<div style="font-size:9px;color:var(--text-dim);">يناير–مارس</div></button>
+        <button onclick="selectQuarter(2)" id="qBtn2" style="padding:10px 18px;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;">Q2<div style="font-size:9px;color:var(--text-dim);">أبريل–يونيو</div></button>
+        <button onclick="selectQuarter(3)" id="qBtn3" style="padding:10px 18px;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;">Q3<div style="font-size:9px;color:var(--text-dim);">يوليو–سبتمبر</div></button>
+        <button onclick="selectQuarter(4)" id="qBtn4" style="padding:10px 18px;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;">Q4<div style="font-size:9px;color:var(--text-dim);">أكتوبر–ديسمبر</div></button>
+      </div>
+    </div>
+
+    <!-- أرباع محفوظة كمرجع -->
+    <div id="qSavedList" style="margin-bottom:20px;"></div>
+
+    <!-- تحميل -->
+    <div id="qLoading" style="display:none;text-align:center;padding:40px;">
+      <div style="font-size:32px;margin-bottom:10px;">⏳</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text-dim);">جاري جلب البيانات...</div>
+    </div>
+
+    <!-- النتائج -->
+    <div id="qResults" style="display:none;">
+      <div id="qKpiCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;"></div>
+      <div id="qDetails"></div>
+      <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+        <button onclick="exportQuarterlyExcel()" style="flex:1;min-width:200px;padding:16px;background:linear-gradient(135deg,#00A896,#007B6E);color:#fff;border:none;border-radius:16px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">⬇ تصدير Excel الربعي الكامل</button>
+        <button onclick="saveQuarterAsRef()" style="flex:1;min-width:200px;padding:16px;background:linear-gradient(135deg,#0D1F2D,#1A3A5C);color:#fff;border:none;border-radius:16px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">📌 حفظ كمرجع دائم</button>
+      </div>
+    </div>
+
+    <!-- ترحيب -->
+    <div id="qWelcome" style="text-align:center;padding:40px 20px;">
+      <div style="font-size:48px;margin-bottom:12px;">📅</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text-dim);">اختر السنة والربع لعرض التقرير الشامل</div>
     </div>
 
   </div>
@@ -11932,6 +11963,104 @@ async function submitSalesEval(staffKey) {
   }
 }
 
+
+// ══ صفحة التقارير الربعية ══
+function openQuarterlyPage() {
+  if(!currentUser){toast('❌ يرجى تسجيل الدخول');return;}
+  if(currentUser.role!=='admin'){toast('❌ هذه الصفحة للمدير فقط');return;}
+  // نفتح الصفحة
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-quarterly')?.classList.add('active');
+  document.querySelectorAll('.nav-tab,.sb-item').forEach(b=>b.classList.remove('active'));
+  // نهيئ
+  initQuarterlyPage();
+}
+
+function initQuarterlyPage() {
+  // ملء سنوات
+  const sel = document.getElementById('qYear');
+  if(sel && !sel.options.length) {
+    const now = new Date().getFullYear();
+    for(let y=now; y>=now-2; y--) {
+      const opt = document.createElement('option');
+      opt.value = y; opt.textContent = y;
+      sel.appendChild(opt);
+    }
+  }
+  // عرض الأرباع المحفوظة
+  renderSavedQuarters();
+  // تحميل الربع الحالي تلقائياً
+  const curQ = Math.ceil((new Date().getMonth()+1)/3);
+  selectQuarter(curQ);
+}
+
+// ═══ حفظ الربع كمرجع دائم ═══
+const SAVED_QUARTERS_KEY = 'nq_saved_quarters';
+
+function saveQuarterAsRef() {
+  if(!_qData){toast('❌ لا توجد بيانات محملة');return;}
+  const key = `Q${_qData.q}-${_qData.year}`;
+  const MN=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const months = Q_MONTHS[_qData.q]||[1,2,3];
+  const violations = Array.isArray(_qData.violations)?_qData.violations:[];
+  const surveys    = Array.isArray(_qData.surveys)?_qData.surveys:[];
+  const ops        = Array.isArray(_qData.ops)?_qData.ops:[];
+  const sales      = Array.isArray(_qData.sales)?_qData.sales:[];
+
+  const saved = JSON.parse(localStorage.getItem(SAVED_QUARTERS_KEY)||'{}');
+  saved[key] = {
+    q: _qData.q, year: _qData.year, savedAt: new Date().toLocaleString('ar'),
+    label: `Q${_qData.q} — ${_qData.year} (${MN[months[0]]}–${MN[months[months.length-1]]})`,
+    summary: {
+      violations: violations.length,
+      femViol: violations.filter(v=>v.section==='female').length,
+      malViol: violations.filter(v=>v.section==='male').length,
+      avgSurvey: surveys.length?Math.round(surveys.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/surveys.length):0,
+      opsCount: ops.length,
+      salesCount: sales.length,
+    }
+  };
+  localStorage.setItem(SAVED_QUARTERS_KEY, JSON.stringify(saved));
+  renderSavedQuarters();
+  toast(`✅ تم حفظ ${key} كمرجع دائم`);
+}
+
+function renderSavedQuarters() {
+  const el = document.getElementById('qSavedList');
+  if(!el) return;
+  const saved = JSON.parse(localStorage.getItem(SAVED_QUARTERS_KEY)||'{}');
+  const keys = Object.keys(saved).sort().reverse();
+  if(!keys.length){ el.innerHTML=''; return; }
+
+  el.innerHTML = `
+    <div style="margin-bottom:8px;">
+      <div style="font-size:11px;font-weight:800;color:var(--accent);letter-spacing:1px;margin-bottom:10px;">📌 الأرباع المحفوظة كمرجع</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${keys.map(k=>{
+          const s=saved[k];
+          return `<div onclick="loadSavedQuarter('${k}')"
+            style="background:var(--card2);border-radius:14px;padding:12px 16px;cursor:pointer;border:1.5px solid var(--border);transition:all .2s;min-width:160px;"
+            onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:12px;font-weight:800;color:var(--accent);">${s.label}</div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">
+              ⚖️ ${s.summary.violations} مخالفة &nbsp; ⭐ ${s.summary.avgSurvey}%
+            </div>
+            <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">📅 ${s.savedAt}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+function loadSavedQuarter(key) {
+  const saved = JSON.parse(localStorage.getItem(SAVED_QUARTERS_KEY)||'{}');
+  if(!saved[key]) return;
+  const {q, year} = saved[key];
+  const sel = document.getElementById('qYear');
+  if(sel) sel.value = year;
+  selectQuarter(q);
+}
+
 </script>
 
 
@@ -12118,6 +12247,8 @@ async function submitSalesEval(staffKey) {
     <button onclick="closeWn()" style="background:rgba(0,200,180,.15);border:1px solid rgba(0,200,180,.25);color:#00C8B4;border-radius:9px;padding:5px 13px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:800;cursor:pointer;">فهمت ✓</button>
   </div>
 </div>
+
+
 
 </body>
 </html>
