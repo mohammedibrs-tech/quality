@@ -1566,7 +1566,37 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="sub">FACILITY &amp; CLEANLINESS REPORTS</div>
     </div>
 
-    <!-- زر أضف ملاحظة أخرى — يظهر دائماً -->
+    <!-- تبويبات -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+      <button onclick="switchFacTab('note')" id="fTab_note"
+        style="padding:10px 18px;border-radius:20px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        🔧 ملاحظة مرافق
+      </button>
+      <button onclick="switchFacTab('clean')" id="fTab_clean"
+        style="padding:10px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        🧹 المرافق والنظافة
+      </button>
+      <button onclick="switchFacTab('maint')" id="fTab_maint"
+        style="padding:10px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        🔨 الصيانة والتشغيل
+      </button>
+      <button onclick="switchFacTab('safe')" id="fTab_safe"
+        style="padding:10px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        🚒 السلامة والطوارئ
+      </button>
+      <button onclick="switchFacTab('sec')" id="fTab_sec"
+        style="padding:10px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        🔒 الأمن والمراقبة
+      </button>
+      <button onclick="exportFacilityExcel()"
+        style="padding:10px 18px;border-radius:20px;border:2px solid #27AE60;background:rgba(39,174,96,0.08);color:#27AE60;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;margin-right:auto;">
+        📥 تصدير Excel
+      </button>
+    </div>
+
+    <!-- ملاحظة المرافق الأصلية -->
+    <div id="fSection_note">
+<!-- زر أضف ملاحظة أخرى — يظهر دائماً -->
     <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
       <button onclick="addAnotherFacility()" style="display:flex;align-items:center;gap:7px;padding:9px 16px;background:rgba(0,168,150,0.08);border:1.5px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;color:var(--accent);cursor:pointer;transition:all .2s ease;">
         <span style="font-size:16px;">+</span> أضف ملاحظة أخرى
@@ -1616,7 +1646,87 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
       </div>
     </div>
+    </div>
+
+    <!-- نماذج الرصد الأربعة -->
+    <div id="fSection_clean" style="display:none;">
+      <div class="card">
+        <div class="slabel">نموذج (أ) — المرافق والنظافة <span style="font-size:10px;color:var(--text-dim);">FACILITY & CLEANLINESS</span></div>
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div class="field"><label>اسم الموظف / الوحدة *</label>
+            <input type="text" id="fobs_clean_name" placeholder="اسم الموظف أو الوحدة..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;"></div>
+          <div class="field"><label>اسم مسؤول الجودة *</label>
+            <input type="text" id="fobs_clean_obs" placeholder="مسؤول الجودة..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+        <div id="fobs_clean_form"></div>
+        <div style="background:var(--card2);border-radius:14px;padding:14px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;">المجموع الكلي</div>
+          <div style="font-size:22px;font-weight:900;color:var(--accent);" id="fobs_clean_total">0 / 100</div>
+        </div>
+        <div id="fobs_clean_rating" style="text-align:center;margin-bottom:16px;"></div>
+        <button onclick="submitFacObs('clean')" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">💾 حفظ التقييم</button>
+      </div>
+    </div>
+
+    <div id="fSection_maint" style="display:none;">
+      <div class="card">
+        <div class="slabel">نموذج (ب) — الصيانة والتشغيل <span style="font-size:10px;color:var(--text-dim);">MAINTENANCE</span></div>
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div class="field"><label>اسم الموظف / الوحدة *</label>
+            <input type="text" id="fobs_maint_name" placeholder="اسم الموظف أو الوحدة..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;"></div>
+          <div class="field"><label>اسم مسؤول الجودة *</label>
+            <input type="text" id="fobs_maint_obs" placeholder="مسؤول الجودة..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+        <div id="fobs_maint_form"></div>
+        <div style="background:var(--card2);border-radius:14px;padding:14px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;">المجموع الكلي</div>
+          <div style="font-size:22px;font-weight:900;color:var(--accent);" id="fobs_maint_total">0 / 100</div>
+        </div>
+        <div id="fobs_maint_rating" style="text-align:center;margin-bottom:16px;"></div>
+        <button onclick="submitFacObs('maint')" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">💾 حفظ التقييم</button>
+      </div>
+    </div>
+
+    <div id="fSection_safe" style="display:none;">
+      <div class="card">
+        <div class="slabel">نموذج (ج) — السلامة والطوارئ <span style="font-size:10px;color:var(--text-dim);">SAFETY & EMERGENCY</span></div>
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div class="field"><label>اسم الموظف / الوحدة *</label>
+            <input type="text" id="fobs_safe_name" placeholder="اسم الموظف أو الوحدة..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;"></div>
+          <div class="field"><label>اسم مسؤول الجودة *</label>
+            <input type="text" id="fobs_safe_obs" placeholder="مسؤول الجودة..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+        <div id="fobs_safe_form"></div>
+        <div style="background:var(--card2);border-radius:14px;padding:14px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;">المجموع الكلي</div>
+          <div style="font-size:22px;font-weight:900;color:var(--accent);" id="fobs_safe_total">0 / 100</div>
+        </div>
+        <div id="fobs_safe_rating" style="text-align:center;margin-bottom:16px;"></div>
+        <button onclick="submitFacObs('safe')" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">💾 حفظ التقييم</button>
+      </div>
+    </div>
+
+    <div id="fSection_sec" style="display:none;">
+      <div class="card">
+        <div class="slabel">نموذج (د) — الأمن والمراقبة <span style="font-size:10px;color:var(--text-dim);">SECURITY</span></div>
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div class="field"><label>اسم الموظف / الوحدة *</label>
+            <input type="text" id="fobs_sec_name" placeholder="اسم الموظف أو الوحدة..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;"></div>
+          <div class="field"><label>اسم مسؤول الجودة *</label>
+            <input type="text" id="fobs_sec_obs" placeholder="مسؤول الجودة..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+        <div id="fobs_sec_form"></div>
+        <div style="background:var(--card2);border-radius:14px;padding:14px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;">المجموع الكلي</div>
+          <div style="font-size:22px;font-weight:900;color:var(--accent);" id="fobs_sec_total">0 / 100</div>
+        </div>
+        <div id="fobs_sec_rating" style="text-align:center;margin-bottom:16px;"></div>
+        <button onclick="submitFacObs('sec')" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">💾 حفظ التقييم</button>
+      </div>
+    </div>
+
   </div>
+</div>
 </div>
 
 <!-- RECORDS -->
@@ -2255,81 +2365,150 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <h1>تقرير المبنى الرئيسي</h1>
       <div class="sub">MAIN BUILDING REPORT</div>
     </div>
-    <div class="card">
-      <div id="bForm">
-        <!-- RECEPTION -->
-        <div class="slabel">🏠 الاستقبال / Reception</div>
-        <div class="grid-2">
-          <div class="field"><label><span class="req">* </span>هل يوجد ازدحام بالاستقبال؟</label>
-            <select id="bRecepCrowd"><option value="">اختر</option><option value="لا يوجد">لا يوجد</option><option value="خفيف">خفيف</option><option value="متوسط">متوسط</option><option value="شديد">شديد</option></select>
-          </div>
-          <div class="field"><label><span class="req">* </span>عدد الموظفات بالاستقبال</label>
-            <input type="number" id="bRecepStaff" min="0" max="20" placeholder="0">
-          </div>
-        </div>
 
-        <div class="sep"></div>
-        <!-- CUSTOMER SERVICE -->
-        <div class="slabel">💳 خدمة العملاء ودفع الرسوم / Customer Service</div>
-        <div class="grid-2">
-          <div class="field"><label><span class="req">* </span>مدة الانتظار التقريبية للعميل</label>
-            <select id="bWaitTime"><option value="">اختر</option><option value="أقل من 5 دقائق">أقل من 5 دقائق</option><option value="5-10 دقائق">5-10 دقائق</option><option value="10-20 دقيقة">10-20 دقيقة</option><option value="أكثر من 20 دقيقة">أكثر من 20 دقيقة</option></select>
-          </div>
-          <div class="field"><label><span class="req">* </span>عدد الموظفات بالكاونترات</label>
-            <input type="number" id="bCounterStaff" min="0" max="20" placeholder="0">
-          </div>
-        </div>
-        <div class="field"><label><span class="req">* </span>هل تم إعطاء العميل كامل المعلومات المطلوبة؟</label>
-          <select id="bInfoGiven"><option value="">اختر</option><option value="نعم بالكامل">نعم بالكامل</option><option value="جزئياً">جزئياً</option><option value="لا">لا</option></select>
-        </div>
+    <!-- تبويبات -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+      <button onclick="switchBuildingTab('report')" id="bTab_report"
+        style="padding:10px 18px;border-radius:20px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        🏢 تقرير المبنى
+      </button>
+      <button onclick="switchBuildingTab('cust')" id="bTab_cust"
+        style="padding:10px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        😊 خدمة العملاء
+      </button>
+      <button onclick="switchBuildingTab('counter')" id="bTab_counter"
+        style="padding:10px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        🖥️ الكاونتر
+      </button>
+      <button onclick="switchBuildingTab('exam')" id="bTab_exam"
+        style="padding:10px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        📝 قاعات الاختبار
+      </button>
+      <button onclick="switchBuildingTab('super')" id="bTab_super"
+        style="padding:10px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        👷 الإشراف الميداني
+      </button>
+      <button onclick="exportBuildingExcel()"
+        style="padding:10px 18px;border-radius:20px;border:2px solid #27AE60;background:rgba(39,174,96,0.08);color:#27AE60;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;margin-right:auto;">
+        📥 تصدير Excel
+      </button>
+    </div>
 
-        <div class="sep"></div>
-        <!-- EXAM HALLS -->
-        <div class="slabel">📝 قاعات الاختبار / Exam Halls</div>
-        <div class="grid-2">
-          <div class="field"><label><span class="req">* </span>عدد الموظفات الموجودات</label>
-            <input type="number" id="bExamStaff" min="0" max="20" placeholder="0">
-          </div>
-          <div class="field"><label><span class="req">* </span>عدد القاعات المفتوحة</label>
-            <input type="number" id="bExamHalls" min="0" max="10" placeholder="0">
-          </div>
-        </div>
-        <div class="grid-2">
-          <div class="field"><label><span class="req">* </span>هل يوجد تكدس بقاعة الاختبارات؟</label>
-            <select id="bExamCrowd"><option value="">اختر</option><option value="لا يوجد">لا يوجد</option><option value="خفيف">خفيف</option><option value="متوسط">متوسط</option><option value="شديد">شديد</option></select>
-          </div>
-          <div class="field"><label>ملاحظات قاعات الاختبار</label>
-            <input type="text" id="bExamNotes" placeholder="أي ملاحظات إضافية...">
-          </div>
-        </div>
+    <!-- ══ تقرير المبنى الأصلي ══ -->
+    <div id="bSection_report">
+      
+    </div>
 
-        <div class="sep"></div>
-        <!-- GENERAL -->
-        <div class="slabel">📋 بيانات الرصد / Observation Info</div>
-        <div class="grid-2">
-          <div class="field"><label><span class="req">* </span>التاريخ / Date</label><input type="date" id="bDate"></div>
-          <div class="field"><label><span class="req">* </span>الوقت / Time</label><input type="time" id="bTime"></div>
+    <!-- ══ نموذج (أ) خدمة العملاء ══ -->
+    <div id="bSection_cust" style="display:none;">
+      <div class="card">
+        <div class="slabel">نموذج (أ) — قسم خدمة العملاء <span style="font-size:10px;color:var(--text-dim);">CUSTOMER SERVICE</span></div>
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div class="field">
+            <label>اسم الموظف *</label>
+            <input type="text" id="obs_cust_name" placeholder="اسم الموظف المُقيَّم..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div class="field">
+            <label>اسم مسؤول الجودة *</label>
+            <input type="text" id="obs_cust_obs" placeholder="اسم مسؤول الجودة..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;">
+          </div>
         </div>
-        <div class="field"><label><span class="req">* </span>الراصد / Observer</label>
-          <select id="bObs"><option value="">اختر / Select</option>
-            <option>شهد المقرن</option><option>سمية الخضيري</option><option>امجاد ابانمي</option>
-            <option>احمد الحماد</option><option>احمد سحاب</option><option>ابراهيم الحمد</option>
-          </select>
+        <div id="obs_cust_form"></div>
+        <div style="background:var(--card2);border-radius:14px;padding:14px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;">المجموع الكلي</div>
+          <div style="font-size:22px;font-weight:900;color:var(--accent);" id="obs_cust_total">0 / 100</div>
         </div>
-        <div class="field"><label>ملاحظات عامة / General Notes</label>
-          <textarea id="bGeneralNotes" placeholder="أي ملاحظات إضافية عن المبنى..."></textarea>
-        </div>
-        <button class="submit-btn" id="bBtn" onclick="submitBuilding()">✦ تسجيل التقرير / Submit Report</button>
-      </div>
-      <div class="success-msg" id="bOk">
-        <div class="success-icon">✓</div>
-        <h2>تم التسجيل! / Recorded!</h2>
-        <p>حُفظ تقرير المبنى تلقائياً</p>
-        <div id="bAnalysis" style="margin-top:16px;text-align:right;"></div>
-        <button class="new-btn" onclick="resetB()">+ تقرير جديد / New Report</button>
+        <div id="obs_cust_rating" style="text-align:center;margin-bottom:16px;"></div>
+        <button onclick="submitObsForm('cust')"
+          style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">
+          💾 حفظ التقييم
+        </button>
       </div>
     </div>
+
+    <!-- ══ نموذج (ب) الكاونتر ══ -->
+    <div id="bSection_counter" style="display:none;">
+      <div class="card">
+        <div class="slabel">نموذج (ب) — قسم الكاونتر <span style="font-size:10px;color:var(--text-dim);">COUNTER</span></div>
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div class="field">
+            <label>اسم الموظف *</label>
+            <input type="text" id="obs_counter_name" placeholder="اسم الموظف المُقيَّم..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div class="field">
+            <label>اسم مسؤول الجودة *</label>
+            <input type="text" id="obs_counter_obs" placeholder="اسم مسؤول الجودة..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;">
+          </div>
+        </div>
+        <div id="obs_counter_form"></div>
+        <div style="background:var(--card2);border-radius:14px;padding:14px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;">المجموع الكلي</div>
+          <div style="font-size:22px;font-weight:900;color:var(--accent);" id="obs_counter_total">0 / 100</div>
+        </div>
+        <div id="obs_counter_rating" style="text-align:center;margin-bottom:16px;"></div>
+        <button onclick="submitObsForm('counter')"
+          style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">
+          💾 حفظ التقييم
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ نموذج (ج) قاعات الاختبار ══ -->
+    <div id="bSection_exam" style="display:none;">
+      <div class="card">
+        <div class="slabel">نموذج (ج) — قاعات الاختبار <span style="font-size:10px;color:var(--text-dim);">EXAM HALLS</span></div>
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div class="field">
+            <label>اسم الموظف *</label>
+            <input type="text" id="obs_exam_name" placeholder="اسم الموظف المُقيَّم..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div class="field">
+            <label>اسم مسؤول الجودة *</label>
+            <input type="text" id="obs_exam_obs" placeholder="اسم مسؤول الجودة..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;">
+          </div>
+        </div>
+        <div id="obs_exam_form"></div>
+        <div style="background:var(--card2);border-radius:14px;padding:14px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;">المجموع الكلي</div>
+          <div style="font-size:22px;font-weight:900;color:var(--accent);" id="obs_exam_total">0 / 100</div>
+        </div>
+        <div id="obs_exam_rating" style="text-align:center;margin-bottom:16px;"></div>
+        <button onclick="submitObsForm('exam')"
+          style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">
+          💾 حفظ التقييم
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ نموذج (د) الإشراف الميداني ══ -->
+    <div id="bSection_super" style="display:none;">
+      <div class="card">
+        <div class="slabel">نموذج (د) — الإشراف الميداني <span style="font-size:10px;color:var(--text-dim);">FIELD SUPERVISORS</span></div>
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div class="field">
+            <label>اسم المشرف *</label>
+            <input type="text" id="obs_super_name" placeholder="اسم المشرف المُقيَّم..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div class="field">
+            <label>اسم مسؤول الجودة *</label>
+            <input type="text" id="obs_super_obs" placeholder="اسم مسؤول الجودة..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;">
+          </div>
+        </div>
+        <div id="obs_super_form"></div>
+        <div style="background:var(--card2);border-radius:14px;padding:14px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;">المجموع الكلي</div>
+          <div style="font-size:22px;font-weight:900;color:var(--accent);" id="obs_super_total">0 / 100</div>
+        </div>
+        <div id="obs_super_rating" style="text-align:center;margin-bottom:16px;"></div>
+        <button onclick="submitObsForm('super')"
+          style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">
+          💾 حفظ التقييم
+        </button>
+      </div>
+    </div>
+
   </div>
+</div>
 </div>
 
 <!-- ══════════════════════════════════════════ -->
@@ -3021,6 +3200,7 @@ function openSec(type){
     document.getElementById('page-survey').classList.add('active');autoObs('sObs');
   }else if(type==='building'){
     document.getElementById('page-building').classList.add('active');autoObs('bObs');
+    setTimeout(initObsForms, 100);
     const now=new Date();
     const d=now.toISOString().split('T')[0];
     const h=String(now.getHours()).padStart(2,'0'),m=String(now.getMinutes()).padStart(2,'0');
@@ -3051,6 +3231,7 @@ function openSec(type){
     loadAttendFromSupabase().then(()=>{renderAttendList();renderAttendKPIs();});
   }else{
     document.getElementById('page-facility').classList.add('active');autoObs('fObs');
+    setTimeout(initFacObs, 100);
   }
   setDT();
 }
@@ -10774,6 +10955,676 @@ function showOpsMonthModal() {
     }
   }
   modal.style.display = 'block';
+}
+
+
+// ══ نماذج الرصد الميداني ══
+const OBS_FORMS = {
+  cust: {
+    title: 'خدمة العملاء',
+    items: [
+      { label:'الترحيب وحسن الاستقبال',              w:15 },
+      { label:'وضوح المعلومة وصحتها',                 w:15 },
+      { label:'اللباقة وضبط الانفعالات',              w:15 },
+      { label:'سرعة الاستجابة وتقليص وقت الانتظار',  w:15 },
+      { label:'التعامل مع الشكاوى والحالات الصعبة',   w:15 },
+      { label:'الالتزام بالزي والمظهر الرسمي',        w:10 },
+      { label:'نظافة وترتيب بيئة الاستقبال',          w:10 },
+      { label:'مستوى رضا المستفيد الظاهر',            w:5  },
+    ]
+  },
+  counter: {
+    title: 'الكاونتر',
+    items: [
+      { label:'سرعة إنجاز المعاملة ودقتها',               w:20 },
+      { label:'دقة البيانات المُدخلة (نسبة الأخطاء)',      w:20 },
+      { label:'التواصل المهني مع المراجع',                 w:15 },
+      { label:'تنظيم مكان العمل وسرية المستندات',          w:15 },
+      { label:'الالتزام بالإجراءات واللوائح',              w:15 },
+      { label:'نظافة الكاونتر وترتيبه',                   w:10 },
+      { label:'المبادرة في حل الحالات الاستثنائية',        w:5  },
+    ]
+  },
+  exam: {
+    title: 'قاعات الاختبار',
+    items: [
+      { label:'الاستعداد المسبق للقاعة والأجهزة',           w:20 },
+      { label:'ضبط القاعة ومنع الغش أثناء الاختبار',        w:20 },
+      { label:'التعامل الاحترافي مع المتقدمين',             w:15 },
+      { label:'سرعة التعامل مع الأعطال التقنية',            w:15 },
+      { label:'دقة توثيق الحضور والغياب والتقارير',         w:15 },
+      { label:'الالتزام بمواعيد بدء الاختبار وانتهائه',     w:10 },
+      { label:'التنسيق مع الفريق الإداري',                  w:5  },
+    ]
+  },
+  super: {
+    title: 'الإشراف الميداني',
+    items: [
+      { label:'انتظام الجولات الميدانية وتوثيقها',             w:25 },
+      { label:'جودة القرارات الميدانية وسرعتها',              w:20 },
+      { label:'أثر القيادة على أداء الفريق',                   w:20 },
+      { label:'دقة التقارير والالتزام بمواعيدها',              w:20 },
+      { label:'الشفافية في التواصل مع الجودة والعمليات',       w:10 },
+      { label:'المشاركة في التدريب ونقل المعرفة',              w:5  },
+    ]
+  }
+};
+
+const OBS_LABELS = ['ضعيف','مقبول','جيد','جيد جداً','ممتاز'];
+const OBS_COLORS = ['#E74C3C','#E67E22','#F1C40F','#27AE60','#16A085'];
+
+function renderObsForm(type) {
+  const form = OBS_FORMS[type];
+  if (!form) return;
+  const el = document.getElementById('obs_'+type+'_form');
+  if (!el) return;
+
+  el.innerHTML = form.items.map((item, idx) => `
+    <div style="background:var(--card2);border-radius:14px;padding:14px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+        <div style="font-size:12px;font-weight:700;flex:1;">${item.label}</div>
+        <span style="font-size:10px;background:rgba(0,168,150,0.1);color:var(--accent);border-radius:20px;padding:2px 10px;font-weight:800;">وزن ${item.w}%</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${[1,2,3,4,5].map(v => `
+          <label style="flex:1;min-width:50px;cursor:pointer;">
+            <input type="radio" name="obs_${type}_${idx}" value="${v}"
+              onchange="calcObsTotal('${type}')"
+              style="display:none;">
+            <div class="obs-radio-btn" data-type="${type}" data-idx="${idx}" data-val="${v}"
+              style="text-align:center;padding:8px 4px;border-radius:10px;border:1.5px solid var(--border);
+              font-size:10px;font-weight:700;color:var(--text-dim);transition:all .2s;cursor:pointer;"
+              onclick="selectObsRadio('${type}',${idx},${v})">
+              <div style="font-size:14px;">${['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣'][v-1]}</div>
+              <div style="font-size:9px;">${OBS_LABELS[v-1]}</div>
+            </div>
+          </label>
+        `).join('')}
+      </div>
+      <div id="obs_${type}_w${idx}" style="font-size:10px;color:var(--text-dim);margin-top:6px;text-align:left;direction:ltr;"></div>
+    </div>
+  `).join('');
+}
+
+function selectObsRadio(type, idx, val) {
+  // تحديث visual
+  document.querySelectorAll(`[data-type="${type}"][data-idx="${idx}"]`).forEach(el => {
+    const v = parseInt(el.dataset.val);
+    if (v === val) {
+      el.style.background = OBS_COLORS[val-1];
+      el.style.borderColor = OBS_COLORS[val-1];
+      el.style.color = '#fff';
+    } else {
+      el.style.background = '';
+      el.style.borderColor = 'var(--border)';
+      el.style.color = 'var(--text-dim)';
+    }
+  });
+  // تحديد الـ radio
+  const radio = document.querySelector(`input[name="obs_${type}_${idx}"][value="${val}"]`);
+  if (radio) radio.checked = true;
+  calcObsTotal(type);
+}
+
+function calcObsTotal(type) {
+  const form = OBS_FORMS[type];
+  if (!form) return;
+  let total = 0;
+  form.items.forEach((item, idx) => {
+    const selected = document.querySelector(`input[name="obs_${type}_${idx}"]:checked`);
+    if (selected) {
+      const weighted = (item.w * parseInt(selected.value)) / 5;
+      total += weighted;
+      const wEl = document.getElementById(`obs_${type}_w${idx}`);
+      if (wEl) wEl.textContent = `${item.w}% × ${selected.value} ÷ 5 = ${weighted.toFixed(1)} نقطة`;
+    }
+  });
+  const totalEl = document.getElementById(`obs_${type}_total`);
+  if (totalEl) {
+    totalEl.textContent = `${total.toFixed(1)} / 100`;
+    totalEl.style.color = total>=90?'#16A085':total>=80?'#27AE60':total>=70?'#F1C40F':total>=60?'#E67E22':'#E74C3C';
+  }
+  // تصنيف
+  const ratingEl = document.getElementById(`obs_${type}_rating`);
+  if (ratingEl) {
+    const rating = total>=90?{t:'ممتاز ⭐',c:'#16A085',rec:'ترشيح رسمي للتقدير'}
+                 : total>=80?{t:'جيد جداً',c:'#27AE60',rec:'توثيق الإنجاز وتحديد أهداف تطوير'}
+                 : total>=70?{t:'جيد',c:'#F1C40F',rec:'خطة تطوير فردية وجلسة ملاحظات'}
+                 : total>=60?{t:'مقبول',c:'#E67E22',rec:'تنبيه تحريري + خطة تحسين 30 يوم'}
+                 : {t:'دون المستوى',c:'#E74C3C',rec:'إحالة للجنة شؤون الموظفين'};
+    ratingEl.innerHTML = `
+      <div style="background:${rating.c}15;border:1.5px solid ${rating.c}40;border-radius:12px;padding:10px 16px;display:inline-block;">
+        <div style="font-size:14px;font-weight:900;color:${rating.c};">${rating.t}</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">${rating.rec}</div>
+      </div>`;
+  }
+  return total;
+}
+
+async function submitObsForm(type) {
+  const form = OBS_FORMS[type];
+  const empName = document.getElementById(`obs_${type}_name`)?.value.trim();
+  const obsName = document.getElementById(`obs_${type}_obs`)?.value.trim();
+  if (!empName) { toast('⚠️ أدخل اسم الموظف'); return; }
+  if (!obsName) { toast('⚠️ أدخل اسم مشرف الجودة'); return; }
+
+  // تحقق من اكتمال جميع البنود
+  let allFilled = true;
+  form.items.forEach((_, idx) => {
+    if (!document.querySelector(`input[name="obs_${type}_${idx}"]:checked`)) allFilled = false;
+  });
+  if (!allFilled) { toast('⚠️ يرجى تقييم جميع البنود'); return; }
+
+  const total = calcObsTotal(type);
+  const scores = form.items.map((item, idx) => {
+    const v = parseInt(document.querySelector(`input[name="obs_${type}_${idx}"]:checked`)?.value||0);
+    return { label:item.label, weight:item.w, score:v, weighted:(item.w*v/5) };
+  });
+
+  const rating = total>=90?'ممتاز':total>=80?'جيد جداً':total>=70?'جيد':total>=60?'مقبول':'دون المستوى';
+  const date = new Date().toISOString().split('T')[0];
+
+  const record = {
+    report_type: type,
+    section_title: form.title,
+    employee_name: empName,
+    observer_name: obsName,
+    total_score: Math.round(total*10)/10,
+    rating,
+    scores: JSON.stringify(scores),
+    report_date: date,
+    report_month: new Date().getMonth()+1,
+    report_year:  new Date().getFullYear(),
+    observer: obsName,
+  };
+
+  try {
+    const { error } = await db.from('building_reports').insert([record]);
+    if (error) throw error;
+    addToAppData('buildings', record);
+    toast(`✅ تم حفظ تقييم ${form.title} — ${empName} — ${rating} (${total.toFixed(1)})`);
+    // إعادة تعيين النموذج
+    document.getElementById(`obs_${type}_name`).value = '';
+    document.getElementById(`obs_${type}_obs`).value = '';
+    document.querySelectorAll(`[data-type="${type}"]`).forEach(el => {
+      el.style.background=''; el.style.borderColor='var(--border)'; el.style.color='var(--text-dim)';
+    });
+    document.querySelectorAll(`input[name^="obs_${type}_"]`).forEach(r=>r.checked=false);
+    const totalEl=document.getElementById(`obs_${type}_total`); if(totalEl) totalEl.textContent='0 / 100';
+    const rEl=document.getElementById(`obs_${type}_rating`); if(rEl) rEl.innerHTML='';
+    form.items.forEach((_,idx)=>{ const w=document.getElementById(`obs_${type}_w${idx}`); if(w)w.textContent=''; });
+  } catch(e) {
+    toast('❌ خطأ في الحفظ: '+e.message);
+  }
+}
+
+function switchBuildingTab(tab) {
+  ['report','cust','counter','exam','super'].forEach(t => {
+    const sec = document.getElementById('bSection_'+t);
+    const btn = document.getElementById('bTab_'+t);
+    if (sec) sec.style.display = t===tab ? 'block' : 'none';
+    if (btn) {
+      btn.style.background   = t===tab ? 'var(--accent)' : 'var(--card)';
+      btn.style.color        = t===tab ? '#fff'          : 'var(--text-dim)';
+      btn.style.borderColor  = t===tab ? 'var(--accent)' : 'var(--border)';
+    }
+    if (t===tab && t!=='report') renderObsForm(t);
+  });
+}
+
+// تلقائي: عبّئ اسم المشرف من المستخدم الحالي
+function initObsForms() {
+  ['cust','counter','exam','super'].forEach(t => {
+    const obsEl = document.getElementById(`obs_${t}_obs`);
+    if (obsEl && currentUser?.name) obsEl.value = currentUser.name;
+    renderObsForm(t);
+  });
+}
+
+
+// ══ نماذج رصد المرافق ══
+const FAC_FORMS = {
+  clean: {
+    title:'المرافق والنظافة',
+    items:[
+      {label:'نظافة المداخل والممرات والمساحات المشتركة', w:20},
+      {label:'نظافة دورات المياه وتوافر المستلزمات',       w:15},
+      {label:'انتظام جدول التنظيف والالتزام به',          w:15},
+      {label:'جودة المواد والمعدات المستخدمة',            w:15},
+      {label:'مستوى نظافة الحدائق والمناطق الخارجية',     w:15},
+      {label:'استجابة الفريق عند البلاغات الطارئة',       w:10},
+      {label:'ترتيب مخازن المعدات والمواد',               w:10},
+    ]
+  },
+  maint: {
+    title:'الصيانة والتشغيل',
+    items:[
+      {label:'سرعة الاستجابة لبلاغات الأعطال',            w:20},
+      {label:'جودة التنفيذ وإتقان العمل',                 w:20},
+      {label:'توثيق أعمال الصيانة في السجلات',            w:15},
+      {label:'الالتزام بمعايير السلامة أثناء العمل',       w:15},
+      {label:'سلامة وجاهزية الأجهزة والمعدات',            w:15},
+      {label:'تنفيذ الصيانة الوقائية وفق الجدول',         w:10},
+      {label:'نظافة موقع العمل بعد الانتهاء',             w:5 },
+    ]
+  },
+  safe: {
+    title:'السلامة والطوارئ',
+    items:[
+      {label:'جاهزية معدات الإطفاء وصلاحيتها',            w:25},
+      {label:'وضوح مسارات الإخلاء وعلامات الطوارئ',       w:20},
+      {label:'التزام الموظفين بتعليمات السلامة اليومية',   w:20},
+      {label:'حضور التدريبات وتجارب الإخلاء الدورية',     w:15},
+      {label:'توثيق حوادث السلامة والإصلاحات',            w:15},
+      {label:'تقديم تقارير السلامة في مواعيدها',          w:5 },
+    ]
+  },
+  sec: {
+    title:'الأمن والمراقبة',
+    items:[
+      {label:'الانضباط والمظهر المهني لفريق الأمن',        w:20},
+      {label:'تغطية مناطق المراقبة بشكل كامل',            w:20},
+      {label:'الاستجابة للحوادث والبلاغات الأمنية',       w:20},
+      {label:'توثيق السجل اليومي والحوادث',               w:20},
+      {label:'جاهزية منظومة المراقبة (كاميرات/أنظمة)',    w:15},
+      {label:'الاحترافية في التعامل مع الزوار والمراجعين', w:5 },
+    ]
+  }
+};
+
+function switchFacTab(tab) {
+  ['note','clean','maint','safe','sec'].forEach(t=>{
+    const sec=document.getElementById('fSection_'+t);
+    const btn=document.getElementById('fTab_'+t);
+    if(sec) sec.style.display = t===tab?'block':'none';
+    if(btn){
+      btn.style.background  = t===tab?'var(--accent)':'var(--card)';
+      btn.style.color       = t===tab?'#fff':'var(--text-dim)';
+      btn.style.borderColor = t===tab?'var(--accent)':'var(--border)';
+    }
+    if(t===tab && t!=='note') renderFacObs(t);
+  });
+}
+
+function renderFacObs(type) {
+  const form = FAC_FORMS[type];
+  if(!form) return;
+  const el = document.getElementById('fobs_'+type+'_form');
+  if(!el) return;
+  el.innerHTML = form.items.map((item,idx)=>`
+    <div style="background:var(--card2);border-radius:14px;padding:14px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+        <div style="font-size:12px;font-weight:700;flex:1;">${item.label}</div>
+        <span style="font-size:10px;background:rgba(0,168,150,0.1);color:var(--accent);border-radius:20px;padding:2px 10px;font-weight:800;">وزن ${item.w}%</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${[1,2,3,4,5].map(v=>`
+          <label style="flex:1;min-width:50px;cursor:pointer;">
+            <input type="radio" name="fobs_${type}_${idx}" value="${v}" style="display:none;">
+            <div class="obs-radio-btn" data-ftype="${type}" data-fidx="${idx}" data-fval="${v}"
+              style="text-align:center;padding:8px 4px;border-radius:10px;border:1.5px solid var(--border);
+              font-size:10px;font-weight:700;color:var(--text-dim);transition:all .2s;cursor:pointer;"
+              onclick="selectFacRadio('${type}',${idx},${v})">
+              <div style="font-size:14px;">${['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣'][v-1]}</div>
+              <div style="font-size:9px;">${OBS_LABELS[v-1]}</div>
+            </div>
+          </label>`).join('')}
+      </div>
+      <div id="fobs_${type}_w${idx}" style="font-size:10px;color:var(--text-dim);margin-top:6px;text-align:left;direction:ltr;"></div>
+    </div>`).join('');
+}
+
+function selectFacRadio(type,idx,val) {
+  document.querySelectorAll(`[data-ftype="${type}"][data-fidx="${idx}"]`).forEach(el=>{
+    const v=parseInt(el.dataset.fval);
+    el.style.background  = v===val?OBS_COLORS[val-1]:'';
+    el.style.borderColor = v===val?OBS_COLORS[val-1]:'var(--border)';
+    el.style.color       = v===val?'#fff':'var(--text-dim)';
+  });
+  const r=document.querySelector(`input[name="fobs_${type}_${idx}"][value="${val}"]`);
+  if(r) r.checked=true;
+  calcFacTotal(type);
+}
+
+function calcFacTotal(type) {
+  const form=FAC_FORMS[type]; if(!form) return 0;
+  let total=0;
+  form.items.forEach((item,idx)=>{
+    const sel=document.querySelector(`input[name="fobs_${type}_${idx}"]:checked`);
+    if(sel){
+      const w=(item.w*parseInt(sel.value))/5;
+      total+=w;
+      const wEl=document.getElementById(`fobs_${type}_w${idx}`);
+      if(wEl) wEl.textContent=`${item.w}% × ${sel.value} ÷ 5 = ${w.toFixed(1)} نقطة`;
+    }
+  });
+  const tEl=document.getElementById(`fobs_${type}_total`);
+  if(tEl){ tEl.textContent=`${total.toFixed(1)} / 100`; tEl.style.color=total>=90?'#16A085':total>=80?'#27AE60':total>=70?'#F1C40F':total>=60?'#E67E22':'#E74C3C'; }
+  const rEl=document.getElementById(`fobs_${type}_rating`);
+  if(rEl){
+    const R=total>=90?{t:'ممتاز ⭐',c:'#16A085',rec:'ترشيح للتقدير'}
+           :total>=80?{t:'جيد جداً',c:'#27AE60',rec:'توثيق الإنجاز'}
+           :total>=70?{t:'جيد',c:'#F1C40F',rec:'خطة تطوير فردية'}
+           :total>=60?{t:'مقبول',c:'#E67E22',rec:'تنبيه + خطة 30 يوم'}
+           :{t:'دون المستوى',c:'#E74C3C',rec:'إحالة فورية للجنة'};
+    rEl.innerHTML=`<div style="background:${R.c}15;border:1.5px solid ${R.c}40;border-radius:12px;padding:10px 16px;display:inline-block;">
+      <div style="font-size:14px;font-weight:900;color:${R.c};">${R.t}</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">${R.rec}</div></div>`;
+  }
+  return total;
+}
+
+async function submitFacObs(type) {
+  const form=FAC_FORMS[type];
+  const empName=document.getElementById(`fobs_${type}_name`)?.value.trim();
+  const obsName=document.getElementById(`fobs_${type}_obs`)?.value.trim();
+  if(!empName){toast('⚠️ أدخل اسم الموظف/الوحدة');return;}
+  if(!obsName){toast('⚠️ أدخل اسم مسؤول الجودة');return;}
+  let allFilled=true;
+  form.items.forEach((_,idx)=>{if(!document.querySelector(`input[name="fobs_${type}_${idx}"]:checked`)) allFilled=false;});
+  if(!allFilled){toast('⚠️ يرجى تقييم جميع البنود');return;}
+  const total=calcFacTotal(type);
+  const scores=form.items.map((item,idx)=>{
+    const v=parseInt(document.querySelector(`input[name="fobs_${type}_${idx}"]:checked`)?.value||0);
+    return {label:item.label,weight:item.w,score:v,weighted:(item.w*v/5)};
+  });
+  const rating=total>=90?'ممتاز':total>=80?'جيد جداً':total>=70?'جيد':total>=60?'مقبول':'دون المستوى';
+  const date=new Date().toISOString().split('T')[0];
+  const record={
+    report_type:type, section_title:form.title,
+    employee_name:empName, observer_name:obsName, observer:obsName,
+    total_score:Math.round(total*10)/10, rating,
+    scores:JSON.stringify(scores),
+    report_date:date, report_month:new Date().getMonth()+1, report_year:new Date().getFullYear(),
+  };
+  try {
+    const{error}=await db.from('facility_reports').insert([record]);
+    if(error) throw error;
+    addToAppData('facilities',record);
+    toast(`✅ تم حفظ تقييم ${form.title} — ${empName} — ${rating} (${total.toFixed(1)})`);
+    // reset
+    document.getElementById(`fobs_${type}_name`).value='';
+    document.getElementById(`fobs_${type}_obs`).value='';
+    document.querySelectorAll(`[data-ftype="${type}"]`).forEach(el=>{
+      el.style.background='';el.style.borderColor='var(--border)';el.style.color='var(--text-dim)';});
+    document.querySelectorAll(`input[name^="fobs_${type}_"]`).forEach(r=>r.checked=false);
+    const tEl=document.getElementById(`fobs_${type}_total`);if(tEl)tEl.textContent='0 / 100';
+    const rEl=document.getElementById(`fobs_${type}_rating`);if(rEl)rEl.innerHTML='';
+    form.items.forEach((_,idx)=>{const w=document.getElementById(`fobs_${type}_w${idx}`);if(w)w.textContent='';});
+  }catch(e){toast('❌ خطأ: '+e.message);}
+}
+
+function initFacObs() {
+  ['clean','maint','safe','sec'].forEach(t=>{
+    const obsEl=document.getElementById(`fobs_${t}_obs`);
+    if(obsEl&&currentUser?.name) obsEl.value=currentUser.name;
+    renderFacObs(t);
+  });
+}
+
+
+// ══ تصدير Excel — المرافق والمبنى ══
+
+// ── أدوات مشتركة ──
+function _exSetup(wb, rtl=true) {
+  const C={teal:'FF00A896',dark:'FF0D1F2D',white:'FFFFFFFF',
+    green:'FF27AE60',gold:'FFD4AC0D',red:'FFE74C3C',
+    blue:'FF2E86C1',orange:'FFCA6F1E',gray:'FFF5F5F5',
+    ltTeal:'FFE8F5F3',ltRed:'FFFEF0EF',ltBlue:'FFEBF5FB',ltGold:'FFFEF9E7'};
+  const sh=(ws,txt,bg,cols)=>{
+    const r=ws.addRow([txt]);
+    try{ws.mergeCells(r.number,1,r.number,cols);}catch(e){}
+    r.getCell(1).font={name:'Arial',bold:true,size:13,color:{argb:C.white}};
+    r.getCell(1).fill={type:'pattern',pattern:'solid',fgColor:{argb:bg||C.dark}};
+    r.getCell(1).alignment={horizontal:'center',vertical:'middle'};
+    r.height=34;
+  };
+  const subH=(ws,txt,bg,cols)=>{
+    ws.addRow([]);
+    const r=ws.addRow([txt]);
+    try{ws.mergeCells(r.number,1,r.number,cols);}catch(e){}
+    r.getCell(1).font={name:'Arial',bold:true,size:11,color:{argb:C.white}};
+    r.getCell(1).fill={type:'pattern',pattern:'solid',fgColor:{argb:bg||C.teal}};
+    r.getCell(1).alignment={horizontal:'right',vertical:'middle'};
+    r.height=26;
+    ws.addRow([]);
+  };
+  const hdr=(row,bg)=>{row.height=26;row.eachCell({includeEmpty:true},c=>{
+    c.font={name:'Arial',bold:true,size:10,color:{argb:C.white}};
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg||C.teal}};
+    c.alignment={horizontal:'center',vertical:'middle'};
+  });};
+  const row=(row,bg)=>{row.height=20;row.eachCell({includeEmpty:true},c=>{
+    c.font={name:'Arial',size:10};
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg||C.white}};
+    c.alignment={vertical:'middle'};
+  });};
+  const ratingColor=(score)=>score>=90?C.green:score>=70?C.gold:C.red;
+  return {C,sh,subH,hdr,row,ratingColor};
+}
+
+async function exportFacilityExcel() {
+  if(typeof ExcelJS==='undefined'){toast('❌ ExcelJS غير محملة');return;}
+  const now=new Date();
+  const month=now.getMonth()+1, year=now.getFullYear();
+  const MN=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  toast('⏳ جاري بناء التقرير...');
+
+  try {
+    const wb=new ExcelJS.Workbook();
+    wb.creator='نورة لتعليم القيادة'; wb.created=now;
+    const {C,sh,subH,hdr,row,ratingColor}=_exSetup(wb);
+
+    // نجلب بيانات هذا الشهر من Supabase + APP_DATA
+    const dateFrom=`${year}-${String(month).padStart(2,'0')}-01`;
+    const dateTo=`${year}-${String(month).padStart(2,'0')}-31`;
+    let recs=[];
+    try {
+      const{data}=await db.from('facility_reports').select('*')
+        .gte('report_date',dateFrom).lte('report_date',dateTo);
+      recs=data||[];
+    } catch(e){}
+    // دمج مع APP_DATA
+    const local=(APP_DATA.facilities||[]).filter(r=>(r.report_date||'').startsWith(`${year}-${String(month).padStart(2,'0')}`));
+    const seen=new Set(recs.map(r=>r.employee_name+'_'+r.report_date));
+    recs=[...recs,...local.filter(r=>!seen.has(r.employee_name+'_'+r.report_date))];
+
+    const types=['clean','maint','safe','sec'];
+    const typeTitles={clean:'المرافق والنظافة',maint:'الصيانة والتشغيل',safe:'السلامة والطوارئ',sec:'الأمن والمراقبة'};
+    const typeColors={clean:C.teal,maint:C.blue,safe:C.red,sec:C.orange};
+    const typeIcons={clean:'🧹',maint:'🔨',safe:'🚒',sec:'🔒'};
+
+    // ── شيت ١: ملخص KPIs ──
+    const ws1=wb.addWorksheet('📊 ملخص KPIs');
+    ws1.views=[{rightToLeft:true}];
+    ws1.columns=[{width:30},{width:16},{width:16},{width:16},{width:40}];
+    sh(ws1,`تقرير المرافق والدعم — ${MN[month]} ${year}`,C.dark,5);
+
+    subH(ws1,'🎯 مؤشرات الأداء الرئيسية',C.teal,5);
+    hdr(ws1.addRow(['القسم/الوحدة','عدد التقييمات','متوسط الدرجة','التصنيف','التوصية']),C.teal);
+
+    let grandTotal=0, grandCount=0;
+    types.forEach((t,i)=>{
+      const tRecs=recs.filter(r=>r.report_type===t);
+      const avg=tRecs.length?Math.round(tRecs.reduce((s,r)=>s+(r.total_score||0),0)/tRecs.length*10)/10:0;
+      const rating=avg>=90?'ممتاز ⭐':avg>=80?'جيد جداً':avg>=70?'جيد':avg>=60?'مقبول':tRecs.length?'دون المستوى':'— لا بيانات';
+      const rec=avg>=90?'استمر على هذا المستوى':avg>=80?'توثيق الإنجاز وتطوير الأهداف':avg>=70?'خطة تطوير + متابعة دورية':avg>=60?'تنبيه تحريري + خطة 30 يوم':tRecs.length?'إحالة فورية للجنة المختصة':'يحتاج بيانات';
+      const r=ws1.addRow([`${typeIcons[t]} ${typeTitles[t]}`,tRecs.length,avg||'—',rating,rec]);
+      row(r,i%2===0?C.ltTeal:C.white);
+      r.getCell(1).font={name:'Arial',bold:true,size:11};
+      r.getCell(2).alignment={horizontal:'center',vertical:'middle'};
+      if(avg){r.getCell(3).font={name:'Arial',bold:true,size:12,color:{argb:ratingColor(avg)}};r.getCell(3).alignment={horizontal:'center',vertical:'middle'};}
+      if(tRecs.length){grandTotal+=avg*tRecs.length;grandCount+=tRecs.length;}
+    });
+    ws1.addRow([]);
+    const avgTotal=grandCount?Math.round(grandTotal/grandCount*10)/10:0;
+    const tR=ws1.addRow(['المتوسط العام','',avgTotal||'—',avgTotal>=90?'ممتاز ⭐':avgTotal>=70?'جيد':'يحتاج تحسين','']);
+    tR.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',bold:true,size:12};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:C.ltTeal}};});
+    if(avgTotal){tR.getCell(3).font={name:'Arial',bold:true,size:14,color:{argb:ratingColor(avgTotal)}};tR.getCell(3).alignment={horizontal:'center',vertical:'middle'};}
+
+    // ── شيتات التفاصيل (4 شيتات) ──
+    types.forEach(t=>{
+      const tRecs=recs.filter(r=>r.report_type===t);
+      if(!tRecs.length) return;
+      const ws=wb.addWorksheet(`${typeIcons[t]} ${typeTitles[t]}`);
+      ws.views=[{rightToLeft:true}];
+      ws.columns=[{width:6},{width:28},{width:14},{width:14},{width:16},{width:40}];
+      sh(ws,`${typeIcons[t]} ${typeTitles[t]} — ${MN[month]} ${year}`,typeColors[t],6);
+
+      subH(ws,'📋 نتائج التقييمات',typeColors[t],6);
+      hdr(ws.addRow(['#','الموظف/الوحدة','التاريخ','الدرجة /100','التصنيف','التوصية']),typeColors[t]);
+
+      [...tRecs].sort((a,b)=>(b.total_score||0)-(a.total_score||0)).forEach((rec,i)=>{
+        const sc=rec.total_score||0;
+        const rat=sc>=90?'ممتاز ⭐':sc>=80?'جيد جداً':sc>=70?'جيد':sc>=60?'مقبول':'دون المستوى';
+        const rec2=sc>=90?'ترشيح للتقدير':sc>=80?'توثيق وتطوير':sc>=70?'خطة تطوير':sc>=60?'تنبيه + خطة':'إحالة فورية';
+        const r=ws.addRow([i+1,rec.employee_name||'—',rec.report_date||'—',sc,rat,rec2]);
+        row(r,i%2===0?C.ltTeal:C.white);
+        r.getCell(4).font={name:'Arial',bold:true,size:12,color:{argb:ratingColor(sc)}};
+        [1,3,4,5].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+      });
+
+      // ملخص القسم
+      ws.addRow([]);
+      const avg=tRecs.length?Math.round(tRecs.reduce((s,r)=>s+(r.total_score||0),0)/tRecs.length*10)/10:0;
+      const sumR=ws.addRow(['','متوسط القسم','',avg,'','']);
+      sumR.getCell(2).font={name:'Arial',bold:true,size:11};
+      sumR.getCell(4).font={name:'Arial',bold:true,size:13,color:{argb:ratingColor(avg)}};
+      sumR.getCell(4).alignment={horizontal:'center',vertical:'middle'};
+      sumR.eachCell({includeEmpty:true},c=>c.fill={type:'pattern',pattern:'solid',fgColor:{argb:C.ltTeal}});
+
+      // تفاصيل البنود إذا في scores
+      const withScores=tRecs.filter(r=>r.scores);
+      if(withScores.length){
+        ws.addRow([]);
+        subH(ws,'📋 تفاصيل البنود',typeColors[t],6);
+        withScores.forEach(rec=>{
+          ws.addRow([`تقييم: ${rec.employee_name||'—'}`,'','','','','']);
+          try {
+            const scores=JSON.parse(rec.scores||'[]');
+            hdr(ws.addRow(['','البند','الوزن %','الدرجة','الدرجة المرجحة','']),typeColors[t]);
+            scores.forEach((s,si)=>{
+              const r=ws.addRow(['',s.label,s.weight+'%',s.score,(s.weighted||0).toFixed(1),'']);
+              row(r,si%2===0?C.ltTeal:C.white);
+              [3,4,5].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+            });
+          } catch(e){}
+          ws.addRow([]);
+        });
+      }
+    });
+
+    // تنزيل
+    const buf=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=`تقرير_المرافق_${MN[month]}_${year}.xlsx`;
+    a.style.display='none'; document.body.appendChild(a); a.click();
+    setTimeout(()=>{try{document.body.removeChild(a);}catch(e){} URL.revokeObjectURL(url);},300);
+    toast(`✅ تم تصدير تقرير المرافق — ${wb.worksheets.length} شيتات`);
+  } catch(err){
+    console.error(err);
+    toast('❌ خطأ في التصدير: '+err.message);
+  }
+}
+
+async function exportBuildingExcel() {
+  if(typeof ExcelJS==='undefined'){toast('❌ ExcelJS غير محملة');return;}
+  const now=new Date();
+  const month=now.getMonth()+1, year=now.getFullYear();
+  const MN=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  toast('⏳ جاري بناء التقرير...');
+
+  try {
+    const wb=new ExcelJS.Workbook();
+    wb.creator='نورة لتعليم القيادة'; wb.created=now;
+    const {C,sh,subH,hdr,row,ratingColor}=_exSetup(wb);
+
+    const dateFrom=`${year}-${String(month).padStart(2,'0')}-01`;
+    const dateTo=`${year}-${String(month).padStart(2,'0')}-31`;
+    let recs=[];
+    try {
+      const{data}=await db.from('building_reports').select('*')
+        .gte('report_date',dateFrom).lte('report_date',dateTo);
+      recs=data||[];
+    } catch(e){}
+    const local=(APP_DATA.buildings||[]).filter(r=>(r.report_date||'').startsWith(`${year}-${String(month).padStart(2,'0')}`));
+    const seen=new Set(recs.map(r=>r.employee_name+'_'+r.report_date));
+    recs=[...recs,...local.filter(r=>!seen.has(r.employee_name+'_'+r.report_date))];
+
+    const types=['cust','counter','exam','super'];
+    const typeTitles={cust:'خدمة العملاء',counter:'الكاونتر',exam:'قاعات الاختبار',super:'الإشراف الميداني'};
+    const typeColors={cust:C.teal,counter:C.blue,exam:C.gold,super:C.orange};
+    const typeIcons={cust:'😊',counter:'🖥️',exam:'📝',super:'👷'};
+
+    // ── شيت KPIs ──
+    const ws1=wb.addWorksheet('📊 ملخص KPIs');
+    ws1.views=[{rightToLeft:true}];
+    ws1.columns=[{width:28},{width:16},{width:16},{width:16},{width:40}];
+    sh(ws1,`تقرير المبنى الرئيسي — ${MN[month]} ${year}`,C.dark,5);
+    subH(ws1,'🎯 مؤشرات الأداء الرئيسية',C.teal,5);
+    hdr(ws1.addRow(['القسم','عدد التقييمات','متوسط الدرجة','التصنيف','التوصية']),C.teal);
+
+    let grandTotal=0, grandCount=0;
+    types.forEach((t,i)=>{
+      const tRecs=recs.filter(r=>r.report_type===t);
+      const avg=tRecs.length?Math.round(tRecs.reduce((s,r)=>s+(r.total_score||0),0)/tRecs.length*10)/10:0;
+      const rating=avg>=90?'ممتاز ⭐':avg>=80?'جيد جداً':avg>=70?'جيد':avg>=60?'مقبول':tRecs.length?'دون المستوى':'— لا بيانات';
+      const rec=avg>=90?'ترشيح للتقدير الرسمي':avg>=80?'توثيق وتطوير أهداف جديدة':avg>=70?'خطة تطوير فردية':avg>=60?'تنبيه + خطة 30 يوم':tRecs.length?'إحالة فورية':'يحتاج بيانات';
+      const r=ws1.addRow([`${typeIcons[t]} ${typeTitles[t]}`,tRecs.length,avg||'—',rating,rec]);
+      row(r,i%2===0?C.ltTeal:C.white);
+      r.getCell(1).font={name:'Arial',bold:true,size:11};
+      r.getCell(2).alignment={horizontal:'center',vertical:'middle'};
+      if(avg){r.getCell(3).font={name:'Arial',bold:true,size:12,color:{argb:ratingColor(avg)}};r.getCell(3).alignment={horizontal:'center',vertical:'middle'};}
+      if(tRecs.length){grandTotal+=avg*tRecs.length;grandCount+=tRecs.length;}
+    });
+    ws1.addRow([]);
+    const avgTotal=grandCount?Math.round(grandTotal/grandCount*10)/10:0;
+    const tR=ws1.addRow(['المتوسط العام للمبنى','',avgTotal||'—',avgTotal>=90?'ممتاز ⭐':avgTotal>=70?'جيد':'يحتاج تحسين','']);
+    tR.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',bold:true,size:12};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:C.ltTeal}};});
+    if(avgTotal){tR.getCell(3).font={name:'Arial',bold:true,size:14,color:{argb:ratingColor(avgTotal)}};tR.getCell(3).alignment={horizontal:'center',vertical:'middle'};}
+
+    // شيتات تفصيلية
+    types.forEach(t=>{
+      const tRecs=recs.filter(r=>r.report_type===t);
+      if(!tRecs.length) return;
+      const ws=wb.addWorksheet(`${typeIcons[t]} ${typeTitles[t]}`);
+      ws.views=[{rightToLeft:true}];
+      ws.columns=[{width:6},{width:28},{width:14},{width:14},{width:16},{width:40}];
+      sh(ws,`${typeIcons[t]} ${typeTitles[t]} — ${MN[month]} ${year}`,typeColors[t],6);
+      subH(ws,'📋 التقييمات',typeColors[t],6);
+      hdr(ws.addRow(['#','الموظف','التاريخ','الدرجة /100','التصنيف','التوصية']),typeColors[t]);
+      [...tRecs].sort((a,b)=>(b.total_score||0)-(a.total_score||0)).forEach((rec,i)=>{
+        const sc=rec.total_score||0;
+        const rat=sc>=90?'ممتاز ⭐':sc>=80?'جيد جداً':sc>=70?'جيد':sc>=60?'مقبول':'دون المستوى';
+        const rec2=sc>=90?'ترشيح للتقدير':sc>=80?'توثيق وتطوير':sc>=70?'خطة تطوير':sc>=60?'تنبيه':'إحالة فورية';
+        const r=ws.addRow([i+1,rec.employee_name||'—',rec.report_date||'—',sc,rat,rec2]);
+        row(r,i%2===0?C.ltTeal:C.white);
+        r.getCell(4).font={name:'Arial',bold:true,size:12,color:{argb:ratingColor(sc)}};
+        [1,3,4,5].forEach(n=>r.getCell(n).alignment={horizontal:'center',vertical:'middle'});
+      });
+      const avg=tRecs.length?Math.round(tRecs.reduce((s,r)=>s+(r.total_score||0),0)/tRecs.length*10)/10:0;
+      ws.addRow([]);
+      const sR=ws.addRow(['','متوسط القسم','',avg,'','']);
+      sR.getCell(2).font={name:'Arial',bold:true,size:11};
+      sR.getCell(4).font={name:'Arial',bold:true,size:13,color:{argb:ratingColor(avg)}};
+      sR.getCell(4).alignment={horizontal:'center',vertical:'middle'};
+      sR.eachCell({includeEmpty:true},c=>c.fill={type:'pattern',pattern:'solid',fgColor:{argb:C.ltTeal}});
+    });
+
+    const buf=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=`تقرير_المبنى_${MN[month]}_${year}.xlsx`;
+    a.style.display='none'; document.body.appendChild(a); a.click();
+    setTimeout(()=>{try{document.body.removeChild(a);}catch(e){} URL.revokeObjectURL(url);},300);
+    toast(`✅ تم تصدير تقرير المبنى — ${wb.worksheets.length} شيتات`);
+  } catch(err){
+    console.error(err);
+    toast('❌ خطأ في التصدير: '+err.message);
+  }
 }
 
 </script>
