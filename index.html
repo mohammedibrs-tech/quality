@@ -9743,9 +9743,15 @@ async function exportQuarterlyExcel() {
 
 // ══ تثبيت + تصدير التقييم ══
 function pinRatingData() {
-  const rows = window._ratingData || [];
-  if (!rows.length) { toast('❌ ارفع ملف التقييم أولاً'); return; }
-  const key = new Date().toISOString().slice(0,7);
+  const rows = window._ratingParsed || window._ratingData || [];
+  if (!rows.length) { toast('❌ ارفع ملف التقييم وحلّله أولاً'); return; }
+  // نستخدم شهر أول تاريخ في البيانات إن وُجد، وإلا شهر اليوم
+  let key = new Date().toISOString().slice(0,7);
+  const firstDate = rows[0]?.dates?.[0];
+  if (firstDate) {
+    const d = new Date(firstDate);
+    if (!isNaN(d.getTime())) key = d.toISOString().slice(0,7);
+  }
   PINNED_DATA.ratings = PINNED_DATA.ratings || {};
   PINNED_DATA.ratings[key] = {
     data: JSON.parse(JSON.stringify(rows)),
@@ -10079,7 +10085,12 @@ function pinMonthData(){
   };
   renderPinnedMonths('ops');
   savePinnedToStorage();
-  toast('✅ تم تثبيت بيانات '+mo.label);
+  // حفظ في Supabase لضمان الربط بالتقارير الربعية
+  ['female','male','bike'].forEach(sec=>{
+    const rows=(mo.ops[sec]||[]);
+    if(rows.length) saveOpsToSupabase(rows.map(r=>({...r,zone:sec,section:sec})), sec);
+  });
+  toast('✅ تم تثبيت بيانات '+mo.label+' وحفظها في قاعدة البيانات');
   refreshQuarterlyCard();
 }
 function pinReportData(type,data,monthKey){
