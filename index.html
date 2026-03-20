@@ -1941,7 +1941,22 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 <!-- SALES REPORT PAGE -->
 <div id="page-sales" class="page">
   <div class="container-wide">
-    <div class="page-header">
+
+    <!-- ══ تبويبات قسم المبيعات ══ -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;border-bottom:2px solid var(--border);padding-bottom:12px;">
+      <button onclick="switchSalesMainTab('data')" id="smTab_data"
+        style="padding:10px 20px;border-radius:20px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        📊 بيانات عملاء الاسترداد والتحليل البياني
+      </button>
+      <button onclick="switchSalesMainTab('eval')" id="smTab_eval"
+        style="padding:10px 20px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        📋 تقييم عملاء الاسترداد
+      </button>
+    </div>
+
+    <!-- ══ التبويب الأول: البيانات والتحليل ══ -->
+    <div id="smSection_data">
+<div class="page-header">
       <div class="p-icon" style="background:rgba(245,166,35,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">💼</div>
       <h1>تقرير قسم المبيعات</h1>
       <div class="sub">SALES WEEKLY REPORT — الاسترداد | الاستكمال | التأجيل</div>
@@ -2059,7 +2074,40 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
     <div style="height:30px;"></div>
     <button class="back-btn" onclick="goHome()">← رجوع / Back</button>
+  </div
+    </div>
+
+    <!-- ══ التبويب الثاني: تقييم مكالمات الاسترداد ══ -->
+    <div id="smSection_eval" style="display:none;">
+      <div class="page-header" style="margin-bottom:20px;">
+        <div class="p-icon" style="background:rgba(0,168,150,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">📋</div>
+        <h1>تقييم مكالمات الاسترداد</h1>
+        <div class="sub">RETENTION CALLS EVALUATION</div>
+      </div>
+
+      <!-- اختيار الموظفة -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+        <button onclick="switchSalesEvalStaff('rowan')"   id="seStaff_rowan"
+          style="padding:9px 18px;border-radius:20px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+          👩 روان الخشلان
+        </button>
+        <button onclick="switchSalesEvalStaff('iman')"    id="seStaff_iman"
+          style="padding:9px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+          👩 إيمان العنزي
+        </button>
+        <button onclick="switchSalesEvalStaff('haya')"    id="seStaff_haya"
+          style="padding:9px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+          👩 هيا الدويسان
+        </button>
+      </div>
+
+      <!-- النموذج -->
+      <div id="seFormContainer"></div>
+
+    </div>
+
   </div>
+</div>
 </div>
 
 <!-- OPS EFFICIENCY PAGE -->
@@ -2396,7 +2444,98 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
     <!-- ══ تقرير المبنى الأصلي ══ -->
     <div id="bSection_report">
-      
+      <!-- زر أضف ملاحظة أخرى -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+        <button onclick="addAnotherBuilding()" style="display:flex;align-items:center;gap:7px;padding:9px 16px;background:rgba(0,168,150,0.08);border:1.5px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;color:var(--accent);cursor:pointer;">
+          <span style="font-size:16px;">+</span> أضف ملاحظة أخرى
+        </button>
+      </div>
+
+      <div class="card">
+        <div id="bForm">
+          <div class="slabel">بيانات الزيارة / Visit Details</div>
+          <div class="grid-2">
+            <div class="field">
+              <label><span class="req">* </span>التاريخ / Date</label>
+              <input type="date" id="bDate">
+            </div>
+            <div class="field">
+              <label><span class="req">* </span>الوقت / Time</label>
+              <input type="time" id="bTime">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label><span class="req">* </span>القسم / Section</label>
+              <select id="bSection">
+                <option value="">اختر / Select</option>
+                <option>الاستقبال / Reception</option>
+                <option>الكاونتر / Counter</option>
+                <option>قاعات الاختبار / Exam Halls</option>
+                <option>الممرات / Corridors</option>
+                <option>دورات المياه / Restrooms</option>
+                <option>المواقف / Parking</option>
+                <option>المكاتب / Offices</option>
+                <option>المبنى العام / General Building</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><span class="req">* </span>الراصد / Observer</label>
+              <select id="bObs">
+                <option value="">اختر / Select</option>
+                <option>شهد المقرن</option>
+                <option>سمية الخضيري</option>
+                <option>امجاد ابانمي</option>
+                <option>احمد الحماد</option>
+                <option>احمد سحاب</option>
+                <option>ابراهيم الحمد</option>
+              </select>
+            </div>
+          </div>
+          <div class="slabel" style="margin-top:10px;">تفاصيل الملاحظة / Observation Details</div>
+          <div class="grid-2">
+            <div class="field">
+              <label><span class="req">* </span>نوع الملاحظة / Type</label>
+              <select id="bType">
+                <option value="">اختر / Select</option>
+                <option>نظافة / Cleanliness</option>
+                <option>ترتيب / Organization</option>
+                <option>أداء موظف / Staff Performance</option>
+                <option>سلامة / Safety</option>
+                <option>صيانة / Maintenance</option>
+                <option>تجربة عميل / Customer Experience</option>
+                <option>أخرى / Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>مستوى الأولوية / Priority</label>
+              <select id="bPriority">
+                <option value="normal">عادي / Normal</option>
+                <option value="high">عاجل / Urgent</option>
+                <option value="critical">حرج / Critical</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label><span class="req">* </span>الوصف التفصيلي / Description</label>
+            <textarea id="bDesc" placeholder="اشرح الملاحظة بالتفصيل / Describe the observation..." rows="3"></textarea>
+          </div>
+          <div class="field">
+            <label>الإجراء المقترح / Suggested Action</label>
+            <textarea id="bAction" placeholder="ما الإجراء المقترح؟ / Suggested action..." rows="2"></textarea>
+          </div>
+          <button class="submit-btn" id="bBtn" onclick="submitBuilding()" style="margin-top:13px">🏢 تسجيل التقرير / Submit Report</button>
+        </div>
+        <div class="success-msg" id="bOk">
+          <div class="success-icon">✓</div>
+          <h2>تم التسجيل! / Recorded!</h2>
+          <p>حُفظ التقرير بنجاح / Report saved successfully</p>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+            <button class="submit-btn" onclick="addAnotherBuilding()" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;">+ أضف ملاحظة أخرى / Add Another</button>
+            <button class="new-btn" onclick="goHome()">← العودة للرئيسية / Back Home</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ══ نموذج (أ) خدمة العملاء ══ -->
@@ -3204,8 +3343,8 @@ function openSec(type){
     const now=new Date();
     const d=now.toISOString().split('T')[0];
     const h=String(now.getHours()).padStart(2,'0'),m=String(now.getMinutes()).padStart(2,'0');
-    document.getElementById('bDate').value=d;
-    document.getElementById('bTime').value=h+':'+m;
+    const bDateEl=document.getElementById('bDate'); if(bDateEl) bDateEl.value=d;
+    const bTimeEl=document.getElementById('bTime'); if(bTimeEl) bTimeEl.value=h+':'+m;
   }else if(type==='sales'){
     document.getElementById('page-sales').classList.add('active');
   }else if(type==='ops'){
@@ -3247,6 +3386,7 @@ function updateCoworkerList(){
 function autoObs(id){
   if(!currentUser)return;
   const s=document.getElementById(id);
+  if(!s||!s.options)return;
   for(let i=0;i<s.options.length;i++){if(s.options[i].text===currentUser.name){s.selectedIndex=i;break;}}
   if(id==='vObs') updateCoworkerList();
 }
@@ -11624,6 +11764,255 @@ async function exportBuildingExcel() {
   } catch(err){
     console.error(err);
     toast('❌ خطأ في التصدير: '+err.message);
+  }
+}
+
+
+// ══ تقييم مكالمات الاسترداد — قسم المبيعات ══
+const SALES_STAFF = {
+  rowan:{ name:'روان الخشلان', key:'rowan' },
+  iman: { name:'إيمان العنزي', key:'iman'  },
+  haya: { name:'هيا الدويسان', key:'haya'  },
+};
+
+const RET_ITEMS = [
+  {label:'الاستماع الفعّال وتحديد سبب الاسترداد الحقيقي', w:20},
+  {label:'الهدوء والمهنية في التعامل مع اعتراض العميل',    w:20},
+  {label:'عرض الحل البديل المناسب وفق الصلاحيات',         w:20},
+  {label:'الإقناع والتأثير دون ضغط أو إلحاح مزعج',        w:20},
+  {label:'توثيق نتيجة المكالمة فور انتهائها',              w:10},
+  {label:'الالتزام بمراحل التواصل وعدم التجاوز',           w:10},
+];
+
+const RET_OUTCOME_COLORS = {
+  kept:'#27AE60', freeze:'#F39C12', refund:'#E74C3C'
+};
+
+let _seCurrentStaff = 'rowan';
+
+function switchSalesMainTab(tab) {
+  ['data','eval'].forEach(t => {
+    const sec = document.getElementById('smSection_'+t);
+    const btn = document.getElementById('smTab_'+t);
+    if(sec) sec.style.display = t===tab ? 'block' : 'none';
+    if(btn) {
+      btn.style.background  = t===tab ? 'var(--accent)' : 'var(--card)';
+      btn.style.color       = t===tab ? '#fff' : 'var(--text-dim)';
+      btn.style.borderColor = t===tab ? 'var(--accent)' : 'var(--border)';
+    }
+  });
+  if(tab==='eval') renderSalesEvalForm(_seCurrentStaff);
+}
+
+function switchSalesEvalStaff(key) {
+  _seCurrentStaff = key;
+  Object.keys(SALES_STAFF).forEach(k => {
+    const btn = document.getElementById('seStaff_'+k);
+    if(btn) {
+      btn.style.background  = k===key ? 'var(--accent)' : 'var(--card)';
+      btn.style.color       = k===key ? '#fff' : 'var(--text-dim)';
+      btn.style.borderColor = k===key ? 'var(--accent)' : 'var(--border)';
+    }
+  });
+  renderSalesEvalForm(key);
+}
+
+function renderSalesEvalForm(staffKey) {
+  const staff = SALES_STAFF[staffKey];
+  const container = document.getElementById('seFormContainer');
+  if(!container) return;
+
+  container.innerHTML = `
+    <div class="card">
+      <div class="slabel" style="margin-bottom:16px;">
+        📋 نموذج تقييم مكالمة الاسترداد
+        <span style="color:var(--accent);font-size:13px;margin-right:8px;">— ${staff.name}</span>
+      </div>
+
+      <!-- بيانات المكالمة -->
+      <div class="grid-2" style="margin-bottom:16px;">
+        <div class="field">
+          <label>اسم العميل *</label>
+          <input type="text" id="se_client_name" placeholder="اسم العميل..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;">
+        </div>
+        <div class="field">
+          <label>تاريخ المكالمة *</label>
+          <input type="date" id="se_call_date" style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;box-sizing:border-box;">
+        </div>
+      </div>
+
+      <!-- مخرج المكالمة -->
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:10px;">مخرج المكالمة *</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <label onclick="selectRetOutcome('kept')" id="seOut_kept" style="flex:1;min-width:120px;cursor:pointer;padding:12px;border-radius:14px;border:2px solid var(--border);text-align:center;transition:all .2s;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;">
+            ✅ احتفاظ بالرسوم
+          </label>
+          <label onclick="selectRetOutcome('freeze')" id="seOut_freeze" style="flex:1;min-width:120px;cursor:pointer;padding:12px;border-radius:14px;border:2px solid var(--border);text-align:center;transition:all .2s;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;">
+            ⏸️ تجميد مؤقت
+          </label>
+          <label onclick="selectRetOutcome('refund')" id="seOut_refund" style="flex:1;min-width:120px;cursor:pointer;padding:12px;border-radius:14px;border:2px solid var(--border);text-align:center;transition:all .2s;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;">
+            ❌ استرداد نهائي
+          </label>
+        </div>
+        <input type="hidden" id="se_outcome" value="">
+      </div>
+
+      <!-- بنود التقييم -->
+      <div id="se_items_container">
+        ${RET_ITEMS.map((item,idx)=>`
+          <div style="background:var(--card2);border-radius:14px;padding:14px;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+              <div style="font-size:12px;font-weight:700;flex:1;">${item.label}</div>
+              <span style="font-size:10px;background:rgba(0,168,150,0.1);color:var(--accent);border-radius:20px;padding:2px 10px;font-weight:800;">وزن ${item.w}%</span>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              ${[1,2,3,4,5].map(v=>`
+                <div onclick="selectSeRadio(${idx},${v})" id="seRadio_${idx}_${v}"
+                  style="flex:1;min-width:50px;text-align:center;padding:8px 4px;border-radius:10px;
+                  border:1.5px solid var(--border);font-size:10px;font-weight:700;
+                  color:var(--text-dim);transition:all .2s;cursor:pointer;">
+                  <div style="font-size:14px;">${['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣'][v-1]}</div>
+                  <div style="font-size:9px;">${['ضعيف','مقبول','جيد','جيد جداً','ممتاز'][v-1]}</div>
+                </div>`).join('')}
+            </div>
+            <div id="seW_${idx}" style="font-size:10px;color:var(--text-dim);margin-top:6px;text-align:left;direction:ltr;"></div>
+          </div>`).join('')}
+      </div>
+
+      <!-- المجموع والتصنيف -->
+      <div style="background:var(--card2);border-radius:14px;padding:14px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:13px;font-weight:700;">المجموع الكلي</div>
+        <div id="se_total" style="font-size:22px;font-weight:900;color:var(--accent);">0 / 100</div>
+      </div>
+      <div id="se_rating" style="text-align:center;margin-bottom:16px;"></div>
+      <div class="field" style="margin-bottom:16px;">
+        <label>ملاحظات المقيِّم</label>
+        <textarea id="se_notes" placeholder="أي ملاحظات على أداء المكالمة..." rows="3"
+          style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;resize:none;box-sizing:border-box;"></textarea>
+      </div>
+      <button onclick="submitSalesEval('${staffKey}')"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">
+        💾 حفظ التقييم
+      </button>
+    </div>`;
+
+  // نعيّن اليوم
+  const today = new Date().toISOString().split('T')[0];
+  const dateEl = document.getElementById('se_call_date');
+  if(dateEl) dateEl.value = today;
+}
+
+let _seOutcome = '';
+let _seScores  = {};
+
+function selectRetOutcome(val) {
+  _seOutcome = val;
+  document.getElementById('se_outcome').value = val;
+  ['kept','freeze','refund'].forEach(k => {
+    const el = document.getElementById('seOut_'+k);
+    if(!el) return;
+    if(k === val) {
+      el.style.background  = RET_OUTCOME_COLORS[k]+'22';
+      el.style.borderColor = RET_OUTCOME_COLORS[k];
+      el.style.color       = RET_OUTCOME_COLORS[k];
+    } else {
+      el.style.background  = '';
+      el.style.borderColor = 'var(--border)';
+      el.style.color       = 'var(--text)';
+    }
+  });
+}
+
+function selectSeRadio(idx, val) {
+  _seScores[idx] = val;
+  // تحديث visual لهذا البند
+  for(let v=1;v<=5;v++){
+    const el = document.getElementById(`seRadio_${idx}_${v}`);
+    if(!el) continue;
+    const colors = ['#E74C3C','#E67E22','#F1C40F','#27AE60','#16A085'];
+    el.style.background  = v===val ? colors[val-1] : '';
+    el.style.borderColor = v===val ? colors[val-1] : 'var(--border)';
+    el.style.color       = v===val ? '#fff' : 'var(--text-dim)';
+  }
+  // حساب المجموع
+  let total = 0;
+  RET_ITEMS.forEach((item,i) => {
+    if(_seScores[i]) {
+      const w = (item.w * _seScores[i]) / 5;
+      total += w;
+      const wEl = document.getElementById('seW_'+i);
+      if(wEl) wEl.textContent = `${item.w}% × ${_seScores[i]} ÷ 5 = ${w.toFixed(1)} نقطة`;
+    }
+  });
+  const tEl = document.getElementById('se_total');
+  if(tEl) {
+    tEl.textContent = total.toFixed(1)+' / 100';
+    tEl.style.color = total>=90?'#16A085':total>=80?'#27AE60':total>=70?'#F1C40F':total>=60?'#E67E22':'#E74C3C';
+  }
+  const rEl = document.getElementById('se_rating');
+  if(rEl) {
+    const R = total>=90?{t:'ممتاز ⭐',c:'#16A085',r:'ترشيح للتقدير الشهري'}
+             :total>=80?{t:'جيد جداً',c:'#27AE60',r:'توثيق الإنجاز وتحديد هدف جديد'}
+             :total>=70?{t:'جيد',c:'#F1C40F',r:'جلسة ملاحظات وخطة تطوير'}
+             :total>=60?{t:'مقبول',c:'#E67E22',r:'تنبيه تحريري وخطة 30 يوم'}
+             :{t:'دون المستوى',c:'#E74C3C',r:'متابعة مكثفة وجلسة مدير'};
+    rEl.innerHTML = `<div style="background:${R.c}15;border:1.5px solid ${R.c}40;border-radius:12px;padding:10px 16px;display:inline-block;">
+      <div style="font-size:14px;font-weight:900;color:${R.c};">${R.t}</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">${R.r}</div></div>`;
+  }
+}
+
+async function submitSalesEval(staffKey) {
+  const staff   = SALES_STAFF[staffKey];
+  const client  = document.getElementById('se_client_name')?.value.trim();
+  const date    = document.getElementById('se_call_date')?.value;
+  const outcome = _seOutcome;
+  const notes   = document.getElementById('se_notes')?.value.trim();
+
+  if(!client)  { toast('⚠️ أدخل اسم العميل'); return; }
+  if(!outcome) { toast('⚠️ حدد مخرج المكالمة'); return; }
+
+  const filled = RET_ITEMS.filter((_,i)=>_seScores[i]);
+  if(filled.length < RET_ITEMS.length) { toast('⚠️ يرجى تقييم جميع البنود'); return; }
+
+  let total = 0;
+  const scores = RET_ITEMS.map((item,i)=>{
+    const s = _seScores[i]||0;
+    const w = (item.w*s)/5;
+    total += w;
+    return {label:item.label, weight:item.w, score:s, weighted:w};
+  });
+  total = Math.round(total*10)/10;
+  const rating = total>=90?'ممتاز':total>=80?'جيد جداً':total>=70?'جيد':total>=60?'مقبول':'دون المستوى';
+  const outcomeLabel = outcome==='kept'?'احتفاظ بالرسوم':outcome==='freeze'?'تجميد مؤقت':'استرداد نهائي';
+
+  const record = {
+    staff_name:   staff.name,
+    staff_key:    staffKey,
+    client_name:  client,
+    call_date:    date,
+    call_type:    'retention',
+    outcome:      outcomeLabel,
+    total_score:  total,
+    rating,
+    scores:       JSON.stringify(scores),
+    notes,
+    report_date:  date,
+    observer:     staff.name,
+  };
+
+  try {
+    const { error } = await db.from('sales_reports').insert([record]);
+    if(error) throw error;
+    addToAppData('sales', record);
+    toast(`✅ تم حفظ تقييم ${staff.name} — ${client} — ${outcomeLabel} — ${rating} (${total})`);
+    // reset
+    _seScores  = {};
+    _seOutcome = '';
+    renderSalesEvalForm(staffKey);
+  } catch(e) {
+    toast('❌ خطأ في الحفظ: '+e.message);
   }
 }
 
