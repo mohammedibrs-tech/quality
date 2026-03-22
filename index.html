@@ -1228,16 +1228,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon">🗂️</div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
     <div class="section-card" onclick="openQuarterlyPage()" style="background:linear-gradient(135deg,#0D1F2D,#1A3A5C);"><div class="s-icon" style="color:#00C8B4;">📋</div><div class="s-text"><div class="s-title-ar" style="color:#fff;">التقارير الربعية</div><div class="s-title-en" style="color:rgba(0,200,180,0.8);">QUARTERLY REPORTS</div></div><div class="s-arrow" style="color:#00C8B4;">›</div></div>
 
-    <!-- كرت آراء العملاء -->
-    <div class="section-card" onclick="openCustomerVoice()" style="background:linear-gradient(135deg,#0f172a,#1e293b);border:1px solid rgba(99,102,241,0.2);">
-      <div class="s-icon" style="font-size:22px;">🌐</div>
-      <div class="s-text">
-        <div class="s-title-ar" style="color:#fff;">آراء العملاء</div>
-        <div class="s-title-en" style="color:rgba(99,102,241,0.8);">CUSTOMER VOICE</div>
-      </div>
-      <div class="s-arrow" style="color:rgba(99,102,241,0.6);">›</div>
-    </div>
-
     <!-- ══ الأنشطة والفعاليات ══ -->
     <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#6A0DAD;background:rgba(106,13,173,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #6A0DAD;">🎯 الأنشطة والفعاليات</div>
 
@@ -4216,7 +4206,7 @@ async function loadActiveStaffHome(){
   const el=document.getElementById('homeActiveStaff');
   if(!el||!currentUser) return;
   try{
-    const START_DATE='2026-02-01';
+    const START_DATE='2026-03-01';
     const[{data:vd},{data:sd},{data:fd}]=await Promise.all([
       db.from('violations').select('observer').gte('date',START_DATE),
       db.from('surveys').select('observer').gte('date',START_DATE),
@@ -12074,182 +12064,7 @@ function loadSavedQuarter(key) {
 
 
 
-// ══ آراء العملاء ══
-const CV_KEY = 'nq_cv_reviews';
-let _cvSource = 'google';
-let _cvImageBase64 = null;
-let _cvExtractedList = [];
 
-function openCustomerVoice() {
-  document.getElementById('customerVoiceModal').style.display = 'block';
-  cvTab('view');
-  renderCVReviews();
-}
-function closeCV() {
-  document.getElementById('customerVoiceModal').style.display = 'none';
-}
-
-function cvTab(tab) {
-  document.getElementById('cvView').style.display = tab==='view' ? 'block' : 'none';
-  document.getElementById('cvAdd').style.display  = tab==='add'  ? 'block' : 'none';
-  const vBtn = document.getElementById('cvTabView');
-  const aBtn = document.getElementById('cvTabAdd');
-  if(vBtn){ vBtn.style.background = tab==='view'?'var(--accent)':'var(--card)'; vBtn.style.color = tab==='view'?'#fff':'var(--text-dim)'; }
-  if(aBtn){ aBtn.style.background = tab==='add' ?'var(--accent)':'var(--card)'; aBtn.style.color = tab==='add' ?'#fff':'var(--text-dim)'; }
-  if(tab==='view') renderCVReviews();
-}
-
-function setCVSource(src) {
-  _cvSource = src;
-  ['google','other'].forEach(s => {
-    const btn = document.getElementById('cvSrc_'+s);
-    if(!btn) return;
-    btn.style.borderColor = s===src ? 'var(--accent)' : 'var(--border)';
-    btn.style.background  = s===src ? 'rgba(0,168,150,0.1)' : 'var(--card)';
-    btn.style.color       = s===src ? 'var(--accent)' : 'var(--text-dim)';
-  });
-}
-
-function handleCVDrop(e) {
-  const file = e.dataTransfer.files[0];
-  if(file) processCVFile(file);
-}
-function handleCVImage(input) {
-  const file = input.files[0];
-  if(file) processCVFile(file);
-}
-function processCVFile(file) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    _cvImageBase64 = e.target.result.split(',')[1];
-    const preview = document.getElementById('cvImgPreview');
-    if(preview) preview.innerHTML = `<img src="${e.target.result}" style="max-height:120px;border-radius:10px;max-width:100%;">`;
-    const btn = document.getElementById('cvExtractBtn');
-    if(btn){ btn.style.opacity='1'; btn.style.pointerEvents='auto'; }
-  };
-  reader.readAsDataURL(file);
-}
-
-async function extractCVReviews() {
-  if(!_cvImageBase64){ toast('⚠️ ارفع صورة أولاً'); return; }
-  const btn = document.getElementById('cvExtractBtn');
-  const orig = btn.innerHTML;
-  btn.innerHTML = '⏳ جاري الاستخراج...';
-  btn.style.opacity = '0.7';
-
-  try {
-    const srcLabel = _cvSource==='google' ? 'Google Maps' : 'منصة أخرى';
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: { type: 'base64', media_type: 'image/jpeg', data: _cvImageBase64 }
-            },
-            {
-              type: 'text',
-              text: `هذه صورة screenshot لتعليقات العملاء من ${srcLabel}. استخرج التعليقات وأرجعها كـ JSON array فقط بدون أي نص آخر. كل عنصر يحتوي: {"name":"اسم العميل","text":"نص التعليق","rating":5,"date":"التاريخ إن وُجد أو اتركه فارغاً"}. إذا لم تجد تعليقات واضحة أرجع [].`
-            }
-          ]
-        }]
-      })
-    });
-
-    const data = await response.json();
-    const raw = data.content?.[0]?.text || '[]';
-    const clean = raw.replace(/```json|```/g, '').trim();
-    _cvExtractedList = JSON.parse(clean);
-
-    if(!_cvExtractedList.length) {
-      toast('⚠️ لم أتمكن من استخراج تعليقات من الصورة');
-      btn.innerHTML = orig; btn.style.opacity='1';
-      return;
-    }
-
-    // عرض النتائج للمراجعة
-    const extEl = document.getElementById('cvExtracted');
-    extEl.style.display = 'block';
-    extEl.innerHTML = `
-      <div style="font-size:11px;font-weight:800;color:var(--accent);margin-bottom:10px;">✅ تم استخراج ${_cvExtractedList.length} تعليق — راجع وأضف</div>
-      ${_cvExtractedList.map((r,i) => `
-        <div style="background:var(--card2);border-radius:12px;padding:12px;margin-bottom:8px;border-right:3px solid var(--accent);">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-            <span style="font-size:12px;font-weight:800;">${r.name||'عميل'}</span>
-            <span style="color:#F5C518;font-size:12px;">${'⭐'.repeat(Math.min(r.rating||5,5))}</span>
-          </div>
-          <div style="font-size:11px;color:var(--text-dim);line-height:1.5;">${r.text||''}</div>
-        </div>`).join('')}
-      <button onclick="saveCVExtracted()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),#007B6E);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;margin-top:6px;">
-        💾 حفظ كل التعليقات
-      </button>`;
-
-  } catch(e) {
-    toast('❌ خطأ في الاستخراج: '+e.message);
-  }
-  btn.innerHTML = orig; btn.style.opacity='1';
-}
-
-function saveCVExtracted() {
-  if(!_cvExtractedList.length) return;
-  const existing = JSON.parse(localStorage.getItem(CV_KEY)||'[]');
-  const srcLabel = _cvSource==='google' ? 'Google Maps' : 'منصة أخرى';
-  const toAdd = _cvExtractedList.map(r => ({
-    ...r,
-    source: srcLabel,
-    addedAt: new Date().toLocaleDateString('ar-SA'),
-    id: Date.now()+'_'+Math.random().toString(36).slice(2)
-  }));
-  const updated = [...toAdd, ...existing].slice(0, 50); // أحدث 50
-  localStorage.setItem(CV_KEY, JSON.stringify(updated));
-  toast(`✅ تم حفظ ${toAdd.length} تعليق`);
-  _cvExtractedList = [];
-  _cvImageBase64 = null;
-  document.getElementById('cvExtracted').style.display = 'none';
-  document.getElementById('cvImgPreview').innerHTML = '📸';
-  const btn = document.getElementById('cvExtractBtn');
-  if(btn){ btn.style.opacity='0.5'; btn.style.pointerEvents='none'; }
-  cvTab('view');
-}
-
-function renderCVReviews() {
-  const reviews = JSON.parse(localStorage.getItem(CV_KEY)||'[]');
-  const list = document.getElementById('cvReviewsList');
-  const empty = document.getElementById('cvEmpty');
-  if(!list) return;
-  if(!reviews.length){ list.innerHTML=''; if(empty) empty.style.display='block'; return; }
-  if(empty) empty.style.display='none';
-  list.innerHTML = reviews.map(r => `
-    <div style="background:var(--card2);border-radius:14px;padding:14px;border-right:3px solid var(--accent);position:relative;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#007B6E);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700;">
-            ${(r.name||'ع').charAt(0)}
-          </div>
-          <div>
-            <div style="font-size:12px;font-weight:800;">${r.name||'عميل'}</div>
-            <div style="font-size:9px;color:var(--text-dim);">${r.source||''} · ${r.addedAt||''}</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="color:#F5C518;font-size:12px;">${'⭐'.repeat(Math.min(r.rating||5,5))}</span>
-          ${currentUser?.role==='admin'?`<button onclick="deleteCVReview('${r.id}')" style="background:rgba(231,76,60,0.1);border:none;border-radius:6px;padding:3px 7px;color:#E74C3C;font-size:10px;cursor:pointer;">حذف</button>`:''}
-        </div>
-      </div>
-      <div style="font-size:12px;color:var(--text);line-height:1.6;">${r.text||''}</div>
-    </div>`).join('');
-}
-
-function deleteCVReview(id) {
-  const reviews = JSON.parse(localStorage.getItem(CV_KEY)||'[]').filter(r=>r.id!==id);
-  localStorage.setItem(CV_KEY, JSON.stringify(reviews));
-  renderCVReviews();
-}
 
 </script>
 
@@ -12443,88 +12258,6 @@ function deleteCVReview(id) {
 
 
 
-<!-- ══ CUSTOMER VOICE MODAL ══ -->
-<div id="customerVoiceModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(14px);z-index:9500;overflow-y:auto;padding:16px 12px;">
-  <div style="max-width:660px;margin:0 auto;background:var(--card);border-radius:24px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.5);">
-
-    <!-- Header -->
-    <div style="background:linear-gradient(135deg,#0f172a,#1e293b);padding:20px 20px 16px;position:relative;">
-      <button onclick="closeCV()" style="position:absolute;top:14px;left:14px;background:rgba(255,255,255,0.08);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:rgba(255,255,255,0.6);">✕</button>
-      <div style="text-align:center;">
-        <div style="font-size:26px;margin-bottom:6px;">⭐</div>
-        <div style="font-size:15px;font-weight:900;color:#fff;">آراء العملاء</div>
-        <div style="font-size:10px;color:rgba(99,102,241,0.7);letter-spacing:2px;margin-top:2px;">CUSTOMER REVIEWS</div>
-      </div>
-    </div>
-
-    <!-- تبويبات -->
-    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);">
-      <button onclick="cvTab('view')" id="cvTabView"
-        style="flex:1;padding:12px;border:none;background:var(--accent);color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;">
-        ⭐ التعليقات
-      </button>
-      <button onclick="cvTab('add')" id="cvTabAdd"
-        style="flex:1;padding:12px;border:none;background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;">
-        📸 أضف من صورة
-      </button>
-    </div>
-
-    <!-- ══ تبويب التعليقات ══ -->
-    <div id="cvView" style="padding:16px;">
-      <div id="cvReviewsList" style="display:flex;flex-direction:column;gap:10px;"></div>
-      <div id="cvEmpty" style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px;">
-        <div style="font-size:36px;margin-bottom:10px;">💬</div>
-        لا توجد تعليقات بعد — أضف أول تعليق من تبويب "أضف من صورة"
-      </div>
-    </div>
-
-    <!-- ══ تبويب الإضافة ══ -->
-    <div id="cvAdd" style="display:none;padding:16px;">
-
-      <!-- رفع صورة -->
-      <div style="background:var(--card2);border-radius:16px;padding:16px;margin-bottom:14px;border:2px dashed var(--border);text-align:center;cursor:pointer;transition:all .2s;"
-        onclick="document.getElementById('cvImgInput').click()"
-        id="cvDropZone"
-        ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
-        ondragleave="this.style.borderColor='var(--border)'"
-        ondrop="event.preventDefault();handleCVDrop(event)">
-        <input type="file" id="cvImgInput" accept="image/*" style="display:none;" onchange="handleCVImage(this)">
-        <div id="cvImgPreview" style="font-size:36px;margin-bottom:8px;">📸</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text);">اضغط أو اسحب صورة screenshot</div>
-        <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">صوّر تعليقات Google Maps أو أي منصة</div>
-      </div>
-
-      <!-- المصدر -->
-      <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:6px;">المنصة / المصدر</label>
-        <div style="display:flex;gap:8px;">
-          <button onclick="setCVSource('google')" id="cvSrc_google"
-            style="flex:1;padding:8px;border-radius:10px;border:1.5px solid var(--accent);background:rgba(0,168,150,0.1);color:var(--accent);font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">
-            📍 Google Maps
-          </button>
-          <button onclick="setCVSource('other')" id="cvSrc_other"
-            style="flex:1;padding:8px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">
-            💬 منصة أخرى
-          </button>
-        </div>
-      </div>
-
-      <!-- زر الاستخراج -->
-      <button onclick="extractCVReviews()" id="cvExtractBtn"
-        style="width:100%;padding:13px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;margin-bottom:10px;opacity:0.5;pointer-events:none;">
-        🤖 استخراج التعليقات بالذكاء الاصطناعي
-      </button>
-
-      <!-- نتائج الاستخراج -->
-      <div id="cvExtracted" style="display:none;"></div>
-
-    </div>
-
-    <div style="padding:0 16px 16px;">
-      <button onclick="closeCV()" style="width:100%;padding:11px;background:rgba(0,0,0,0.1);border:1px solid var(--border);border-radius:12px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text-dim);">إغلاق</button>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
