@@ -59,8 +59,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 /* PAGES */
 .page{display:none;}.page.active{display:block;animation:fadeUp .4s ease;}
-.container{max-width:700px;margin:0 auto;padding:26px 18px 60px;position:relative;z-index:1;}
-.container-wide{max-width:1020px;margin:0 auto;padding:26px 18px 60px;position:relative;z-index:1;}
+.container{max-width:700px;margin:0 auto;padding:26px 18px 60px;position:relative;z-index:1;width:100%;box-sizing:border-box;}
+.container-wide{max-width:1020px;margin:0 auto;padding:26px 18px 60px;position:relative;z-index:1;width:100%;box-sizing:border-box;}
 
 /* HOME */
 .home-hero{text-align:center;padding:44px 18px 32px;position:relative;z-index:1;}
@@ -709,7 +709,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 .kpi-val{font-size:24px;font-weight:900;color:#fff;line-height:1;margin-bottom:4px;}
 .kpi-lbl{font-size:10px;color:rgba(255,255,255,0.82);font-weight:600;}
 /* home sections */
-.home-sections{display:flex;flex-direction:column;gap:10px;padding:0 14px;}
+.home-sections{display:flex;flex-direction:column;gap:10px;padding:0 14px;max-width:900px;margin:0 auto;width:100%;}
 .cards-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .sec-group-label{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;padding:6px 2px 2px;}
 @media(min-width:768px){
@@ -724,7 +724,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 /* ══ DESKTOP SIDEBAR ══ */
 @media (min-width: 900px) {
-  body { display:flex; }
   #desktopSidebar {
     display:flex !important;
     flex-direction:column;
@@ -780,23 +779,37 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     background:var(--border);
     margin:6px auto;
   }
-  /* دفع المحتوى لليسار */
+  /* دفع المحتوى لليسار عند وجود sidebar */
   #app {
-    margin-right:200px;
-    width:calc(100% - 200px);
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
+    margin-right: 200px;
+    width: calc(100% - 200px);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
   }
   .page {
-    width:100%;
-    box-sizing:border-box;
-    flex:1;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    flex: 1;
+    overflow-x: hidden;
   }
   #page-dashboard {
-    width:100% !important;
-    max-width:100% !important;
-    box-sizing:border-box;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0 !important;
+  }
+  #page-dashboard .container,
+  #page-dashboard .container-wide {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 20px 24px 60px !important;
+  }
+  /* كل الصفحات تملأ العرض كاملاً */
+  .page.active {
+    min-height: calc(100vh - 60px);
   }
 }
 @media (max-width: 899px) {
