@@ -727,62 +727,121 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   #desktopSidebar {
     display:flex !important;
     flex-direction:column;
-    width:200px;
+    width:60px;
     min-height:100vh;
     background:var(--card);
     border-left:1px solid var(--border);
     position:fixed;
     right:0;top:0;bottom:0;
     z-index:8000;
-    padding:20px 0;
-    gap:4px;
+    padding:16px 0;
+    gap:2px;
     align-items:center;
     box-shadow:-2px 0 16px rgba(0,0,0,0.08);
-    transition:width .3s cubic-bezier(.4,0,.2,1);
+    transition:width .28s cubic-bezier(.4,0,.2,1);
     overflow:hidden;
   }
-  #desktopSidebar:hover {
+  #desktopSidebar.expanded {
     width:200px;
   }
   #desktopSidebar .sb-item {
-    width:100%;
+    width:calc(100% - 10px);
     display:flex;
     align-items:center;
     gap:10px;
-    padding:12px 0;
+    padding:10px 0;
     cursor:pointer;
-    border-radius:14px;
-    margin:0 6px;
-    width:calc(100% - 12px);
+    border-radius:12px;
+    margin:0 5px;
     transition:background .2s;
     overflow:hidden;
     white-space:nowrap;
-  }
-  #desktopSidebar .sb-item:hover { background:rgba(0,168,150,0.08); }
-  #desktopSidebar .sb-item.active { background:rgba(0,168,150,0.12); }
-  #desktopSidebar .sb-icon {
-    font-size:20px;
     flex-shrink:0;
-    width:52px;
+  }
+  #desktopSidebar .sb-item:hover { background:rgba(0,168,150,0.1); }
+  #desktopSidebar .sb-item.active { background:rgba(0,168,150,0.15); }
+  #desktopSidebar .sb-icon {
+    font-size:19px;
+    flex-shrink:0;
+    width:50px;
     text-align:center;
   }
   #desktopSidebar .sb-label {
     font-size:12px;
     font-weight:700;
     color:var(--text);
-    opacity:1;
+    opacity:0;
+    transition:opacity .15s;
     pointer-events:none;
+    flex:1;
   }
+  #desktopSidebar.expanded .sb-label { opacity:1; }
   #desktopSidebar .sb-divider {
-    width:40px;
+    width:36px;
     height:1px;
     background:var(--border);
-    margin:6px auto;
+    margin:4px auto;
+    transition:width .28s;
   }
+  #desktopSidebar.expanded .sb-divider { width:80%; }
+  /* toggle button */
+  #sbToggleBtn {
+    width:calc(100% - 10px);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 0;
+    cursor:pointer;
+    border-radius:12px;
+    margin:0 5px;
+    transition:background .2s;
+    background:none;
+    border:none;
+    overflow:hidden;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  #sbToggleBtn:hover { background:rgba(0,168,150,0.08); }
+  #sbToggleBtn .sb-icon { font-size:19px;width:50px;text-align:center;flex-shrink:0;color:var(--accent); }
+  #sbToggleBtn .sb-label { font-size:11px;font-weight:800;color:var(--accent);opacity:0;transition:opacity .15s; }
+  #desktopSidebar.expanded #sbToggleBtn .sb-label { opacity:1; }
+  /* user card in sidebar */
+  #sbUserCard {
+    width:calc(100% - 10px);
+    margin:0 5px 4px;
+    border-radius:12px;
+    overflow:hidden;
+    white-space:nowrap;
+    cursor:pointer;
+    transition:background .2s;
+    flex-shrink:0;
+  }
+  #sbUserCard:hover { background:rgba(0,168,150,0.08); }
+  #sbUserCard .sb-user-inner {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 0;
+  }
+  #sbUserCard .sb-avatar {
+    width:34px;height:34px;border-radius:50%;
+    flex-shrink:0;
+    margin:0 8px;
+    object-fit:cover;
+    border:2px solid var(--accent);
+    background:rgba(0,168,150,0.15);
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:900;color:var(--accent);
+    overflow:hidden;
+  }
+  #sbUserCard .sb-user-info { opacity:0;transition:opacity .15s; }
+  #desktopSidebar.expanded #sbUserCard .sb-user-info { opacity:1; }
+  #sbUserCard .sb-user-name { font-size:12px;font-weight:800;color:var(--text); }
+  #sbUserCard .sb-user-role { font-size:10px;color:var(--text-dim); }
   /* دفع المحتوى لليسار عند وجود sidebar */
   #app {
-    margin-right: 200px;
-    width: calc(100% - 200px);
+    margin-right: 60px;
+    width: calc(100% - 60px);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -1069,10 +1128,23 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 <!-- ══ DESKTOP SIDEBAR ══ -->
 <div id="desktopSidebar" style="display:none;">
-  <!-- لوقو -->
-  <div style="margin-bottom:10px;text-align:center;">
-    <div style="width:42px;height:42px;border-radius:12px;background:rgba(0,168,150,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto;">
-      <span style="font-size:20px;">⚙️</span>
+
+  <!-- زر الطي/التوسيع -->
+  <button id="sbToggleBtn" onclick="toggleSidebar()">
+    <span class="sb-icon" id="sbToggleIcon">☰</span>
+    <span class="sb-label">طي القائمة</span>
+  </button>
+
+  <div class="sb-divider"></div>
+
+  <!-- بطاقة المستخدم -->
+  <div id="sbUserCard" onclick="openProfileModal()">
+    <div class="sb-user-inner">
+      <div class="sb-avatar" id="sbAvatarEl">م</div>
+      <div class="sb-user-info">
+        <div class="sb-user-name" id="sbUserName">—</div>
+        <div class="sb-user-role" id="sbUserRole">—</div>
+      </div>
     </div>
   </div>
 
@@ -1086,7 +1158,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
   <!-- 2. السجلات -->
   <div class="sb-item" id="sb-records" onclick="sbNav('records')">
-    <span class="sb-icon">📊</span>
+    <span class="sb-icon">📋</span>
     <span class="sb-label">السجلات</span>
   </div>
 
@@ -1098,13 +1170,13 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
   <div class="sb-divider"></div>
 
-  <!-- 3. الوضع الداكن/الفاتح -->
+  <!-- الوضع الداكن/الفاتح -->
   <div class="sb-item" onclick="toggleTheme()">
     <span class="sb-icon" id="sbThemeIcon">🌙</span>
     <span class="sb-label" id="sbThemeLabel">الوضع الداكن</span>
   </div>
 
-  <!-- 4. تسجيل دخول/خروج -->
+  <!-- تسجيل دخول/خروج -->
   <div class="sb-item" id="sb-auth" onclick="sbAuthAction()">
     <span class="sb-icon" id="sbAuthIcon">🔑</span>
     <span class="sb-label" id="sbAuthLabel">تسجيل الدخول</span>
@@ -1243,21 +1315,25 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
     <!-- ══ الأنشطة والفعاليات ══ -->
     <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#6A0DAD;background:rgba(106,13,173,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #6A0DAD;">🎯 الأنشطة والفعاليات</div>
-
-    <div class="section-card" onclick="openIdeasBank()" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);position:relative;">
-      <div class="s-icon">💡</div>
-      <div class="s-text">
-        <div class="s-title-ar">بنك الأفكار</div>
-        <div class="s-title-en">IDEAS BANK</div>
-      </div>
-      <span id="ideasPendingBadge" style="display:none;position:absolute;top:10px;left:10px;background:#F39C12;color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:900;"></span>
-      <div class="s-arrow">›</div>
-    </div>
-
   </div>
 
-  <!-- ══ GAME OF THE DAY CARD ══ -->
-  <div style="padding:0 14px 16px;max-width:900px;margin:0 auto;">
+  <!-- بنك الأفكار + لعبة اليوم في grid متناسق -->
+  <div style="padding:0 14px 8px;max-width:900px;margin:0 auto;">
+    <div class="cards-row-2" style="grid-template-columns:1fr 1fr;align-items:stretch;">
+
+      <!-- بنك الأفكار -->
+      <div class="section-card" onclick="openIdeasBank()" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);position:relative;border-radius:20px;min-height:80px;">
+        <div class="s-icon">💡</div>
+        <div class="s-text">
+          <div class="s-title-ar">بنك الأفكار</div>
+          <div class="s-title-en">IDEAS BANK</div>
+        </div>
+        <span id="ideasPendingBadge" style="display:none;position:absolute;top:10px;left:10px;background:#F39C12;color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:900;"></span>
+        <div class="s-arrow">›</div>
+      </div>
+
+  <!-- ══ لعبة اليوم ══ -->
+  <div class="home-sections" style="padding:0;display:contents;">
     <div id="gameDayCard" onclick="openGameModal()" style="background:linear-gradient(135deg,#1A0533,#3D0B6B,#6A0DAD);border-radius:22px;padding:18px 20px;cursor:pointer;box-shadow:0 8px 32px rgba(106,13,173,0.45);position:relative;overflow:hidden;transition:transform .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
       <div style="position:absolute;inset:0;opacity:0.15;background:radial-gradient(circle at 20% 50%,#fff 1px,transparent 1px),radial-gradient(circle at 80% 20%,#fff 1px,transparent 1px);background-size:40px 40px,60px 60px;"></div>
       <div style="position:relative;z-index:1;">
@@ -1276,6 +1352,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
       </div>
     </div>
+    </div>
+  </div>
   </div>
 
 
@@ -3252,6 +3330,7 @@ function toggleTheme(){
   const saved=localStorage.getItem('nq_theme')||'light';
   document.documentElement.setAttribute('data-theme',saved);
   document.addEventListener('DOMContentLoaded',()=>{
+  initSidebar();
     const btn=document.getElementById('themeToggle');
     if(btn)btn.textContent=saved==='dark'?'☀️':'🌙';
   });
@@ -12078,6 +12157,153 @@ function loadSavedQuarter(key) {
 
 
 
+
+
+// ══ Sidebar Toggle ══
+let _sbExpanded = localStorage.getItem('nq_sb_expanded') === '1';
+
+function initSidebar() {
+  const sb = document.getElementById('desktopSidebar');
+  if(!sb) return;
+  if(_sbExpanded) {
+    sb.classList.add('expanded');
+    document.getElementById('sbToggleIcon').textContent = '✕';
+  }
+  updateSbUserCard();
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('desktopSidebar');
+  if(!sb) return;
+  _sbExpanded = !_sbExpanded;
+  localStorage.setItem('nq_sb_expanded', _sbExpanded ? '1' : '0');
+  if(_sbExpanded) {
+    sb.classList.add('expanded');
+    document.getElementById('sbToggleIcon').textContent = '✕';
+  } else {
+    sb.classList.remove('expanded');
+    document.getElementById('sbToggleIcon').textContent = '☰';
+  }
+}
+
+function updateSbUserCard() {
+  if(!currentUser) return;
+  const nameEl  = document.getElementById('sbUserName');
+  const roleEl  = document.getElementById('sbUserRole');
+  const avatarEl= document.getElementById('sbAvatarEl');
+  if(nameEl)  nameEl.textContent  = currentUser.name || '—';
+  if(roleEl)  roleEl.textContent  = currentUser.role === 'admin' ? 'مدير الجودة' : 'موظف جودة';
+  // صورة محفوظة
+  const savedImg = localStorage.getItem('nq_avatar_' + currentUser.username);
+  if(avatarEl) {
+    if(savedImg) {
+      avatarEl.innerHTML = `<img src="${savedImg}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+    } else {
+      avatarEl.textContent = (currentUser.name||'م').charAt(0);
+    }
+  }
+}
+
+// ══ Profile Modal ══
+const AVATAR_SAMPLES = [
+  'https://api.dicebear.com/9.x/avataaars/svg?seed=quality1&backgroundColor=00A896',
+  'https://api.dicebear.com/9.x/avataaars/svg?seed=quality2&backgroundColor=0D1F2D',
+  'https://api.dicebear.com/9.x/avataaars/svg?seed=quality3&backgroundColor=007B6E',
+  'https://api.dicebear.com/9.x/avataaars/svg?seed=noura1&backgroundColor=1a3a5c',
+  'https://api.dicebear.com/9.x/avataaars/svg?seed=noura2&backgroundColor=2d6a4f',
+  'https://api.dicebear.com/9.x/avataaars/svg?seed=noura3&backgroundColor=3d1c52',
+];
+
+function openProfileModal() {
+  if(!currentUser) { toast('⚠️ يرجى تسجيل الدخول أولاً'); return; }
+  let modal = document.getElementById('profileModal');
+  if(!modal) {
+    modal = document.createElement('div');
+    modal.id = 'profileModal';
+    document.body.appendChild(modal);
+  }
+  const savedImg = localStorage.getItem('nq_avatar_' + currentUser.username) || '';
+  const roleLabel = currentUser.role === 'admin' ? '👑 مدير الجودة' : '👤 موظف جودة';
+  modal.innerHTML = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:9600;display:flex;align-items:center;justify-content:center;padding:16px;">
+      <div style="background:var(--card);border-radius:24px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.5);">
+
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#0D1F2D,#1a3a5c);padding:28px 20px;text-align:center;position:relative;">
+          <button onclick="document.getElementById('profileModal').style.display='none'"
+            style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.1);border:none;border-radius:50%;width:30px;height:30px;color:rgba(255,255,255,0.7);font-size:14px;cursor:pointer;">✕</button>
+          <div id="pmAvatarBig" style="width:80px;height:80px;border-radius:50%;background:rgba(0,168,150,0.2);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:var(--accent);margin:0 auto 12px;overflow:hidden;">
+            ${savedImg ? `<img src="${savedImg}" style="width:100%;height:100%;object-fit:cover;">` : (currentUser.name||'م').charAt(0)}
+          </div>
+          <div style="font-size:16px;font-weight:900;color:#fff;">${currentUser.name || '—'}</div>
+          <div style="font-size:11px;color:rgba(0,200,180,0.8);margin-top:4px;">${roleLabel}</div>
+        </div>
+
+        <!-- Body -->
+        <div style="padding:20px;">
+
+          <!-- رفع صورة -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:800;color:var(--text-dim);margin-bottom:8px;">📸 رفع صورة شخصية</div>
+            <label style="display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:14px;padding:12px 16px;cursor:pointer;border:1.5px dashed var(--border);transition:all .2s;"
+              onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+              <input type="file" accept="image/*" style="display:none;" onchange="setProfilePic(this)">
+              <span style="font-size:22px;">📁</span>
+              <span style="font-size:12px;font-weight:700;color:var(--text);">اختر صورة من جهازك</span>
+            </label>
+          </div>
+
+          <!-- عيّنات جاهزة -->
+          <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:800;color:var(--text-dim);margin-bottom:10px;">🎨 أو اختر أفاتار جاهز</div>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;">
+              ${AVATAR_SAMPLES.map((url,i) => `
+                <div onclick="selectAvatar('${url}')"
+                  style="width:100%;aspect-ratio:1;border-radius:50%;overflow:hidden;cursor:pointer;border:2px solid var(--border);transition:all .2s;"
+                  onmouseover="this.style.borderColor='var(--accent)';this.style.transform='scale(1.1)'"
+                  onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+                  <img src="${url}" style="width:100%;height:100%;" loading="lazy">
+                </div>`).join('')}
+            </div>
+          </div>
+
+          <!-- حذف الصورة -->
+          ${savedImg ? `<button onclick="removeAvatar()" style="width:100%;padding:10px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:12px;color:#E74C3C;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:10px;">🗑️ حذف الصورة الحالية</button>` : ''}
+
+          <button onclick="document.getElementById('profileModal').style.display='none'"
+            style="width:100%;padding:12px;background:rgba(0,0,0,0.1);border:1px solid var(--border);border-radius:14px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text-dim);">إغلاق</button>
+        </div>
+      </div>
+    </div>`;
+  modal.style.display = 'block';
+}
+
+function setProfilePic(input) {
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = e.target.result;
+    localStorage.setItem('nq_avatar_' + currentUser.username, data);
+    updateSbUserCard();
+    openProfileModal(); // إعادة فتح لتحديث الصورة
+    toast('✅ تم حفظ الصورة');
+  };
+  reader.readAsDataURL(file);
+}
+
+function selectAvatar(url) {
+  localStorage.setItem('nq_avatar_' + currentUser.username, url);
+  updateSbUserCard();
+  openProfileModal();
+  toast('✅ تم اختيار الأفاتار');
+}
+
+function removeAvatar() {
+  localStorage.removeItem('nq_avatar_' + currentUser.username);
+  updateSbUserCard();
+  openProfileModal();
+  toast('✅ تم حذف الصورة');
+}
 
 </script>
 
