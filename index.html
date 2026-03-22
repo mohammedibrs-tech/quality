@@ -1228,6 +1228,16 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon">🗂️</div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
     <div class="section-card" onclick="openQuarterlyPage()" style="background:linear-gradient(135deg,#0D1F2D,#1A3A5C);"><div class="s-icon" style="color:#00C8B4;">📋</div><div class="s-text"><div class="s-title-ar" style="color:#fff;">التقارير الربعية</div><div class="s-title-en" style="color:rgba(0,200,180,0.8);">QUARTERLY REPORTS</div></div><div class="s-arrow" style="color:#00C8B4;">›</div></div>
 
+    <!-- كرت آراء العملاء -->
+    <div class="section-card" onclick="openCustomerVoice()" style="background:linear-gradient(135deg,#0f172a,#1e293b);border:1px solid rgba(99,102,241,0.2);">
+      <div class="s-icon" style="font-size:22px;">🌐</div>
+      <div class="s-text">
+        <div class="s-title-ar" style="color:#fff;">آراء العملاء</div>
+        <div class="s-title-en" style="color:rgba(99,102,241,0.8);">CUSTOMER VOICE</div>
+      </div>
+      <div class="s-arrow" style="color:rgba(99,102,241,0.6);">›</div>
+    </div>
+
     <!-- ══ الأنشطة والفعاليات ══ -->
     <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#6A0DAD;background:rgba(106,13,173,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #6A0DAD;">🎯 الأنشطة والفعاليات</div>
 
@@ -12061,6 +12071,12 @@ function loadSavedQuarter(key) {
   selectQuarter(q);
 }
 
+
+function openCustomerVoice() {
+  const modal = document.getElementById('customerVoiceModal');
+  if(modal) modal.style.display = 'block';
+}
+
 </script>
 
 
@@ -12249,6 +12265,90 @@ function loadSavedQuarter(key) {
 </div>
 
 
+
+
+<!-- ══ CUSTOMER VOICE MODAL ══ -->
+<div id="customerVoiceModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(14px);z-index:9500;overflow-y:auto;padding:16px 12px;">
+  <div style="max-width:640px;margin:0 auto;background:var(--card);border-radius:24px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.5);">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#0f172a,#1e293b);padding:22px 22px 18px;position:relative;">
+      <button onclick="document.getElementById('customerVoiceModal').style.display='none'"
+        style="position:absolute;top:14px;left:14px;background:rgba(255,255,255,0.08);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:rgba(255,255,255,0.6);">✕</button>
+      <div style="text-align:center;">
+        <div style="font-size:28px;margin-bottom:8px;">🌐</div>
+        <div style="font-size:16px;font-weight:900;color:#fff;">آراء العملاء</div>
+        <div style="font-size:10px;color:rgba(99,102,241,0.8);letter-spacing:2px;margin-top:3px;">CUSTOMER VOICE</div>
+      </div>
+    </div>
+
+    <!-- أزرار المنصات -->
+    <div style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+
+      <!-- X -->
+      <a href="https://x.com/ndcksa?s=21&t=JCwYxokEw_fncGKqeqkoyg" target="_blank"
+        style="display:flex;align-items:center;gap:14px;background:#000;border-radius:16px;padding:16px 20px;text-decoration:none;border:1px solid rgba(255,255,255,0.1);transition:all .2s;"
+        onmouseover="this.style.border='1px solid rgba(255,255,255,0.3)';this.style.transform='translateY(-2px)'"
+        onmouseout="this.style.border='1px solid rgba(255,255,255,0.1)';this.style.transform=''">
+        <div style="width:44px;height:44px;border-radius:12px;background:#000;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:800;color:#fff;">X (تويتر)</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">@ndcksa — اطّلع على التغريدات والآراء</div>
+        </div>
+        <div style="font-size:18px;color:rgba(255,255,255,0.3);">↗</div>
+      </a>
+
+      <!-- TikTok -->
+      <a href="https://www.tiktok.com/@ndc_care?_r=1&_t=ZS-94tWFQ2NBjD" target="_blank"
+        style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#010101,#1a1a2e);border-radius:16px;padding:16px 20px;text-decoration:none;border:1px solid rgba(254,44,85,0.2);transition:all .2s;"
+        onmouseover="this.style.border='1px solid rgba(254,44,85,0.5)';this.style.transform='translateY(-2px)'"
+        onmouseout="this.style.border='1px solid rgba(254,44,85,0.2)';this.style.transform=''">
+        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#fe2c55,#25f4ee);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.77a4.85 4.85 0 0 1-1.01-.08z"/></svg>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:800;color:#fff;">TikTok</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">@ndc_care — شاهد التعليقات والمحتوى</div>
+        </div>
+        <div style="font-size:18px;color:rgba(255,255,255,0.3);">↗</div>
+      </a>
+
+      <!-- Google Maps -->
+      <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(66,133,244,0.3);">
+        <div style="background:linear-gradient(135deg,#1a3a5c,#0d2137);padding:12px 16px;display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#4285f4,#34a853);display:flex;align-items:center;justify-content:center;font-size:16px;">📍</div>
+          <div>
+            <div style="font-size:12px;font-weight:800;color:#fff;">Google Maps</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);">تقييمات العملاء على الخريطة</div>
+          </div>
+          <a href="https://maps.app.goo.gl/bonAH6d8eWBfiEQb6" target="_blank"
+            style="margin-right:auto;background:rgba(66,133,244,0.2);border:1px solid rgba(66,133,244,0.4);color:#93c5fd;border-radius:10px;padding:5px 12px;font-size:11px;font-weight:700;text-decoration:none;">
+            فتح ↗
+          </a>
+        </div>
+        <!-- iframe Google Maps -->
+        <iframe
+          src="https://maps.google.com/maps?q=نورة+لتعليم+القيادة&output=embed&hl=ar&z=14"
+          width="100%" height="220"
+          style="display:block;border:none;"
+          loading="lazy"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+    </div>
+
+    <div style="padding:0 20px 20px;">
+      <button onclick="document.getElementById('customerVoiceModal').style.display='none'"
+        style="width:100%;padding:13px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:14px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--text-dim);">
+        إغلاق
+      </button>
+    </div>
+
+  </div>
+</div>
 
 </body>
 </html>
