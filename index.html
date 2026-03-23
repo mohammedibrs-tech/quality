@@ -874,6 +874,42 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 @media (max-width: 899px) {
   #desktopSidebar { display:none !important; }
 }
+@media (min-width: 900px) {
+  .nav { display:none !important; }
+
+  /* الرئيسية على desktop */
+  .home-sections {
+    max-width: 860px !important;
+    padding: 0 0 8px !important;
+  }
+  .home-hero {
+    padding: 28px 0 20px !important;
+  }
+  /* الكروت العادية تكون أكبر قليلاً */
+  .section-card {
+    border-radius: 18px !important;
+  }
+  .s-icon {
+    width: 64px !important;
+    height: 72px !important;
+  }
+  .cards-row-2 {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* الكروت الكبيرة (مرافق، مبنى، مبيعات) تمتد */
+  #page-home .container,
+  #page-home > div[style*="max-width:900px"],
+  #page-home > div[style*="max-width: 900px"] {
+    max-width: 900px !important;
+  }
+
+  /* dashboard */
+  #page-dashboard {
+    padding-top: 0 !important;
+  }
+}
 
 /* اللوقو يتكيف مع الثيم */
 [data-theme="dark"] .home-brand img,
@@ -1260,7 +1296,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 </nav>
 
 <!-- HOME -->
-<div id="page-home" class="page active" style="position:relative;overflow:hidden;">
+<div id="page-home" class="page active" style="position:relative;">
   <canvas id="qualityCanvas" style="position:absolute;inset:0;width:100%;height:100%;opacity:0.15;pointer-events:none;z-index:0;"></canvas>
   <div class="home-hero">
     <div class="home-brand">
@@ -2343,7 +2379,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 <!-- ══ PAGE: DASHBOARD ══ -->
 <div id="page-dashboard" class="page" style="background:#F7F9FC;min-height:100vh;width:100%;box-sizing:border-box;">
-  <div style="max-width:100%;padding:28px 32px 60px;box-sizing:border-box;">
+  <div style="max-width:100%;padding:16px 24px 60px;box-sizing:border-box;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:14px;border-bottom:1px solid #E2E8F0;padding-bottom:20px;">
       <div>
         <div style="font-size:20px;font-weight:900;color:#0F172A;letter-spacing:-.3px;">لوحة المتابعة</div>
