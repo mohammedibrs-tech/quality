@@ -719,34 +719,21 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 /* إخفاء الـ nav العلوي على الكمبيوتر */
 @media (min-width: 900px) {
-
   /* ── إخفاء nav الجوال ── */
   nav.nav { display:none !important; }
 
   /* ── Sidebar ── */
   #desktopSidebar {
-    display:flex !important;
-    flex-direction:column;
-    width:60px;
-    min-height:100vh;
-    background:var(--card);
-    border-left:1px solid var(--border);
-    position:fixed;
-    right:0; top:0; bottom:0;
-    z-index:8000;
-    padding:16px 0;
-    gap:2px;
-    align-items:center;
+    display:flex !important; flex-direction:column;
+    width:60px; min-height:100vh;
+    background:var(--card); border-left:1px solid var(--border);
+    position:fixed; right:0; top:0; bottom:0; z-index:8000;
+    padding:16px 0; gap:2px; align-items:center;
     box-shadow:-2px 0 16px rgba(0,0,0,0.08);
-    transition:width .28s cubic-bezier(.4,0,.2,1);
-    overflow:hidden;
+    transition:width .28s cubic-bezier(.4,0,.2,1); overflow:hidden;
   }
   #desktopSidebar.expanded { width:200px; }
-  #desktopSidebar .sb-item {
-    width:calc(100% - 10px); display:flex; align-items:center; gap:10px;
-    padding:10px 0; cursor:pointer; border-radius:12px; margin:0 5px;
-    transition:background .2s; overflow:hidden; white-space:nowrap; flex-shrink:0;
-  }
+  #desktopSidebar .sb-item { width:calc(100% - 10px); display:flex; align-items:center; gap:10px; padding:10px 0; cursor:pointer; border-radius:12px; margin:0 5px; transition:background .2s; overflow:hidden; white-space:nowrap; flex-shrink:0; }
   #desktopSidebar .sb-item:hover { background:rgba(0,168,150,0.1); }
   #desktopSidebar .sb-item.active { background:rgba(0,168,150,0.15); }
   #desktopSidebar .sb-icon { font-size:19px; flex-shrink:0; width:50px; text-align:center; }
@@ -768,54 +755,128 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   #sbUserCard .sb-user-name { font-size:12px; font-weight:800; color:var(--text); }
   #sbUserCard .sb-user-role { font-size:10px; color:var(--text-dim); }
 
-  /* ── #app يدفع عن الـ sidebar ── */
+  /* ══ LAYOUT ══ */
   #app {
     margin-right: 60px;
     width: calc(100% - 60px);
     min-height: 100vh;
     box-sizing: border-box;
   }
-  #desktopSidebar.expanded ~ #app { margin-right:200px; width:calc(100% - 200px); }
+  #desktopSidebar.expanded ~ #app {
+    margin-right: 200px;
+    width: calc(100% - 200px);
+  }
 
-  /* ── كل الصفحات تملأ العرض ── */
+  /* ══ PAGES — كل صفحة تملأ العرض كاملاً ══ */
   .page {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    overflow-x: hidden;
   }
-  .container {
-    max-width: 100% !important;
-    padding: 12px 28px 40px !important;
-  }
+
+  /* container و container-wide — padding متوازن */
+  .container,
   .container-wide {
     max-width: 100% !important;
-    padding: 12px 28px 40px !important;
+    width: 100% !important;
+    padding: 16px 32px 48px !important;
+    box-sizing: border-box !important;
   }
 
-  /* ── page-header أفقي لتوفير مساحة ── */
+  /* ══ PAGE HEADER — أفقي نظيف ══ */
   .page-header {
-    margin-bottom: 14px !important;
     display: flex !important;
     align-items: center !important;
-    gap: 12px !important;
+    gap: 14px !important;
     text-align: right !important;
+    margin-bottom: 18px !important;
+    padding-bottom: 14px !important;
+    border-bottom: 1px solid var(--border) !important;
   }
   .page-header .p-icon {
-    width: 40px !important; height: 40px !important;
-    font-size: 18px !important; margin: 0 !important; flex-shrink: 0;
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 20px !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+    border-radius: 12px !important;
   }
-  .page-header h1 { font-size: 17px !important; margin: 0 !important; }
-  .page-header .sub { font-size: 9px !important; margin: 2px 0 0 !important; }
-  .back-btn { padding: 4px 10px !important; font-size: 11px !important; margin-bottom: 8px !important; display:inline-flex; }
+  .page-header h1 {
+    font-size: 18px !important;
+    margin: 0 !important;
+    font-weight: 900 !important;
+  }
+  .page-header .sub {
+    font-size: 10px !important;
+    margin: 3px 0 0 !important;
+    letter-spacing: 1.5px !important;
+  }
+  .back-btn {
+    padding: 5px 12px !important;
+    font-size: 11px !important;
+    margin-bottom: 10px !important;
+    display: inline-flex !important;
+  }
 
-  /* ── Dashboard ── */
-  #page-dashboard > div { padding: 12px 28px 40px !important; max-width:100% !important; }
+  /* ══ DASHBOARD ══ */
+  #page-dashboard {
+    background: var(--body-bg) !important;
+  }
+  #page-dashboard > div {
+    max-width: 100% !important;
+    padding: 16px 32px 48px !important;
+    box-sizing: border-box !important;
+  }
+  /* تقليل المسافة الداخلية في dashboard header */
+  #page-dashboard > div > div:first-child {
+    margin-bottom: 18px !important;
+    padding-bottom: 14px !important;
+  }
 
-  /* ── الرئيسية ── */
-  .home-sections { max-width: 860px !important; padding: 0 0 8px !important; }
-  .home-hero { padding: 16px 0 12px !important; }
-  .section-card { border-radius: 18px !important; }
-  .cards-row-2 { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+  /* ══ HOME ══ */
+  #page-home {
+    overflow-x: hidden;
+  }
+  .home-hero {
+    padding: 18px 32px 14px !important;
+    text-align: center;
+  }
+  .home-sections {
+    max-width: 980px !important;
+    margin: 0 auto !important;
+    padding: 0 32px 16px !important;
+    width: 100% !important;
+  }
+  .section-card {
+    border-radius: 16px !important;
+  }
+  .cards-row-2 {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* ══ RECORDS / SALES / RATING / OPS / QUARTERLY ══ */
+  #page-records .container-wide,
+  #page-sales .container-wide,
+  #page-rating .container-wide,
+  #page-ops .container-wide,
+  #page-quarterly .container-wide {
+    padding-top: 16px !important;
+  }
+
+  /* ══ BUILDING / FACILITY ══ */
+  #page-building .container,
+  #page-facility .container {
+    padding-top: 16px !important;
+    max-width: 860px !important;
+  }
+
+  /* tab buttons أكبر قليلاً على desktop */
+  .stab, [id^="smTab"], [id^="qBtn"] {
+    font-size: 13px !important;
+    padding: 10px 20px !important;
+  }
 }
 
 /* اللوقو يتكيف مع الثيم */
@@ -1798,7 +1859,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 <div id="page-records" class="page">
   <div class="container-wide">
     <div class="page-header">
-      <div class="p-icon survey" style="margin-bottom:9px">📊</div>
+      <div class="p-icon survey">📊</div>
       <h1>السجلات والتقارير</h1>
       <div class="sub">RECORDS &amp; ANALYTICS</div>
     </div>
@@ -2180,7 +2241,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   <div class="container-wide">
     <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
     <div class="page-header">
-      <div class="p-icon" style="background:rgba(102,126,234,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">⚙️</div>
+      <div class="p-icon" style="background:rgba(102,126,234,0.12);">⚙️</div>
       <h1>كفاءة التشغيل</h1>
       <div class="sub">OPERATIONAL EFFICIENCY</div>
     </div>
@@ -2285,8 +2346,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 
 <!-- ══ PAGE: DASHBOARD ══ -->
-<div id="page-dashboard" class="page" style="background:#F7F9FC;min-height:100vh;width:100%;box-sizing:border-box;">
-  <div style="max-width:100%;padding:16px 24px 60px;box-sizing:border-box;">
+<div id="page-dashboard" class="page">
+  <div style="max-width:100%;box-sizing:border-box;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;border-bottom:1px solid #E2E8F0;padding-bottom:12px;">
       <div>
         <div style="font-size:20px;font-weight:900;color:#0F172A;letter-spacing:-.3px;">لوحة المتابعة</div>
