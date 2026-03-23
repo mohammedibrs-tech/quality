@@ -845,6 +845,26 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   #page-facility .container {
     max-width: 900px !important;
   }
+
+  /* ══ AUTH BUTTONS ══ */
+  .tb-auth-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 10px;
+    border: none; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 800;
+    transition: all .2s; white-space: nowrap;
+  }
+  .tb-login {
+    background: var(--accent); color: #fff;
+  }
+  .tb-login:hover { background: #007B6E; }
+  .tb-logout {
+    background: rgba(231,76,60,0.1);
+    border: 1.5px solid rgba(231,76,60,0.3) !important;
+    color: #E74C3C;
+  }
+  .tb-logout:hover { background: rgba(231,76,60,0.2); }
+
 }
 
 /* اللوقو يتكيف مع الثيم */
@@ -1224,23 +1244,34 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   <!-- لوقو -->
   <div class="tb-logo">
     <span>⚙️</span>
-    <span>منصة إدارة الجودة</span>
+    <span>نورة للجودة</span>
   </div>
-  <!-- تنقل -->
+  <!-- تنقل + داشبورد + ثيم كلها جنب بعض -->
   <div class="tb-nav">
     <button class="tb-btn active" id="tb-home" onclick="tbNav('home')">🏠 الرئيسية</button>
-    <button class="tb-btn" id="tb-records" onclick="tbNav('records')">📋 السجلات</button>
-    <button class="tb-btn" id="tb-dashboard" onclick="showDashboard(this)" style="display:none;">📈 Dashboard</button>
+    <button class="tb-btn" id="tb-records" onclick="tbNavRecords()">📋 السجلات</button>
+    <button class="tb-btn" id="tb-dashboard" onclick="tbNavDash()" style="display:none;">📈 Dashboard</button>
     <div class="tb-divider"></div>
-    <button class="tb-btn" id="tb-theme" onclick="toggleTheme()"><span id="tbThemeIcon">🌙</span></button>
+    <button class="tb-icon-btn" id="tb-theme" onclick="tbToggleTheme()" title="تبديل الوضع"><span id="tbThemeIcon">🌙</span></button>
   </div>
-  <!-- المستخدم -->
+  <!-- المستخدم + تسجيل دخول/خروج -->
   <div class="tb-right">
-    <div class="tb-user" onclick="openProfileModal()" id="tbUserChip">
-      <div class="tb-avatar" id="tbAvatarEl">م</div>
-      <span class="tb-user-name" id="tbUserName">—</span>
+    <!-- حالة: مسجل دخول -->
+    <div id="tbLoggedIn" style="display:none;align-items:center;gap:8px;">
+      <div class="tb-user" onclick="openProfileModal()" id="tbUserChip">
+        <div class="tb-avatar" id="tbAvatarEl">م</div>
+        <span class="tb-user-name" id="tbUserName">—</span>
+      </div>
+      <button class="tb-auth-btn tb-logout" onclick="tbLogout()" title="تسجيل الخروج">
+        <span>🚪</span><span>خروج</span>
+      </button>
     </div>
-    <button class="tb-icon-btn" id="tb-auth" onclick="tbAuthAction()" title="تسجيل الخروج">🚪</button>
+    <!-- حالة: غير مسجل -->
+    <div id="tbLoggedOut" style="display:flex;align-items:center;gap:8px;">
+      <button class="tb-auth-btn tb-login" onclick="showLM()">
+        <span>🔑</span><span>تسجيل الدخول</span>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -12357,21 +12388,30 @@ function initTopBar() {
 }
 
 function updateTopBarUser() {
-  if(!currentUser) return;
   const nameEl   = document.getElementById('tbUserName');
   const avatarEl = document.getElementById('tbAvatarEl');
-  const authBtn  = document.getElementById('tb-auth');
   const dashBtn  = document.getElementById('tb-dashboard');
-  if(nameEl)  nameEl.textContent  = currentUser.name || '—';
-  if(authBtn) authBtn.title       = 'تسجيل الخروج';
-  if(dashBtn && currentUser.role === 'admin') dashBtn.style.display = '';
-  const savedImg = localStorage.getItem('nq_avatar_' + currentUser.username);
-  if(avatarEl) {
-    if(savedImg) {
-      avatarEl.innerHTML = `<img src="${savedImg}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
-    } else {
-      avatarEl.textContent = (currentUser.name||'م').charAt(0);
+  const loggedIn = document.getElementById('tbLoggedIn');
+  const loggedOut= document.getElementById('tbLoggedOut');
+
+  if(currentUser) {
+    if(loggedIn)  loggedIn.style.display  = 'flex';
+    if(loggedOut) loggedOut.style.display = 'none';
+    if(nameEl)    nameEl.textContent = currentUser.name || '—';
+    if(dashBtn && currentUser.role === 'admin') dashBtn.style.display = '';
+    else if(dashBtn) dashBtn.style.display = 'none';
+    const savedImg = localStorage.getItem('nq_avatar_' + currentUser.username);
+    if(avatarEl) {
+      if(savedImg) {
+        avatarEl.innerHTML = `<img src="${savedImg}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+      } else {
+        avatarEl.textContent = (currentUser.name||'م').charAt(0);
+      }
     }
+  } else {
+    if(loggedIn)  loggedIn.style.display  = 'none';
+    if(loggedOut) loggedOut.style.display = 'flex';
+    if(dashBtn)   dashBtn.style.display   = 'none';
   }
   // theme icon
   const thIcon = document.getElementById('tbThemeIcon');
@@ -12391,22 +12431,44 @@ function tbNav(page) {
   showPage(page, null);
 }
 
-function tbAuthAction() {
-  if(currentUser) {
-    logout();
-  } else {
-    showLM();
+function tbNavRecords() {
+  if(!currentUser) { showLM(); return; }
+  tbNav('records');
+}
+
+function tbNavDash() {
+  if(!currentUser || currentUser.role !== 'admin') return;
+  ['home','records','dashboard'].forEach(p => {
+    const btn = document.getElementById('tb-'+p);
+    if(btn) btn.classList.remove('active');
+  });
+  document.getElementById('tb-dashboard')?.classList.add('active');
+  showDashboard(null);
+}
+
+function tbToggleTheme() {
+  toggleTheme();
+  const thIcon = document.getElementById('tbThemeIcon');
+  if(thIcon) {
+    const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+    thIcon.textContent = isDark ? '☀️' : '🌙';
   }
 }
 
-// sync top bar active state مع showPage
-const _origShowPage = showPage;
-function showPage(name, el) {
-  _origShowPage(name, el);
-  ['home','records'].forEach(p => {
-    const btn = document.getElementById('tb-'+p);
-    if(btn) btn.classList.toggle('active', p===name);
-  });
+function tbLogout() {
+  if(confirm('تسجيل الخروج؟')) {
+    currentUser = null;
+    localStorage.removeItem('nq_user');
+    updateNav();
+    goHome();
+    updateTopBarUser();
+    toast('👋 تم تسجيل الخروج');
+  }
+}
+
+function tbAuthAction() {
+  if(currentUser) tbLogout();
+  else showLM();
 }
 
 // resize handler
