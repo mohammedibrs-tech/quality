@@ -875,39 +875,70 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   #desktopSidebar { display:none !important; }
 }
 @media (min-width: 900px) {
+  /* إخفاء nav — sidebar يغني عنه */
   .nav { display:none !important; }
 
-  /* الرئيسية على desktop */
+  /* تقليص padding على كل الصفحات */
+  .container, .container-wide {
+    padding-top: 14px !important;
+    padding-bottom: 40px !important;
+  }
+
+  /* تصغير page-header على desktop — لا يأكل مساحة */
+  .page-header {
+    margin-bottom: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    text-align: right !important;
+  }
+  .page-header .p-icon {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 18px !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+  }
+  .page-header h1 {
+    font-size: 18px !important;
+    margin: 0 !important;
+  }
+  .page-header .sub {
+    font-size: 9px !important;
+    margin-top: 2px !important;
+  }
+
+  /* back-btn أصغر */
+  .back-btn {
+    padding: 4px 10px !important;
+    font-size: 11px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* الرئيسية */
   .home-sections {
     max-width: 860px !important;
     padding: 0 0 8px !important;
   }
-  .home-hero {
-    padding: 28px 0 20px !important;
-  }
-  /* الكروت العادية تكون أكبر قليلاً */
-  .section-card {
-    border-radius: 18px !important;
-  }
-  .s-icon {
-    width: 64px !important;
-    height: 72px !important;
-  }
-  .cards-row-2 {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 12px !important;
-  }
-
-  /* الكروت الكبيرة (مرافق، مبنى، مبيعات) تمتد */
-  #page-home .container,
-  #page-home > div[style*="max-width:900px"],
-  #page-home > div[style*="max-width: 900px"] {
-    max-width: 900px !important;
-  }
+  .home-hero { padding: 20px 0 14px !important; }
+  .section-card { border-radius: 18px !important; }
+  .s-icon { width: 60px !important; height: 68px !important; }
+  .cards-row-2 { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
 
   /* dashboard */
-  #page-dashboard {
-    padding-top: 0 !important;
+  #page-dashboard { padding-top: 0 !important; }
+  #page-dashboard > div { padding-top: 14px !important; }
+
+  /* صفحة المبيعات — تبويبات في السطر العلوي */
+  #page-sales .container-wide,
+  #page-rating .container-wide,
+  #page-building .container {
+    padding-top: 12px !important;
+  }
+
+  /* تصغير مسافة margin-bottom:32px في dashboard header */
+  #page-dashboard [style*="margin-bottom:32px"] {
+    margin-bottom: 16px !important;
   }
 }
 
@@ -1841,7 +1872,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   <div class="container-wide">
     <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
     <div class="page-header">
-      <div class="p-icon" style="background:rgba(0,168,150,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">📋</div>
+      <div class="p-icon" style="background:rgba(0,168,150,0.12);">📋</div>
       <h1>التقارير الربعية</h1>
       <div class="sub">QUARTERLY REPORTS & KPIs</div>
     </div>
@@ -2101,7 +2132,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   <div class="container-wide">
 
     <!-- ══ تبويبات قسم المبيعات ══ -->
-    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;border-bottom:2px solid var(--border);padding-bottom:12px;">
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;border-bottom:2px solid var(--border);padding-bottom:8px;">
       <button onclick="switchSalesMainTab('data')" id="smTab_data"
         style="padding:10px 20px;border-radius:20px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
         📊 بيانات عملاء الاسترداد والتحليل البياني
@@ -2238,7 +2269,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <!-- ══ التبويب الثاني: تقييم مكالمات الاسترداد ══ -->
     <div id="smSection_eval" style="display:none;">
       <div class="page-header" style="margin-bottom:20px;">
-        <div class="p-icon" style="background:rgba(0,168,150,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">📋</div>
+        <div class="p-icon" style="background:rgba(0,168,150,0.12);">📋</div>
         <h1>تقييم مكالمات الاسترداد</h1>
         <div class="sub">RETENTION CALLS EVALUATION</div>
       </div>
@@ -2380,7 +2411,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 <!-- ══ PAGE: DASHBOARD ══ -->
 <div id="page-dashboard" class="page" style="background:#F7F9FC;min-height:100vh;width:100%;box-sizing:border-box;">
   <div style="max-width:100%;padding:16px 24px 60px;box-sizing:border-box;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:14px;border-bottom:1px solid #E2E8F0;padding-bottom:20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;border-bottom:1px solid #E2E8F0;padding-bottom:12px;">
       <div>
         <div style="font-size:20px;font-weight:900;color:#0F172A;letter-spacing:-.3px;">لوحة المتابعة</div>
         <div style="font-size:10px;color:#94A3B8;letter-spacing:2.5px;margin-top:3px;font-weight:600;">QUALITY DASHBOARD</div>
@@ -2903,7 +2934,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 <div id="page-rating" class="page">
   <div class="container-wide">
     <div class="page-header">
-      <div class="p-icon" style="background:rgba(255,107,53,0.12);font-size:22px;border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">🌟</div>
+      <div class="p-icon" style="background:rgba(255,107,53,0.12);">🌟</div>
       <h1>الأعلى بالتقييم</h1>
       <div class="sub">TOP RATED TRAINERS ANALYSIS</div>
     </div>
@@ -12242,12 +12273,12 @@ function updateSbUserCard() {
 
 // ══ Profile Modal ══
 const AVATAR_SAMPLES = [
-  'https://api.dicebear.com/9.x/avataaars/svg?seed=quality1&backgroundColor=00A896',
-  'https://api.dicebear.com/9.x/avataaars/svg?seed=quality2&backgroundColor=0D1F2D',
-  'https://api.dicebear.com/9.x/avataaars/svg?seed=quality3&backgroundColor=007B6E',
-  'https://api.dicebear.com/9.x/avataaars/svg?seed=noura1&backgroundColor=1a3a5c',
-  'https://api.dicebear.com/9.x/avataaars/svg?seed=noura2&backgroundColor=2d6a4f',
-  'https://api.dicebear.com/9.x/avataaars/svg?seed=noura3&backgroundColor=3d1c52',
+  'https://api.dicebear.com/9.x/initials/svg?seed=QM&backgroundColor=0D1F2D&fontFamily=Arial&fontSize=38&fontWeight=700&textColor=00C8B4',
+  'https://api.dicebear.com/9.x/initials/svg?seed=AD&backgroundColor=1a3a5c&fontFamily=Arial&fontSize=38&fontWeight=700&textColor=ffffff',
+  'https://api.dicebear.com/9.x/shapes/svg?seed=exec1&backgroundColor=0f2744',
+  'https://api.dicebear.com/9.x/shapes/svg?seed=exec2&backgroundColor=1a2e1a',
+  'https://api.dicebear.com/9.x/shapes/svg?seed=exec3&backgroundColor=2a1a3e',
+  'https://api.dicebear.com/9.x/shapes/svg?seed=exec4&backgroundColor=1a1a1a',
 ];
 
 function openProfileModal() {
