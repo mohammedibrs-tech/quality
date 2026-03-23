@@ -719,163 +719,131 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 /* إخفاء الـ nav العلوي على الكمبيوتر */
 @media (min-width: 900px) {
-  /* ── إخفاء nav الجوال ── */
+
+  /* ── إخفاء nav الجوال وإخفاء sidebar الجانبي ── */
   nav.nav { display:none !important; }
+  #desktopSidebar { display:none !important; }
 
-  /* ── Sidebar ── */
-  #desktopSidebar {
-    display:flex !important; flex-direction:column;
-    width:60px; min-height:100vh;
-    background:var(--card); border-left:1px solid var(--border);
-    position:fixed; right:0; top:0; bottom:0; z-index:8000;
-    padding:16px 0; gap:2px; align-items:center;
-    box-shadow:-2px 0 16px rgba(0,0,0,0.08);
-    transition:width .28s cubic-bezier(.4,0,.2,1); overflow:hidden;
+  /* ── Top Bar (بدل الـ sidebar) ── */
+  #desktopTopBar {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0; right: 0; left: 0;
+    height: 52px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    z-index: 8000;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    box-sizing: border-box;
   }
-  #desktopSidebar.expanded { width:200px; }
-  #desktopSidebar .sb-item { width:calc(100% - 10px); display:flex; align-items:center; gap:10px; padding:10px 0; cursor:pointer; border-radius:12px; margin:0 5px; transition:background .2s; overflow:hidden; white-space:nowrap; flex-shrink:0; }
-  #desktopSidebar .sb-item:hover { background:rgba(0,168,150,0.1); }
-  #desktopSidebar .sb-item.active { background:rgba(0,168,150,0.15); }
-  #desktopSidebar .sb-icon { font-size:19px; flex-shrink:0; width:50px; text-align:center; }
-  #desktopSidebar .sb-label { font-size:12px; font-weight:700; color:var(--text); opacity:0; transition:opacity .15s; pointer-events:none; flex:1; }
-  #desktopSidebar.expanded .sb-label { opacity:1; }
-  #desktopSidebar .sb-divider { width:36px; height:1px; background:var(--border); margin:4px auto; transition:width .28s; }
-  #desktopSidebar.expanded .sb-divider { width:80%; }
-  #sbToggleBtn { width:calc(100% - 10px); display:flex; align-items:center; gap:10px; padding:10px 0; cursor:pointer; border-radius:12px; margin:0 5px; transition:background .2s; background:none; border:none; overflow:hidden; white-space:nowrap; flex-shrink:0; }
-  #sbToggleBtn:hover { background:rgba(0,168,150,0.08); }
-  #sbToggleBtn .sb-icon { font-size:19px; width:50px; text-align:center; flex-shrink:0; color:var(--accent); }
-  #sbToggleBtn .sb-label { font-size:11px; font-weight:800; color:var(--accent); opacity:0; transition:opacity .15s; }
-  #desktopSidebar.expanded #sbToggleBtn .sb-label { opacity:1; }
-  #sbUserCard { width:calc(100% - 10px); margin:0 5px 4px; border-radius:12px; overflow:hidden; white-space:nowrap; cursor:pointer; transition:background .2s; flex-shrink:0; }
-  #sbUserCard:hover { background:rgba(0,168,150,0.08); }
-  #sbUserCard .sb-user-inner { display:flex; align-items:center; gap:10px; padding:10px 0; }
-  #sbUserCard .sb-avatar { width:34px; height:34px; border-radius:50%; flex-shrink:0; margin:0 8px; border:2px solid var(--accent); background:rgba(0,168,150,0.15); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:900; color:var(--accent); overflow:hidden; }
-  #sbUserCard .sb-user-info { opacity:0; transition:opacity .15s; }
-  #desktopSidebar.expanded #sbUserCard .sb-user-info { opacity:1; }
-  #sbUserCard .sb-user-name { font-size:12px; font-weight:800; color:var(--text); }
-  #sbUserCard .sb-user-role { font-size:10px; color:var(--text-dim); }
+  #desktopTopBar .tb-logo {
+    display: flex; align-items: center; gap:10px;
+    font-size: 13px; font-weight: 900; color: var(--accent);
+  }
+  #desktopTopBar .tb-logo span { font-size: 18px; }
+  #desktopTopBar .tb-nav {
+    display: flex; align-items: center; gap: 4px;
+  }
+  #desktopTopBar .tb-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 10px;
+    border: none; background: none; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700;
+    color: var(--text-dim); transition: all .2s;
+    white-space: nowrap;
+  }
+  #desktopTopBar .tb-btn:hover { background: rgba(0,168,150,0.08); color: var(--text); }
+  #desktopTopBar .tb-btn.active { background: rgba(0,168,150,0.12); color: var(--accent); }
+  #desktopTopBar .tb-divider { width:1px; height:20px; background:var(--border); margin:0 4px; }
+  #desktopTopBar .tb-right {
+    display: flex; align-items: center; gap: 8px;
+  }
+  #desktopTopBar .tb-user {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 10px; border-radius: 20px;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: all .2s;
+  }
+  #desktopTopBar .tb-user:hover { border-color: var(--accent); background: rgba(0,168,150,0.05); }
+  #desktopTopBar .tb-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(0,168,150,0.15);
+    border: 1.5px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900; color: var(--accent);
+    overflow: hidden; flex-shrink: 0;
+  }
+  #desktopTopBar .tb-user-name { font-size: 12px; font-weight: 700; color: var(--text); }
+  #desktopTopBar .tb-icon-btn {
+    width: 34px; height: 34px; border-radius: 10px;
+    border: none; background: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: background .2s; color: var(--text-dim);
+  }
+  #desktopTopBar .tb-icon-btn:hover { background: rgba(0,168,150,0.08); }
 
-  /* ══ LAYOUT ══ */
+  /* ── #app يحسب ارتفاع الـ top bar ── */
   #app {
-    margin-right: 60px;
-    width: calc(100% - 60px);
+    margin-right: 0 !important;
+    width: 100% !important;
+    padding-top: 52px;
     min-height: 100vh;
     box-sizing: border-box;
   }
-  #desktopSidebar.expanded ~ #app {
-    margin-right: 200px;
-    width: calc(100% - 200px);
-  }
 
-  /* ══ PAGES — كل صفحة تملأ العرض كاملاً ══ */
+  /* ══ PAGES ══ */
   .page {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     overflow-x: hidden;
   }
-
-  /* container و container-wide — padding متوازن */
-  .container,
-  .container-wide {
+  .container, .container-wide {
     max-width: 100% !important;
     width: 100% !important;
-    padding: 16px 32px 48px !important;
+    padding: 20px 36px 48px !important;
     box-sizing: border-box !important;
   }
 
-  /* ══ PAGE HEADER — أفقي نظيف ══ */
+  /* ══ PAGE HEADER ══ */
   .page-header {
     display: flex !important;
     align-items: center !important;
     gap: 14px !important;
     text-align: right !important;
-    margin-bottom: 18px !important;
+    margin-bottom: 20px !important;
     padding-bottom: 14px !important;
     border-bottom: 1px solid var(--border) !important;
   }
   .page-header .p-icon {
-    width: 44px !important;
-    height: 44px !important;
-    font-size: 20px !important;
-    margin: 0 !important;
-    flex-shrink: 0 !important;
-    border-radius: 12px !important;
+    width: 44px !important; height: 44px !important;
+    font-size: 20px !important; margin: 0 !important;
+    flex-shrink: 0 !important; border-radius: 12px !important;
   }
-  .page-header h1 {
-    font-size: 18px !important;
-    margin: 0 !important;
-    font-weight: 900 !important;
-  }
-  .page-header .sub {
-    font-size: 10px !important;
-    margin: 3px 0 0 !important;
-    letter-spacing: 1.5px !important;
-  }
-  .back-btn {
-    padding: 5px 12px !important;
-    font-size: 11px !important;
-    margin-bottom: 10px !important;
-    display: inline-flex !important;
-  }
+  .page-header h1 { font-size: 18px !important; margin: 0 !important; font-weight: 900 !important; }
+  .page-header .sub { font-size: 10px !important; margin: 3px 0 0 !important; }
+  .back-btn { padding: 5px 12px !important; font-size: 11px !important; margin-bottom: 10px !important; display: inline-flex !important; }
 
   /* ══ DASHBOARD ══ */
-  #page-dashboard {
-    background: var(--body-bg) !important;
-  }
   #page-dashboard > div {
     max-width: 100% !important;
-    padding: 16px 32px 48px !important;
+    padding: 20px 36px 48px !important;
     box-sizing: border-box !important;
-  }
-  /* تقليل المسافة الداخلية في dashboard header */
-  #page-dashboard > div > div:first-child {
-    margin-bottom: 18px !important;
-    padding-bottom: 14px !important;
   }
 
   /* ══ HOME ══ */
-  #page-home {
-    overflow-x: hidden;
-  }
-  .home-hero {
-    padding: 18px 32px 14px !important;
-    text-align: center;
-  }
-  .home-sections {
-    max-width: 980px !important;
-    margin: 0 auto !important;
-    padding: 0 32px 16px !important;
-    width: 100% !important;
-  }
-  .section-card {
-    border-radius: 16px !important;
-  }
-  .cards-row-2 {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 12px !important;
-  }
-
-  /* ══ RECORDS / SALES / RATING / OPS / QUARTERLY ══ */
-  #page-records .container-wide,
-  #page-sales .container-wide,
-  #page-rating .container-wide,
-  #page-ops .container-wide,
-  #page-quarterly .container-wide {
-    padding-top: 16px !important;
-  }
+  .home-hero { padding: 20px 36px 14px !important; text-align: center; }
+  .home-sections { max-width: 1100px !important; margin: 0 auto !important; padding: 0 36px 16px !important; width: 100% !important; }
+  .section-card { border-radius: 16px !important; }
+  .cards-row-2 { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
 
   /* ══ BUILDING / FACILITY ══ */
   #page-building .container,
   #page-facility .container {
-    padding-top: 16px !important;
-    max-width: 860px !important;
-  }
-
-  /* tab buttons أكبر قليلاً على desktop */
-  .stab, [id^="smTab"], [id^="qBtn"] {
-    font-size: 13px !important;
-    padding: 10px 20px !important;
+    max-width: 900px !important;
   }
 }
 
@@ -1250,6 +1218,32 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 
 <div id="app">
+
+<!-- ══ DESKTOP TOP BAR ══ -->
+<div id="desktopTopBar" style="display:none;">
+  <!-- لوقو -->
+  <div class="tb-logo">
+    <span>⚙️</span>
+    <span>منصة إدارة الجودة</span>
+  </div>
+  <!-- تنقل -->
+  <div class="tb-nav">
+    <button class="tb-btn active" id="tb-home" onclick="tbNav('home')">🏠 الرئيسية</button>
+    <button class="tb-btn" id="tb-records" onclick="tbNav('records')">📋 السجلات</button>
+    <button class="tb-btn" id="tb-dashboard" onclick="showDashboard(this)" style="display:none;">📈 Dashboard</button>
+    <div class="tb-divider"></div>
+    <button class="tb-btn" id="tb-theme" onclick="toggleTheme()"><span id="tbThemeIcon">🌙</span></button>
+  </div>
+  <!-- المستخدم -->
+  <div class="tb-right">
+    <div class="tb-user" onclick="openProfileModal()" id="tbUserChip">
+      <div class="tb-avatar" id="tbAvatarEl">م</div>
+      <span class="tb-user-name" id="tbUserName">—</span>
+    </div>
+    <button class="tb-icon-btn" id="tb-auth" onclick="tbAuthAction()" title="تسجيل الخروج">🚪</button>
+  </div>
+</div>
+
 <nav class="nav">
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('home',this)">🏠 الرئيسية</button>
@@ -12352,6 +12346,74 @@ async function seedHistoricalData() {
     console.error('seed error:', e);
   }
 }
+
+
+// ══ Desktop Top Bar ══
+function initTopBar() {
+  const bar = document.getElementById('desktopTopBar');
+  if(!bar) return;
+  if(window.innerWidth >= 900) bar.style.display = '';
+  updateTopBarUser();
+}
+
+function updateTopBarUser() {
+  if(!currentUser) return;
+  const nameEl   = document.getElementById('tbUserName');
+  const avatarEl = document.getElementById('tbAvatarEl');
+  const authBtn  = document.getElementById('tb-auth');
+  const dashBtn  = document.getElementById('tb-dashboard');
+  if(nameEl)  nameEl.textContent  = currentUser.name || '—';
+  if(authBtn) authBtn.title       = 'تسجيل الخروج';
+  if(dashBtn && currentUser.role === 'admin') dashBtn.style.display = '';
+  const savedImg = localStorage.getItem('nq_avatar_' + currentUser.username);
+  if(avatarEl) {
+    if(savedImg) {
+      avatarEl.innerHTML = `<img src="${savedImg}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+    } else {
+      avatarEl.textContent = (currentUser.name||'م').charAt(0);
+    }
+  }
+  // theme icon
+  const thIcon = document.getElementById('tbThemeIcon');
+  if(thIcon) {
+    const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+    thIcon.textContent = isDark ? '☀️' : '🌙';
+  }
+}
+
+function tbNav(page) {
+  ['home','records','dashboard'].forEach(p => {
+    const btn = document.getElementById('tb-'+p);
+    if(btn) btn.classList.remove('active');
+  });
+  const btn = document.getElementById('tb-'+page);
+  if(btn) btn.classList.add('active');
+  showPage(page, null);
+}
+
+function tbAuthAction() {
+  if(currentUser) {
+    logout();
+  } else {
+    showLM();
+  }
+}
+
+// sync top bar active state مع showPage
+const _origShowPage = showPage;
+function showPage(name, el) {
+  _origShowPage(name, el);
+  ['home','records'].forEach(p => {
+    const btn = document.getElementById('tb-'+p);
+    if(btn) btn.classList.toggle('active', p===name);
+  });
+}
+
+// resize handler
+window.addEventListener('resize', () => {
+  const bar = document.getElementById('desktopTopBar');
+  if(bar) bar.style.display = window.innerWidth >= 900 ? '' : 'none';
+});
 
 </script>
 
