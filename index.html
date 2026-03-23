@@ -719,11 +719,11 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 /* إخفاء الـ nav العلوي على الكمبيوتر */
 @media (min-width: 900px) {
-  nav.nav { display:none !important; }
-}
 
-/* ══ DESKTOP SIDEBAR ══ */
-@media (min-width: 900px) {
+  /* ── إخفاء nav الجوال ── */
+  nav.nav { display:none !important; }
+
+  /* ── Sidebar ── */
   #desktopSidebar {
     display:flex !important;
     flex-direction:column;
@@ -732,7 +732,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     background:var(--card);
     border-left:1px solid var(--border);
     position:fixed;
-    right:0;top:0;bottom:0;
+    right:0; top:0; bottom:0;
     z-index:8000;
     padding:16px 0;
     gap:2px;
@@ -741,150 +741,58 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     transition:width .28s cubic-bezier(.4,0,.2,1);
     overflow:hidden;
   }
-  #desktopSidebar.expanded {
-    width:200px;
-  }
+  #desktopSidebar.expanded { width:200px; }
   #desktopSidebar .sb-item {
-    width:calc(100% - 10px);
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:10px 0;
-    cursor:pointer;
-    border-radius:12px;
-    margin:0 5px;
-    transition:background .2s;
-    overflow:hidden;
-    white-space:nowrap;
-    flex-shrink:0;
+    width:calc(100% - 10px); display:flex; align-items:center; gap:10px;
+    padding:10px 0; cursor:pointer; border-radius:12px; margin:0 5px;
+    transition:background .2s; overflow:hidden; white-space:nowrap; flex-shrink:0;
   }
   #desktopSidebar .sb-item:hover { background:rgba(0,168,150,0.1); }
   #desktopSidebar .sb-item.active { background:rgba(0,168,150,0.15); }
-  #desktopSidebar .sb-icon {
-    font-size:19px;
-    flex-shrink:0;
-    width:50px;
-    text-align:center;
-  }
-  #desktopSidebar .sb-label {
-    font-size:12px;
-    font-weight:700;
-    color:var(--text);
-    opacity:0;
-    transition:opacity .15s;
-    pointer-events:none;
-    flex:1;
-  }
+  #desktopSidebar .sb-icon { font-size:19px; flex-shrink:0; width:50px; text-align:center; }
+  #desktopSidebar .sb-label { font-size:12px; font-weight:700; color:var(--text); opacity:0; transition:opacity .15s; pointer-events:none; flex:1; }
   #desktopSidebar.expanded .sb-label { opacity:1; }
-  #desktopSidebar .sb-divider {
-    width:36px;
-    height:1px;
-    background:var(--border);
-    margin:4px auto;
-    transition:width .28s;
-  }
+  #desktopSidebar .sb-divider { width:36px; height:1px; background:var(--border); margin:4px auto; transition:width .28s; }
   #desktopSidebar.expanded .sb-divider { width:80%; }
-  /* toggle button */
-  #sbToggleBtn {
-    width:calc(100% - 10px);
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:10px 0;
-    cursor:pointer;
-    border-radius:12px;
-    margin:0 5px;
-    transition:background .2s;
-    background:none;
-    border:none;
-    overflow:hidden;
-    white-space:nowrap;
-    flex-shrink:0;
-  }
+  #sbToggleBtn { width:calc(100% - 10px); display:flex; align-items:center; gap:10px; padding:10px 0; cursor:pointer; border-radius:12px; margin:0 5px; transition:background .2s; background:none; border:none; overflow:hidden; white-space:nowrap; flex-shrink:0; }
   #sbToggleBtn:hover { background:rgba(0,168,150,0.08); }
-  #sbToggleBtn .sb-icon { font-size:19px;width:50px;text-align:center;flex-shrink:0;color:var(--accent); }
-  #sbToggleBtn .sb-label { font-size:11px;font-weight:800;color:var(--accent);opacity:0;transition:opacity .15s; }
+  #sbToggleBtn .sb-icon { font-size:19px; width:50px; text-align:center; flex-shrink:0; color:var(--accent); }
+  #sbToggleBtn .sb-label { font-size:11px; font-weight:800; color:var(--accent); opacity:0; transition:opacity .15s; }
   #desktopSidebar.expanded #sbToggleBtn .sb-label { opacity:1; }
-  /* user card in sidebar */
-  #sbUserCard {
-    width:calc(100% - 10px);
-    margin:0 5px 4px;
-    border-radius:12px;
-    overflow:hidden;
-    white-space:nowrap;
-    cursor:pointer;
-    transition:background .2s;
-    flex-shrink:0;
-  }
+  #sbUserCard { width:calc(100% - 10px); margin:0 5px 4px; border-radius:12px; overflow:hidden; white-space:nowrap; cursor:pointer; transition:background .2s; flex-shrink:0; }
   #sbUserCard:hover { background:rgba(0,168,150,0.08); }
-  #sbUserCard .sb-user-inner {
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:10px 0;
-  }
-  #sbUserCard .sb-avatar {
-    width:34px;height:34px;border-radius:50%;
-    flex-shrink:0;
-    margin:0 8px;
-    object-fit:cover;
-    border:2px solid var(--accent);
-    background:rgba(0,168,150,0.15);
-    display:flex;align-items:center;justify-content:center;
-    font-size:14px;font-weight:900;color:var(--accent);
-    overflow:hidden;
-  }
-  #sbUserCard .sb-user-info { opacity:0;transition:opacity .15s; }
+  #sbUserCard .sb-user-inner { display:flex; align-items:center; gap:10px; padding:10px 0; }
+  #sbUserCard .sb-avatar { width:34px; height:34px; border-radius:50%; flex-shrink:0; margin:0 8px; border:2px solid var(--accent); background:rgba(0,168,150,0.15); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:900; color:var(--accent); overflow:hidden; }
+  #sbUserCard .sb-user-info { opacity:0; transition:opacity .15s; }
   #desktopSidebar.expanded #sbUserCard .sb-user-info { opacity:1; }
-  #sbUserCard .sb-user-name { font-size:12px;font-weight:800;color:var(--text); }
-  #sbUserCard .sb-user-role { font-size:10px;color:var(--text-dim); }
-  /* دفع المحتوى لليسار عند وجود sidebar */
+  #sbUserCard .sb-user-name { font-size:12px; font-weight:800; color:var(--text); }
+  #sbUserCard .sb-user-role { font-size:10px; color:var(--text-dim); }
+
+  /* ── #app يدفع عن الـ sidebar ── */
   #app {
     margin-right: 60px;
     width: calc(100% - 60px);
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
     box-sizing: border-box;
   }
+  #desktopSidebar.expanded ~ #app { margin-right:200px; width:calc(100% - 200px); }
+
+  /* ── كل الصفحات تملأ العرض ── */
   .page {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    flex: 1;
-    overflow-x: hidden;
   }
-  #page-dashboard {
-    width: 100% !important;
+  .container {
     max-width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 0 !important;
+    padding: 12px 28px 40px !important;
   }
-  #page-dashboard .container,
-  #page-dashboard .container-wide {
+  .container-wide {
     max-width: 100% !important;
-    width: 100% !important;
-    padding: 20px 24px 60px !important;
-  }
-  /* كل الصفحات تملأ العرض كاملاً */
-  .page.active {
-    min-height: calc(100vh - 60px);
-  }
-}
-@media (max-width: 899px) {
-  #desktopSidebar { display:none !important; }
-}
-@media (min-width: 900px) {
-  /* إخفاء nav — sidebar يغني عنه */
-  .nav { display:none !important; }
-
-  /* تقليص padding على كل الصفحات */
-  .container, .container-wide {
-    padding-top: 14px !important;
-    padding-bottom: 40px !important;
+    padding: 12px 28px 40px !important;
   }
 
-  /* تصغير page-header على desktop — لا يأكل مساحة */
+  /* ── page-header أفقي لتوفير مساحة ── */
   .page-header {
     margin-bottom: 14px !important;
     display: flex !important;
@@ -893,53 +801,21 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     text-align: right !important;
   }
   .page-header .p-icon {
-    width: 40px !important;
-    height: 40px !important;
-    font-size: 18px !important;
-    margin: 0 !important;
-    flex-shrink: 0 !important;
+    width: 40px !important; height: 40px !important;
+    font-size: 18px !important; margin: 0 !important; flex-shrink: 0;
   }
-  .page-header h1 {
-    font-size: 18px !important;
-    margin: 0 !important;
-  }
-  .page-header .sub {
-    font-size: 9px !important;
-    margin-top: 2px !important;
-  }
+  .page-header h1 { font-size: 17px !important; margin: 0 !important; }
+  .page-header .sub { font-size: 9px !important; margin: 2px 0 0 !important; }
+  .back-btn { padding: 4px 10px !important; font-size: 11px !important; margin-bottom: 8px !important; display:inline-flex; }
 
-  /* back-btn أصغر */
-  .back-btn {
-    padding: 4px 10px !important;
-    font-size: 11px !important;
-    margin-bottom: 10px !important;
-  }
+  /* ── Dashboard ── */
+  #page-dashboard > div { padding: 12px 28px 40px !important; max-width:100% !important; }
 
-  /* الرئيسية */
-  .home-sections {
-    max-width: 860px !important;
-    padding: 0 0 8px !important;
-  }
-  .home-hero { padding: 20px 0 14px !important; }
+  /* ── الرئيسية ── */
+  .home-sections { max-width: 860px !important; padding: 0 0 8px !important; }
+  .home-hero { padding: 16px 0 12px !important; }
   .section-card { border-radius: 18px !important; }
-  .s-icon { width: 60px !important; height: 68px !important; }
   .cards-row-2 { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
-
-  /* dashboard */
-  #page-dashboard { padding-top: 0 !important; }
-  #page-dashboard > div { padding-top: 14px !important; }
-
-  /* صفحة المبيعات — تبويبات في السطر العلوي */
-  #page-sales .container-wide,
-  #page-rating .container-wide,
-  #page-building .container {
-    padding-top: 12px !important;
-  }
-
-  /* تصغير مسافة margin-bottom:32px في dashboard header */
-  #page-dashboard [style*="margin-bottom:32px"] {
-    margin-bottom: 16px !important;
-  }
 }
 
 /* اللوقو يتكيف مع الثيم */
