@@ -3340,6 +3340,7 @@ function doLogin(){
     loadActiveStaffHome();
     renderHomeWidgets(); sbUpdateAuth();
     renderDailyBulletin().catch(()=>{});
+    if(currentUser.role==='admin') loadPendingViolations();
     if(pendingSec){
       const s=pendingSec;pendingSec=null;
       if(s.startsWith('__admin_')){
@@ -3698,7 +3699,9 @@ async function submitFacility(){
   const desc=document.getElementById('fDesc').value;
 
   const{error}=await db.from('facility_reports').insert([{
-    problem_type:type,location:loc,date:dateVal,time:timeVal,
+    problem_type:type,location:loc,
+    date:dateVal, time:timeVal,
+    report_date:dateVal, report_time:timeVal,
     description:desc,observer:obs
   }]);
   if(error){toast('❌ '+error.message);btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';return;}
@@ -3900,7 +3903,7 @@ function renderF(recs){
       <div style="flex:1">
         <div style="font-weight:700;font-size:13px">${r.problem_type||'-'}</div>
         <div style="font-size:11px;color:var(--text-dim);margin-top:3px">📍 ${r.location||'-'}</div>
-        <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${r.date||''} ${r.time||''} · ${r.observer||''}</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${r.report_date||r.date||''} ${r.report_time||r.time||''} · ${r.observer||''}</div>
         ${r.description?`<div style="font-size:11px;margin-top:5px;color:var(--text)">${r.description}</div>`:''}
         ${photosHtml}
         ${photos.length?`<div style="font-size:9px;color:var(--accent);margin-top:4px;">📷 ${photos.length} صورة — اضغط للتكبير</div>`:''}
@@ -5925,7 +5928,7 @@ async function renderMyLogRecords(tab){
       if(!recs.length){ container.innerHTML = '<div style="font-size:12px;font-weight:900;color:var(--accent);margin-bottom:12px;">📝 سجلك الشهري</div><div style="color:var(--text-dim);font-size:12px;text-align:center;padding:20px;">لا توجد ملاحظات مسجلة</div>'; return; }
       container.innerHTML = '<div style="font-size:12px;font-weight:900;color:var(--accent);letter-spacing:1.5px;margin-bottom:12px;">📝 سجلك الشهري — آخر 30 يوم</div>' +
         recs.map(r=>{
-          const d=(r.date||r.created_at||'').split('T')[0];
+          const d=(r.report_date||r.date||r.created_at||'').split('T')[0];
           return `<div style="background:var(--card);border:1px solid var(--border);border-right:4px solid var(--orange);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
             <div style="flex:1;">
               <div style="font-size:12px;font-weight:900;margin-bottom:3px;">🔧 ${r.problem_type||'—'}</div>
@@ -10227,7 +10230,7 @@ setTimeout(()=>{
   loadAppData();
   setTimeout(initTicker, 300);
   loadPinnedFromStorage();
-  loadPendingViolations();
+  loadPendingViolations();  // تُعيد استدعاء updatePendingBadge بعد تحميل البيانات
   loadIdeas();
   updateDashboardVisibility();
   renderMonthTabs();
@@ -10520,27 +10523,32 @@ async function addPendingViolation(record) {
 
 function updatePendingBadge() {
   const count = PENDING_VIOLATIONS.filter(v => v.status === 'pending').length;
-  // Badge على كرتي المخالفات في الرئيسية
+  const isAdmin = currentUser?.role === 'admin';
+
+  // Banner في الرئيسية
+  const banner = document.getElementById('pendingReviewBanner');
+  if (banner) banner.style.display = count > 0 && isAdmin ? 'block' : 'none';
+
+  // Badge على كرتي المخالفات
   ['pendingBadgeFemale','pendingBadgeMale'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    if (count > 0 && currentUser?.role === 'admin') {
-      el.style.display = 'flex';
-      el.textContent = count;
-    } else {
-      el.style.display = 'none';
-    }
+    if (count > 0 && isAdmin) { el.style.display = 'flex'; el.textContent = count; }
+    else el.style.display = 'none';
   });
-  // badge في كرت المخالفات (داخل الصفحة)
+
+  // badge العدد داخل البانر
   const inPageBadge = document.getElementById('pendingCountBadge');
   if (inPageBadge) {
     inPageBadge.textContent = count > 0 ? `${count} معلقة` : '';
-    inPageBadge.style.display = count > 0 && currentUser?.role === 'admin' ? 'inline-flex' : 'none';
+    inPageBadge.style.display = count > 0 && isAdmin ? 'inline-flex' : 'none';
   }
 }
 
-function openPendingModal() {
+async function openPendingModal() {
   if (currentUser?.role !== 'admin') { toast('❌ للمدير فقط'); return; }
+  // إعادة تحميل من Supabase عشان نشوف كل المعلقة من جميع الأجهزة
+  await loadPendingViolations();
   const pending = PENDING_VIOLATIONS.filter(v => v.status === 'pending');
   const modal = document.getElementById('pendingViolationsModal');
   if (!modal) return;
