@@ -10225,7 +10225,7 @@ async function _gameDeleteScore(playerName,containerId){
   try{await db.from('game_scores').delete().eq('player_name',playerName).eq('play_date',_todayStr());toast('✅ تم الحذف');await _loadLeader(containerId);_refreshHomeLeader();}catch(e){toast('❌ '+e.message);}
 }
 function _showState(state){['Question','Result','End','Already'].forEach(s=>{const el=document.getElementById('game'+s+'State');if(el)el.style.display=(s.toLowerCase()===state)?'block':'none';});}
-setTimeout(()=>{if(currentUser)_refreshHomeLeader();},1500);
+setTimeout(()=>{_refreshHomeLeader();},1500);
 setTimeout(()=>{
   loadAppData();
   setTimeout(initTicker, 300);
@@ -10745,7 +10745,10 @@ function renderApprovedIdeas() {
             <div style="font-size:10px;color:var(--text-dim);">${idea.category}</div>
           </div>
         </div>
-        <span style="background:rgba(39,174,96,0.12);color:#27AE60;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;white-space:nowrap;">✅ مقبولة</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="background:rgba(39,174,96,0.12);color:#27AE60;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;white-space:nowrap;">✅ مقبولة</span>
+          ${currentUser?.role==='admin' ? `<button onclick="deleteIdea('${idea.id}')" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:8px;padding:3px 9px;font-size:10px;color:#E74C3C;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;">🗑️ حذف</button>` : ''}
+        </div>
       </div>
       <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:10px;">${idea.details}</div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
@@ -10801,7 +10804,17 @@ function renderPendingIdeas() {
             style="flex:1;padding:10px;background:rgba(231,76,60,0.1);border:1.5px solid #E74C3C;color:#E74C3C;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
             ❌ رفض
           </button>
-        </div>` : ''}
+          <button onclick="deleteIdea('${idea.id}')"
+            style="padding:10px 14px;background:rgba(231,76,60,0.15);border:1.5px solid #E74C3C;color:#E74C3C;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+            🗑️
+          </button>
+        </div>` : `
+        <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+          <button onclick="deleteIdea('${idea.id}')"
+            style="padding:6px 12px;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);color:#E74C3C;border-radius:8px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">
+            🗑️ حذف
+          </button>
+        </div>`}
     </div>`;
 
   let html = '';
@@ -10833,6 +10846,19 @@ function decideIdea(id, decision) {
   updateIdeasBadge();
   toast(decision === 'approved' ? '✅ تم قبول الفكرة ونشرها' : '🗑️ تم رفض الفكرة');
   renderPendingIdeas();
+}
+
+function deleteIdea(id) {
+  if (currentUser?.role !== 'admin') return;
+  if (!confirm('هل تريد حذف هذا المقترح نهائياً؟')) return;
+  const idx = IDEAS_DATA.findIndex(i => i.id === id);
+  if (idx === -1) return;
+  IDEAS_DATA.splice(idx, 1);
+  saveIdeas();
+  updateIdeasBadge();
+  toast('🗑️ تم حذف المقترح');
+  renderPendingIdeas();
+  renderApprovedIdeas();
 }
 
 
