@@ -1377,7 +1377,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         <div class="s-text" style="position:relative;z-index:1;">
           <div class="s-title-ar" style="color:#fff;">لعبة اليوم</div>
           <div class="s-title-en" style="color:rgba(255,255,255,0.6);">DAILY QUALITY QUIZ</div>
-          <div id="gameTodayBadge" style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.8);margin-top:2px;">جديد اليوم 🎯</div>
+          <div id="gameLeaderCard" style="margin-top:4px;font-size:10px;color:rgba(255,255,255,0.5);">جاري تحميل الترتيب...</div>
         </div>
         <div class="s-arrow" style="color:rgba(255,255,255,0.5);">›</div>
       </div>
@@ -1386,7 +1386,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 
   <!-- leaderCard hidden but kept for JS -->
-  <div id="gameLeaderCard" style="display:none;"></div>
+  <div id="gameLeaderCardOld" style="display:none;"></div>
 
 
 
@@ -10214,10 +10214,17 @@ function _getDailyQuestions(){
   return picked.slice(0,3);
 }
 async function openGameModal(){
-  if(!currentUser){toast('❌ يرجى تسجيل الدخول أولاً');return;}
   const modal=document.getElementById('gameModal');
   if(!modal)return;
   modal.style.display='block';
+  // لو ما سجل دخول — يشوف المراكز فقط
+  if(!currentUser){
+    _showState('already');
+    const el=document.getElementById('gameAlreadyScore');
+    if(el)el.textContent='سجّل دخولك للمشاركة في اللعبة 🎮';
+    await _loadLeader('gameLeaderAlready');
+    return;
+  }
   const already=await _gameCheckAlready();
   if(already){_showState('already');const el=document.getElementById('gameAlreadyScore');if(el)el.textContent=`نقاطك اليوم: ${already.score} نقطة`;await _loadLeader('gameLeaderAlready');return;}
   _gameQuestions=_getDailyQuestions();_gameCurrent=0;_gameScore=0;_showQuestion();
@@ -10280,11 +10287,14 @@ async function _loadLeader(containerId){
 }
 async function _refreshHomeLeader(){
   const el=document.getElementById('gameLeaderCard');if(!el)return;
-  try{const{data}=await db.from('game_scores').select('player_name,score').eq('play_date',_todayStr()).order('score',{ascending:false}).limit(3);
-    if(!data||!data.length){el.innerHTML='<div style="font-size:10px;color:rgba(255,255,255,0.4);">كن أول من يلعب اليوم! 🎮</div>';return;}
+  try{
+    const{data}=await db.from('game_scores').select('player_name,score').eq('play_date',_todayStr()).order('score',{ascending:false}).limit(3);
+    if(!data||!data.length){el.innerHTML='<span style="font-size:10px;color:rgba(255,255,255,0.4);">كن أول من يلعب اليوم! 🎮</span>';return;}
     const medals=['🥇','🥈','🥉'];
-    el.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;">${data.map((r,i)=>`<div style="background:rgba(255,255,255,0.1);border-radius:20px;padding:4px 12px;display:flex;align-items:center;gap:6px;"><span>${medals[i]}</span><span style="font-size:11px;font-weight:700;color:#fff;">${r.player_name.split(' ')[0]}</span><span style="font-size:11px;color:#FFD700;font-weight:900;">${r.score}pt</span></div>`).join('')}</div>`;
-    const badge=document.getElementById('gameTodayBadge');if(badge){const mine=data.find(r=>r.player_name===currentUser?.name);badge.textContent=mine?`نقاطك: ${mine.score} ⭐`:'العب الآن! 🎮';}}catch(e){}
+    el.innerHTML=data.map((r,i)=>`<span style="font-size:10px;color:#fff;margin-left:8px;">${medals[i]} ${r.player_name.split(' ')[0]} <span style="color:#FFD700;font-weight:900;">${r.score}pt</span></span>`).join('');
+    const badge=document.getElementById('gameTodayBadge');
+    if(badge){const mine=data.find(r=>r.player_name===currentUser?.name);badge.textContent=mine?`نقاطك: ${mine.score} ⭐`:'العب الآن! 🎮';}
+  }catch(e){}
 }
 function closeGame(){clearInterval(_gameTimerInt);const m=document.getElementById('gameModal');if(m)m.style.display='none';}
 async function _gameDeleteScore(playerName,containerId){
