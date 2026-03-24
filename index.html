@@ -10462,21 +10462,59 @@ function getAppDataForQuarter(q, year) {
 // ══════════════════════════════════════════════════════
 let PENDING_VIOLATIONS = []; // قائمة المخالفات المعلقة
 
-function loadPendingViolations() {
+async function loadPendingViolations() {
   try {
-    const saved = localStorage.getItem('nq_pending_violations_v1');
-    if (saved) PENDING_VIOLATIONS = JSON.parse(saved);
-  } catch(e) { PENDING_VIOLATIONS = []; }
+    const { data } = await db.from('pending_violations').select('*').order('submitted_at', {ascending: false});
+    PENDING_VIOLATIONS = (data || []).map(r => ({
+      id: r.id,
+      rows: typeof r.rows === 'string' ? JSON.parse(r.rows) : r.rows,
+      section: r.section,
+      submittedBy: r.submitted_by,
+      submittedAt: r.submitted_at,
+      status: r.status || 'pending'
+    }));
+  } catch(e) {
+    // fallback to localStorage if table doesn't exist yet
+    try {
+      const saved = localStorage.getItem('nq_pending_violations_v1');
+      if (saved) PENDING_VIOLATIONS = JSON.parse(saved);
+    } catch(e2) { PENDING_VIOLATIONS = []; }
+  }
   updatePendingBadge();
 }
 
-function savePendingViolations() {
-  try { localStorage.setItem('nq_pending_violations_v1', JSON.stringify(PENDING_VIOLATIONS)); } catch(e) {}
+async function savePendingViolations() {
+  // sync status updates back to supabase
+  try {
+    for (const v of PENDING_VIOLATIONS) {
+      if (v.status !== 'pending') {
+        await db.from('pending_violations').update({ status: v.status }).eq('id', v.id);
+      }
+    }
+  } catch(e) {}
 }
 
-function addPendingViolation(record) {
-  PENDING_VIOLATIONS.push(record);
-  savePendingViolations();
+async function addPendingViolation(record) {
+  try {
+    const { data, error } = await db.from('pending_violations').insert([{
+      id: record.id,
+      rows: JSON.stringify(record.rows),
+      section: record.section,
+      submitted_by: record.submittedBy,
+      submitted_at: record.submittedAt,
+      status: 'pending'
+    }]).select().single();
+    if (!error) {
+      PENDING_VIOLATIONS.unshift(record);
+    } else {
+      // fallback localStorage
+      PENDING_VIOLATIONS.push(record);
+      try { localStorage.setItem('nq_pending_violations_v1', JSON.stringify(PENDING_VIOLATIONS)); } catch(e) {}
+    }
+  } catch(e) {
+    PENDING_VIOLATIONS.push(record);
+    try { localStorage.setItem('nq_pending_violations_v1', JSON.stringify(PENDING_VIOLATIONS)); } catch(e2) {}
+  }
   updatePendingBadge();
 }
 
@@ -10562,9 +10600,11 @@ async function approveViolation(id) {
   const btn = event.target;
   btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
   try {
-    // حفظ في Supabase
+    // حفظ في Supabase violations
     const { error } = await db.from('violations').insert(record.rows);
     if (error) throw error;
+    // حذف من pending_violations
+    await db.from('pending_violations').delete().eq('id', id);
     // GS sync
     const _gsType = record.section === 'male' ? 'violations_male' : 'violations_female';
     const _gsRows = record.rows.map(r=>[r.date,r.time||'',r.observer,r.trainer_name,r.zone||'',r.violation_type,r.grade,'',r.description||'']);
@@ -10578,29 +10618,30 @@ async function approveViolation(id) {
       savePinnedToStorage();
       refreshQuarterlyCard();
     }
-    // تحديث الحالة
-    record.status = 'approved';
-    record.approvedAt = new Date().toISOString();
-    savePendingViolations();
+    // حذف من القائمة المحلية
+    const idx = PENDING_VIOLATIONS.findIndex(v => v.id === id);
+    if (idx !== -1) PENDING_VIOLATIONS.splice(idx, 1);
     updatePendingBadge();
     toast('✅ تم قبول المخالفة وحفظها');
-    openPendingModal(); // تحديث العرض
+    openPendingModal();
   } catch(e) {
     toast('❌ خطأ: ' + e.message);
     btn.disabled = false; btn.textContent = '✅ قبول وحفظ';
   }
 }
 
-function rejectViolation(id) {
+async function rejectViolation(id) {
   if (!confirm('هل تريد رفض هذه المخالفة وحذفها نهائياً؟')) return;
-  const idx = PENDING_VIOLATIONS.findIndex(v => v.id === id);
-  if (idx === -1) return;
-  PENDING_VIOLATIONS[idx].status = 'rejected';
-  PENDING_VIOLATIONS[idx].rejectedAt = new Date().toISOString();
-  savePendingViolations();
-  updatePendingBadge();
-  toast('🗑️ تم رفض المخالفة');
-  openPendingModal();
+  try {
+    await db.from('pending_violations').delete().eq('id', id);
+    const idx = PENDING_VIOLATIONS.findIndex(v => v.id === id);
+    if (idx !== -1) PENDING_VIOLATIONS.splice(idx, 1);
+    updatePendingBadge();
+    toast('🗑️ تم رفض المخالفة');
+    openPendingModal();
+  } catch(e) {
+    toast('❌ خطأ: ' + e.message);
+  }
 }
 
 
