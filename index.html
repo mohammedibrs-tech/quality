@@ -1899,6 +1899,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <button class="stab admin-only-tab" onclick="switchTab('st',this)" style="display:none;">⭐ الاستطلاعات / Surveys</button>
       <button class="stab admin-only-tab" onclick="switchTab('ft',this)" style="display:none;">🔧 المرافق / Facility</button>
       <button class="stab admin-only-tab" onclick="switchTab('bt',this)" style="display:none;">🏢 المبنى / Building</button>
+      <button class="stab admin-only-tab" id="pendingTabBtn" onclick="switchTab('pt',this)" style="display:none;background:rgba(231,76,60,0.08);border-color:rgba(231,76,60,0.3);color:#E74C3C;">⚖️ المعلقة <span id="pendingTabCount" style="background:#E74C3C;color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;margin-right:4px;"></span></button>
     </div>
 
     <!-- ══ VIOLATIONS TAB ══ -->
@@ -2091,6 +2092,16 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
       <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--accent);margin-bottom:8px;">📋 سجل تقارير المبنى التفصيلي</div>
       <div id="bList"><div class="loading"><div class="spin"></div>جاري التحميل...</div></div>
+    </div>
+  </div>
+
+    <!-- ══ PENDING VIOLATIONS TAB ══ -->
+    <div id="tab-pt" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:900;color:#E74C3C;">⚖️ المخالفات المعلقة — بانتظار الموافقة</div>
+        <button onclick="loadPendingViolations().then(renderPendingTab)" style="background:rgba(0,168,150,0.1);border:1px solid var(--border);color:var(--accent);padding:6px 12px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">🔄 تحديث</button>
+      </div>
+      <div id="pendingTabList"></div>
     </div>
   </div>
 </div>
@@ -3739,12 +3750,68 @@ async function switchTab(tab,el){
   document.querySelectorAll('[id^="tab-"]').forEach(t=>t.style.display='none');
   document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+tab).style.display='block';if(el)el.classList.add('active');
+  if(tab==='pt'){ await loadPendingViolations(); renderPendingTab(); return; }
   // إعادة تحميل البيانات دائماً
   await loadAll();
   if(tab==='st'){renderMyLogRecords('surveys');renderS(allS);renderSurveyDash();}
   else if(tab==='ft'){renderMyLogRecords('facilities');renderF(allF);renderFacilityDash();}
   else if(tab==='bt'){renderMyLogRecords('building');renderB(allB);renderBuildingDash();}
   else if(tab==='vt'){renderMyLogRecords('violations');renderV(allV);renderViolationsDash();}
+}
+
+function renderPendingTab() {
+  const list = document.getElementById('pendingTabList');
+  if (!list) return;
+  const pending = PENDING_VIOLATIONS.filter(v => v.status === 'pending');
+
+  // تحديث العدد في التبويب
+  const countEl = document.getElementById('pendingTabCount');
+  if (countEl) countEl.textContent = pending.length || '';
+
+  if (!pending.length) {
+    list.innerHTML = `<div style="text-align:center;padding:50px 20px;color:var(--text-dim);">
+      <div style="font-size:44px;margin-bottom:12px;">✅</div>
+      <div style="font-size:14px;font-weight:700;">لا توجد مخالفات معلقة</div>
+      <div style="font-size:11px;margin-top:6px;">جميع المخالفات تمت معالجتها</div>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = pending.map(record => {
+    const sec = record.section === 'female' ? '👩 نسائي' : '👨 رجالي';
+    const date = new Date(record.submittedAt).toLocaleString('ar');
+    return `<div style="background:var(--card);border:1px solid rgba(231,76,60,0.2);border-right:4px solid #E74C3C;border-radius:16px;padding:16px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="background:rgba(231,76,60,0.1);color:#E74C3C;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:900;">${sec}</span>
+          <span style="font-size:11px;color:var(--text-dim);">بواسطة: <strong>${record.submittedBy}</strong></span>
+        </div>
+        <span style="font-size:10px;color:var(--text-dim);">📅 ${date}</span>
+      </div>
+      ${record.rows.map(r => `
+        <div style="background:var(--card2);border-radius:10px;padding:10px 12px;margin-bottom:8px;">
+          <div style="font-size:12px;font-weight:900;margin-bottom:3px;">👤 ${r.trainer_name||'—'}</div>
+          <div style="font-size:11px;color:var(--text-dim);">📋 ${(r.violation_type||'').split('|')[0].trim()}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;">
+            <span style="background:${r.grade==='A'?'rgba(231,76,60,0.15)':r.grade==='B'?'rgba(212,172,13,0.15)':'rgba(39,174,96,0.15)'};
+              color:${r.grade==='A'?'#E74C3C':r.grade==='B'?'#D4AC0D':'#27AE60'};
+              border-radius:8px;padding:2px 10px;font-size:11px;font-weight:700;">درجة ${r.grade||'—'}</span>
+            <span style="font-size:10px;color:var(--text-dim);">📅 ${r.date||'—'} · 👁️ ${r.observer||'—'}</span>
+          </div>
+          ${r.description ? `<div style="font-size:10px;color:var(--text-dim);margin-top:4px;">📝 ${r.description}</div>` : ''}
+        </div>`).join('')}
+      <div style="display:flex;gap:10px;margin-top:12px;">
+        <button onclick="approveViolation('${record.id}').then(()=>renderPendingTab())"
+          style="flex:1;padding:11px;background:linear-gradient(135deg,#27AE60,#1A8040);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">
+          ✅ قبول وحفظ
+        </button>
+        <button onclick="rejectViolation('${record.id}').then(()=>renderPendingTab())"
+          style="flex:1;padding:11px;background:rgba(231,76,60,0.08);border:1.5px solid #E74C3C;color:#E74C3C;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">
+          ❌ رفض
+        </button>
+      </div>
+    </div>`;
+  }).join('');
 }
 function getQ(d){if(!d)return 1;const m=new Date(d).getMonth()+1;return m<=3?1:m<=6?2:m<=9?3:4;}
 
@@ -10537,8 +10604,9 @@ function updatePendingBadge() {
     else el.style.display = 'none';
   });
 
-  // badge العدد داخل البانر
-  const inPageBadge = document.getElementById('pendingCountBadge');
+  // تحديث عدد التبويب
+  const tabCount = document.getElementById('pendingTabCount');
+  if (tabCount) tabCount.textContent = count > 0 ? count : '';
   if (inPageBadge) {
     inPageBadge.textContent = count > 0 ? `${count} معلقة` : '';
     inPageBadge.style.display = count > 0 && isAdmin ? 'inline-flex' : 'none';
