@@ -3714,8 +3714,6 @@ async function submitFacility(){
   const insertData = {
     problem_type: type,
     location: loc,
-    date: dateVal,
-    time: timeVal,
     report_date: dateVal,
     report_time: timeVal,
     description: desc,
@@ -3938,16 +3936,17 @@ function renderV(recs){
 }
 function renderS(surveys){
   const l=document.getElementById('sList');
+  if(!l)return;
   if(!surveys.length){l.innerHTML='<div class="empty"><div class="em">📭</div><p>لا توجد استطلاعات / No surveys</p></div>';return;}
   const avg=Math.round(surveys.reduce((a,b)=>a+b.satisfaction_pct,0)/surveys.length);
-  document.getElementById('sTot').textContent=surveys.length;
-  document.getElementById('sAvg').textContent=avg+'%';
+  const sTotEl=document.getElementById('sTot');if(sTotEl)sTotEl.textContent=surveys.length;
+  const sAvgEl=document.getElementById('sAvg');if(sAvgEl)sAvgEl.textContent=avg+'%';
   const qAvgs=qAR.map((_,i)=>Math.round(surveys.reduce((a,b)=>a+b['q'+(i+1)],0)/surveys.length*20));
   const maxI=qAvgs.indexOf(Math.max(...qAvgs)),minI=qAvgs.indexOf(Math.min(...qAvgs));
-  document.getElementById('sHi').textContent=qAR[maxI].substring(0,7);
-  document.getElementById('sLo').textContent=qAR[minI].substring(0,7);
+  const sHiEl=document.getElementById('sHi');if(sHiEl)sHiEl.textContent=qAR[maxI].substring(0,7);
+  const sLoEl=document.getElementById('sLo');if(sLoEl)sLoEl.textContent=qAR[minI].substring(0,7);
   const cq=getQ(surveys[0]?.date);
-  document.getElementById('qBadge').textContent=`📅 الربع ${['الأول','الثاني','الثالث','الرابع'][cq-1]} — Q${cq}`;
+  const qBadgeEl=document.getElementById('qBadge');if(qBadgeEl)qBadgeEl.textContent=`📅 الربع ${['الأول','الثاني','الثالث','الرابع'][cq-1]} — Q${cq}`;
   l.innerHTML=surveys.map(s=>{
     const scores=[s.q1,s.q2,s.q3,s.q4,s.q5];
     const gc=s.satisfaction_pct>=TARGET?'gok':s.satisfaction_pct>=70?'gwarn':'gbad';
@@ -10640,6 +10639,9 @@ function updatePendingBadge() {
   // تحديث عدد التبويب
   const tabCount = document.getElementById('pendingTabCount');
   if (tabCount) tabCount.textContent = count > 0 ? count : '';
+
+  // badge العدد داخل البانر
+  const inPageBadge = document.getElementById('pendingCountBadge');
   if (inPageBadge) {
     inPageBadge.textContent = count > 0 ? `${count} معلقة` : '';
     inPageBadge.style.display = count > 0 && isAdmin ? 'inline-flex' : 'none';
