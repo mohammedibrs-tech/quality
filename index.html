@@ -3700,39 +3700,62 @@ function previewImgs(input){
   });
 }
 async function submitFacility(){
-  const type=document.getElementById('fType').value,loc=document.getElementById('fLoc').value.trim(),obs=document.getElementById('fObs').value;
+  const type=document.getElementById('fType').value;
+  const loc=document.getElementById('fLoc').value.trim();
+  const obs=document.getElementById('fObs').value;
   if(!type){toast('⚠️ اختر نوع المشكلة');return;}
   if(!loc){toast('⚠️ أدخل الموقع');return;}
   if(!obs){toast('⚠️ اختر الراصد');return;}
   const btn=document.getElementById('fBtn');btn.disabled=true;btn.textContent='⏳ جاري الحفظ...';
-  const dateVal=document.getElementById('fDate').value;
-  const timeVal=document.getElementById('fTime').value;
-  const desc=document.getElementById('fDesc').value;
+  const dateVal=document.getElementById('fDate')?.value || new Date().toISOString().split('T')[0];
+  const timeVal=document.getElementById('fTime')?.value || '';
+  const desc=document.getElementById('fDesc')?.value?.trim() || '';
 
-  const{error}=await db.from('facility_reports').insert([{
-    problem_type:type,location:loc,
-    date:dateVal, time:timeVal,
-    report_date:dateVal, report_time:timeVal,
-    description:desc,observer:obs
-  }]);
-  if(error){toast('❌ '+error.message);btn.disabled=false;btn.textContent='🔧 تسجيل الملاحظة / Submit Report';return;}
+  const insertData = {
+    problem_type: type,
+    location: loc,
+    date: dateVal,
+    time: timeVal,
+    report_date: dateVal,
+    report_time: timeVal,
+    description: desc,
+    observer: obs
+  };
+
+  const {data: inserted, error} = await db.from('facility_reports').insert([insertData]).select();
+  if(error){
+    console.error('facility insert error:', error);
+    toast('❌ خطأ في الحفظ: '+(error.message||JSON.stringify(error)));
+    btn.disabled=false;
+    btn.textContent='🔧 تسجيل الملاحظة / Submit Report';
+    return;
+  }
+
+  // أضف السجل الجديد لـ allF فوراً (بالـ ID الحقيقي من Supabase)
+  const newRec = inserted?.[0] || {...insertData, id: Date.now().toString(), created_at: new Date().toISOString()};
+  allF.unshift(newRec);
+  window._cachedFacilities = allF;
+  renderF(allF); // تحديث القائمة فوراً
 
   sendToSheets('facility',[[dateVal,timeVal,obs,loc,type,'',desc||'']]);
   const subject='🔧 ملاحظة مرافق جديدة — '+type;
-  const body='النوع: '+type+'\nالموقع: '+loc+'\nالتاريخ: '+dateVal+'\nالراصد: '+obs+'\nالتفاصيل: '+(desc||'—')+'\n\nمنصة إدارة الجودة — نورة لتعليم القيادة';
+  const body='النوع: '+type+'\nالموقع: '+loc+'\nالتاريخ: '+dateVal+'\nالراصد: '+obs+'\nالتفاصيل: '+(desc||'—');
   sendEmailNotification(subject,body,ADMIN_EMAIL);
+
   // تثبيت تلقائي
-  const _fKey = (dateVal||new Date().toISOString().slice(0,10)).slice(0,7);
+  const _fKey = dateVal.slice(0,7);
   if(_fKey){
     if(!PINNED_DATA.facility[_fKey]) PINNED_DATA.facility[_fKey]={data:[],label:_monthLabel(_fKey),pinnedAt:''};
-    const _facRec = {problem_type:type,location:loc,date:dateVal,report_date:dateVal,observer:obs,description:desc||''};
-  PINNED_DATA.facility[_fKey].data.push(_facRec);
-  addToAppData('facilities', _facRec);
+    PINNED_DATA.facility[_fKey].data.push(newRec);
+    addToAppData('facilities', newRec);
     PINNED_DATA.facility[_fKey].pinnedAt=new Date().toLocaleString('ar');
     savePinnedToStorage();
     refreshQuarterlyCard();
   }
-  document.getElementById('fForm').style.display='none';document.getElementById('fOk').style.display='block';
+
+  toast('✅ تم حفظ الملاحظة بنجاح');
+  document.getElementById('fForm').style.display='none';
+  document.getElementById('fOk').style.display='block';
 }
 function resetF(){
   ['fType','fObs'].forEach(id=>document.getElementById(id).value='');
@@ -3970,8 +3993,8 @@ function renderF(recs){
       <div style="flex:1">
         <div style="font-weight:700;font-size:13px">${r.problem_type||'-'}</div>
         <div style="font-size:11px;color:var(--text-dim);margin-top:3px">📍 ${r.location||'-'}</div>
-        <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${r.report_date||r.date||''} ${r.report_time||r.time||''} · ${r.observer||''}</div>
-        ${r.description?`<div style="font-size:11px;margin-top:5px;color:var(--text)">${r.description}</div>`:''}
+        <div style="font-size:10px;color:var(--text-dim);margin-top:2px">📅 ${r.report_date||r.date||''} ${r.report_time||r.time||''} · 👤 ${r.observer||''}</div>
+        ${(r.description||'').trim()?`<div style="font-size:11px;margin-top:6px;padding:6px 10px;background:rgba(0,168,150,0.06);border-right:3px solid var(--accent);border-radius:6px;color:var(--text);line-height:1.6;">📝 ${r.description}</div>`:''}
         ${photosHtml}
         ${photos.length?`<div style="font-size:9px;color:var(--accent);margin-top:4px;">📷 ${photos.length} صورة — اضغط للتكبير</div>`:''}
       </div>
@@ -5999,8 +6022,8 @@ async function renderMyLogRecords(tab){
           return `<div style="background:var(--card);border:1px solid var(--border);border-right:4px solid var(--orange);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
             <div style="flex:1;">
               <div style="font-size:12px;font-weight:900;margin-bottom:3px;">🔧 ${r.problem_type||'—'}</div>
-              <div style="font-size:11px;color:var(--text-dim);">${r.location||''} | 📅 ${d} · ${r.observer||''}</div>
-              ${r.description?`<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${r.description}</div>`:''}
+              <div style="font-size:11px;color:var(--text-dim);">📍 ${r.location||''} | 📅 ${d} · 👤 ${r.observer||''}</div>
+              ${(r.description||'').trim()?`<div style="font-size:11px;margin-top:6px;padding:5px 9px;background:rgba(224,123,42,0.07);border-right:3px solid var(--orange);border-radius:6px;color:var(--text);line-height:1.6;">📝 ${r.description}</div>`:''}
             </div>
             <div style="display:flex;gap:4px;flex-shrink:0;">
               <button onclick="openEditFacility('${r.id}','${(r.problem_type||'').replace(/'/g,'')}','${(r.location||'').replace(/'/g,'')}','${(r.description||'').replace(/'/g,'')}','${r.date||''}')" style="background:rgba(0,168,150,0.1);border:1px solid rgba(0,168,150,0.2);color:var(--accent);padding:5px 8px;border-radius:7px;font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">✏️</button>
