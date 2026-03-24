@@ -3432,9 +3432,7 @@ function updateNav(){
     if(femaleCard){femaleCard.style.display='';femaleCard.style.opacity='';femaleCard.style.cursor='';femaleCard.querySelectorAll('.s-lock').forEach(e=>e.remove());}
     if(maleCard){maleCard.style.display='';maleCard.style.opacity='';maleCard.style.cursor='';maleCard.querySelectorAll('.s-lock').forEach(e=>e.remove());}
   }
-  // تبويب تسجيل الدخول في الـ nav
-  const navLoginBtn = document.getElementById('navLoginBtn');
-  if(navLoginBtn) navLoginBtn.style.display = currentUser ? 'none' : '';
+  // تبويب تسجيل الدخول دايم ظاهر
 
   if(currentUser){
     el.innerHTML=`<span style="color:var(--accent);font-size:11px;font-weight:700;margin-left:7px">👤 ${currentUser.name}</span>
