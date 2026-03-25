@@ -1338,16 +1338,16 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     </div>
 
     <div class="section-card survey" onclick="showSection('survey')"><div class="s-icon">⭐</div><div class="s-text"><div class="s-title-ar">استطلاع رضا العملاء</div><div class="s-title-en">CUSTOMER SATISFACTION SURVEY</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card facility" onclick="showSection('facility')"><div class="s-icon">🔧</div><div class="s-text"><div class="s-title-ar">ملاحظات المرافق</div><div class="s-title-en">FACILITY REPORTS</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card building" onclick="showSection('building')"><div class="s-icon">🏢</div><div class="s-text"><div class="s-title-ar">تقرير المبنى الرئيسي</div><div class="s-title-en">MAIN BUILDING REPORT</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card facility" onclick="showSection('facility')"><div class="s-icon">🔧</div><div class="s-text"><div class="s-title-ar">تقرير ملاحظات المرافق</div><div class="s-title-en">FACILITY REPORTS</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card building" onclick="showSection('building')"><div class="s-icon">🏢</div><div class="s-text"><div class="s-title-ar">تقرير المبنى الرئيسي والعملي</div><div class="s-title-en">MAIN BUILDING REPORT</div></div><div class="s-arrow">›</div></div>
 
     <!-- ══ التقارير الإدارية ══ -->
     <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#7D3C98;background:rgba(125,60,152,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #7D3C98;">📊 التقارير الإدارية</div>
 
     <div class="section-card ops" onclick="showOpsMonthModal()"><div class="s-icon">⚙️</div><div class="s-text"><div class="s-title-ar">كفاءة التشغيل</div><div class="s-title-en">OPERATIONAL EFFICIENCY</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card attend" onclick="adminOnly('attend')"><div class="s-icon">🕐</div><div class="s-text"><div class="s-title-ar">الحضور والانصراف</div><div class="s-title-en">ATTENDANCE & DEPARTURE</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card sales" onclick="adminOnly('sales')"><div class="s-icon">💼</div><div class="s-text"><div class="s-title-ar">قسم المبيعات</div><div class="s-title-en">SALES DEPARTMENT</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon">🌟</div><div class="s-text"><div class="s-title-ar">الأعلى بالتقييم</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card attend" onclick="adminOnly('attend')"><div class="s-icon">🕐</div><div class="s-text"><div class="s-title-ar">الحضور والانصراف فريق الجودة</div><div class="s-title-en">ATTENDANCE & DEPARTURE</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card sales" onclick="adminOnly('sales')"><div class="s-icon">💼</div><div class="s-text"><div class="s-title-ar">تقرير فريق المبيعات</div><div class="s-title-en">SALES DEPARTMENT</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon">🌟</div><div class="s-text"><div class="s-title-ar">الموظفين الأعلى تقييم بالاستبيان</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
     <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon">🗂️</div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
     <div class="section-card" onclick="openQuarterlyPage()" style="background:linear-gradient(135deg,#0D1F2D,#1A3A5C);"><div class="s-icon" style="color:#00C8B4;">📋</div><div class="s-text"><div class="s-title-ar" style="color:#fff;">التقارير الربعية</div><div class="s-title-en" style="color:rgba(0,200,180,0.8);">QUARTERLY REPORTS</div></div><div class="s-arrow" style="color:#00C8B4;">›</div></div>
 
@@ -4882,7 +4882,7 @@ const STAFF_SCHEDULES = {
     ]
   },
   'sumayah': {
-    name:"سمية الخضيري", shift:"11:00 ص — 6:00 م",
+    name:"سمية الخضيري", shift:"11:00 ص — 7:00 م",
     fixed:[
       {time:"11:00 ص",        task:"🏢 جولة على المبنى (داخل وخارج)"},
       {time:"11:00–11:30 ص",  task:"✅ متابعة خروج المدربات والعملاء — بداية الحصة الأولى"},
@@ -4898,9 +4898,10 @@ const STAFF_SCHEDULES = {
       {time:"4:20–4:40 م",    task:"✅ متابعة رجوع المدربات — نهاية الحصة الثالثة (4:40)"},
       {time:"4:40–5:00 م",    task:"☕ استراحة ثالثة — 20 دقيقة"},
       {time:"5:00–5:30 م",    task:"✅ متابعة خروج المدربات — بداية الحصة الرابعة"},
-      {time:"5:30–6:00 م",    task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الرابعة)"},
-      {time:"5:40 م",         task:"📋 تقرير المخالفات (كل خميس)", thursday:true},
-      {time:"6:00 م",         task:"⏹ نهاية الدوام"},
+      {time:"5:30–6:20 م",    task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الرابعة)"},
+      {time:"6:20–6:40 م",    task:"✅ متابعة رجوع المدربات — نهاية الحصة الرابعة (6:40)"},
+      {time:"6:40 م",         task:"📋 تقرير المخالفات (كل خميس)", thursday:true},
+      {time:"7:00 م",         task:"⏹ نهاية الدوام"},
     ],
     rotating:[
       {task:"🔧 ملاحظات المرافق والنظافة",       days:["شهد","امجاد","أنا","شهد","امجاد"]},
