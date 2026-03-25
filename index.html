@@ -9313,7 +9313,7 @@ async function loadQuarterlyData(q, year) {
       db.from('facility_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo),
       db.from('building_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo),
       db.from('ops_reports').select('*').in('report_month',[...monthStrs,...months.map(m=>String(m).padStart(2,'0'))]).eq('report_year',String(year)),
-      db.from('sales_reports').select('*').gte('created_at',dateFrom+'T00:00:00').lte('created_at',dateTo+'T23:59:59'),
+      db.from('sales_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo).catch(()=>db.from('sales_reports').select('*').gte('created_at',dateFrom+'T00:00:00').lte('created_at',dateTo+'T23:59:59')),
       db.from('trainer_ratings').select('*').gte('upload_date',dateFrom).lte('upload_date',dateTo),
       db.from('incentives').select('*').in('month',monthStrs).eq('year',String(year)),
     ]);
@@ -9334,12 +9334,16 @@ async function loadQuarterlyData(q, year) {
 
     _qData = {
       q, year,
-      violations: _merge(vRes.data||[], _local.violations||[], r=>(r.trainer_name||'')+(r.date||'')),
+      violations: vRes.data||[],  // من Supabase فقط بدون دمج local
       surveys:    _merge(sRes.data||[], _local.surveys||[],    r=>(r.client_name||'')+(r.date||'')),
-      facilities: _merge(fRes.data||[], _local.facilities||[], r=>(r.employee_name||'')+(r.report_date||r.date||'')),
-      buildings:  _merge(bRes.data||[], _local.buildings||[],  r=>(r.employee_name||'')+(r.report_date||r.date||'')),
+      facilities: fRes.data||[],
+      buildings:  bRes.data||[],
       ops:        allOps,
-      sales:      _merge(salRes.data||[], _local.sales||[],    r=>(r.staff_name||'')+(r.client_name||'')+(r.report_date||'')),
+      sales:      _merge(
+        salRes.data||[],
+        _local.sales||[],
+        r=>(r.staff_name||'')+(r.client_name||'')+(r.report_date||r.created_at||'')
+      ),
       ratings:    _merge(ratRes.data||[], _local.ratings||[],  r=>(r.trainer_name||'')+(r.upload_date||r.report_date||r.date||'')),
       incentives: _merge(incRes.data||[], _local.incentives||[], r=>(r.trainer_name||r.name||'')+(r.month||'')),
     };
@@ -9373,15 +9377,20 @@ function renderQuarterlyResults() {
 
   const femViol=violations.filter(v=>v.section==='female');
   const malViol=violations.filter(v=>v.section==='male');
-  const femOps =ops.filter(r=>r.zone==='female'||r.section==='female');
-  const malOps =ops.filter(r=>r.zone==='male'  ||r.section==='male');
-  const bikeOps=ops.filter(r=>r.zone==='bike'  ||r.section==='bike');
-  const retSales=sales.filter(r=>r.call_type==='retention'||r.outcome);
+  const FEMALE_ZONES=['female','L','E','D','B','A'];
+  const MALE_ZONES  =['male','O','H'];
+  const BIKE_ZONES  =['bike','دراجات'];
+  const femOps =ops.filter(r=>FEMALE_ZONES.includes(r.zone)||FEMALE_ZONES.includes(r.section));
+  const malOps =ops.filter(r=>MALE_ZONES.includes(r.zone)  ||MALE_ZONES.includes(r.section));
+  const bikeOps=ops.filter(r=>BIKE_ZONES.includes(r.zone)  ||BIKE_ZONES.includes(r.section));
+  const retSales=sales.filter(r=>r.outcome||(r.call_type==='retention'));
+  const keptSales=sales.filter(r=>(r.outcome||'').includes('احتفاظ')||(r.outcome||'').includes('kept'));
+  const recovSales=sales.filter(r=>(r.outcome||'').includes('استرداد')||(r.outcome||'').includes('recov'));
   const avgSurvey =surveys.length ?Math.round(surveys.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/surveys.length):0;
   const avgFemOps =femOps.length  ?Math.round(femOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/femOps.length):0;
   const avgMalOps =malOps.length  ?Math.round(malOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/malOps.length):0;
   const avgBikeOps=bikeOps.length ?Math.round(bikeOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/bikeOps.length):0;
-  const retRate   =retSales.length?Math.round(retSales.filter(r=>(r.outcome||'').includes('احتفاظ')).length/retSales.length*100):0;
+  const retRate   =retSales.length?Math.round(keptSales.length/retSales.length*100):0;
   const avgBuild  =buildings.filter(r=>r.total_score).length?Math.round(buildings.filter(r=>r.total_score).reduce((s,r)=>s+(r.total_score||0),0)/buildings.filter(r=>r.total_score).length):0;
   const avgFacil  =facilities.filter(r=>r.total_score).length?Math.round(facilities.filter(r=>r.total_score).reduce((s,r)=>s+(r.total_score||0),0)/facilities.filter(r=>r.total_score).length):0;
 
@@ -9414,15 +9423,16 @@ function renderQuarterlyResults() {
 
   // KPI Cards
   document.getElementById('qKpiCards').innerHTML=[
-    {icon:'👩',label:'مخالفات نسائي', value:femViol.length,  sub:`A:${femViol.filter(v=>v.grade==='A').length} B:${femViol.filter(v=>v.grade==='B').length}`,color:'#E74C3C'},
-    {icon:'👨',label:'مخالفات رجالي', value:malViol.length,  sub:`A:${malViol.filter(v=>v.grade==='A').length} B:${malViol.filter(v=>v.grade==='B').length}`,color:'#2E86C1'},
-    {icon:'⭐',label:'رضا العملاء',   value:avgSurvey+'%',   sub:`${surveys.length} استطلاع`,color:ec(avgSurvey)},
-    {icon:'👩‍🏫',label:'كفاءة نسائي', value:avgFemOps+'%',   sub:`${femOps.length} مدربة`,  color:ec(avgFemOps)},
-    {icon:'👨‍🏫',label:'كفاءة رجالي', value:avgMalOps+'%',   sub:`${malOps.length} مدرب`,   color:ec(avgMalOps)},
-    {icon:'🏍️',label:'كفاءة دراجات', value:avgBikeOps+'%',  sub:`${bikeOps.length} مدرب`,  color:ec(avgBikeOps)},
-    {icon:'💼',label:'احتفاظ بالرسوم',value:retRate+'%',     sub:`${retSales.length} حالة`, color:retRate>=60?'#27AE60':retRate>=40?'#D4AC0D':'#E74C3C'},
-    {icon:'🏢',label:'المبنى',         value:avgBuild||buildings.length, sub:`${buildings.length} تقرير`,color:'#7D3C98'},
-    {icon:'🔧',label:'المرافق',        value:avgFacil||facilities.length,sub:`${facilities.length} ملاحظة`,color:'#16A085'},
+    {icon:'👩',  label:'مخالفات نسائي',  value:femViol.length,   sub:`A:${femViol.filter(v=>v.grade==='A').length} B:${femViol.filter(v=>v.grade==='B').length}`, color:'#E74C3C'},
+    {icon:'👨',  label:'مخالفات رجالي',  value:malViol.length,   sub:`A:${malViol.filter(v=>v.grade==='A').length} B:${malViol.filter(v=>v.grade==='B').length}`, color:'#2E86C1'},
+    {icon:'⭐',  label:'رضا العملاء',    value:avgSurvey+'%',    sub:`${surveys.length} استطلاع`, color:ec(avgSurvey)},
+    {icon:'👩‍🏫',label:'كفاءة نسائي',   value:avgFemOps?avgFemOps+'%':'—',  sub:`${femOps.length} مدربة`, color:ec(avgFemOps)},
+    {icon:'👨‍🏫',label:'كفاءة رجالي',   value:avgMalOps?avgMalOps+'%':'—',  sub:`${malOps.length} مدرب`,  color:ec(avgMalOps)},
+    {icon:'🏍️', label:'كفاءة دراجات',   value:avgBikeOps?avgBikeOps+'%':'—',sub:`${bikeOps.length} مدرب`, color:ec(avgBikeOps)},
+    {icon:'✅',  label:'احتفاظ بالرسوم', value:keptSales.length, sub:`من ${retSales.length} حالة — ${retRate}%`, color:retRate>=60?'#27AE60':retRate>=40?'#D4AC0D':'#E74C3C'},
+    {icon:'🔄',  label:'استرداد',         value:recovSales.length,sub:`من ${retSales.length} حالة`, color:'#F39C12'},
+    {icon:'🏢',  label:'المبنى',           value:buildings.length, sub:`${buildings.length} تقرير`, color:'#7D3C98'},
+    {icon:'🔧',  label:'المرافق',          value:facilities.length,sub:`${facilities.length} ملاحظة`,color:'#16A085'},
   ].map(k=>`<div style="background:var(--card2);border-radius:14px;padding:12px 10px;border-right:4px solid ${k.color};">
     <div style="font-size:18px;margin-bottom:4px;">${k.icon}</div>
     <div style="font-size:20px;font-weight:900;color:${k.color};">${k.value}</div>
