@@ -9049,7 +9049,7 @@ function handleOpsFile(input){handleOpsFileNew(input,'ops');}
 
 loadSummaryWidgets();
 setDT();updateNav();
-setTimeout(()=>{ loadActiveStaffHome(); if(currentUser){renderHomeWidgets();renderDailyBulletin();showBulletinPopup();} },300);
+setTimeout(()=>{ loadActiveStaffHome(); refreshQuarterlyCard(); if(currentUser){renderHomeWidgets();renderDailyBulletin();showBulletinPopup();} },300);
 
 // ══ OPS_MONTHS ══
 const OPS_MONTHS = {};
@@ -10172,39 +10172,55 @@ async function exportSalesExcelFull() {
 
 
 // ══ تحديث كرت التقارير الربعية تلقائياً ══
-function refreshQuarterlyCard() {
+async function refreshQuarterlyCard() {
   const now = new Date();
   const curQ = Math.ceil((now.getMonth()+1)/3);
   const year = now.getFullYear();
-  const badge  = document.getElementById('quarterlyBadge');
-  const preview= document.getElementById('quarterlyPreview');
+  const badge   = document.getElementById('quarterlyBadge');
+  const preview = document.getElementById('quarterlyPreview');
   if (badge) badge.textContent = `Q${curQ} ${year}`;
+  if (!preview) return;
 
-  // تجميع من OPS_MONTHS + PINNED_DATA تلقائياً
-  const pinned = getPinnedForQuarter(curQ, year);
-  const femViol = pinned.violations.filter(v=>v.section==='female');
-  const malViol = pinned.violations.filter(v=>v.section==='male');
-  const avgSurv = pinned.surveys.length
-    ? Math.round(pinned.surveys.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/pinned.surveys.length) : 0;
-  const avgOps = pinned.ops.length
-    ? Math.round(pinned.ops.reduce((s,r)=>s+(r.efficiency_pct||0),0)/pinned.ops.length) : 0;
+  // حساب نطاق الأشهر
+  const months = Q_MONTHS[curQ]; // [1,2,3] أو [4,5,6] إلخ
+  const fromDate = `${year}-${String(months[0]).padStart(2,'0')}-01`;
+  const toDate   = `${year}-${String(months[months.length-1]).padStart(2,'0')}-31`;
 
-  const hasPinned = pinned.violations.length||pinned.surveys.length||pinned.ops.length||pinned.facility.length;
+  preview.innerHTML = '<div style="font-size:9px;color:rgba(255,255,255,0.5);">⏳ جاري التحميل...</div>';
 
-  if (preview) {
-    if (!hasPinned) {
-      preview.innerHTML = '<div style="font-size:9px;color:rgba(255,255,255,0.4);">سيتحدث تلقائياً عند إدخال البيانات</div>';
+  try {
+    const safe = (p) => p.then(r=>r.data||[]).catch(()=>[]);
+    const [vd, sd, fd, bd] = await Promise.all([
+      safe(db.from('violations').select('section,grade').gte('date', fromDate).lte('date', toDate)),
+      safe(db.from('surveys').select('satisfaction_pct').gte('date', fromDate).lte('date', toDate)),
+      safe(db.from('facility_reports').select('id').gte('report_date', fromDate).lte('report_date', toDate)),
+      safe(db.from('building_reports').select('id').gte('report_date', fromDate).lte('report_date', toDate)),
+    ]);
+
+    const femViol = vd.filter(v=>v.section==='female').length;
+    const malViol = vd.filter(v=>v.section==='male').length;
+    const gradeA  = vd.filter(v=>v.grade==='A').length;
+    const avgSurv = sd.length ? Math.round(sd.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/sd.length) : 0;
+
+    const total = vd.length + sd.length + fd.length + bd.length;
+    if (!total) {
+      preview.innerHTML = '<div style="font-size:9px;color:rgba(255,255,255,0.4);">لا توجد بيانات لهذا الربع بعد</div>';
       return;
     }
+
     preview.innerHTML = [
-      {l:'مخالفات نسائي', v:femViol.length, c:'#E74C3C'},
-      {l:'مخالفات رجالي', v:malViol.length, c:'#2E86C1'},
+      {l:'مخالفات نسائي', v:femViol, c:'#E07070'},
+      {l:'مخالفات رجالي', v:malViol, c:'#70A0E0'},
+      {l:'مخالفات A',     v:gradeA,  c:'#E74C3C'},
       {l:'رضا العملاء',   v:avgSurv ? avgSurv+'%' : '—', c:avgSurv>=90?'#27AE60':'#D4AC0D'},
-      {l:'كفاءة التشغيل', v:avgOps  ? avgOps+'%'  : '—', c:avgOps>=90?'#27AE60':'#D4AC0D'},
+      {l:'ملاحظات مرافق', v:fd.length, c:'#E07B2A'},
+      {l:'تقارير مبنى',   v:bd.length, c:'#7D3C98'},
     ].map(i=>`<div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:4px 10px;text-align:center;">
       <div style="font-size:12px;font-weight:900;color:${i.c};">${i.v}</div>
       <div style="font-size:8px;color:rgba(255,255,255,0.5);">${i.l}</div>
     </div>`).join('');
+  } catch(e) {
+    preview.innerHTML = '<div style="font-size:9px;color:rgba(255,255,255,0.4);">—</div>';
   }
 }
 
