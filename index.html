@@ -4418,7 +4418,7 @@ async function renderHomeWidgets(){
 
 async function loadActiveStaffHome(){
   const el=document.getElementById('homeActiveStaff');
-  if(!el||!currentUser) return;
+  if(!el) return;
   try{
     const START_DATE='2026-03-01';
     const[{data:vd},{data:sd},{data:fd},{data:bd}]=await Promise.all([
@@ -9049,7 +9049,7 @@ function handleOpsFile(input){handleOpsFileNew(input,'ops');}
 
 loadSummaryWidgets();
 setDT();updateNav();
-setTimeout(()=>{ if(currentUser){loadActiveStaffHome();renderHomeWidgets();renderDailyBulletin();showBulletinPopup();} },300);
+setTimeout(()=>{ loadActiveStaffHome(); if(currentUser){renderHomeWidgets();renderDailyBulletin();showBulletinPopup();} },300);
 
 // ══ OPS_MONTHS ══
 const OPS_MONTHS = {};
