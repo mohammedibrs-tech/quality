@@ -3275,6 +3275,87 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const {createClient}=supabase;
 const db=createClient(SB_URL,SB_KEY);
 
+// ══════════════════════════════════════════════════
+// 🧠 DATA LAYER — المخ المركزي للبيانات
+// كل الكروت تقرأ من هنا بدل ما تروح Supabase منفردة
+// ══════════════════════════════════════════════════
+const NQ = {
+  // ── الكاش المركزي ──
+  _cache: {},
+  _loading: false,
+  _lastFetch: null,
+  _listeners: [],
+
+  // ── جلب كل البيانات مرة وحدة ──
+  async fetchAll(force = false) {
+    const now = Date.now();
+    // لو في بيانات أقل من 3 دقائق ما نجيب مرة ثانية
+    if (!force && this._lastFetch && (now - this._lastFetch) < 180000) return this._cache;
+    if (this._loading) return this._cache;
+    this._loading = true;
+
+    try {
+      const START = '2026-02-01';
+      const safe = async (p) => { try { const r = await p; return r.data||[]; } catch(e) { return []; } };
+
+      const [violations, surveys, facility, building, ops, sales, ratings, pending, gameScores] = await Promise.all([
+        safe(db.from('violations').select('*').gte('date', START).order('created_at', {ascending:false})),
+        safe(db.from('surveys').select('*').order('created_at', {ascending:false})),
+        safe(db.from('facility_reports').select('*').order('created_at', {ascending:false})),
+        safe(db.from('building_reports').select('*').order('created_at', {ascending:false})),
+        safe(db.from('ops_reports').select('*').order('created_at', {ascending:false})),
+        safe(db.from('sales_reports').select('*').order('created_at', {ascending:false})),
+        safe(db.from('trainer_ratings').select('*').order('created_at', {ascending:false})),
+        safe(db.from('pending_violations').select('*').eq('status','pending')),
+        safe(db.from('game_scores').select('player_name,score,play_date').eq('play_date', new Date().toISOString().slice(0,10)).order('score', {ascending:false}).limit(10)),
+      ]);
+
+      this._cache = { violations, surveys, facility, building, ops, sales, ratings, pending, gameScores };
+      this._lastFetch = now;
+      this._loading = false;
+
+      // أبلغ كل المستمعين بتحديث البيانات
+      this._listeners.forEach(fn => { try { fn(this._cache); } catch(e) {} });
+      console.log(`✅ NQ DataLayer: جُلب ${violations.length} مخالفة، ${surveys.length} استطلاع، ${facility.length} مرفق، ${ops.length} تشغيل`);
+      return this._cache;
+    } catch(e) {
+      this._loading = false;
+      console.error('NQ DataLayer error:', e);
+      return this._cache;
+    }
+  },
+
+  // ── اشتراك في تحديثات البيانات ──
+  onUpdate(fn) { this._listeners.push(fn); },
+
+  // ── Helpers للفلترة ──
+  bySection: (arr, sec) => arr.filter(r => r.section === sec),
+  byMonth:   (arr, col, yr, mo) => arr.filter(r => (r[col]||'').startsWith(`${yr}-${String(mo).padStart(2,'0')}`)),
+  byQuarter: (arr, col, yr, q) => {
+    const months = {1:[1,2,3],2:[4,5,6],3:[7,8,9],4:[10,11,12]}[q]||[1,2,3];
+    return arr.filter(r => {
+      const d = r[col]||''; const m = parseInt((d.split('-')[1])||0);
+      return d.startsWith(String(yr)) && months.includes(m);
+    });
+  },
+  avgPct: (arr, field) => arr.length ? Math.round(arr.reduce((s,r)=>s+(r[field]||0),0)/arr.length) : 0,
+
+  // ── تحديث جزئي (بعد إضافة سجل جديد) ──
+  push(table, record) {
+    if (this._cache[table]) {
+      this._cache[table].unshift(record);
+      this._listeners.forEach(fn => { try { fn(this._cache); } catch(e) {} });
+    }
+  },
+
+  // ── إعادة الجلب ──
+  refresh() { return this.fetchAll(true); }
+};
+
+// تحميل البيانات فور تهيئة الصفحة
+setTimeout(() => NQ.fetchAll(), 800);
+// ══════════════════════════════════════════════════
+
 const USERS={
   'admin':{password:'1133Md',role:'admin',name:'محمد'},
   'shahad':{password:'1122SH',role:'staff',name:'شهد المقرن'},
@@ -3837,16 +3918,13 @@ function renderPendingTab() {
 function getQ(d){if(!d)return 1;const m=new Date(d).getMonth()+1;return m<=3?1:m<=6?2:m<=9?3:4;}
 
 async function loadAll(){
-  const{data:vd}=await db.from('violations').select('*').gte('date','2026-02-01').order('created_at',{ascending:false});
-  allV=vd||[];window._cachedViolations=allV;updateVStats();renderV(allV);
-  const{data:sd}=await db.from('surveys').select('*').order('created_at',{ascending:false});
-  allS=sd||[];renderS(allS);
-  const{data:fd}=await db.from('facility_reports').select('*').order('created_at',{ascending:false});
-  allF=fd||[];window._cachedFacilities=allF;renderF(allF);
-  try{
-    const{data:bd}=await db.from('building_reports').select('*').order('created_at',{ascending:false});
-    allB=bd||[];window._cachedBuilding=allB;renderB(allB);
-  }catch(e){allB=[];document.getElementById('bList').innerHTML='<div style="font-size:11px;color:var(--text-dim);padding:10px">لا توجد بيانات بعد — قم بإنشاء الجدول في Supabase</div>';}
+  // استخدام NQ المخ المركزي بدل استدعاءات منفردة
+  const cache = await NQ.fetchAll();
+  allV=cache.violations||[];window._cachedViolations=allV;updateVStats();renderV(allV);
+  allS=cache.surveys||[];renderS(allS);
+  allF=cache.facility||[];window._cachedFacilities=allF;renderF(allF);
+  allB=cache.building||[];window._cachedBuilding=allB;
+  try{renderB(allB);}catch(e){const el=document.getElementById('bList');if(el)el.innerHTML='<div style="font-size:11px;color:var(--text-dim);padding:10px">لا توجد بيانات بعد</div>';}
   renderDashboard();
   renderActiveStaff();
 }
@@ -4425,15 +4503,13 @@ async function renderHomeWidgets(){
 
 async function loadActiveStaffHome(){
   const el=document.getElementById('homeActiveStaff');
-  if(!el||!currentUser) return;
+  if(!el) return;
   try{
-    const START_DATE='2026-03-01';
-    const[{data:vd},{data:sd},{data:fd}]=await Promise.all([
-      db.from('violations').select('observer').gte('date',START_DATE),
-      db.from('surveys').select('observer').gte('date',START_DATE),
-      db.from('facility_reports').select('observer').gte('report_date',START_DATE),
-    ]);
-    // كل الموظفين الستة — يبدأون بصفر
+    const cache = await NQ.fetchAll();
+    const vd = cache.violations||[];
+    const sd = cache.surveys||[];
+    const fd = cache.facility||[];
+    const bd = cache.building||[];
     const ALL_STAFF=['أحمد سحاب','أحمد الحماد','ابراهيم الحمد','شهد المقرن','امجاد ابانمي','سمية الخضيري'];
     const map={};
     ALL_STAFF.forEach(n=>map[n]=0);
@@ -4444,8 +4520,7 @@ async function loadActiveStaffHome(){
         if(map[key]!==undefined) map[key]=(map[key]||0)+1;
       });
     });
-    add(vd);add(sd);add(fd);
-    // ترتيب تنازلي
+    add(vd);add(sd);add(fd);add(bd);
     const sorted=ALL_STAFF.map(n=>([n,map[n]])).sort((a,b)=>b[1]-a[1]);
     const colors=['#F5C518','#A8A9AD','#CD7F32','var(--accent)','#7D3C98','#2E86C1'];
     const medals=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣'];
@@ -4455,7 +4530,7 @@ async function loadActiveStaffHome(){
         <div class="staff-name" style="color:#fff">${name}</div>
         <div class="staff-count" style="color:#fff;font-weight:900">${cnt}</div>
       </div>`).join('');
-  }catch(e){el.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,0.5)">تسجيل دخول للعرض</div>';}
+  }catch(e){el.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,0.5)">—</div>';}
 }
 
 // ── Helper: split observer field into individual names ──
@@ -11047,19 +11122,17 @@ async function loadDashboard() {
   const { from, to, label } = _dashRange();
   ['dashViolPeriod','dashOpsPeriod'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent = label; });
   try {
-    const [vR,oR,sR,bR,fR] = await Promise.all([
-      db.from('violations').select('*').gte('date',from).lte('date',to),
-      db.from('ops_reports').select('*').gte('report_date',from).lte('report_date',to),
-      db.from('sales_reports').select('*').gte('report_date',from).lte('report_date',to),
-      db.from('building_reports').select('*').gte('report_date',from).lte('report_date',to),
-      db.from('facility_reports').select('*').gte('report_date',from).lte('report_date',to),
-    ]);
-    const merge = (a1,a2,k) => { const s=new Set((a1||[]).map(r=>r[k]||'')); return [...(a1||[]),...(a2||[]).filter(r=>!s.has(r[k]||''))]; };
-    const V  = merge(vR.data||[], (APP_DATA.violations||[]).filter(r=>r.date>=from), 'trainer_name');
-    const O  = merge(oR.data||[], APP_DATA.ops||[], 'trainer_name');
-    const S  = merge(sR.data||[], APP_DATA.sales||[], 'report_date');
-    const B  = merge(bR.data||[], APP_DATA.buildings||[], 'report_date');
-    const F  = merge(fR.data||[], APP_DATA.facilities||[], 'report_date');
+    // استخدام NQ — فلترة من الكاش بدل queries جديدة
+    const cache = await NQ.fetchAll();
+    const filterDate = (arr, col) => arr.filter(r => {
+      const d = r[col]||r.date||r.report_date||r.created_at||'';
+      return d >= from && d <= to+'Z';
+    });
+    const V = filterDate(cache.violations, 'date');
+    const O = cache.ops||[];
+    const S = filterDate(cache.sales, 'created_at');
+    const B = filterDate(cache.building, 'report_date');
+    const F = filterDate(cache.facility, 'report_date');
     _renderKPI(V,O,S,B,F);
     _renderViol(V);
     _renderOps(O);
