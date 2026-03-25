@@ -9493,7 +9493,11 @@ function renderQuarterlyResults() {
   const monthStrsQ = months.map(m=>String(m));
   const monthStrsQP= months.map(m=>String(m).padStart(2,'0'));
   const allMonthsQ = [...new Set([...monthStrsQ,...monthStrsQP])];
-  const ops        = (Array.isArray(d.ops)?d.ops:[]).filter(r=>allMonthsQ.includes(String(r.report_month||'')) && String(r.report_year||'')=== String(d.year));
+  const opsRaw     = Array.isArray(d.ops)?d.ops:[];
+  // تشخيص — اطبع عينة من القيم الفعلية
+  if(opsRaw.length) console.log('🔍 ops sample report_month values:', [...new Set(opsRaw.slice(0,10).map(r=>r.report_month))], '| report_year:', [...new Set(opsRaw.slice(0,10).map(r=>r.report_year))], '| zone:', [...new Set(opsRaw.slice(0,5).map(r=>r.zone))]);
+  const ops        = opsRaw.filter(r=>allMonthsQ.includes(String(r.report_month||'')) && String(r.report_year||'')=== String(d.year));
+  console.log('🔍 ops after filter:', ops.length, '| allMonthsQ:', allMonthsQ, '| d.year:', d.year);
   const facilities = Array.isArray(d.facilities)?d.facilities:[];
   const buildings  = Array.isArray(d.buildings)?d.buildings:[];
   const ratings    = Array.isArray(d.ratings)?d.ratings:[];
