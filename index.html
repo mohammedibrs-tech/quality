@@ -9424,7 +9424,7 @@ async function loadQuarterlyData(q, year) {
       safe(db.from('surveys').select('*').gte('date',dateFrom).lte('date',dateTo)),
       safe(db.from('facility_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo)),
       safe(db.from('building_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo)),
-      safe(db.from('ops_reports').select('*').in('report_month',[...monthStrs,...monthStrsPad]).eq('report_year',String(year))),
+      safe(db.from('ops_reports').select('*').in('report_month',months.map(m=>parseInt(m))).eq('report_year',String(year))),
       safe(db.from('sales_reports').select('*').gte('created_at',dateFrom+'T00:00:00').lte('created_at',dateTo+'T23:59:59')),
       safe(db.from('trainer_ratings').select('*').gte('upload_date',dateFrom).lte('upload_date',dateTo)),
       safe(db.from('incentives').select('*').in('month',monthStrs).eq('year',String(year))),
@@ -9489,15 +9489,16 @@ function renderQuarterlyResults() {
 
   const violations = Array.isArray(d.violations)?d.violations:[];
   const surveys    = Array.isArray(d.surveys)?d.surveys:[];
-  // فلترة ops بالأشهر الصحيحة فقط
-  const monthStrsQ = months.map(m=>String(m));
-  const monthStrsQP= months.map(m=>String(m).padStart(2,'0'));
-  const allMonthsQ = [...new Set([...monthStrsQ,...monthStrsQP])];
+  // فلترة ops بالأشهر الصحيحة — نحول لأرقام لأن Supabase يخزنها integer
+  const monthInts  = months.map(m=>parseInt(m));
   const opsRaw     = Array.isArray(d.ops)?d.ops:[];
-  // تشخيص — اطبع عينة من القيم الفعلية
-  if(opsRaw.length) console.log('🔍 ops sample report_month values:', [...new Set(opsRaw.slice(0,10).map(r=>r.report_month))], '| report_year:', [...new Set(opsRaw.slice(0,10).map(r=>r.report_year))], '| zone:', [...new Set(opsRaw.slice(0,5).map(r=>r.zone))]);
-  const ops        = opsRaw.filter(r=>allMonthsQ.includes(String(r.report_month||'')) && String(r.report_year||'')=== String(d.year));
-  console.log('🔍 ops after filter:', ops.length, '| allMonthsQ:', allMonthsQ, '| d.year:', d.year);
+  if(opsRaw.length) console.log('🔍 ops sample:', [...new Set(opsRaw.slice(0,5).map(r=>r.report_month))], typeof opsRaw[0]?.report_month);
+  const ops = opsRaw.filter(r=>{
+    const rm = parseInt(r.report_month);
+    const ry = parseInt(r.report_year||r.year||0);
+    return monthInts.includes(rm) && ry === parseInt(d.year);
+  });
+  console.log('🔍 ops after filter:', ops.length, '| months:', monthInts, '| year:', d.year);
   const facilities = Array.isArray(d.facilities)?d.facilities:[];
   const buildings  = Array.isArray(d.buildings)?d.buildings:[];
   const ratings    = Array.isArray(d.ratings)?d.ratings:[];
@@ -9936,7 +9937,7 @@ async function qFetchCard(cardLabel, q, year) {
     } else if(cardLabel==='كفاءة نسائي'||cardLabel==='كفاءة رجالي'||cardLabel==='كفاءة دراجات'){
       const allMV=[...new Set([...monthStrs,...monthStrsPad])];
       console.log('🔍 ops fetch: year='+year+' months=',allMV);
-      const {data:opsRaw,error:opsErr}=await db.from('ops_reports').select('*').in('report_month',allMV).eq('report_year',String(year));
+      const {data:opsRaw,error:opsErr}=await db.from('ops_reports').select('*').in('report_month',months.map(m=>parseInt(m))).eq('report_year',String(year));
       console.log('🔍 ops result:',opsRaw?.length,'err:',opsErr?.message);
       if(!opsRaw?.length){const {data:s}=await db.from('ops_reports').select('report_month,report_year,zone,trainer_name,efficiency_pct').limit(5);console.log('🔍 عينة Supabase ops:',s);}
       const data=opsRaw||[];
