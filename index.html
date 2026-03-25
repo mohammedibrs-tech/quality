@@ -13292,10 +13292,15 @@ window.addEventListener('resize', () => {
           <div style="margin-right:auto;font-size:20px;color:var(--text-dim);" id="ns-arrow1">›</div>
         </div>
         <div id="no-session-form" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;" onclick="event.stopPropagation()">
-          <div class="field"><label>اسم المدرب/ة</label><input id="nsName" type="text" placeholder="اسم المدرب/ة" class="inp"></div>
+          <div class="field"><label>اسم المدرب/ة</label>
+            <div style="position:relative;">
+              <input id="nsName" type="text" placeholder="ابدأ بالكتابة للبحث..." class="inp" autocomplete="off" oninput="nsTrainerSearch(this,'ns')" onblur="nsHideDD('ns-dd')">
+              <div id="ns-dd" class="trainer-dropdown"></div>
+            </div>
+          </div>
           <div class="field"><label>الزون</label>
             <select id="nsZone" class="inp">
-              <option value="">-- اختر الزون --</option>
+              <option value="">-- يُجلب تلقائياً --</option>
               <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>L</option>
               <option>O</option><option>H</option><option>دراجات</option>
             </select>
@@ -13339,10 +13344,15 @@ window.addEventListener('resize', () => {
           <div style="margin-right:auto;font-size:20px;color:var(--text-dim);" id="ns-arrow2">›</div>
         </div>
         <div id="backup-form" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;" onclick="event.stopPropagation()">
-          <div class="field"><label>اسم المدرب/ة</label><input id="buName" type="text" placeholder="اسم المدرب/ة" class="inp"></div>
+          <div class="field"><label>اسم المدرب/ة</label>
+            <div style="position:relative;">
+              <input id="buName" type="text" placeholder="ابدأ بالكتابة للبحث..." class="inp" autocomplete="off" oninput="nsTrainerSearch(this,'bu')" onblur="nsHideDD('bu-dd')">
+              <div id="bu-dd" class="trainer-dropdown"></div>
+            </div>
+          </div>
           <div class="field"><label>الزون</label>
             <select id="buZone" class="inp">
-              <option value="">-- اختر الزون --</option>
+              <option value="">-- يُجلب تلقائياً --</option>
               <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>L</option>
               <option>O</option><option>H</option><option>دراجات</option>
             </select>
@@ -13371,6 +13381,36 @@ window.addEventListener('resize', () => {
 </div>
 
 <script>
+// ── Autocomplete للمدربين في كرت جدولة الحصص ──
+function nsTrainerSearch(inp, prefix) {
+  const q = inp.value.trim();
+  const dd = document.getElementById(prefix+'-dd');
+  if (!dd) return;
+  if (!q) { dd.classList.remove('show'); return; }
+  const matches = Object.keys(TRAINERS_DB).filter(n => n.includes(q)).slice(0,8);
+  if (!matches.length) { dd.classList.remove('show'); return; }
+  dd.innerHTML = matches.map(n =>
+    `<div class="td-item" onmousedown="nsSelectTrainer('${prefix}','${n.replace(/'/g,"\\'")}')">
+      <span>${n}</span><span class="td-zone">ZONE ${TRAINERS_DB[n]}</span>
+    </div>`).join('');
+  dd.classList.add('show');
+}
+function nsSelectTrainer(prefix, name) {
+  const zone = TRAINERS_DB[name] || '';
+  if (prefix === 'ns') {
+    const el = document.getElementById('nsName'); if(el) el.value = name;
+    const zEl = document.getElementById('nsZone');
+    if (zEl) { zEl.value = zone || ''; }
+  } else {
+    const el = document.getElementById('buName'); if(el) el.value = name;
+    const zEl = document.getElementById('buZone');
+    if (zEl) { zEl.value = zone || ''; }
+  }
+  const dd = document.getElementById(prefix+'-dd');
+  if (dd) dd.classList.remove('show');
+}
+function nsHideDD(id) { setTimeout(()=>{ const d=document.getElementById(id); if(d) d.classList.remove('show'); },200); }
+
 // ── مدربين بلا حصة ──
 let _nsRecords = [];
 let _buRecords = [];
