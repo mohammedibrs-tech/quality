@@ -3295,7 +3295,7 @@ const NQ = {
     this._loading = true;
 
     try {
-      const START = '2026-02-01';
+      const START = '2026-03-01';
       const safe = async (p) => { try { const r = await p; return r.data||[]; } catch(e) { return []; } };
 
       const [violations, surveys, facility, building, ops, sales, ratings, pending, gameScores] = await Promise.all([
@@ -3352,8 +3352,7 @@ const NQ = {
   refresh() { return this.fetchAll(true); }
 };
 
-// تحميل البيانات فور تهيئة الصفحة
-setTimeout(() => NQ.fetchAll(), 800);
+// البيانات تُجلب بعد تسجيل الدخول فقط — انظر doLogin()
 // ══════════════════════════════════════════════════
 
 const USERS={
@@ -3429,8 +3428,12 @@ function doLogin(){
   const usr=USERS[u];
   if(usr&&usr.password===p){
     currentUser={username:u,...usr};hideLM();updateNav();
-    loadActiveStaffHome();
-    renderHomeWidgets(); sbUpdateAuth();
+    // جلب كل البيانات فور تسجيل الدخول
+    NQ.fetchAll(true).then(()=>{
+      loadActiveStaffHome();
+      renderHomeWidgets();
+    });
+    sbUpdateAuth();
     renderDailyBulletin().catch(()=>{});
     if(currentUser.role==='admin') loadPendingViolations();
     if(pendingSec){
@@ -3444,7 +3447,11 @@ function doLogin(){
     }
   }else{document.getElementById('lErr').style.display='block';}
 }
-function doLogout(){currentUser=null;updateNav();goHome();}
+function doLogout(){
+  currentUser=null;
+  NQ._cache={};NQ._lastFetch=null; // مسح الكاش عند الخروج
+  updateNav();goHome();
+}
 
 // ── THEME TOGGLE ──
 function toggleTheme(){
@@ -4506,10 +4513,12 @@ async function loadActiveStaffHome(){
   if(!el) return;
   try{
     const cache = await NQ.fetchAll();
-    const vd = cache.violations||[];
-    const sd = cache.surveys||[];
-    const fd = cache.facility||[];
-    const bd = cache.building||[];
+    const START = '2026-03-01';
+    // فلترة من 1 مارس فقط
+    const vd = (cache.violations||[]).filter(r=>(r.date||'')>=START);
+    const sd = (cache.surveys||[]).filter(r=>(r.date||'')>=START);
+    const fd = (cache.facility||[]).filter(r=>(r.report_date||r.date||r.created_at||'')>=START);
+    const bd = (cache.building||[]).filter(r=>(r.report_date||r.date||r.created_at||'')>=START);
     const ALL_STAFF=['أحمد سحاب','أحمد الحماد','ابراهيم الحمد','شهد المقرن','امجاد ابانمي','سمية الخضيري'];
     const map={};
     ALL_STAFF.forEach(n=>map[n]=0);
