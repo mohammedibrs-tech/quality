@@ -3887,7 +3887,7 @@ function renderPendingTab() {
   }
 
   list.innerHTML = pending.map(record => {
-    const sec = record.section === 'female' ? '👩 نسائي' : '👨 رجالي';
+    const sec = record.section === 'female' ? 'نسائي' : 'رجالي';
     const date = new Date(record.submittedAt).toLocaleString('ar');
     return `<div style="background:var(--card);border:1px solid rgba(231,76,60,0.2);border-right:4px solid #E74C3C;border-radius:16px;padding:16px;margin-bottom:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
@@ -4332,7 +4332,7 @@ function exportSurvey(){
     if(!data.length){rows.push([qName,'لا توجد بيانات / No data','-','-','-']);return;}
     const a=Math.round(data.reduce((x,b)=>x+b.satisfaction_pct,0)/data.length);
     const vs=prevAvg!==null?(a-prevAvg>=0?'↑ +'+(a-prevAvg)+'%':'↓ '+(a-prevAvg)+'%'):'-';
-    rows.push([qName,data.length,a+'%',a>=TARGET?'✅ فوق الهدف':'⚠️ دون الهدف',vs]);
+    rows.push([qName,data.length,a+'%',a>=TARGET?'✅ فوق الهدف':'دون الهدف',vs]);
     prevAvg=a;
   });
   rows.push([],[]);
@@ -5303,7 +5303,7 @@ function filterArchV(){
   l.innerHTML=data.map(r=>`<div class="table-row">
     <span><span class="grade-badge grade-${r.grade}">${r.grade}</span></span>
     <span>${r.trainer||'-'}</span>
-    <span>${r.section==='female'?'👩 نسائي':'👨 رجالي'}</span>
+    <span>${r.section==='female'?'نسائي':'رجالي'}</span>
     <span style="font-size:11px">${r.violation||'-'}</span>
     <span>${r.date||''}</span>
     <span>${r.time||''}</span>
@@ -5473,7 +5473,7 @@ async function renderMyLog(){
               <span style="background:${bc}22;color:${bc};padding:2px 10px;border-radius:20px;font-size:12px;font-weight:900;">${r.grade||'—'}</span>
               <span style="font-size:13px;font-weight:900;">${r.trainer_name||'—'}</span>
             </div>
-            <div style="font-size:11px;color:var(--text-dim);">${r.section==='female'?'👩 نسائي':'👨 رجالي'} | ${r.zone||''} | ${r.violation_type||''}</div>
+            <div style="font-size:11px;color:var(--text-dim);">${r.section==='female'?'نسائي':'رجالي'} | ${r.zone||''} | ${r.violation_type||''}</div>
             <div style="font-size:10px;color:var(--text-dim);margin-top:3px;">📅 ${d} ${r.time||''} · سجّل بواسطة: ${r.observer||''}</div>
             ${r.description?`<div style="font-size:11px;color:var(--text-dim);margin-top:4px;padding:6px 8px;background:var(--card2);border-radius:8px;">${r.description}</div>`:''}
           </div>
@@ -8769,7 +8769,7 @@ function getOpsAnalysis(){
         unusedSessions:   Math.round(unusedSess*10)/10,
         absSessions:      absSess,
         efficiency:       Math.round(eff*1000)/10,
-        status: eff>=TARGET_EFF?'✅ ممتاز':eff>=0.7?'⚠️ يحتاج تحسين':'❌ ضعيف',
+        status: eff>=TARGET_EFF?'ممتاز':eff>=0.7?'⚠️ يحتاج تحسين':'❌ ضعيف',
         recommendation,
       });
     });
@@ -8784,7 +8784,7 @@ function renderOpsTableFromData(trainers, sec){
   if(!el) return;
   // أزرار الأقسام
   const sc={female:'#E74C3C',male:'#2E86C1',bike:'#D4AC0D'};
-  const sn={female:'👩 نسائي',male:'👨 رجالي',bike:'🏍️ دراجات'};
+  const sn={female:'نسائي',male:'رجالي',bike:'🏍️ دراجات'};
   const avg = filtered.length ? filtered.reduce((s,t)=>s+t.efficiency,0)/filtered.length : 0;
   // KPI bar
   const kpiBar = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
@@ -8805,7 +8805,7 @@ function renderOpsTableFromData(trainers, sec){
       style="padding:6px 14px;border-radius:10px;border:1.5px solid ${s===sec?'var(--accent)':'var(--border)'};
       background:${s===sec?'var(--accent)':'var(--card)'};color:${s===sec?'#fff':'var(--text)'};
       font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">
-      ${{all:'الكل',female:'👩 نسائي',male:'👨 رجالي',bike:'🏍️ دراجات'}[s]}</button>`).join('')}
+      ${{all:'الكل',female:'نسائي',male:'رجالي',bike:'🏍️ دراجات'}[s]}</button>`).join('')}
   </div>`;
   // الجدول
   const headers = ['#','اسم المدرب','القسم','حصص منجزة','الحصص المفترضة','الحصص الغير مجدولة','الحصص المهدرة بسبب الغياب','غياب','إجازة','استئذان (س)','ساعات إجمالية','ساعات فعلية','نسبة المنصة','كفاءة %','تقييم','التوصية'];
@@ -8851,12 +8851,12 @@ function renderOpsKPIFromData(trainers){
   const el = document.getElementById('opsKpiOut') || document.getElementById('opsKpiContent');
   if(!el) return;
   if(!trainers.length){el.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:40px;">لا توجد بيانات</div>';return;}
-  const sects=[{k:'female',l:'👩 نسائي',c:'#E74C3C'},{k:'male',l:'👨 رجالي',c:'#2E86C1'},{k:'bike',l:'🏍️ دراجات',c:'#D4AC0D'}];
+  const sects=[{k:'female',l:'نسائي',c:'#E74C3C'},{k:'male',l:'رجالي',c:'#2E86C1'},{k:'bike',l:'🏍️ دراجات',c:'#D4AC0D'}];
   const avg=trainers.reduce((s,t)=>s+t.efficiency,0)/trainers.length;
   let html=`<div style="background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;text-align:center;">
     <div style="font-size:11px;color:var(--text-dim);">الكفاءة الإجمالية — ${trainers.length} مدرب</div>
     <div style="font-size:36px;font-weight:900;color:${avg>=90?'#27AE60':'#D4AC0D'};">${avg.toFixed(1)}%</div>
-    <div style="font-size:11px;color:${avg>=90?'#27AE60':'#D4AC0D'};">${avg>=90?'✅ حقق الهدف 90%':'⚠️ دون الهدف (فجوة '+(90-avg).toFixed(1)+'%)'}</div>
+    <div style="font-size:11px;color:${avg>=90?'#27AE60':'#D4AC0D'};">${avg>=90?'حقق الهدف 90%':'⚠️ دون الهدف (فجوة '+(90-avg).toFixed(1)+'%)'}</div>
   </div>`;
   sects.forEach(({k,l,c})=>{
     const data=trainers.filter(t=>t.section===k);
@@ -8915,7 +8915,7 @@ function renderOpsTable_old(sec){
   }
   if(!filtered.length){el.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:30px;">لا توجد بيانات — ارفع الملفات أولاً</div>';return;}
   const sc={female:'#E74C3C',male:'#2E86C1',bike:'#D4AC0D'};
-  const sn={female:'👩 نسائي',male:'👨 رجالي',bike:'🏍️ دراجات'};
+  const sn={female:'نسائي',male:'رجالي',bike:'🏍️ دراجات'};
   el.innerHTML=`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="background:var(--accent);color:#fff;">${['#','اسم المدرب','القسم','متوقعة','فعلية','مهدرة','غياب','الكفاءة %','تقييم'].map(h=>`<th style="padding:10px 8px;text-align:${h==='اسم المدرب'?'right':'center'};">${h}</th>`).join('')}</tr></thead><tbody>${filtered.map((t,i)=>{const ec=t.efficiency>=90?'#27AE60':t.efficiency>=70?'#D4AC0D':'#E74C3C';const bg=i%2===0?'var(--card)':'var(--primary)';return`<tr style="background:${bg};"><td style="padding:9px 8px;text-align:center;font-weight:700;color:var(--accent);">${i+1}</td><td style="padding:9px 8px;text-align:right;font-weight:700;">${t.name}</td><td style="padding:9px 8px;text-align:center;"><span style="background:${sc[t.section]}22;color:${sc[t.section]};border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;">${sn[t.section]}</span></td><td style="padding:9px 8px;text-align:center;">${t.expectedSessions}</td><td style="padding:9px 8px;text-align:center;">${t.actualSessions}</td><td style="padding:9px 8px;text-align:center;color:#E74C3C;font-weight:700;">${t.unusedSessions}</td><td style="padding:9px 8px;text-align:center;">${t.absDays}</td><td style="padding:9px 8px;text-align:center;"><div style="background:${ec}22;color:${ec};border-radius:8px;padding:3px 8px;font-weight:900;">${t.efficiency.toFixed(1)}%</div><div style="background:#eee;border-radius:4px;height:4px;margin-top:3px;overflow:hidden;"><div style="background:${ec};height:4px;width:${Math.min(t.efficiency,100)}%;"></div></div></td><td style="padding:9px 8px;text-align:center;">${t.status}</td></tr>`;}).join('')}</tbody></table></div>`;
 }
 
@@ -8928,11 +8928,11 @@ function renderOpsKPI(){
   const top10=trainers.slice(0,10);
   const bot10=[...trainers].sort((a,b)=>a.efficiency-b.efficiency).slice(0,10);
   const sc={female:'#E74C3C',male:'#2E86C1',bike:'#D4AC0D'};
-  const sn={female:'👩 نسائي',male:'👨 رجالي',bike:'🏍️ دراجات'};
+  const sn={female:'نسائي',male:'رجالي',bike:'🏍️ دراجات'};
   el.innerHTML=`<div class="card" style="margin-bottom:14px;background:${avg>=90?'rgba(39,174,96,0.08)':'rgba(212,172,13,0.08)'};border-color:${avg>=90?'rgba(39,174,96,0.3)':'rgba(212,172,13,0.3)'};">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div><div style="font-size:13px;font-weight:900;">🎯 الكفاءة الإجمالية</div><div style="font-size:10px;color:var(--text-dim);">الهدف: 90% | ${trainers.length} مدرب</div></div>
-      <div style="text-align:center;"><div style="font-size:28px;font-weight:900;color:${avg>=90?'#27AE60':'#D4AC0D'};">${avg.toFixed(1)}%</div><div style="font-size:10px;color:${avg>=90?'#27AE60':'#D4AC0D'};">${avg>=90?'✅ حقق الهدف':'⚠️ دون الهدف'}</div></div>
+      <div style="text-align:center;"><div style="font-size:28px;font-weight:900;color:${avg>=90?'#27AE60':'#D4AC0D'};">${avg.toFixed(1)}%</div><div style="font-size:10px;color:${avg>=90?'#27AE60':'#D4AC0D'};">${avg>=90?'✅ حقق الهدف':'دون الهدف'}</div></div>
     </div></div>
   <div class="card" style="margin-bottom:14px;"><div style="font-size:13px;font-weight:900;color:#27AE60;margin-bottom:10px;">🏆 أعلى 10 مدربين</div>${top10.map((t,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;${i<9?'border-bottom:1px solid var(--border)':''}"><div style="width:28px;height:28px;border-radius:50%;background:${i<3?'linear-gradient(135deg,#D4AC0D,#9A7A00)':'var(--primary)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:${i<3?'#fff':'var(--text-dim)'};">${i+1}</div><div style="flex:1;"><div style="font-size:12px;font-weight:700;">${t.name}</div><div style="font-size:9px;color:var(--text-dim);">${sn[t.section]} · ${t.actualSessions} حصة · ${t.absDays} أيام غياب</div></div><div style="background:rgba(39,174,96,0.12);color:#27AE60;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:900;">${t.efficiency.toFixed(1)}%</div></div>`).join('')}</div>
   <div class="card" style="margin-bottom:14px;"><div style="font-size:13px;font-weight:900;color:#E74C3C;margin-bottom:10px;">⚠️ أقل 10 مدربين</div>${bot10.map((t,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;${i<9?'border-bottom:1px solid var(--border)':''}"><div style="width:28px;height:28px;border-radius:50%;background:rgba(231,76,60,0.12);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#E74C3C;">${i+1}</div><div style="flex:1;"><div style="font-size:12px;font-weight:700;">${t.name}</div><div style="font-size:9px;color:var(--text-dim);">${t.recommendation}</div></div><div style="background:rgba(231,76,60,0.12);color:#E74C3C;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:900;">${t.efficiency.toFixed(1)}%</div></div>`).join('')}</div>`;
@@ -9045,15 +9045,15 @@ async function exportOpsExcelFull(){
     const data=trainers.filter(t=>t.section===k);if(!data.length)return;
     const sa=data.reduce((s,t)=>s+t.efficiency,0)/data.length;
     aT(wk,'قسم '+l+' — '+data.length+' مدرب',c);aH(wk);
-    [['متوسط الكفاءة',sa.toFixed(1)+'%',sa>=90?'✅ حقق الهدف':'⚠️ دون الهدف'],
+    [['متوسط الكفاءة',sa.toFixed(1)+'%',sa>=90?'✅ حقق الهدف':'دون الهدف'],
      ['مدربون ≥90%',data.filter(t=>t.efficiency>=90).length+'/'+data.length,''],
      ['غياب',data.reduce((s,t)=>s+(t.absDays||0),0)+' يوم',''],
      ['حصص مهدرة',data.reduce((s,t)=>s+(t.unusedSessions||0),0).toFixed(0),''],
     ].forEach((r,i)=>aR(wk,r[0],r[1],r[2],i));wk.addRow([]);
-    const t5=wk.addRow(['🏆 أعلى 5 — '+l]);t5.getCell(1).font={name:'Arial',bold:true,size:11,color:{argb:CLR.green}};t5.height=22;
+    const t5=wk.addRow(['أعلى 5 — '+l]);t5.getCell(1).font={name:'Arial',bold:true,size:11,color:{argb:CLR.green}};t5.height=22;
     [...data].sort((a,b)=>b.efficiency-a.efficiency).slice(0,5).forEach((t,i)=>aR(wk,i+1+'. '+t.name,t.efficiency.toFixed(1)+'%',t.recommendation||'',i));
     wk.addRow([]);
-    const b5=wk.addRow(['⚠️ أدنى 5 — '+l]);b5.getCell(1).font={name:'Arial',bold:true,size:11,color:{argb:CLR.red}};b5.height=22;
+    const b5=wk.addRow(['أدنى 5 — '+l]);b5.getCell(1).font={name:'Arial',bold:true,size:11,color:{argb:CLR.red}};b5.height=22;
     [...data].sort((a,b)=>a.efficiency-b.efficiency).slice(0,5).forEach((t,i)=>aR(wk,i+1+'. '+t.name,t.efficiency.toFixed(1)+'%',t.recommendation||'',i));
     wk.addRow([]);
   });
@@ -9111,7 +9111,7 @@ async function exportOpsExcelNew(){
   const avg=trainers.reduce((s,t)=>s+t.efficiency,0)/trainers.length;
   ws2.addRow(['مؤشر','القيمة','ملاحظة']);
   ws2.getRow(1).eachCell(c=>{c.font={name:'Arial',bold:true,color:{argb:W}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:D}};});
-  [[`الكفاءة الإجمالية`,avg.toFixed(1)+'%',avg>=90?'✅ حقق الهدف 90%':'⚠️ دون الهدف'],[`مدربون ≥90%`,trainers.filter(t=>t.efficiency>=90).length+'/'+trainers.length,''],[`أقل كفاءة`,[...trainers].sort((a,b)=>a.efficiency-b.efficiency)[0]?.name||'—',[...trainers].sort((a,b)=>a.efficiency-b.efficiency)[0]?.efficiency.toFixed(1)+'%'],[`إجمالي الغياب`,trainers.reduce((s,t)=>s+t.absDays,0)+' يوم',''],[`حصص مهدرة`,trainers.reduce((s,t)=>s+t.unusedSessions,0).toFixed(0)+' حصة','']].forEach(r=>ws2.addRow(r));
+  [[`الكفاءة الإجمالية`,avg.toFixed(1)+'%',avg>=90?'حقق الهدف 90%':'دون الهدف'],[`مدربون ≥90%`,trainers.filter(t=>t.efficiency>=90).length+'/'+trainers.length,''],[`أقل كفاءة`,[...trainers].sort((a,b)=>a.efficiency-b.efficiency)[0]?.name||'—',[...trainers].sort((a,b)=>a.efficiency-b.efficiency)[0]?.efficiency.toFixed(1)+'%'],[`إجمالي الغياب`,trainers.reduce((s,t)=>s+t.absDays,0)+' يوم',''],[`حصص مهدرة`,trainers.reduce((s,t)=>s+t.unusedSessions,0).toFixed(0)+' حصة','']].forEach(r=>ws2.addRow(r));
   ws2.columns=[{width:30},{width:20},{width:35}];
   const buf=await wb.xlsx.writeBuffer();
   const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
@@ -9533,7 +9533,7 @@ function renderQuarterlyResults() {
   ['female','male'].forEach(sec=>{
     const vList=violations.filter(v=>v.section===sec);
     if(!vList.length)return;
-    const secL=sec==='female'?'👩 القسم النسائي':'👨 القسم الرجالي';
+    const secL=sec==='female'?'القسم النسائي':'القسم الرجالي';
     const secC=sec==='female'?'#E74C3C':'#2E86C1';
     const byType={};vList.forEach(v=>{byType[v.violation_type||'أخرى']=(byType[v.violation_type||'أخرى']||0)+1;});
     const topViol=Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -9603,8 +9603,8 @@ function renderQuarterlyResults() {
   // ── ٣ كفاءة التشغيل ──
   if(ops.length){
     const sections=[
-      {k:'female',l:'👩 نسائي',c:'#E74C3C',data:femOps,avg:avgFemOps},
-      {k:'male',  l:'👨 رجالي',c:'#2E86C1',data:malOps, avg:avgMalOps},
+      {k:'female',l:'نسائي',c:'#E74C3C',data:femOps,avg:avgFemOps},
+      {k:'male',  l:'رجالي',c:'#2E86C1',data:malOps, avg:avgMalOps},
       {k:'bike',  l:'🏍️ دراجات',c:'#D4AC0D',data:bikeOps,avg:avgBikeOps},
     ].filter(s=>s.data.length);
     html+=`<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
@@ -9709,7 +9709,7 @@ function renderQuarterlyResults() {
       const items=facilities.filter(r=>r.report_type===t&&r.total_score);
       avgByType[t]=items.length?Math.round(items.reduce((s,r)=>s+(r.total_score||0),0)/items.length):0;
     });
-    const TYPE_L={clean:'🧹 المرافق والنظافة',maint:'🔨 الصيانة',safe:'🚒 السلامة',sec:'🔒 الأمن'};
+    const TYPE_L={clean:'المرافق والنظافة',maint:'الصيانة',safe:'السلامة',sec:'الأمن'};
     const recs=[];
     if(avgFacil>0&&avgFacil<70)recs.push(`⚠️ متوسط نماذج الرصد ${avgFacil}% — دون الهدف 70%`);
     Object.entries(avgByType).forEach(([t,v])=>{if(v>0&&v<60)recs.push(`🔴 ${TYPE_L[t]||t}: ${v}% — يحتاج تدخلاً فورياً`);});
@@ -9739,7 +9739,7 @@ function renderQuarterlyResults() {
       const items=buildings.filter(r=>r.report_type===t&&r.total_score);
       avgByType[t]=items.length?Math.round(items.reduce((s,r)=>s+(r.total_score||0),0)/items.length):0;
     });
-    const TYPE_L={cust:'😊 خدمة العملاء',counter:'🖥️ الكاونتر',exam:'📝 قاعات الاختبار',super:'👷 الإشراف'};
+    const TYPE_L={cust:'خدمة العملاء',counter:'الكاونتر',exam:'قاعات الاختبار',super:'الإشراف'};
     const recs=[];
     if(avgBuild>0&&avgBuild<70)recs.push(`⚠️ متوسط تقييم المبنى ${avgBuild}% — دون الهدف 70%`);
     Object.entries(avgByType).forEach(([t,v])=>{if(v>0&&v<60)recs.push(`🔴 ${TYPE_L[t]||t}: ${v}% — يحتاج خطة تحسين عاجلة`);});
@@ -9790,8 +9790,8 @@ function renderQuarterlyResults() {
     };
     html+=`<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
       <div style="font-size:14px;font-weight:900;margin-bottom:12px;">🏅 الأعلى بالتقييم — آراء العملاء</div>
-      ${renderRatSec(ratings.filter(r=>r.section==='female'||r.zone==='female'),'👩 نسائي','#E74C3C')}
-      ${renderRatSec(ratings.filter(r=>r.section==='male'||r.zone==='male'),'👨 رجالي','#2E86C1')}
+      ${renderRatSec(ratings.filter(r=>r.section==='female'||r.zone==='female'),'نسائي','#E74C3C')}
+      ${renderRatSec(ratings.filter(r=>r.section==='male'||r.zone==='male'),'رجالي','#2E86C1')}
     </div>`;
   }
 
@@ -9894,7 +9894,7 @@ async function exportQuarterlyExcel() {
     const rtl=(ws)=>{ws.views=[{rightToLeft:true}];};
 
     // ══ شيت ١: ملخص KPIs ══
-    const ws0=wb.addWorksheet('📊 ملخص الربع');
+    const ws0=wb.addWorksheet('ملخص الربع');
     rtl(ws0); ws0.columns=[{width:28},{width:14},{width:14},{width:14},{width:14},{width:35}];
     addT(ws0,`تقرير الربع ${qLabel} — ${d.year} — نورة لتعليم القيادة`,C.dark,6);
     addS(ws0,'مؤشرات الأداء الرئيسية — KPIs',C.teal,6);
@@ -9920,15 +9920,15 @@ async function exportQuarterlyExcel() {
     [
       ['مخالفات نسائي',femViol.length,'—','—','—',femViol.filter(v=>v.grade==='A').length>0?'مخالفات A تستوجب إجراءً':'المستوى مقبول'],
       ['مخالفات رجالي',malViol.length,'—','—','—',malViol.filter(v=>v.grade==='A').length>0?'مخالفات A تستوجب إجراءً':'المستوى مقبول'],
-      ['رضا العملاء %',avgS+'%','90%',avgS>=90?'✅ ممتاز':avgS>=70?'🟡 جيد':'🔴 دون الهدف',avgS<90?`${90-avgS}%`:'—',avgS<70?'مراجعة فورية لأسباب التذمر':'متابعة المستوى'],
-      ['كفاءة نسائي %',avgFO?avgFO+'%':'لا بيانات','90%',avgFO>=90?'✅ ممتاز':avgFO>=70?'🟡 جيد':avgFO>0?'🔴 دون الهدف':'—',avgFO&&avgFO<90?`${90-avgFO}%`:'—',avgFO&&avgFO<70?'خطة تطوير مطلوبة':'استمرار التحسن'],
-      ['كفاءة رجالي %',avgMO?avgMO+'%':'لا بيانات','90%',avgMO>=90?'✅ ممتاز':avgMO>=70?'🟡 جيد':avgMO>0?'🔴 دون الهدف':'—',avgMO&&avgMO<90?`${90-avgMO}%`:'—',avgMO&&avgMO<70?'خطة تطوير مطلوبة':'استمرار التحسن'],
-      ['كفاءة دراجات %',avgBO?avgBO+'%':'لا بيانات','90%',avgBO>=90?'✅ ممتاز':avgBO>=70?'🟡 جيد':avgBO>0?'🔴 دون الهدف':'—',avgBO&&avgBO<90?`${90-avgBO}%`:'—',avgBO&&avgBO<70?'خطة تطوير مطلوبة':'استمرار التحسن'],
+      ['رضا العملاء %',avgS+'%','90%',avgS>=90?'ممتاز':avgS>=70?'جيد':'دون الهدف',avgS<90?`${90-avgS}%`:'—',avgS<70?'مراجعة فورية لأسباب التذمر':'متابعة المستوى'],
+      ['كفاءة نسائي %',avgFO?avgFO+'%':'لا بيانات','90%',avgFO>=90?'ممتاز':avgFO>=70?'جيد':avgFO>0?'دون الهدف':'—',avgFO&&avgFO<90?`${90-avgFO}%`:'—',avgFO&&avgFO<70?'خطة تطوير مطلوبة':'استمرار التحسن'],
+      ['كفاءة رجالي %',avgMO?avgMO+'%':'لا بيانات','90%',avgMO>=90?'ممتاز':avgMO>=70?'جيد':avgMO>0?'دون الهدف':'—',avgMO&&avgMO<90?`${90-avgMO}%`:'—',avgMO&&avgMO<70?'خطة تطوير مطلوبة':'استمرار التحسن'],
+      ['كفاءة دراجات %',avgBO?avgBO+'%':'لا بيانات','90%',avgBO>=90?'ممتاز':avgBO>=70?'جيد':avgBO>0?'دون الهدف':'—',avgBO&&avgBO<90?`${90-avgBO}%`:'—',avgBO&&avgBO<70?'خطة تطوير مطلوبة':'استمرار التحسن'],
       ['احتفاظ بالرسوم — حالات',retSales.length,'—','—','—',`${retRate}% من إجمالي ${sales.length} حالة`],
-      ['عملاء الاسترداد — حالات',recSales.length,'—',recSales.length>retSales.length?'🔴 استرداد أعلى':'🟡 مقبول','—',recSales.length>retSales.length?'مراجعة أسباب الاسترداد':'—'],
-      ['معدل الاحتفاظ بالرسوم %',retRate+'%','60%',retRate>=60?'✅ محقق':retRate>=40?'🟡 مقبول':'🔴 دون الهدف',retRate<60?`${60-retRate}%`:'—',retRate<60?'مراجعة أسباب الاسترداد':'متابعة المستوى'],
-      ['تقييم المبنى %',avgBld?avgBld+'%':'لا بيانات','70%',avgBld>=70?'✅ جيد':avgBld>0?'🔴 دون الهدف':'—',avgBld&&avgBld<70?`${70-avgBld}%`:'—',avgBld&&avgBld<70?'خطة تحسين مطلوبة':'—'],
-      ['تقييم المرافق %',avgFac?avgFac+'%':'لا بيانات','70%',avgFac>=70?'✅ جيد':avgFac>0?'🔴 دون الهدف':'—',avgFac&&avgFac<70?`${70-avgFac}%`:'—',avgFac&&avgFac<70?'متابعة ومراجعة':'—'],
+      ['عملاء الاسترداد — حالات',recSales.length,'—',recSales.length>retSales.length?'🔴 استرداد أعلى':'مقبول','—',recSales.length>retSales.length?'مراجعة أسباب الاسترداد':'—'],
+      ['معدل الاحتفاظ بالرسوم %',retRate+'%','60%',retRate>=60?'محقق':retRate>=40?'مقبول':'دون الهدف',retRate<60?`${60-retRate}%`:'—',retRate<60?'مراجعة أسباب الاسترداد':'متابعة المستوى'],
+      ['تقييم المبنى %',avgBld?avgBld+'%':'لا بيانات','70%',avgBld>=70?'جيد':avgBld>0?'دون الهدف':'—',avgBld&&avgBld<70?`${70-avgBld}%`:'—',avgBld&&avgBld<70?'خطة تحسين مطلوبة':'—'],
+      ['تقييم المرافق %',avgFac?avgFac+'%':'لا بيانات','70%',avgFac>=70?'جيد':avgFac>0?'دون الهدف':'—',avgFac&&avgFac<70?`${70-avgFac}%`:'—',avgFac&&avgFac<70?'متابعة ومراجعة':'—'],
     ].forEach((r,i)=>{
       const row=ws0.addRow(r);
       sR(row,i%2===0?C.lt:C.white);
@@ -9940,7 +9940,7 @@ async function exportQuarterlyExcel() {
     });
 
     // ══ شيت ٢: المخالفات ══
-    const ws1=wb.addWorksheet('⚖️ المخالفات');
+    const ws1=wb.addWorksheet('المخالفات');
     rtl(ws1); ws1.columns=[{width:12},{width:20},{width:14},{width:8},{width:35},{width:18},{width:12}];
     addT(ws1,`تقارير المخالفات — ${qLabel} ${d.year}`,C.red,7);
     ['female','male'].forEach(sec=>{
@@ -9971,7 +9971,7 @@ async function exportQuarterlyExcel() {
     });
 
     // ══ شيت ٣: رضا العملاء ══
-    const ws2=wb.addWorksheet('⭐ رضا العملاء');
+    const ws2=wb.addWorksheet('رضا العملاء');
     rtl(ws2); ws2.columns=[{width:14},{width:20},{width:16},{width:16},{width:35},{width:18}];
     addT(ws2,`رضا العملاء — ${qLabel} ${d.year}`,C.gold,6);
     addS(ws2,'التقييمات التفصيلية',C.teal,6);
@@ -9995,7 +9995,7 @@ async function exportQuarterlyExcel() {
     });
 
     // ══ شيت ٤: المبيعات والاسترداد ══
-    const ws3=wb.addWorksheet('💼 المبيعات');
+    const ws3=wb.addWorksheet('المبيعات');
     rtl(ws3); ws3.columns=[{width:14},{width:20},{width:18},{width:16},{width:16},{width:16},{width:16}];
     addT(ws3,`المبيعات وعملاء الاسترداد — ${qLabel} ${d.year}`,C.purple,7);
     addS(ws3,'تقييم مكالمات الاسترداد',C.teal,7);
@@ -10022,7 +10022,7 @@ async function exportQuarterlyExcel() {
       Object.entries(staffPerf2).forEach(([name,v],i)=>{
         const avg=Math.round(v.scores.reduce((a,b)=>a+b,0)/v.scores.length*10)/10;
         const rate=v.total>0?Math.round(v.kept/v.total*100):0;
-        const row=ws3.addRow([name,v.total,v.kept,rate+'%',avg,rate>=60?'✅ محقق':rate>=40?'🟡 مقبول':'🔴 دون الهدف',rate<60?'تحتاج متابعة وتدريب':'استمرار التحسن']);
+        const row=ws3.addRow([name,v.total,v.kept,rate+'%',avg,rate>=60?'محقق':rate>=40?'مقبول':'دون الهدف',rate<60?'تحتاج متابعة وتدريب':'استمرار التحسن']);
         sR(row,i%2===0?C.lt:C.white);
         row.getCell(1).font={name:'Arial',bold:true,size:10};
         row.getCell(4).font={name:'Arial',bold:true,size:11,color:{argb:rate>=60?C.green:rate>=40?C.gold:C.red}};
@@ -10030,13 +10030,13 @@ async function exportQuarterlyExcel() {
     }
 
     // ══ شيت ٥: كفاءة التشغيل ══
-    const ws4=wb.addWorksheet('⚙️ كفاءة التشغيل');
+    const ws4=wb.addWorksheet('كفاءة التشغيل');
     rtl(ws4); ws4.columns=[{width:14},{width:28},{width:16},{width:8},{width:8},{width:8},{width:18}];
     addT(ws4,`كفاءة التشغيل — ${qLabel} ${d.year}`,C.dark,7);
     ['female','male','bike'].forEach(zone=>{
       const zList=ops.filter(r=>r.zone===zone||r.section===zone);
       if(!zList.length)return;
-      const zL=zone==='female'?'👩 القسم النسائي':zone==='male'?'👨 القسم الرجالي':'🏍️ الدراجات';
+      const zL=zone==='female'?'القسم النسائي':zone==='male'?'القسم الرجالي':'الدراجات';
       const zC=zone==='female'?C.red:zone==='male'?C.blue:C.gold;
       const avg=Math.round(zList.reduce((s,r)=>s+(r.efficiency_pct||0),0)/zList.length);
       addS(ws4,`${zL} — متوسط ${avg}%`,zC,7);
@@ -10050,13 +10050,13 @@ async function exportQuarterlyExcel() {
     });
 
     // ══ شيت ٦: المرافق ══
-    const ws5=wb.addWorksheet('🔧 المرافق');
+    const ws5=wb.addWorksheet('المرافق');
     rtl(ws5); ws5.columns=[{width:14},{width:28},{width:22},{width:14},{width:14},{width:22}];
     addT(ws5,`ملاحظات المرافق والنماذج — ${qLabel} ${d.year}`,C.teal,6);
     addS(ws5,'التقارير التفصيلية',C.teal,6);
     const sH6=ws5.addRow(['التاريخ','الموظف/الوحدة','نوع النموذج','الدرجة /100','التصنيف','مسؤول الجودة']);
     sH(sH6);
-    const FAC_L={clean:'🧹 المرافق والنظافة',maint:'🔨 الصيانة',safe:'🚒 السلامة',sec:'🔒 الأمن'};
+    const FAC_L={clean:'المرافق والنظافة',maint:'الصيانة',safe:'السلامة',sec:'الأمن'};
     [...facilities].sort((a,b)=>(b.total_score||0)-(a.total_score||0)).forEach((f,i)=>{
       const row=ws5.addRow([f.report_date||'—',f.employee_name||'—',FAC_L[f.report_type]||f.section_title||f.report_type||'ملاحظة',f.total_score||'—',f.rating||'—',f.observer_name||f.observer||'—']);
       sR(row,i%2===0?C.lt:C.white);
@@ -10069,19 +10069,19 @@ async function exportQuarterlyExcel() {
     ['clean','maint','safe','sec'].forEach((t,i)=>{
       const items=facilities.filter(r=>r.report_type===t);
       const avg=items.filter(r=>r.total_score).length?Math.round(items.filter(r=>r.total_score).reduce((s,r)=>s+(r.total_score||0),0)/items.filter(r=>r.total_score).length):0;
-      const row=ws5.addRow([FAC_L[t],items.length,avg?avg+'%':'—',avg>=70?'✅ جيد':avg>0?'🔴 دون الهدف':'—',avg&&avg<70?`${70-avg}%`:'—',avg&&avg<70?'خطة تحسين مطلوبة':'—']);
+      const row=ws5.addRow([FAC_L[t],items.length,avg?avg+'%':'—',avg>=70?'جيد':avg>0?'دون الهدف':'—',avg&&avg<70?`${70-avg}%`:'—',avg&&avg<70?'خطة تحسين مطلوبة':'—']);
       sR(row,i%2===0?C.lt:C.white);
       if(avg>0)row.getCell(3).font={name:'Arial',bold:true,size:11,color:{argb:ec(avg)}};
     });
 
     // ══ شيت ٧: المبنى الرئيسي ══
-    const ws6=wb.addWorksheet('🏢 المبنى الرئيسي');
+    const ws6=wb.addWorksheet('المبنى الرئيسي');
     rtl(ws6); ws6.columns=[{width:14},{width:28},{width:22},{width:14},{width:14},{width:22}];
     addT(ws6,`تقرير المبنى الرئيسي — ${qLabel} ${d.year}`,C.blue,6);
     addS(ws6,'التقييمات التفصيلية',C.teal,6);
     const sH7=ws6.addRow(['التاريخ','اسم الموظف','القسم','الدرجة /100','التصنيف','مسؤول الجودة']);
     sH(sH7);
-    const BLD_L={cust:'😊 خدمة العملاء',counter:'🖥️ الكاونتر',exam:'📝 قاعات الاختبار',super:'👷 الإشراف'};
+    const BLD_L={cust:'خدمة العملاء',counter:'الكاونتر',exam:'قاعات الاختبار',super:'الإشراف'};
     [...buildings].sort((a,b)=>(b.total_score||0)-(a.total_score||0)).forEach((b,i)=>{
       const row=ws6.addRow([b.report_date||'—',b.employee_name||'—',BLD_L[b.report_type]||b.section_title||b.report_type||'تقرير',b.total_score||'—',b.rating||'—',b.observer_name||b.observer||'—']);
       sR(row,i%2===0?C.ltB:C.white);
@@ -10093,19 +10093,19 @@ async function exportQuarterlyExcel() {
     ['cust','counter','exam','super'].forEach((t,i)=>{
       const items=buildings.filter(r=>r.report_type===t);
       const avg=items.filter(r=>r.total_score).length?Math.round(items.filter(r=>r.total_score).reduce((s,r)=>s+(r.total_score||0),0)/items.filter(r=>r.total_score).length):0;
-      const row=ws6.addRow([BLD_L[t],items.length,avg?avg+'%':'—',avg>=70?'✅ جيد':avg>0?'🔴 دون الهدف':'—',avg&&avg<70?`${70-avg}%`:'—',avg&&avg<70?'خطة تحسين مطلوبة':'—']);
+      const row=ws6.addRow([BLD_L[t],items.length,avg?avg+'%':'—',avg>=70?'جيد':avg>0?'دون الهدف':'—',avg&&avg<70?`${70-avg}%`:'—',avg&&avg<70?'خطة تحسين مطلوبة':'—']);
       sR(row,i%2===0?C.ltB:C.white);
       if(avg>0)row.getCell(3).font={name:'Arial',bold:true,size:11,color:{argb:ec(avg)}};
     });
 
     // ══ شيت ٨: الأعلى بالتقييم ══
-    const ws7=wb.addWorksheet('🏅 تقييم المدربين');
+    const ws7=wb.addWorksheet('تقييم المدربين');
     rtl(ws7); ws7.columns=[{width:28},{width:12},{width:16},{width:14},{width:14},{width:22}];
     addT(ws7,`الأعلى بالتقييم — آراء العملاء — ${qLabel} ${d.year}`,C.dark,6);
     ['female','male'].forEach(sec=>{
       const rList=ratings.filter(r=>r.section===sec||r.zone===sec);
       if(!rList.length)return;
-      const secL=sec==='female'?'👩 القسم النسائي':'👨 القسم الرجالي';
+      const secL=sec==='female'?'القسم النسائي':'القسم الرجالي';
       const secC=sec==='female'?C.red:C.blue;
       addS(ws7,secL,secC,6);
       const hdr=ws7.addRow(['اسم المدرب','التاريخ','التقييم /5','عدد الآراء','الحالة','ملاحظات']);
@@ -10120,7 +10120,7 @@ async function exportQuarterlyExcel() {
       Object.entries(byTrainer).map(([n,v])=>({
         name:n,avg:Math.round(v.scores.reduce((a,b)=>a+b,0)/v.scores.length*10)/10,count:v.scores.length
       })).sort((a,b)=>b.avg-a.avg).forEach((r,i)=>{
-        const row=ws7.addRow([r.name,'—',r.avg,r.count,r.avg>=4?'✅ ممتاز':r.avg>=3?'🟡 جيد':'🔴 دون المتوسط','']);
+        const row=ws7.addRow([r.name,'—',r.avg,r.count,r.avg>=4?'ممتاز':r.avg>=3?'جيد':'دون المتوسط','']);
         sR(row,i%2===0?C.lt:C.white);
         row.getCell(1).font={name:'Arial',bold:true,size:10};
         row.getCell(3).font={name:'Arial',bold:true,size:12,color:{argb:r.avg>=4?C.green:r.avg>=3?C.gold:C.red}};
@@ -10128,7 +10128,7 @@ async function exportQuarterlyExcel() {
     });
 
     // ══ شيت ٩: الاحتفاظ والاسترداد (مفصّل) ══
-    const ws8=wb.addWorksheet('✅ الاحتفاظ والاسترداد');
+    const ws8=wb.addWorksheet('الاحتفاظ والاسترداد');
     rtl(ws8); ws8.columns=[{width:14},{width:22},{width:20},{width:18},{width:14},{width:18},{width:22}];
     addT(ws8,`الاحتفاظ بالرسوم وعملاء الاسترداد — ${qLabel} ${d.year}`,C.purple,7);
     // ملخص
@@ -10145,7 +10145,7 @@ async function exportQuarterlyExcel() {
     });
     // تفاصيل احتفاظ
     if(retS2.length){
-      addS(ws8,'✅ حالات الاحتفاظ بالرسوم',C.green,7);
+      addS(ws8,'حالات الاحتفاظ بالرسوم',C.green,7);
       const h1=ws8.addRow(['التاريخ','اسم العميل','الموظفة','نوع الطلب','رسوم','سبب العميل','ملاحظات']);
       sH(h1,C.green);
       retS2.forEach((r,i)=>{
@@ -10155,7 +10155,7 @@ async function exportQuarterlyExcel() {
     }
     // تفاصيل استرداد
     if(recS2.length){
-      addS(ws8,'🔄 طلبات الاسترداد',C.red,7);
+      addS(ws8,'طلبات الاسترداد',C.red,7);
       const h2=ws8.addRow(['التاريخ','اسم العميل','الموظفة','نوع الطلب','رسوم','سبب العميل','ملاحظات']);
       sH(h2,C.red);
       recS2.forEach((r,i)=>{
@@ -10166,7 +10166,7 @@ async function exportQuarterlyExcel() {
 
     // ══ شيت ١٠: الحوافز الشهرية ══
     if(incentives.length){
-      const ws9=wb.addWorksheet('💰 الحوافز الشهرية');
+      const ws9=wb.addWorksheet('الحوافز الشهرية');
       rtl(ws9); ws9.columns=[{width:14},{width:8},{width:8},{width:24},{width:14},{width:14},{width:28}];
       addT(ws9,`الحوافز الشهرية — ${qLabel} ${d.year}`,C.purple,7);
       // ملخص
@@ -10219,7 +10219,7 @@ async function exportQuarterlyExcel() {
     [
       ['الاحتفاظ بالرسوم — عدد الحالات',retS3.length,'—','—','—',retR3+'% من الإجمالي'],
       ['عملاء الاسترداد — عدد الحالات',recS3.length,'—','—','—',recS3.length>retS3.length?'الاسترداد أعلى من الاحتفاظ':'—'],
-      ['معدل الاحتفاظ %',retR3+'%','60%',retR3>=60?'✅ محقق':retR3>=40?'🟡 مقبول':'🔴 دون الهدف',retR3<60?`${60-retR3}%`:'—',retR3<60?'مراجعة أسباب الاسترداد':'استمرار التحسن'],
+      ['معدل الاحتفاظ %',retR3+'%','60%',retR3>=60?'محقق':retR3>=40?'مقبول':'دون الهدف',retR3<60?`${60-retR3}%`:'—',retR3<60?'مراجعة أسباب الاسترداد':'استمرار التحسن'],
       ['الأعلى تقييماً',topRat?topRat.trainer_name||'—':'لا بيانات','—','—','—',topRat?`${(topRat.mention_pct||topRat.rating||0).toFixed(1)}%`:'—'],
       ['إجمالي سجلات الحوافز',incentives.length,'—','—','—','—'],
       ['إجمالي نقاط الحوافز',incTotal2,'—','—','—','—'],
@@ -10315,7 +10315,7 @@ async function exportRatingsExcelFull() {
 
   sorted.forEach((r,i) => {
     const rv = parseFloat(r.rating||r.avg_rating||r[Object.keys(r)[1]]||0);
-    const cat = rv>=4?'✅ ممتاز':rv>=3?'⚠️ جيد':rv>=2?'⚠️ مقبول':'❌ ضعيف';
+    const cat = rv>=4?'ممتاز':rv>=3?'جيد':rv>=2?'⚠️ مقبول':'❌ ضعيف';
     const rec = rv>=4?'يستحق تقدير وتحفيز':rv>=3?'أداء جيد — يحتاج تطوير في بعض المحاور':rv>=2?'يحتاج متابعة ودعم':'يحتاج تدخل عاجل وخطة تطوير';
     const ec  = rv>=4?C.green:rv>=3?C.gold:rv>=2?C.orange:C.red;
     const row = wsSum.addRow([i+1, r.name||r.trainer_name||Object.values(r)[0], rv.toFixed(2), cat, rec]);
@@ -10328,7 +10328,7 @@ async function exportRatingsExcelFull() {
 
   // إجمالي
   wsSum.addRow([]);
-  const avgRow = wsSum.addRow(['','المتوسط العام', avg.toFixed(2), avg>=4?'✅ ممتاز':avg>=3?'⚠️ جيد':'❌ يحتاج تحسين','']);
+  const avgRow = wsSum.addRow(['','المتوسط العام', avg.toFixed(2), avg>=4?'ممتاز':avg>=3?'جيد':'يحتاج تحسين','']);
   avgRow.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',bold:true,size:12};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE8F5F3'}};});
   avgRow.getCell(3).font={name:'Arial',bold:true,size:14,color:{argb:avg>=4?C.green:avg>=3?C.gold:C.red}};
 
@@ -10911,7 +10911,7 @@ async function openPendingModal() {
     </div>`;
   } else {
     list.innerHTML = pending.map(record => {
-      const sec = record.section === 'female' ? '👩 نسائي' : '👨 رجالي';
+      const sec = record.section === 'female' ? 'نسائي' : 'رجالي';
       const date = new Date(record.submittedAt).toLocaleString('ar');
       return `<div style="background:var(--card2);border-radius:16px;padding:16px;margin-bottom:12px;border-right:4px solid var(--accent);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
@@ -11737,7 +11737,7 @@ function calcObsTotal(type) {
   // تصنيف
   const ratingEl = document.getElementById(`obs_${type}_rating`);
   if (ratingEl) {
-    const rating = total>=90?{t:'ممتاز ⭐',c:'#16A085',rec:'ترشيح رسمي للتقدير'}
+    const rating = total>=90?{t:'ممتاز',c:'#16A085',rec:'ترشيح رسمي للتقدير'}
                  : total>=80?{t:'جيد جداً',c:'#27AE60',rec:'توثيق الإنجاز وتحديد أهداف تطوير'}
                  : total>=70?{t:'جيد',c:'#F1C40F',rec:'خطة تطوير فردية وجلسة ملاحظات'}
                  : total>=60?{t:'مقبول',c:'#E67E22',rec:'تنبيه تحريري + خطة تحسين 30 يوم'}
@@ -11952,7 +11952,7 @@ function calcFacTotal(type) {
   if(tEl){ tEl.textContent=`${total.toFixed(1)} / 100`; tEl.style.color=total>=90?'#16A085':total>=80?'#27AE60':total>=70?'#F1C40F':total>=60?'#E67E22':'#E74C3C'; }
   const rEl=document.getElementById(`fobs_${type}_rating`);
   if(rEl){
-    const R=total>=90?{t:'ممتاز ⭐',c:'#16A085',rec:'ترشيح للتقدير'}
+    const R=total>=90?{t:'ممتاز',c:'#16A085',rec:'ترشيح للتقدير'}
            :total>=80?{t:'جيد جداً',c:'#27AE60',rec:'توثيق الإنجاز'}
            :total>=70?{t:'جيد',c:'#F1C40F',rec:'خطة تطوير فردية'}
            :total>=60?{t:'مقبول',c:'#E67E22',rec:'تنبيه + خطة 30 يوم'}
@@ -12085,7 +12085,7 @@ async function exportFacilityExcel() {
     const typeIcons={clean:'🧹',maint:'🔨',safe:'🚒',sec:'🔒'};
 
     // ── شيت ١: ملخص KPIs ──
-    const ws1=wb.addWorksheet('📊 ملخص KPIs');
+    const ws1=wb.addWorksheet('ملخص KPIs');
     ws1.views=[{rightToLeft:true}];
     ws1.columns=[{width:30},{width:16},{width:16},{width:16},{width:40}];
     sh(ws1,`تقرير المرافق والدعم — ${MN[month]} ${year}`,C.dark,5);
@@ -12097,7 +12097,7 @@ async function exportFacilityExcel() {
     types.forEach((t,i)=>{
       const tRecs=recs.filter(r=>r.report_type===t);
       const avg=tRecs.length?Math.round(tRecs.reduce((s,r)=>s+(r.total_score||0),0)/tRecs.length*10)/10:0;
-      const rating=avg>=90?'ممتاز ⭐':avg>=80?'جيد جداً':avg>=70?'جيد':avg>=60?'مقبول':tRecs.length?'دون المستوى':'— لا بيانات';
+      const rating=avg>=90?'ممتاز':avg>=80?'جيد جداً':avg>=70?'جيد':avg>=60?'مقبول':tRecs.length?'دون المستوى':'— لا بيانات';
       const rec=avg>=90?'استمر على هذا المستوى':avg>=80?'توثيق الإنجاز وتطوير الأهداف':avg>=70?'خطة تطوير + متابعة دورية':avg>=60?'تنبيه تحريري + خطة 30 يوم':tRecs.length?'إحالة فورية للجنة المختصة':'يحتاج بيانات';
       const r=ws1.addRow([`${typeIcons[t]} ${typeTitles[t]}`,tRecs.length,avg||'—',rating,rec]);
       row(r,i%2===0?C.ltTeal:C.white);
@@ -12108,7 +12108,7 @@ async function exportFacilityExcel() {
     });
     ws1.addRow([]);
     const avgTotal=grandCount?Math.round(grandTotal/grandCount*10)/10:0;
-    const tR=ws1.addRow(['المتوسط العام','',avgTotal||'—',avgTotal>=90?'ممتاز ⭐':avgTotal>=70?'جيد':'يحتاج تحسين','']);
+    const tR=ws1.addRow(['المتوسط العام','',avgTotal||'—',avgTotal>=90?'ممتاز':avgTotal>=70?'جيد':'يحتاج تحسين','']);
     tR.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',bold:true,size:12};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:C.ltTeal}};});
     if(avgTotal){tR.getCell(3).font={name:'Arial',bold:true,size:14,color:{argb:ratingColor(avgTotal)}};tR.getCell(3).alignment={horizontal:'center',vertical:'middle'};}
 
@@ -12126,7 +12126,7 @@ async function exportFacilityExcel() {
 
       [...tRecs].sort((a,b)=>(b.total_score||0)-(a.total_score||0)).forEach((rec,i)=>{
         const sc=rec.total_score||0;
-        const rat=sc>=90?'ممتاز ⭐':sc>=80?'جيد جداً':sc>=70?'جيد':sc>=60?'مقبول':'دون المستوى';
+        const rat=sc>=90?'ممتاز':sc>=80?'جيد جداً':sc>=70?'جيد':sc>=60?'مقبول':'دون المستوى';
         const rec2=sc>=90?'ترشيح للتقدير':sc>=80?'توثيق وتطوير':sc>=70?'خطة تطوير':sc>=60?'تنبيه + خطة':'إحالة فورية';
         const r=ws.addRow([i+1,rec.employee_name||'—',rec.report_date||'—',sc,rat,rec2]);
         row(r,i%2===0?C.ltTeal:C.white);
@@ -12209,7 +12209,7 @@ async function exportBuildingExcel() {
     const typeIcons={cust:'😊',counter:'🖥️',exam:'📝',super:'👷'};
 
     // ── شيت KPIs ──
-    const ws1=wb.addWorksheet('📊 ملخص KPIs');
+    const ws1=wb.addWorksheet('ملخص KPIs');
     ws1.views=[{rightToLeft:true}];
     ws1.columns=[{width:28},{width:16},{width:16},{width:16},{width:40}];
     sh(ws1,`تقرير المبنى الرئيسي — ${MN[month]} ${year}`,C.dark,5);
@@ -12220,7 +12220,7 @@ async function exportBuildingExcel() {
     types.forEach((t,i)=>{
       const tRecs=recs.filter(r=>r.report_type===t);
       const avg=tRecs.length?Math.round(tRecs.reduce((s,r)=>s+(r.total_score||0),0)/tRecs.length*10)/10:0;
-      const rating=avg>=90?'ممتاز ⭐':avg>=80?'جيد جداً':avg>=70?'جيد':avg>=60?'مقبول':tRecs.length?'دون المستوى':'— لا بيانات';
+      const rating=avg>=90?'ممتاز':avg>=80?'جيد جداً':avg>=70?'جيد':avg>=60?'مقبول':tRecs.length?'دون المستوى':'— لا بيانات';
       const rec=avg>=90?'ترشيح للتقدير الرسمي':avg>=80?'توثيق وتطوير أهداف جديدة':avg>=70?'خطة تطوير فردية':avg>=60?'تنبيه + خطة 30 يوم':tRecs.length?'إحالة فورية':'يحتاج بيانات';
       const r=ws1.addRow([`${typeIcons[t]} ${typeTitles[t]}`,tRecs.length,avg||'—',rating,rec]);
       row(r,i%2===0?C.ltTeal:C.white);
@@ -12231,7 +12231,7 @@ async function exportBuildingExcel() {
     });
     ws1.addRow([]);
     const avgTotal=grandCount?Math.round(grandTotal/grandCount*10)/10:0;
-    const tR=ws1.addRow(['المتوسط العام للمبنى','',avgTotal||'—',avgTotal>=90?'ممتاز ⭐':avgTotal>=70?'جيد':'يحتاج تحسين','']);
+    const tR=ws1.addRow(['المتوسط العام للمبنى','',avgTotal||'—',avgTotal>=90?'ممتاز':avgTotal>=70?'جيد':'يحتاج تحسين','']);
     tR.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',bold:true,size:12};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:C.ltTeal}};});
     if(avgTotal){tR.getCell(3).font={name:'Arial',bold:true,size:14,color:{argb:ratingColor(avgTotal)}};tR.getCell(3).alignment={horizontal:'center',vertical:'middle'};}
 
@@ -12247,7 +12247,7 @@ async function exportBuildingExcel() {
       hdr(ws.addRow(['#','الموظف','التاريخ','الدرجة /100','التصنيف','التوصية']),typeColors[t]);
       [...tRecs].sort((a,b)=>(b.total_score||0)-(a.total_score||0)).forEach((rec,i)=>{
         const sc=rec.total_score||0;
-        const rat=sc>=90?'ممتاز ⭐':sc>=80?'جيد جداً':sc>=70?'جيد':sc>=60?'مقبول':'دون المستوى';
+        const rat=sc>=90?'ممتاز':sc>=80?'جيد جداً':sc>=70?'جيد':sc>=60?'مقبول':'دون المستوى';
         const rec2=sc>=90?'ترشيح للتقدير':sc>=80?'توثيق وتطوير':sc>=70?'خطة تطوير':sc>=60?'تنبيه':'إحالة فورية';
         const r=ws.addRow([i+1,rec.employee_name||'—',rec.report_date||'—',sc,rat,rec2]);
         row(r,i%2===0?C.ltTeal:C.white);
@@ -12462,7 +12462,7 @@ function selectSeRadio(idx, val) {
   }
   const rEl = document.getElementById('se_rating');
   if(rEl) {
-    const R = total>=90?{t:'ممتاز ⭐',c:'#16A085',r:'ترشيح للتقدير الشهري'}
+    const R = total>=90?{t:'ممتاز',c:'#16A085',r:'ترشيح للتقدير الشهري'}
              :total>=80?{t:'جيد جداً',c:'#27AE60',r:'توثيق الإنجاز وتحديد هدف جديد'}
              :total>=70?{t:'جيد',c:'#F1C40F',r:'جلسة ملاحظات وخطة تطوير'}
              :total>=60?{t:'مقبول',c:'#E67E22',r:'تنبيه تحريري وخطة 30 يوم'}
