@@ -4421,32 +4421,38 @@ async function loadActiveStaffHome(){
   if(!el||!currentUser) return;
   try{
     const START_DATE='2026-03-01';
-    const[{data:vd},{data:sd},{data:fd}]=await Promise.all([
+    const[{data:vd},{data:sd},{data:fd},{data:bd}]=await Promise.all([
       db.from('violations').select('observer').gte('date',START_DATE),
       db.from('surveys').select('observer').gte('date',START_DATE),
       db.from('facility_reports').select('observer').gte('report_date',START_DATE),
+      db.from('building_reports').select('observer').gte('report_date',START_DATE).catch(()=>({data:[]})),
     ]);
-    // كل الموظفين الستة — يبدأون بصفر
     const ALL_STAFF=['أحمد سحاب','أحمد الحماد','ابراهيم الحمد','شهد المقرن','امجاد ابانمي','سمية الخضيري'];
     const map={};
     ALL_STAFF.forEach(n=>map[n]=0);
-    const add=(arr)=>(arr||[]).forEach(r=>{
+
+    // نقاط مختلفة لكل نشاط
+    const add=(arr, pts)=>(arr||[]).forEach(r=>{
       if(!r.observer) return;
       splitObservers(r.observer).forEach(name=>{
         const key=normalizeName(name);
-        if(map[key]!==undefined) map[key]=(map[key]||0)+1;
+        if(map[key]!==undefined) map[key]=(map[key]||0)+pts;
       });
     });
-    add(vd);add(sd);add(fd);
-    // ترتيب تنازلي
+
+    add(vd, 1);  // رصد مخالفة = 1 نقطة
+    add(sd, 1);  // استطلاع رضا = 1 نقطة
+    add(fd, 1);  // ملاحظة مرافق = 1 نقطة
+    add(bd, 1);  // تقرير مبنى = 1 نقطة
+
     const sorted=ALL_STAFF.map(n=>([n,map[n]])).sort((a,b)=>b[1]-a[1]);
     const colors=['#F5C518','#A8A9AD','#CD7F32','var(--accent)','#7D3C98','#2E86C1'];
     const medals=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣'];
-    el.innerHTML=sorted.map(([name,cnt],i)=>`
+    el.innerHTML=sorted.map(([name,pts],i)=>`
       <div class="staff-chip">
         <div class="staff-rank" style="background:${colors[i]}20;color:${colors[i]}">${medals[i]}</div>
         <div class="staff-name" style="color:#fff">${name}</div>
-        <div class="staff-count" style="color:#fff;font-weight:900">${cnt}</div>
+        <div class="staff-count" style="color:#fff;font-weight:900">${pts}⭐</div>
       </div>`).join('');
   }catch(e){el.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,0.5)">تسجيل دخول للعرض</div>';}
 }
