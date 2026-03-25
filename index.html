@@ -9306,16 +9306,19 @@ async function loadQuarterlyData(q, year) {
     const dateTo   = `${year}-${String(months[months.length-1]).padStart(2,'0')}-31`;
     const monthStrs = months.map(m => String(m));
 
+    // دالة آمنة — لو أي جدول فشل ما يكسر الباقين
+    const safe = async (q) => { try { const r = await q; return r; } catch(e) { return {data:[],error:e}; } };
+
     // جلب كل البيانات تلقائياً بدون أي إجراء من المستخدم
     const [vRes,sRes,fRes,bRes,oRes,salRes,ratRes,incRes] = await Promise.all([
-      db.from('violations').select('*').gte('date',dateFrom).lte('date',dateTo),
-      db.from('surveys').select('*').gte('date',dateFrom).lte('date',dateTo),
-      db.from('facility_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo),
-      db.from('building_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo),
-      db.from('ops_reports').select('*').in('report_month',[...monthStrs,...months.map(m=>String(m).padStart(2,'0'))]).eq('report_year',String(year)),
-      db.from('sales_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo).catch(()=>db.from('sales_reports').select('*').gte('created_at',dateFrom+'T00:00:00').lte('created_at',dateTo+'T23:59:59')),
-      db.from('trainer_ratings').select('*').gte('upload_date',dateFrom).lte('upload_date',dateTo),
-      db.from('incentives').select('*').in('month',monthStrs).eq('year',String(year)),
+      safe(db.from('violations').select('*').gte('date',dateFrom).lte('date',dateTo)),
+      safe(db.from('surveys').select('*').gte('date',dateFrom).lte('date',dateTo)),
+      safe(db.from('facility_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo)),
+      safe(db.from('building_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo)),
+      safe(db.from('ops_reports').select('*').in('report_month',[...monthStrs,...months.map(m=>String(m).padStart(2,'0'))]).eq('report_year',String(year))),
+      safe(db.from('sales_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo)),
+      safe(db.from('trainer_ratings').select('*').gte('upload_date',dateFrom).lte('upload_date',dateTo)),
+      safe(db.from('incentives').select('*').in('month',monthStrs).eq('year',String(year))),
     ]);
 
     const _local = getAppDataForQuarter(q, year);
