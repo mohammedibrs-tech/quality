@@ -9926,10 +9926,15 @@ async function qFetchCard(cardLabel, q, year) {
       _qData.surveys = data;
       toast(`✅ تم جلب ${data.length} استطلاع`);
     } else if(cardLabel==='كفاءة نسائي'||cardLabel==='كفاءة رجالي'||cardLabel==='كفاءة دراجات'){
-      const data = await safe(db.from('ops_reports').select('*').in('report_month',[...monthStrs,...monthStrsPad]).eq('report_year',String(year)));
+      const allMV=[...new Set([...monthStrs,...monthStrsPad])];
+      console.log('🔍 ops fetch: year='+year+' months=',allMV);
+      const {data:opsRaw,error:opsErr}=await db.from('ops_reports').select('*').in('report_month',allMV).eq('report_year',String(year));
+      console.log('🔍 ops result:',opsRaw?.length,'err:',opsErr?.message);
+      if(!opsRaw?.length){const {data:s}=await db.from('ops_reports').select('report_month,report_year,zone,trainer_name,efficiency_pct').limit(5);console.log('🔍 عينة Supabase ops:',s);}
+      const data=opsRaw||[];
       if(data.length>0){
         _qData.ops = data;
-        toast(`✅ تم جلب ${data.length} سجل تشغيل من Supabase`);
+        toast(`✅ تم جلب ${data.length} سجل تشغيل`);
       } else {
         // جلب من OPS_MONTHS إذا ما في بيانات في Supabase
         let ops=[];
