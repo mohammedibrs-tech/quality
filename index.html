@@ -9970,6 +9970,8 @@ async function qFetchCard(cardLabel, q, year) {
     renderQuarterlyResults();
   }catch(e){toast('❌ '+e.message);}
 }
+
+async function exportQuarterlyExcel() {
   if(!_qData){toast('❌ افتح التقرير الربعي أولاً واختر الربع');return;}
   if(typeof ExcelJS==='undefined'){toast('❌ مكتبة ExcelJS غير محملة');return;}
 
