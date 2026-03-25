@@ -9900,15 +9900,19 @@ async function exportQuarterlyExcel() {
     addS(ws0,'مؤشرات الأداء الرئيسية — KPIs',C.teal,6);
     const femViol=violations.filter(v=>v.section==='female');
     const malViol=violations.filter(v=>v.section==='male');
-    const femOps=ops.filter(r=>r.zone==='female'||r.section==='female');
-    const malOps=ops.filter(r=>r.zone==='male'  ||r.section==='male');
-    const bikeOps=ops.filter(r=>r.zone==='bike'  ||r.section==='bike');
-    const retSales=sales.filter(r=>r.call_type==='retention'||r.outcome);
+    const FZONES=['female','L','E','D','B','A'];
+    const MZONES=['male','O','H'];
+    const BZONES=['bike','دراجات'];
+    const femOps=ops.filter(r=>FZONES.includes(r.zone)||FZONES.includes(r.section));
+    const malOps=ops.filter(r=>MZONES.includes(r.zone)||MZONES.includes(r.section));
+    const bikeOps=ops.filter(r=>BZONES.includes(r.zone)||BZONES.includes(r.section));
+    const retSales=sales.filter(r=>r.request_type==='احتفاظ'||(r.outcome||'').includes('احتفاظ'));
+    const recSales=sales.filter(r=>r.request_type==='استرداد'||(r.request_type||'').includes('استرداد'));
     const avgS=surveys.length?Math.round(surveys.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/surveys.length):0;
     const avgFO=femOps.length?Math.round(femOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/femOps.length):0;
     const avgMO=malOps.length?Math.round(malOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/malOps.length):0;
     const avgBO=bikeOps.length?Math.round(bikeOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/bikeOps.length):0;
-    const retRate=retSales.length?Math.round(retSales.filter(r=>(r.outcome||'').includes('احتفاظ')).length/retSales.length*100):0;
+    const retRate=sales.length?Math.round(retSales.length/sales.length*100):0;
     const avgBld=buildings.filter(r=>r.total_score).length?Math.round(buildings.filter(r=>r.total_score).reduce((s,r)=>s+(r.total_score||0),0)/buildings.filter(r=>r.total_score).length):0;
     const avgFac=facilities.filter(r=>r.total_score).length?Math.round(facilities.filter(r=>r.total_score).reduce((s,r)=>s+(r.total_score||0),0)/facilities.filter(r=>r.total_score).length):0;
     const hRow=ws0.addRow(['المؤشر','القيمة','الهدف','الحالة','الفجوة','التوصية']);
@@ -9917,9 +9921,11 @@ async function exportQuarterlyExcel() {
       ['مخالفات نسائي',femViol.length,'—','—','—',femViol.filter(v=>v.grade==='A').length>0?'مخالفات A تستوجب إجراءً':'المستوى مقبول'],
       ['مخالفات رجالي',malViol.length,'—','—','—',malViol.filter(v=>v.grade==='A').length>0?'مخالفات A تستوجب إجراءً':'المستوى مقبول'],
       ['رضا العملاء %',avgS+'%','90%',avgS>=90?'✅ ممتاز':avgS>=70?'🟡 جيد':'🔴 دون الهدف',avgS<90?`${90-avgS}%`:'—',avgS<70?'مراجعة فورية لأسباب التذمر':'متابعة المستوى'],
-      ['كفاءة نسائي %',avgFO+'%','90%',avgFO>=90?'✅ ممتاز':avgFO>=70?'🟡 جيد':'🔴 دون الهدف',avgFO<90?`${90-avgFO}%`:'—',avgFO<70?'خطة تطوير مطلوبة':'استمرار التحسن'],
-      ['كفاءة رجالي %',avgMO+'%','90%',avgMO>=90?'✅ ممتاز':avgMO>=70?'🟡 جيد':'🔴 دون الهدف',avgMO<90?`${90-avgMO}%`:'—',avgMO<70?'خطة تطوير مطلوبة':'استمرار التحسن'],
-      ['كفاءة دراجات %',avgBO+'%','90%',avgBO>=90?'✅ ممتاز':avgBO>=70?'🟡 جيد':'🔴 دون الهدف',avgBO<90?`${90-avgBO}%`:'—',avgBO<70?'خطة تطوير مطلوبة':'استمرار التحسن'],
+      ['كفاءة نسائي %',avgFO?avgFO+'%':'لا بيانات','90%',avgFO>=90?'✅ ممتاز':avgFO>=70?'🟡 جيد':avgFO>0?'🔴 دون الهدف':'—',avgFO&&avgFO<90?`${90-avgFO}%`:'—',avgFO&&avgFO<70?'خطة تطوير مطلوبة':'استمرار التحسن'],
+      ['كفاءة رجالي %',avgMO?avgMO+'%':'لا بيانات','90%',avgMO>=90?'✅ ممتاز':avgMO>=70?'🟡 جيد':avgMO>0?'🔴 دون الهدف':'—',avgMO&&avgMO<90?`${90-avgMO}%`:'—',avgMO&&avgMO<70?'خطة تطوير مطلوبة':'استمرار التحسن'],
+      ['كفاءة دراجات %',avgBO?avgBO+'%':'لا بيانات','90%',avgBO>=90?'✅ ممتاز':avgBO>=70?'🟡 جيد':avgBO>0?'🔴 دون الهدف':'—',avgBO&&avgBO<90?`${90-avgBO}%`:'—',avgBO&&avgBO<70?'خطة تطوير مطلوبة':'استمرار التحسن'],
+      ['احتفاظ بالرسوم — حالات',retSales.length,'—','—','—',`${retRate}% من إجمالي ${sales.length} حالة`],
+      ['عملاء الاسترداد — حالات',recSales.length,'—',recSales.length>retSales.length?'🔴 استرداد أعلى':'🟡 مقبول','—',recSales.length>retSales.length?'مراجعة أسباب الاسترداد':'—'],
       ['معدل الاحتفاظ بالرسوم %',retRate+'%','60%',retRate>=60?'✅ محقق':retRate>=40?'🟡 مقبول':'🔴 دون الهدف',retRate<60?`${60-retRate}%`:'—',retRate<60?'مراجعة أسباب الاسترداد':'متابعة المستوى'],
       ['تقييم المبنى %',avgBld?avgBld+'%':'لا بيانات','70%',avgBld>=70?'✅ جيد':avgBld>0?'🔴 دون الهدف':'—',avgBld&&avgBld<70?`${70-avgBld}%`:'—',avgBld&&avgBld<70?'خطة تحسين مطلوبة':'—'],
       ['تقييم المرافق %',avgFac?avgFac+'%':'لا بيانات','70%',avgFac>=70?'✅ جيد':avgFac>0?'🔴 دون الهدف':'—',avgFac&&avgFac<70?`${70-avgFac}%`:'—',avgFac&&avgFac<70?'متابعة ومراجعة':'—'],
@@ -10119,6 +10125,108 @@ async function exportQuarterlyExcel() {
         row.getCell(1).font={name:'Arial',bold:true,size:10};
         row.getCell(3).font={name:'Arial',bold:true,size:12,color:{argb:r.avg>=4?C.green:r.avg>=3?C.gold:C.red}};
       });
+    });
+
+    // ══ شيت ٩: الاحتفاظ والاسترداد (مفصّل) ══
+    const ws8=wb.addWorksheet('✅ الاحتفاظ والاسترداد');
+    rtl(ws8); ws8.columns=[{width:14},{width:22},{width:20},{width:18},{width:14},{width:18},{width:22}];
+    addT(ws8,`الاحتفاظ بالرسوم وعملاء الاسترداد — ${qLabel} ${d.year}`,C.purple,7);
+    // ملخص
+    const retS2=sales.filter(r=>r.request_type==='احتفاظ'||(r.outcome||'').includes('احتفاظ'));
+    const recS2=sales.filter(r=>r.request_type==='استرداد'||(r.request_type||'').includes('استرداد'));
+    const retR2=sales.length?Math.round(retS2.length/sales.length*100):0;
+    const recFees2=recS2.reduce((s,r)=>s+parseFloat(r.fees||0),0);
+    addS(ws8,'ملخص الفترة',C.teal,7);
+    [{label:'إجمالي الحالات',val:sales.length},{label:'احتفاظ بالرسوم',val:retS2.length},{label:'استرداد نهائي',val:recS2.length},{label:'معدل الاحتفاظ %',val:retR2+'%'},{label:'مجموع المبالغ المستردة',val:recFees2?recFees2.toLocaleString()+' ر':'—'}].forEach((r,i)=>{
+      const row=ws8.addRow([r.label,r.val,'','','','','']);
+      sR(row,i%2===0?C.lt:C.white);
+      row.getCell(1).font={name:'Arial',bold:true,size:10};
+      row.getCell(2).font={name:'Arial',bold:true,size:12,color:{argb:C.teal}};
+    });
+    // تفاصيل احتفاظ
+    if(retS2.length){
+      addS(ws8,'✅ حالات الاحتفاظ بالرسوم',C.green,7);
+      const h1=ws8.addRow(['التاريخ','اسم العميل','الموظفة','نوع الطلب','رسوم','سبب العميل','ملاحظات']);
+      sH(h1,C.green);
+      retS2.forEach((r,i)=>{
+        const row=ws8.addRow([r.request_date||r.report_date||'—',r.client_name||'—',r.uploaded_by||'—',r.request_type||'احتفاظ',r.fees||'—',r.client_reason||'—',r.sales_notes||r.notes||'—']);
+        sR(row,i%2===0?'FFE8F8F0':C.white);
+      });
+    }
+    // تفاصيل استرداد
+    if(recS2.length){
+      addS(ws8,'🔄 طلبات الاسترداد',C.red,7);
+      const h2=ws8.addRow(['التاريخ','اسم العميل','الموظفة','نوع الطلب','رسوم','سبب العميل','ملاحظات']);
+      sH(h2,C.red);
+      recS2.forEach((r,i)=>{
+        const row=ws8.addRow([r.request_date||r.report_date||'—',r.client_name||'—',r.uploaded_by||'—',r.request_type||'استرداد',r.fees||'—',r.client_reason||'—',r.sales_notes||r.notes||'—']);
+        sR(row,i%2===0?C.ltR:C.white);
+      });
+    }
+
+    // ══ شيت ١٠: الحوافز الشهرية ══
+    if(incentives.length){
+      const ws9=wb.addWorksheet('💰 الحوافز الشهرية');
+      rtl(ws9); ws9.columns=[{width:14},{width:8},{width:8},{width:24},{width:14},{width:14},{width:28}];
+      addT(ws9,`الحوافز الشهرية — ${qLabel} ${d.year}`,C.purple,7);
+      // ملخص
+      const incTot=incentives.reduce((s,r)=>s+parseFloat(r.score||0),0);
+      const incByStaff={};
+      incentives.forEach(r=>{ if(r.staff_name) incByStaff[r.staff_name]=(incByStaff[r.staff_name]||0)+parseFloat(r.score||0); });
+      addS(ws9,'ملخص الحوافز',C.teal,7);
+      const hi=ws9.addRow(['إجمالي السجلات',incentives.length,'','إجمالي النقاط',incTot,'','']);
+      sR(hi,'FFEEE8FA');
+      hi.getCell(1).font={name:'Arial',bold:true,size:10};
+      hi.getCell(4).font={name:'Arial',bold:true,size:10};
+      hi.getCell(2).font={name:'Arial',bold:true,size:12,color:{argb:C.purple}};
+      hi.getCell(5).font={name:'Arial',bold:true,size:12,color:{argb:C.purple}};
+      // تفاصيل
+      addS(ws9,'تفاصيل الحوافز',C.teal,7);
+      const hdr9=ws9.addRow(['الشهر','السنة','القسم','اسم الموظف','النقاط','عدد المخالفات','ملاحظات']);
+      sH(hdr9);
+      const MNI=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      [...incentives].sort((a,b)=>parseInt(b.month||0)-parseInt(a.month||0)).forEach((r,i)=>{
+        const row=ws9.addRow([MNI[parseInt(r.month)||0]||r.month||'—',r.year||d.year,r.section||'—',r.staff_name||'—',r.score||0,r.violations_count||0,r.notes||'—']);
+        sR(row,i%2===0?'FFEEE8FA':C.white);
+        row.getCell(4).font={name:'Arial',bold:true,size:10};
+        row.getCell(5).font={name:'Arial',bold:true,size:11,color:{argb:C.purple}};
+      });
+      // ترتيب الموظفين
+      if(Object.keys(incByStaff).length){
+        addS(ws9,'ترتيب الموظفين',C.purple,7);
+        const hdr10=ws9.addRow(['الترتيب','اسم الموظف','إجمالي النقاط','','','','']);
+        sH(hdr10,C.purple);
+        Object.entries(incByStaff).sort((a,b)=>b[1]-a[1]).forEach(([name,score],i)=>{
+          const row=ws9.addRow([i+1,name,score,'','','','']);
+          sR(row,i%2===0?'FFEEE8FA':C.white);
+          row.getCell(1).font={name:'Arial',bold:true,size:10,color:{argb:C.purple}};
+          row.getCell(2).font={name:'Arial',bold:true,size:11};
+          row.getCell(3).font={name:'Arial',bold:true,size:12,color:{argb:C.purple}};
+        });
+      }
+    }
+
+    // ── تحديث شيت KPIs بالبيانات الجديدة ──
+    // إضافة صفوف للاحتفاظ والاسترداد والتقييم والحوافز في ws0
+    const retS3=sales.filter(r=>r.request_type==='احتفاظ'||(r.outcome||'').includes('احتفاظ'));
+    const recS3=sales.filter(r=>r.request_type==='استرداد'||(r.request_type||'').includes('استرداد'));
+    const retR3=sales.length?Math.round(retS3.length/sales.length*100):0;
+    const topRat=ratings.length?[...ratings].sort((a,b)=>(b.mention_pct||b.rating||0)-(a.mention_pct||a.rating||0))[0]:null;
+    const incTotal2=incentives.reduce((s,r)=>s+parseFloat(r.score||0),0);
+    addS(ws0,'مؤشرات المبيعات والحوافز والتقييم',C.purple,6);
+    const hRow2=ws0.addRow(['المؤشر','القيمة','الهدف','الحالة','الفجوة','التوصية']);
+    sH(hRow2);
+    [
+      ['الاحتفاظ بالرسوم — عدد الحالات',retS3.length,'—','—','—',retR3+'% من الإجمالي'],
+      ['عملاء الاسترداد — عدد الحالات',recS3.length,'—','—','—',recS3.length>retS3.length?'الاسترداد أعلى من الاحتفاظ':'—'],
+      ['معدل الاحتفاظ %',retR3+'%','60%',retR3>=60?'✅ محقق':retR3>=40?'🟡 مقبول':'🔴 دون الهدف',retR3<60?`${60-retR3}%`:'—',retR3<60?'مراجعة أسباب الاسترداد':'استمرار التحسن'],
+      ['الأعلى تقييماً',topRat?topRat.trainer_name||'—':'لا بيانات','—','—','—',topRat?`${(topRat.mention_pct||topRat.rating||0).toFixed(1)}%`:'—'],
+      ['إجمالي سجلات الحوافز',incentives.length,'—','—','—','—'],
+      ['إجمالي نقاط الحوافز',incTotal2,'—','—','—','—'],
+    ].forEach((r,i)=>{
+      const row=ws0.addRow(r);
+      sR(row,i%2===0?'FFEEE8FA':C.white);
+      row.getCell(1).font={name:'Arial',bold:true,size:10};
     });
 
     // تنزيل الملف
