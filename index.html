@@ -4004,33 +4004,26 @@ function renderF(recs){
 function renderB(recs){
   const l=document.getElementById('bList');
   if(!l)return;
-  // Update stats
-  const crowdHigh=recs.filter(r=>r.recep_crowd==='شديد'||r.exam_crowd==='شديد').length;
-  const waitLong=recs.filter(r=>r.wait_time==='أكثر من 20 دقيقة').length;
-  const infoMiss=recs.filter(r=>r.info_given==='لا'||r.info_given==='جزئياً').length;
+  const urgent=recs.filter(r=>r.priority==='critical'||r.priority==='high').length;
   const bTot=document.getElementById('bTot');if(bTot)bTot.textContent=recs.length;
-  const bCH=document.getElementById('bCrowdHigh');if(bCH)bCH.textContent=crowdHigh;
-  const bWL=document.getElementById('bWaitLong');if(bWL)bWL.textContent=waitLong;
-  const bIM=document.getElementById('bInfoMiss');if(bIM)bIM.textContent=infoMiss;
+  const bCH=document.getElementById('bCrowdHigh');if(bCH)bCH.textContent=urgent;
+  const bWL=document.getElementById('bWaitLong');if(bWL)bWL.textContent=recs.filter(r=>r.observation_type?.includes('صيانة')||r.observation_type?.includes('Maintenance')).length;
+  const bIM=document.getElementById('bInfoMiss');if(bIM)bIM.textContent=recs.filter(r=>r.observation_type?.includes('أداء')||r.observation_type?.includes('Staff')).length;
 
   if(!recs.length){l.innerHTML='<div class="empty"><div class="em">🏢</div><p>لا توجد تقارير بعد</p></div>';return;}
+  const priorityColor={'critical':'var(--red)','high':'var(--orange)','normal':'var(--green)'};
+  const priorityLabel={'critical':'🔴 حرج','high':'🟠 عاجل','normal':'🟢 عادي'};
   l.innerHTML=recs.map(r=>`
     <div class="facility-rec">
       <div class="f-thumb">🏢</div>
       <div style="flex:1">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div style="font-weight:700;font-size:13px;">${r.date||''} ${r.time||''}</div>
-          <div style="font-size:10px;color:var(--text-dim);">👤 ${r.observer||''}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <div style="font-weight:700;font-size:13px;">${r.section||r.observation_type||'تقرير مبنى'}</div>
+          <span style="font-size:10px;font-weight:700;color:${priorityColor[r.priority]||'var(--accent)'};">${priorityLabel[r.priority]||''}</span>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px;">
-          <div style="font-size:10px;background:rgba(0,168,150,0.07);padding:4px 8px;border-radius:6px;">🏠 استقبال: <strong>${r.recep_crowd||'-'}</strong></div>
-          <div style="font-size:10px;background:rgba(0,168,150,0.07);padding:4px 8px;border-radius:6px;">👩 موظفات: <strong>${r.recep_staff||'-'}</strong></div>
-          <div style="font-size:10px;background:rgba(0,168,150,0.07);padding:4px 8px;border-radius:6px;">⏱️ انتظار: <strong>${r.wait_time||'-'}</strong></div>
-          <div style="font-size:10px;background:rgba(0,168,150,0.07);padding:4px 8px;border-radius:6px;">💳 كاونترات: <strong>${r.counter_staff||'-'}</strong></div>
-          <div style="font-size:10px;background:rgba(0,168,150,0.07);padding:4px 8px;border-radius:6px;">📝 قاعات: <strong>${r.exam_halls||'-'}</strong></div>
-          <div style="font-size:10px;background:rgba(0,168,150,0.07);padding:4px 8px;border-radius:6px;">📋 تكدس: <strong>${r.exam_crowd||'-'}</strong></div>
-        </div>
-        ${r.general_notes?`<div style="font-size:11px;margin-top:6px;color:var(--text-dim);">📌 ${r.general_notes}</div>`:''}
+        <div style="font-size:10px;color:var(--text-dim);">📅 ${r.report_date||r.date||''} ${r.report_time||r.time||''} · 👤 ${r.observer||''}</div>
+        ${(r.description||'').trim()?`<div style="font-size:11px;margin-top:6px;padding:6px 10px;background:rgba(0,168,150,0.06);border-right:3px solid var(--accent);border-radius:6px;color:var(--text);line-height:1.6;">📝 ${r.description}</div>`:''}
+        ${(r.suggested_action||r.general_notes||'').trim()?`<div style="font-size:11px;margin-top:4px;padding:5px 9px;background:rgba(224,123,42,0.07);border-right:3px solid var(--orange);border-radius:6px;color:var(--text);">💡 ${r.suggested_action||r.general_notes}</div>`:''}
       </div>
     </div>`).join('');
 }
@@ -8066,43 +8059,51 @@ function showBulletinPopup(){
 async function submitBuilding(){
   const obs=document.getElementById('bObs').value;
   const date=document.getElementById('bDate').value;
+  const desc=document.getElementById('bDesc')?.value||'';
   if(!obs||!date){toast('يرجى تعبئة الحقول المطلوبة');return;}
+  if(!desc){toast('⚠️ يرجى كتابة وصف الملاحظة');return;}
   const btn=document.getElementById('bBtn');
   btn.disabled=true;btn.textContent='جاري الحفظ...';
+
   const data={
-    observer:obs,date,time:document.getElementById('bTime').value,
-    recep_crowd:document.getElementById('bRecepCrowd').value,
-    recep_staff:document.getElementById('bRecepStaff').value,
-    wait_time:document.getElementById('bWaitTime').value,
-    counter_staff:document.getElementById('bCounterStaff').value,
-    info_given:document.getElementById('bInfoGiven').value,
-    exam_staff:document.getElementById('bExamStaff').value,
-    exam_halls:document.getElementById('bExamHalls').value,
-    exam_crowd:document.getElementById('bExamCrowd').value,
-    exam_notes:document.getElementById('bExamNotes').value,
-    general_notes:document.getElementById('bGeneralNotes').value,
+    observer: obs,
+    date: date,
+    report_date: date,
+    time: document.getElementById('bTime')?.value||'',
+    report_time: document.getElementById('bTime')?.value||'',
+    section: document.getElementById('bSection')?.value||'',
+    observation_type: document.getElementById('bType')?.value||'',
+    priority: document.getElementById('bPriority')?.value||'normal',
+    description: desc,
+    suggested_action: document.getElementById('bAction')?.value||'',
   };
+
   try{
     const{error}=await db.from('building_reports').insert([data]);
     if(error)throw error;
-    // GS sync
-    sendToSheets('building',[[data.date,data.time||'',data.observer,data.recep_crowd||'',data.recep_staff||'',data.wait_time||'',data.counter_staff||'',data.info_given||'',data.exam_staff||'',data.exam_halls||'',data.general_notes||'']]);
-    // Build analysis
-    const analysis=buildingAnalysis(data);
-    document.getElementById('bAnalysis').innerHTML=analysis;
+
+    sendToSheets('building',[[data.date,data.time||'',data.observer,data.section||'',data.observation_type||'',data.priority||'',data.description||'',data.suggested_action||'']]);
+
     // تثبيت تلقائي
-    const _bKey = (data.date||new Date().toISOString().slice(0,10)).slice(0,7);
+    const _bKey = date.slice(0,7);
     if(_bKey){
       if(!PINNED_DATA.building[_bKey]) PINNED_DATA.building[_bKey]={data:[],label:_monthLabel(_bKey),pinnedAt:''};
-      PINNED_DATA.building[_bKey].data.push({...data}); addToAppData('buildings', data);
+      PINNED_DATA.building[_bKey].data.push({...data});
+      addToAppData('buildings', data);
       PINNED_DATA.building[_bKey].pinnedAt=new Date().toLocaleString('ar');
-    savePinnedToStorage();
+      savePinnedToStorage();
     }
+
+    // تحديث allB فوراً
+    allB.unshift({...data, id:Date.now().toString(), created_at:new Date().toISOString()});
+    window._cachedBuilding = allB;
+    renderB(allB);
+
     document.getElementById('bForm').style.display='none';
     document.getElementById('bOk').style.display='block';
   }catch(e){
-    toast('خطأ في الحفظ: '+e.message);
-    btn.disabled=false;btn.textContent='✦ تسجيل التقرير / Submit Report';
+    toast('❌ خطأ في الحفظ: '+e.message);
+    btn.disabled=false;btn.textContent='🏢 تسجيل التقرير / Submit Report';
   }
 }
 
@@ -8126,9 +8127,10 @@ function resetB(){
   document.getElementById('bForm').style.display='block';
   document.getElementById('bOk').style.display='none';
   document.getElementById('bBtn').disabled=false;
-  document.getElementById('bBtn').textContent='✦ تسجيل التقرير / Submit Report';
-  ['bRecepCrowd','bWaitTime','bInfoGiven','bExamCrowd','bObs'].forEach(id=>document.getElementById(id).value='');
-  ['bRecepStaff','bCounterStaff','bExamStaff','bExamHalls','bExamNotes','bGeneralNotes','bDate','bTime'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('bBtn').textContent='🏢 تسجيل التقرير / Submit Report';
+  ['bObs','bSection','bType','bPriority'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['bDesc','bAction','bDate','bTime'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  setDT();
 }
 
 function renderDashboard(){
