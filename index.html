@@ -1348,7 +1348,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="section-card ops" onclick="showOpsMonthModal()"><div class="s-icon">⚙️</div><div class="s-text"><div class="s-title-ar">كفاءة التشغيل</div><div class="s-title-en">OPERATIONAL EFFICIENCY</div></div><div class="s-arrow">›</div></div>
     <div class="section-card attend" onclick="adminOnly('attend')"><div class="s-icon">🕐</div><div class="s-text"><div class="s-title-ar">الحضور والانصراف فريق الجودة</div><div class="s-title-en">ATTENDANCE & DEPARTURE</div></div><div class="s-arrow">›</div></div>
     <div class="section-card sales" onclick="adminOnly('sales')"><div class="s-icon">💼</div><div class="s-text"><div class="s-title-ar">تقرير فريق المبيعات</div><div class="s-title-en">SALES DEPARTMENT</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon">🌟</div><div class="s-text"><div class="s-title-ar">الموظفين الأعلى تقييم بالاستبيان</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon">🌟</div><div class="s-text"><div class="s-title-ar">المدرب/ة الأعلى تقييم بالاستبيان</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
     <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon">🗂️</div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
     <div class="section-card" onclick="openQuarterlyPage()" style="background:linear-gradient(135deg,#0D1F2D,#1A3A5C);"><div class="s-icon" style="color:#00C8B4;">📋</div><div class="s-text"><div class="s-title-ar" style="color:#fff;">التقارير الربعية</div><div class="s-title-en" style="color:rgba(0,200,180,0.8);">QUARTERLY REPORTS</div></div><div class="s-arrow" style="color:#00C8B4;">›</div></div>
 
@@ -13299,11 +13299,7 @@ window.addEventListener('resize', () => {
             </div>
           </div>
           <div class="field"><label>الزون</label>
-            <select id="nsZone" class="inp">
-              <option value="">-- يُجلب تلقائياً --</option>
-              <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>L</option>
-              <option>O</option><option>H</option><option>دراجات</option>
-            </select>
+            <input id="nsZone" type="text" class="inp" placeholder="يُجلب تلقائياً عند اختيار الاسم" readonly style="background:rgba(0,168,150,0.06);cursor:default;">
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <div class="field"><label>الوقت</label><input id="nsTime" type="time" class="inp"></div>
@@ -13351,11 +13347,7 @@ window.addEventListener('resize', () => {
             </div>
           </div>
           <div class="field"><label>الزون</label>
-            <select id="buZone" class="inp">
-              <option value="">-- يُجلب تلقائياً --</option>
-              <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>L</option>
-              <option>O</option><option>H</option><option>دراجات</option>
-            </select>
+            <input id="buZone" type="text" class="inp" placeholder="يُجلب تلقائياً عند اختيار الاسم" readonly style="background:rgba(0,168,150,0.06);cursor:default;">
           </div>
           <div class="field"><label>ملاحظات أخرى</label><textarea id="buNotes" class="inp" rows="2" placeholder="أي تفاصيل إضافية..."></textarea></div>
           <div style="display:flex;gap:10px;margin-top:4px;">
