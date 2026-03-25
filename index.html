@@ -9316,7 +9316,7 @@ async function loadQuarterlyData(q, year) {
       safe(db.from('facility_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo)),
       safe(db.from('building_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo)),
       safe(db.from('ops_reports').select('*').in('report_month',[...monthStrs,...months.map(m=>String(m).padStart(2,'0'))]).eq('report_year',String(year))),
-      safe(db.from('sales_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo)),
+      safe(db.from('sales_reports').select('*').gte('created_at',dateFrom+'T00:00:00').lte('created_at',dateTo+'T23:59:59')),
       safe(db.from('trainer_ratings').select('*').gte('upload_date',dateFrom).lte('upload_date',dateTo)),
       safe(db.from('incentives').select('*').in('month',monthStrs).eq('year',String(year))),
     ]);
@@ -9461,8 +9461,6 @@ function renderQuarterlyResults() {
 
   // KPI Cards
   document.getElementById('qKpiCards').innerHTML=[
-    {icon:'👩',  label:'مخالفات نسائي',  value:femViol.length,   sub:`A:${femViol.filter(v=>v.grade==='A').length} B:${femViol.filter(v=>v.grade==='B').length}`, color:'#E74C3C'},
-    {icon:'👨',  label:'مخالفات رجالي',  value:malViol.length,   sub:`A:${malViol.filter(v=>v.grade==='A').length} B:${malViol.filter(v=>v.grade==='B').length}`, color:'#2E86C1'},
     {icon:'⭐',  label:'رضا العملاء',    value:avgSurvey+'%',    sub:`${surveys.length} استطلاع`, color:ec(avgSurvey)},
     {icon:'👩‍🏫',label:'كفاءة نسائي',   value:avgFemOps?avgFemOps+'%':'—',  sub:`${femOps.length} مدربة`, color:ec(avgFemOps)},
     {icon:'👨‍🏫',label:'كفاءة رجالي',   value:avgMalOps?avgMalOps+'%':'—',  sub:`${malOps.length} مدرب`,  color:ec(avgMalOps)},
