@@ -1340,6 +1340,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="section-card survey" onclick="showSection('survey')"><div class="s-icon">⭐</div><div class="s-text"><div class="s-title-ar">استطلاع رضا العملاء</div><div class="s-title-en">CUSTOMER SATISFACTION SURVEY</div></div><div class="s-arrow">›</div></div>
     <div class="section-card facility" onclick="showSection('facility')"><div class="s-icon">🔧</div><div class="s-text"><div class="s-title-ar">تقرير ملاحظات المرافق</div><div class="s-title-en">FACILITY REPORTS</div></div><div class="s-arrow">›</div></div>
     <div class="section-card building" onclick="showSection('building')"><div class="s-icon">🏢</div><div class="s-text"><div class="s-title-ar">تقرير المبنى الرئيسي والعملي</div><div class="s-title-en">MAIN BUILDING REPORT</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card" onclick="openSec('no-session')" style="background:linear-gradient(135deg,#7D3A10,#5C2A0A);border-right:4px solid #E8873A;"><div class="s-icon" style="color:#E8873A;">🚫</div><div class="s-text"><div class="s-title-ar" style="color:#fff;">تقرير جدولة الحصص التدريبية</div><div class="s-title-en" style="color:rgba(232,135,58,0.8);">TRAINING SESSIONS SCHEDULE</div></div><div class="s-arrow" style="color:#E8873A;">›</div></div>
 
     <!-- ══ التقارير الإدارية ══ -->
     <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#7D3C98;background:rgba(125,60,152,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #7D3C98;">📊 التقارير الإدارية</div>
@@ -3618,6 +3619,9 @@ function openSec(type){
   }else if(type==='archive'){
     document.getElementById('page-archive').classList.add('active');
     loadArchiveTab('vt');
+  }else if(type==='no-session'){
+    document.getElementById('page-no-session').classList.add('active');
+    loadNSTodayList();
   }else if(type==='rating'){
     document.getElementById('page-rating').classList.add('active');
   }else if(type==='mylog'){
@@ -4825,7 +4829,7 @@ function removeTrainer(idx){
 // Per-staff schedule — key = username
 const STAFF_SCHEDULES = {
   'shahad': {
-    name:"شهد المقرن", shift:"6:00 ص — 1:40 م",
+    name:"شهد المقرن", shift:"6:00 ص — 2:00 م",
     fixed:[
       {time:"6:00 ص",        task:"🏢 جولة على المبنى (داخل وخارج)"},
       {time:"6:00–6:30 ص",   task:"✅ متابعة خروج المدربات والعملاء — بداية الحصة الأولى"},
@@ -4843,8 +4847,8 @@ const STAFF_SCHEDULES = {
       {time:"12:00–12:30 م", task:"✅ متابعة خروج المدربات — بداية الحصة الرابعة"},
       {time:"12:30–1:20 م",  task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الرابعة)"},
       {time:"1:20–1:40 م",   task:"✅ متابعة رجوع المدربات — نهاية الحصة الرابعة"},
-      {time:"1:30 م",        task:"📋 تقرير المخالفات (كل خميس)", thursday:true},
-      {time:"1:40 م",        task:"⏹ نهاية الدوام"},
+      {time:"1:40 م",        task:"📋 تقرير المخالفات (كل خميس)", thursday:true},
+      {time:"2:00 م",        task:"⏹ نهاية الدوام"},
     ],
     rotating:[
       {task:"🔧 ملاحظات المرافق والنظافة",       days:["أنا","امجاد","سمية","أنا","امجاد"]},
@@ -4853,7 +4857,7 @@ const STAFF_SCHEDULES = {
     ]
   },
   'amjad': {
-    name:"امجاد ابانمي", shift:"7:00 ص — 2:40 م",
+    name:"امجاد ابانمي", shift:"7:00 ص — 3:00 م",
     fixed:[
       {time:"7:00 ص",        task:"🏢 جولة على المبنى (داخل وخارج)"},
       {time:"7:00–7:30 ص",   task:"✅ متابعة خروج المدربات والعملاء — بداية الحصة الأولى"},
@@ -4871,8 +4875,8 @@ const STAFF_SCHEDULES = {
       {time:"1:00–1:30 م",   task:"✅ متابعة خروج المدربات — بداية الحصة الرابعة"},
       {time:"1:30–2:20 م",   task:"🚗 جولة ميدانية — رصد المخالفات (الحصة الرابعة)"},
       {time:"2:20–2:40 م",   task:"✅ متابعة رجوع المدربات — نهاية الحصة الرابعة"},
-      {time:"2:30 م",        task:"📋 تقرير المخالفات (كل خميس)", thursday:true},
-      {time:"2:40 م",        task:"⏹ نهاية الدوام"},
+      {time:"2:40 م",        task:"📋 تقرير المخالفات (كل خميس)", thursday:true},
+      {time:"3:00 م",        task:"⏹ نهاية الدوام"},
     ],
     rotating:[
       {task:"🔧 ملاحظات المرافق والنظافة",       days:["شهد","أنا","سمية","شهد","أنا"]},
@@ -13265,6 +13269,384 @@ window.addEventListener('resize', () => {
 
 
 
+
+<!-- ══ PAGE: NO SESSION ══ -->
+<div id="page-no-session" class="page">
+  <div class="container-wide">
+    <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
+    <div class="page-icon">🚫</div>
+    <h1>تقرير جدولة الحصص التدريبية</h1>
+    <div class="sub">NO SESSION REPORT</div>
+
+    <!-- كرتي الإدخال -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:20px 0;">
+
+      <!-- كارد: مدرب بلا حصة -->
+      <div class="card" style="border-right:4px solid #E74C3C;cursor:pointer;" onclick="toggleNSForm('no-session-form')">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:44px;height:44px;background:rgba(231,76,60,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;">🚫</div>
+          <div>
+            <div style="font-size:14px;font-weight:900;">مدرب/ة ليس لديه حصة</div>
+            <div style="font-size:11px;color:var(--text-dim);">تسجيل مدرب بدون حصة تدريبية</div>
+          </div>
+          <div style="margin-right:auto;font-size:20px;color:var(--text-dim);" id="ns-arrow1">›</div>
+        </div>
+        <div id="no-session-form" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;" onclick="event.stopPropagation()">
+          <div class="field"><label>اسم المدرب/ة</label><input id="nsName" type="text" placeholder="اسم المدرب/ة" class="inp"></div>
+          <div class="field"><label>الزون</label>
+            <select id="nsZone" class="inp">
+              <option value="">-- اختر الزون --</option>
+              <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>L</option>
+              <option>O</option><option>H</option><option>دراجات</option>
+            </select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field"><label>الوقت</label><input id="nsTime" type="time" class="inp"></div>
+            <div class="field"><label>التاريخ</label><input id="nsDate" type="date" class="inp"></div>
+          </div>
+          <div class="field"><label>الشفت</label>
+            <select id="nsShift" class="inp">
+              <option value="صباحي">صباحي</option>
+              <option value="مسائي">مسائي</option>
+            </select>
+          </div>
+          <div class="field"><label>الحصة التدريبية</label>
+            <select id="nsSession" class="inp">
+              <option value="الأولى">الأولى</option>
+              <option value="الثانية">الثانية</option>
+              <option value="الثالثة">الثالثة</option>
+              <option value="الرابعة">الرابعة</option>
+            </select>
+          </div>
+          <div class="field"><label>ملاحظات أخرى</label><textarea id="nsNotes" class="inp" rows="2" placeholder="أي تفاصيل إضافية..."></textarea></div>
+          <div style="display:flex;gap:10px;margin-top:4px;">
+            <button onclick="addNSRecord()" style="flex:1;padding:12px;background:linear-gradient(135deg,#E74C3C,#C0392B);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">➕ إضافة مدرب آخر</button>
+            <button onclick="submitNSRecords()" style="flex:1;padding:12px;background:linear-gradient(135deg,#00A896,#007B6E);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">✅ حفظ</button>
+          </div>
+          <!-- قائمة السجلات المضافة -->
+          <div id="nsList" style="margin-top:12px;"></div>
+        </div>
+      </div>
+
+      <!-- كارد: مدرب/ة احتياطي -->
+      <div class="card" style="border-right:4px solid #F39C12;cursor:pointer;" onclick="toggleNSForm('backup-form')">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:44px;height:44px;background:rgba(243,156,18,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;">🔄</div>
+          <div>
+            <div style="font-size:14px;font-weight:900;">المدرب/ة الاحتياطيين</div>
+            <div style="font-size:11px;color:var(--text-dim);">تسجيل مدرب احتياطي</div>
+          </div>
+          <div style="margin-right:auto;font-size:20px;color:var(--text-dim);" id="ns-arrow2">›</div>
+        </div>
+        <div id="backup-form" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;" onclick="event.stopPropagation()">
+          <div class="field"><label>اسم المدرب/ة</label><input id="buName" type="text" placeholder="اسم المدرب/ة" class="inp"></div>
+          <div class="field"><label>الزون</label>
+            <select id="buZone" class="inp">
+              <option value="">-- اختر الزون --</option>
+              <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>L</option>
+              <option>O</option><option>H</option><option>دراجات</option>
+            </select>
+          </div>
+          <div class="field"><label>ملاحظات أخرى</label><textarea id="buNotes" class="inp" rows="2" placeholder="أي تفاصيل إضافية..."></textarea></div>
+          <div style="display:flex;gap:10px;margin-top:4px;">
+            <button onclick="addBURecord()" style="flex:1;padding:12px;background:linear-gradient(135deg,#F39C12,#D68910);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">➕ إضافة مدرب آخر</button>
+            <button onclick="submitBURecords()" style="flex:1;padding:12px;background:linear-gradient(135deg,#00A896,#007B6E);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">✅ حفظ</button>
+          </div>
+          <div id="buList" style="margin-top:12px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- سجلات اليوم -->
+    <div style="margin-top:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+        <div style="font-size:13px;font-weight:900;color:var(--accent);">📋 سجلات اليوم</div>
+        <button onclick="exportNSExcel()" style="padding:10px 18px;background:linear-gradient(135deg,#00A896,#007B6E);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:900;cursor:pointer;">⬇ تصدير Excel</button>
+      </div>
+      <!-- KPIs -->
+      <div id="nsKpiRow" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:16px;"></div>
+      <div id="nsTodayList"><div style="text-align:center;color:var(--text-dim);padding:30px;font-size:12px;">لا توجد سجلات اليوم</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── مدربين بلا حصة ──
+let _nsRecords = [];
+let _buRecords = [];
+
+function toggleNSForm(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  const arrow = document.getElementById(id === 'no-session-form' ? 'ns-arrow1' : 'ns-arrow2');
+  if (arrow) arrow.textContent = isOpen ? '›' : '‹';
+  if (!isOpen) {
+    // ضع التاريخ واليوم تلقائياً
+    const today = new Date().toISOString().slice(0,10);
+    const timeNow = new Date().toTimeString().slice(0,5);
+    if (id === 'no-session-form') {
+      const d = document.getElementById('nsDate'); if(d) d.value = today;
+      const t = document.getElementById('nsTime'); if(t) t.value = timeNow;
+    }
+  }
+}
+
+function addNSRecord() {
+  const name  = document.getElementById('nsName')?.value?.trim();
+  const zone  = document.getElementById('nsZone')?.value;
+  const time  = document.getElementById('nsTime')?.value;
+  const date  = document.getElementById('nsDate')?.value;
+  const shift = document.getElementById('nsShift')?.value;
+  const sess  = document.getElementById('nsSession')?.value;
+  const notes = document.getElementById('nsNotes')?.value?.trim();
+  if (!name) { toast('❌ أدخل اسم المدرب/ة'); return; }
+  _nsRecords.push({ name, zone, time, date, shift, session: sess, notes, type:'no-session' });
+  renderNSList();
+  document.getElementById('nsName').value = '';
+  document.getElementById('nsNotes').value = '';
+  toast('✅ تمت الإضافة — يمكنك إضافة مدرب آخر');
+}
+
+function addBURecord() {
+  const name  = document.getElementById('buName')?.value?.trim();
+  const zone  = document.getElementById('buZone')?.value;
+  const notes = document.getElementById('buNotes')?.value?.trim();
+  if (!name) { toast('❌ أدخل اسم المدرب/ة'); return; }
+  _buRecords.push({ name, zone, notes, type:'backup', date: new Date().toISOString().slice(0,10) });
+  renderBUList();
+  document.getElementById('buName').value = '';
+  document.getElementById('buNotes').value = '';
+  toast('✅ تمت الإضافة');
+}
+
+function renderNSList() {
+  const el = document.getElementById('nsList');
+  if (!el) return;
+  if (!_nsRecords.length) { el.innerHTML = ''; return; }
+  el.innerHTML = _nsRecords.map((r,i) => `
+    <div style="background:rgba(231,76,60,0.06);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">
+      <div style="flex:1;">
+        <div style="font-size:12px;font-weight:700;">${r.name} <span style="background:rgba(231,76,60,0.12);color:#E74C3C;border-radius:6px;padding:1px 8px;font-size:10px;">زون ${r.zone||'—'}</span></div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">${r.date||''} ${r.time||''} · ${r.shift} · الحصة ${r.session}</div>
+        ${r.notes?`<div style="font-size:10px;color:var(--text-dim);">${r.notes}</div>`:''}
+      </div>
+      <button onclick="_nsRecords.splice(${i},1);renderNSList()" style="background:none;border:none;cursor:pointer;color:#E74C3C;font-size:16px;">🗑</button>
+    </div>`).join('');
+}
+
+function renderBUList() {
+  const el = document.getElementById('buList');
+  if (!el) return;
+  if (!_buRecords.length) { el.innerHTML = ''; return; }
+  el.innerHTML = _buRecords.map((r,i) => `
+    <div style="background:rgba(243,156,18,0.06);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">
+      <div style="flex:1;">
+        <div style="font-size:12px;font-weight:700;">${r.name} <span style="background:rgba(243,156,18,0.12);color:#F39C12;border-radius:6px;padding:1px 8px;font-size:10px;">زون ${r.zone||'—'}</span></div>
+        ${r.notes?`<div style="font-size:10px;color:var(--text-dim);">${r.notes}</div>`:''}
+      </div>
+      <button onclick="_buRecords.splice(${i},1);renderBUList()" style="background:none;border:none;cursor:pointer;color:#E74C3C;font-size:16px;">🗑</button>
+    </div>`).join('');
+}
+
+async function submitNSRecords() {
+  // أضف السجل الحالي في النموذج لو فيه اسم
+  const name = document.getElementById('nsName')?.value?.trim();
+  if (name) addNSRecord();
+  if (!_nsRecords.length) { toast('❌ أضف سجلاً واحداً على الأقل'); return; }
+  try {
+    const rows = _nsRecords.map(r => ({
+      trainer_name: r.name, zone: r.zone||'—',
+      report_time: r.time, report_date: r.date,
+      shift: r.shift, session_number: r.session,
+      notes: r.notes||'', observer: currentUser?.name||'',
+      report_type: 'no_session', created_at: new Date().toISOString()
+    }));
+    const { error } = await db.from('no_session_reports').insert(rows);
+    if (error) throw error;
+    toast(`✅ تم حفظ ${rows.length} سجل`);
+    _nsRecords = [];
+    renderNSList();
+    loadNSTodayList();
+    document.getElementById('no-session-form').style.display = 'none';
+    document.getElementById('ns-arrow1').textContent = '›';
+  } catch(e) { toast('❌ ' + e.message); }
+}
+
+async function submitBURecords() {
+  const name = document.getElementById('buName')?.value?.trim();
+  if (name) addBURecord();
+  if (!_buRecords.length) { toast('❌ أضف سجلاً واحداً على الأقل'); return; }
+  try {
+    const rows = _buRecords.map(r => ({
+      trainer_name: r.name, zone: r.zone||'—',
+      notes: r.notes||'', observer: currentUser?.name||'',
+      report_date: r.date, report_type: 'backup',
+      created_at: new Date().toISOString()
+    }));
+    const { error } = await db.from('no_session_reports').insert(rows);
+    if (error) throw error;
+    toast(`✅ تم حفظ ${rows.length} سجل`);
+    _buRecords = [];
+    renderBUList();
+    loadNSTodayList();
+    document.getElementById('backup-form').style.display = 'none';
+    document.getElementById('ns-arrow2').textContent = '›';
+  } catch(e) { toast('❌ ' + e.message); }
+}
+
+async function loadNSTodayList() {
+  const el = document.getElementById('nsTodayList');
+  const kpiEl = document.getElementById('nsKpiRow');
+  if (!el) return;
+  const today = new Date().toISOString().slice(0,10);
+  try {
+    const { data } = await db.from('no_session_reports').select('*').eq('report_date', today).order('created_at', {ascending:false});
+    const all = data || [];
+    const noSess = all.filter(r=>r.report_type==='no_session');
+    const backup = all.filter(r=>r.report_type==='backup');
+
+    // KPIs
+    if (kpiEl) {
+      const zones = [...new Set(noSess.map(r=>r.zone).filter(Boolean))];
+      const kpis = [
+        {label:'إجمالي بلا حصة', value:noSess.length, color:'#E74C3C'},
+        {label:'احتياطيين',       value:backup.length,  color:'#F39C12'},
+        {label:'صباحي',           value:noSess.filter(r=>r.shift==='صباحي').length, color:'#2E86C1'},
+        {label:'مسائي',           value:noSess.filter(r=>r.shift==='مسائي').length, color:'#7D3C98'},
+        {label:'زون متكرر',       value:zones.length?zones[0]:'—', color:'#00A896'},
+      ];
+      kpiEl.innerHTML = kpis.map(k=>`
+        <div style="background:var(--card2);border-radius:12px;padding:12px;text-align:center;border-top:3px solid ${k.color};">
+          <div style="font-size:20px;font-weight:900;color:${k.color};">${k.value}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">${k.label}</div>
+        </div>`).join('');
+    }
+
+    if (!all.length) { el.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:30px;font-size:12px;">لا توجد سجلات اليوم</div>'; return; }
+    let html = '';
+    if (noSess.length) {
+      html += `<div style="font-size:11px;font-weight:700;color:#E74C3C;margin-bottom:8px;">🚫 مدربين بلا حصة (${noSess.length})</div>`;
+      html += noSess.map(r=>`<div style="background:rgba(231,76,60,0.05);border-radius:10px;padding:10px 14px;margin-bottom:8px;">
+        <div style="font-size:12px;font-weight:700;">${r.trainer_name} <span style="background:rgba(231,76,60,0.12);color:#E74C3C;border-radius:6px;padding:1px 8px;font-size:10px;">زون ${r.zone||'—'}</span></div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:3px;">${r.report_time||''} · ${r.shift||''} · الحصة ${r.session_number||'—'} · ${r.observer||''}</div>
+        ${r.notes?`<div style="font-size:10px;color:var(--text-dim);margin-top:2px;">📝 ${r.notes}</div>`:''}
+      </div>`).join('');
+    }
+    if (backup.length) {
+      html += `<div style="font-size:11px;font-weight:700;color:#F39C12;margin:12px 0 8px;">🔄 احتياطيين (${backup.length})</div>`;
+      html += backup.map(r=>`<div style="background:rgba(243,156,18,0.05);border-radius:10px;padding:10px 14px;margin-bottom:8px;">
+        <div style="font-size:12px;font-weight:700;">${r.trainer_name} <span style="background:rgba(243,156,18,0.12);color:#F39C12;border-radius:6px;padding:1px 8px;font-size:10px;">زون ${r.zone||'—'}</span></div>
+        ${r.notes?`<div style="font-size:10px;color:var(--text-dim);margin-top:2px;">📝 ${r.notes}</div>`:''}
+      </div>`).join('');
+    }
+    el.innerHTML = html;
+  } catch(e) { el.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px;font-size:11px;">—</div>'; }
+}
+
+async function exportNSExcel() {
+  if (typeof ExcelJS === 'undefined') { toast('❌ مكتبة ExcelJS غير محملة'); return; }
+  toast('⏳ جاري بناء التقرير...');
+  try {
+    const today = new Date().toISOString().slice(0,10);
+    const { data } = await db.from('no_session_reports').select('*').order('created_at', {ascending:false}).limit(500);
+    const all = data || [];
+    const noSess = all.filter(r=>r.report_type==='no_session');
+    const backup = all.filter(r=>r.report_type==='backup');
+
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'نورة لتعليم القيادة';
+    const C = { teal:'FF00A896', dark:'FF0D1F2D', red:'FFE74C3C', orange:'FFF39C12', white:'FFFFFFFF', lt:'FFE8F5F3', ltR:'FFFEF0EF', ltO:'FFFEF9E7' };
+    const rtl = ws => { ws.views = [{rightToLeft:true}]; };
+    const hdr = (ws,r,cols,bg) => {
+      const row = ws.addRow(cols);
+      row.height = 26;
+      row.eachCell({includeEmpty:true}, c => {
+        c.font = {name:'Arial',bold:true,size:10,color:{argb:C.white}};
+        c.fill = {type:'pattern',pattern:'solid',fgColor:{argb:bg||C.teal}};
+        c.alignment = {horizontal:'center',vertical:'middle'};
+      });
+    };
+    const sR = (row, bg) => {
+      row.height = 20;
+      row.eachCell({includeEmpty:true}, c => {
+        c.font = {name:'Arial',size:10};
+        c.fill = {type:'pattern',pattern:'solid',fgColor:{argb:bg||C.white}};
+        c.alignment = {vertical:'middle'};
+      });
+    };
+    const merge = (ws,r,c1,c2,txt,opts={}) => {
+      const row = ws.addRow([txt]);
+      try{ws.mergeCells(row.number,c1,row.number,c2);}catch(e){}
+      const cell = row.getCell(c1);
+      cell.font = {name:'Arial',bold:opts.bold!==false,size:opts.size||12,color:{argb:opts.fg||C.white}};
+      cell.fill = {type:'pattern',pattern:'solid',fgColor:{argb:opts.bg||C.dark}};
+      cell.alignment = {horizontal:'center',vertical:'middle'};
+      row.height = opts.height||30;
+    };
+
+    // ══ شيت 1: ملخص KPIs ══
+    const ws0 = wb.addWorksheet('ملخص KPIs'); rtl(ws0);
+    ws0.columns = [{width:26},{width:14},{width:14},{width:14},{width:14},{width:20}];
+    merge(ws0,1,1,6,`تقرير مدربين بلا حصة — نورة لتعليم القيادة — ${today}`,{size:13,height:34});
+    ws0.addRow([]);
+    hdr(ws0,3,['المؤشر','القيمة','—','—','—','—']);
+
+    const sessions = ['الأولى','الثانية','الثالثة','الرابعة'];
+    const kpiRows = [
+      ['إجمالي المدربين بلا حصة', noSess.length],
+      ['إجمالي الاحتياطيين', backup.length],
+      ['شفت صباحي', noSess.filter(r=>r.shift==='صباحي').length],
+      ['شفت مسائي', noSess.filter(r=>r.shift==='مسائي').length],
+      ...sessions.map(s=>['الحصة '+s, noSess.filter(r=>r.session_number===s).length]),
+      ['أكثر زون تكراراً', (() => {
+        const z={};noSess.forEach(r=>{if(r.zone)z[r.zone]=(z[r.zone]||0)+1;});
+        const top=Object.entries(z).sort((a,b)=>b[1]-a[1])[0];
+        return top?`${top[0]} (${top[1]} مرة)`:'—';
+      })()],
+    ];
+    kpiRows.forEach((r,i)=>{
+      const row = ws0.addRow([r[0],r[1],'','','','']);
+      sR(row, i%2===0?C.lt:C.white);
+      row.getCell(1).font = {name:'Arial',bold:true,size:10};
+      row.getCell(2).font = {name:'Arial',bold:true,size:12,color:{argb:C.teal}};
+    });
+
+    // ══ شيت 2: مدربين بلا حصة ══
+    const ws1 = wb.addWorksheet('مدربين بلا حصة'); rtl(ws1);
+    ws1.columns = [{width:22},{width:10},{width:10},{width:10},{width:12},{width:12},{width:18},{width:28}];
+    merge(ws1,1,1,8,`تقرير جدولة الحصص التدريبية — ${today}`,{bg:C.red,height:30});
+    hdr(ws1,2,['اسم المدرب/ة','الزون','التاريخ','الوقت','الشفت','الحصة','المراقب','ملاحظات'],C.red);
+    noSess.forEach((r,i)=>{
+      const row = ws1.addRow([r.trainer_name||'—',r.zone||'—',r.report_date||'—',r.report_time||'—',r.shift||'—',r.session_number||'—',r.observer||'—',r.notes||'—']);
+      sR(row, i%2===0?C.ltR:C.white);
+      row.getCell(1).font = {name:'Arial',bold:true,size:10};
+    });
+    if (!noSess.length) ws1.addRow(['لا توجد سجلات','','','','','','','']);
+
+    // ══ شيت 3: الاحتياطيين ══
+    const ws2 = wb.addWorksheet('الاحتياطيون'); rtl(ws2);
+    ws2.columns = [{width:22},{width:10},{width:10},{width:18},{width:28}];
+    merge(ws2,1,1,5,`المدربون الاحتياطيون — ${today}`,{bg:C.orange,height:30});
+    hdr(ws2,2,['اسم المدرب/ة','الزون','التاريخ','المراقب','ملاحظات'],C.orange);
+    backup.forEach((r,i)=>{
+      const row = ws2.addRow([r.trainer_name||'—',r.zone||'—',r.report_date||'—',r.observer||'—',r.notes||'—']);
+      sR(row, i%2===0?C.ltO:C.white);
+      row.getCell(1).font = {name:'Arial',bold:true,size:10};
+    });
+    if (!backup.length) ws2.addRow(['لا توجد سجلات','','','','']);
+
+    const buf = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=`تقرير_مدربين_بلا_حصة_${today}.xlsx`;
+    a.style.display='none'; document.body.appendChild(a); a.click();
+    setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},300);
+    toast(`✅ تم التصدير — ${wb.worksheets.length} شيتات`);
+  } catch(e) { console.error(e); toast('❌ '+e.message); }
+}
+</script>
 
 </body>
 </html>
