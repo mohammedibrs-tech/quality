@@ -10181,45 +10181,75 @@ async function refreshQuarterlyCard() {
   if (badge) badge.textContent = `Q${curQ} ${year}`;
   if (!preview) return;
 
-  // حساب نطاق الأشهر
-  const months = Q_MONTHS[curQ]; // [1,2,3] أو [4,5,6] إلخ
+  const months = Q_MONTHS[curQ];
   const fromDate = `${year}-${String(months[0]).padStart(2,'0')}-01`;
   const toDate   = `${year}-${String(months[months.length-1]).padStart(2,'0')}-31`;
+  const monthStrs = months.map(m=>String(m));
+  const monthStrsPad = months.map(m=>String(m).padStart(2,'0'));
 
   preview.innerHTML = '<div style="font-size:9px;color:rgba(255,255,255,0.5);">⏳ جاري التحميل...</div>';
 
   try {
     const safe = (p) => p.then(r=>r.data||[]).catch(()=>[]);
-    const [vd, sd, fd, bd] = await Promise.all([
+    const [vd, sd, fd, bd, od, sld] = await Promise.all([
+      // مخالفات من السجلات مباشرة
       safe(db.from('violations').select('section,grade').gte('date', fromDate).lte('date', toDate)),
+      // استطلاعات
       safe(db.from('surveys').select('satisfaction_pct').gte('date', fromDate).lte('date', toDate)),
-      safe(db.from('facility_reports').select('id').gte('report_date', fromDate).lte('report_date', toDate)),
-      safe(db.from('building_reports').select('id').gte('report_date', fromDate).lte('report_date', toDate)),
+      // ملاحظات مرافق
+      safe(db.from('facility_reports').select('id,observer').gte('report_date', fromDate).lte('report_date', toDate)),
+      // تقارير مبنى
+      safe(db.from('building_reports').select('id,observer').gte('report_date', fromDate).lte('report_date', toDate)),
+      // كفاءة التشغيل
+      safe(db.from('ops_reports').select('zone,efficiency_pct').in('report_month',[...monthStrs,...monthStrsPad]).eq('report_year',String(year))),
+      // قسم المبيعات
+      safe(db.from('sales_reports').select('outcome,total_score').gte('report_date', fromDate).lte('report_date', toDate)),
     ]);
 
+    // مخالفات
     const femViol = vd.filter(v=>v.section==='female').length;
     const malViol = vd.filter(v=>v.section==='male').length;
-    const gradeA  = vd.filter(v=>v.grade==='A').length;
+
+    // رضا العملاء
     const avgSurv = sd.length ? Math.round(sd.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/sd.length) : 0;
 
-    const total = vd.length + sd.length + fd.length + bd.length;
+    // كفاءة التشغيل — رجال ونساء ودراجات
+    const femOps  = od.filter(r=>r.zone==='female'||r.zone==='L'||r.zone==='E'||r.zone==='D'||r.zone==='B'||r.zone==='A');
+    const maleOps = od.filter(r=>r.zone==='male'||r.zone==='O'||r.zone==='H');
+    const bikeOps = od.filter(r=>r.zone==='bike'||r.zone==='دراجات');
+    const avgFemOps  = femOps.length  ? Math.round(femOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/femOps.length)   : null;
+    const avgMaleOps = maleOps.length ? Math.round(maleOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/maleOps.length) : null;
+    const avgBikeOps = bikeOps.length ? Math.round(bikeOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/bikeOps.length) : null;
+
+    // المبيعات
+    const kept  = sld.filter(r=>(r.outcome||'').includes('احتفاظ')||(r.outcome||'').includes('kept')).length;
+    const recov = sld.filter(r=>(r.outcome||'').includes('استرداد')||(r.outcome||'').includes('recov')).length;
+
+    const total = vd.length+sd.length+fd.length+bd.length+od.length+sld.length;
     if (!total) {
       preview.innerHTML = '<div style="font-size:9px;color:rgba(255,255,255,0.4);">لا توجد بيانات لهذا الربع بعد</div>';
       return;
     }
 
+    const effColor = (v) => v===null?'rgba(255,255,255,0.4)':v>=85?'#27AE60':v>=70?'#D4AC0D':'#E74C3C';
+
     preview.innerHTML = [
-      {l:'مخالفات نسائي', v:femViol, c:'#E07070'},
-      {l:'مخالفات رجالي', v:malViol, c:'#70A0E0'},
-      {l:'مخالفات A',     v:gradeA,  c:'#E74C3C'},
-      {l:'رضا العملاء',   v:avgSurv ? avgSurv+'%' : '—', c:avgSurv>=90?'#27AE60':'#D4AC0D'},
-      {l:'ملاحظات مرافق', v:fd.length, c:'#E07B2A'},
-      {l:'تقارير مبنى',   v:bd.length, c:'#7D3C98'},
+      {l:'مخالفات نسائي',   v: femViol,                          c:'#E07070'},
+      {l:'مخالفات رجالي',   v: malViol,                          c:'#70A0E0'},
+      {l:'رضا العملاء',     v: avgSurv ? avgSurv+'%' : '—',      c: avgSurv>=90?'#27AE60':'#D4AC0D'},
+      {l:'تشغيل نسائي',     v: avgFemOps!==null?avgFemOps+'%':'—', c: effColor(avgFemOps)},
+      {l:'تشغيل رجالي',     v: avgMaleOps!==null?avgMaleOps+'%':'—', c: effColor(avgMaleOps)},
+      {l:'تشغيل دراجات',    v: avgBikeOps!==null?avgBikeOps+'%':'—', c: effColor(avgBikeOps)},
+      {l:'احتفاظ مبيعات',   v: kept  || '—',                     c:'#27AE60'},
+      {l:'استرداد مبيعات',  v: recov || '—',                     c:'#F39C12'},
+      {l:'ملاحظات مرافق',   v: fd.length || '—',                 c:'#E07B2A'},
+      {l:'تقارير مبنى',     v: bd.length || '—',                 c:'#7D3C98'},
     ].map(i=>`<div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:4px 10px;text-align:center;">
       <div style="font-size:12px;font-weight:900;color:${i.c};">${i.v}</div>
       <div style="font-size:8px;color:rgba(255,255,255,0.5);">${i.l}</div>
     </div>`).join('');
   } catch(e) {
+    console.error('refreshQuarterlyCard:', e);
     preview.innerHTML = '<div style="font-size:9px;color:rgba(255,255,255,0.4);">—</div>';
   }
 }
