@@ -9557,6 +9557,21 @@ function renderQuarterlyResults() {
   const ec=v=>v>=90?'#27AE60':v>=70?'#D4AC0D':'#E74C3C';
 
   // KPI Cards
+  const qFetchMap = {
+    'مخالفات نسائي':  {table:'violations',   filter:r=>r.section==='female', label:'السجلات ← مخالفات نسائي'},
+    'مخالفات رجالي':  {table:'violations',   filter:r=>r.section==='male',   label:'السجلات ← مخالفات رجالي'},
+    'رضا العملاء':    {table:'surveys',       filter:null, label:'كرت الاستطلاعات'},
+    'كفاءة نسائي':    {table:'ops',           filter:null, label:'كرت كفاءة التشغيل'},
+    'كفاءة رجالي':    {table:'ops',           filter:null, label:'كرت كفاءة التشغيل'},
+    'كفاءة دراجات':   {table:'ops',           filter:null, label:'كرت كفاءة التشغيل'},
+    'احتفاظ بالرسوم': {table:'sales',         filter:null, label:'كرت قسم المبيعات'},
+    'عملاء الاسترداد':{table:'sales',         filter:null, label:'كرت قسم المبيعات'},
+    'الأعلى تقييماً': {table:'ratings',       filter:null, label:'كرت الأعلى بالتقييم'},
+    'الحوافز الشهرية':{table:'incentives',    filter:null, label:'كرت الحوافز الشهرية'},
+    'المبنى':          {table:'buildings',     filter:null, label:'كرت تقرير المبنى'},
+    'المرافق':         {table:'facilities',    filter:null, label:'كرت ملاحظات المرافق'},
+  };
+
   document.getElementById('qKpiCards').innerHTML=[
     {icon:'👩',  label:'مخالفات نسائي',  value:femViol.length,   sub:`A:${femViol.filter(v=>v.grade==='A').length} B:${femViol.filter(v=>v.grade==='B').length}`, color:'#E74C3C'},
     {icon:'👨',  label:'مخالفات رجالي',  value:malViol.length,   sub:`A:${malViol.filter(v=>v.grade==='A').length} B:${malViol.filter(v=>v.grade==='B').length}`, color:'#2E86C1'},
@@ -9570,12 +9585,18 @@ function renderQuarterlyResults() {
     {icon:'💰',  label:'الحوافز الشهرية',value:incentives.length?incentives.length+'':'—', sub:incTotal?`${incTotal} نقطة`:'—', color:'#9B59B6'},
     {icon:'🏢',  label:'المبنى',           value:buildings.length||'—', sub:`${buildings.length} تقرير`, color:'#7D3C98'},
     {icon:'🔧',  label:'المرافق',          value:facilities.length||'—',sub:`${facilities.length} ملاحظة`,color:'#16A085'},
-  ].map(k=>`<div style="background:var(--card2);border-radius:14px;padding:12px 10px;border-right:4px solid ${k.color};">
-    <div style="font-size:18px;margin-bottom:4px;">${k.icon}</div>
-    <div style="font-size:18px;font-weight:900;color:${k.color};line-height:1.2;">${k.value}</div>
-    <div style="font-size:10px;font-weight:700;color:var(--text);margin-top:4px;">${k.label}</div>
-    <div style="font-size:9px;color:var(--text-dim);">${k.sub}</div>
-  </div>`).join('');
+  ].map(k=>{
+    const hasData = k.value !== '—' && k.value !== 0 && k.value !== '0%';
+    const src = qFetchMap[k.label];
+    const fetchBtn = src ? `<button onclick="qFetchCard('${k.label}',${d.q},${d.year})" style="margin-top:8px;width:100%;padding:5px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text-dim);font-family:'Cairo',sans-serif;font-size:9px;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(0,168,150,0.15)';this.style.color='var(--accent)'" onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='var(--text-dim)'">⬇ جلب من ${src.label}</button>` : '';
+    return `<div style="background:var(--card2);border-radius:14px;padding:12px 10px;border-right:4px solid ${k.color};display:flex;flex-direction:column;">
+      <div style="font-size:18px;margin-bottom:4px;">${k.icon}</div>
+      <div style="font-size:18px;font-weight:900;color:${hasData?k.color:'var(--text-dim)'};line-height:1.2;">${k.value}</div>
+      <div style="font-size:10px;font-weight:700;color:var(--text);margin-top:4px;">${k.label}</div>
+      <div style="font-size:9px;color:var(--text-dim);">${k.sub}</div>
+      ${fetchBtn}
+    </div>`;
+  }).join('');
 
   let html='';
 
@@ -9882,7 +9903,73 @@ function renderQuarterlyResults() {
   document.getElementById('qDetails').innerHTML=html;
 }
 
-async function exportQuarterlyExcel() {
+async function qFetchCard(cardLabel, q, year) {
+  if(!_qData){toast('❌ اختر الربع أولاً');return;}
+  const months = Q_MONTHS[q];
+  const dateFrom = `${year}-${String(months[0]).padStart(2,'0')}-01`;
+  const dateTo   = `${year}-${String(months[months.length-1]).padStart(2,'0')}-31`;
+  const violFrom = (year===2026 && months[0]<3) ? `${year}-03-01` : dateFrom;
+  const monthStrs = months.map(m=>String(m));
+  const monthStrsPad = months.map(m=>String(m).padStart(2,'0'));
+
+  toast('⏳ جاري جلب البيانات...');
+  const safe = async (p) => { try{const r=await p;return r.data||[];}catch(e){return[];} };
+
+  try{
+    if(cardLabel==='مخالفات نسائي'||cardLabel==='مخالفات رجالي'){
+      const data = await safe(db.from('violations').select('*').gte('date',violFrom).lte('date',dateTo));
+      _qData.violations = data;
+      toast(`✅ تم جلب ${data.length} مخالفة من السجلات`);
+    } else if(cardLabel==='رضا العملاء'){
+      const data = await safe(db.from('surveys').select('*').gte('date',dateFrom).lte('date',dateTo));
+      _qData.surveys = data;
+      toast(`✅ تم جلب ${data.length} استطلاع`);
+    } else if(cardLabel==='كفاءة نسائي'||cardLabel==='كفاءة رجالي'||cardLabel==='كفاءة دراجات'){
+      const data = await safe(db.from('ops_reports').select('*').in('report_month',[...monthStrs,...monthStrsPad]).eq('report_year',String(year)));
+      if(data.length>0){
+        _qData.ops = data;
+        toast(`✅ تم جلب ${data.length} سجل تشغيل من Supabase`);
+      } else {
+        // جلب من OPS_MONTHS إذا ما في بيانات في Supabase
+        let ops=[];
+        months.forEach(m=>{
+          const key=`${year}-${String(m).padStart(2,'0')}`;
+          if(OPS_MONTHS&&OPS_MONTHS[key]){
+            const mo=OPS_MONTHS[key];
+            if(mo.analysis&&mo.analysis.length){
+              mo.analysis.forEach(t=>ops.push({trainer_name:t.trainer_name||t.name,zone:t.section||'female',section:t.section||'female',efficiency_pct:Math.round(t.efficiency||0),sessions:t.sessions||0,trainees:t.trainees||0,report_month:String(m),report_year:String(year)}));
+            } else {
+              ['female','male','bike'].forEach(sec=>(mo.ops[sec]||[]).forEach(r=>ops.push({trainer_name:r.name||r.trainer_name,zone:sec,section:sec,efficiency_pct:Math.round(r.efficiency||0),sessions:r.sessions||0,trainees:r.trainees||0,report_month:String(m),report_year:String(year)})));
+            }
+          }
+        });
+        if(ops.length>0){_qData.ops=ops;toast(`✅ تم جلب ${ops.length} سجل من كرت التشغيل المفتوح`);}
+        else toast('⚠️ افتح كرت كفاءة التشغيل وارفع الملف أولاً');
+      }
+    } else if(cardLabel==='احتفاظ بالرسوم'||cardLabel==='عملاء الاسترداد'){
+      const data = await safe(db.from('sales_reports').select('*').gte('created_at',dateFrom+'T00:00:00').lte('created_at',dateTo+'T23:59:59'));
+      _qData.sales = data;
+      toast(`✅ تم جلب ${data.length} سجل من قسم المبيعات`);
+    } else if(cardLabel==='الأعلى تقييماً'){
+      const data = await safe(db.from('trainer_ratings').select('*').gte('upload_date',dateFrom).lte('upload_date',dateTo));
+      _qData.ratings = data;
+      toast(`✅ تم جلب ${data.length} تقييم`);
+    } else if(cardLabel==='الحوافز الشهرية'){
+      const data = await safe(db.from('incentives').select('*').in('month',monthStrs).eq('year',String(year)));
+      _qData.incentives = data;
+      toast(`✅ تم جلب ${data.length} سجل حوافز`);
+    } else if(cardLabel==='المبنى'){
+      const data = await safe(db.from('building_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo));
+      _qData.buildings = data;
+      toast(`✅ تم جلب ${data.length} تقرير مبنى`);
+    } else if(cardLabel==='المرافق'){
+      const data = await safe(db.from('facility_reports').select('*').gte('report_date',dateFrom).lte('report_date',dateTo));
+      _qData.facilities = data;
+      toast(`✅ تم جلب ${data.length} ملاحظة مرافق`);
+    }
+    renderQuarterlyResults();
+  }catch(e){toast('❌ '+e.message);}
+}
   if(!_qData){toast('❌ افتح التقرير الربعي أولاً واختر الربع');return;}
   if(typeof ExcelJS==='undefined'){toast('❌ مكتبة ExcelJS غير محملة');return;}
 
