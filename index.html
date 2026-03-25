@@ -4045,6 +4045,7 @@ function renderS(surveys){
         <span class="gbadge ${gc2}">${gap>=0?'+':''}${gap}%</span>
       </div>`;
     }).join('');
+    const notes=[s.note1,s.note2,s.note3,s.note4,s.note5].map((n,i)=>n&&n.trim()?`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,168,150,0.08);"><span style="font-size:10px;color:var(--accent);font-weight:700;white-space:nowrap;min-width:90px;">${qAR[i].slice(0,15)}</span><span style="font-size:11px;color:var(--text);flex:1;">${n.trim()}</span></div>`:'').filter(Boolean).join('');
     return`<div class="survey-rec">
       <div class="survey-rec-header">
         <div>
@@ -4057,6 +4058,10 @@ function renderS(surveys){
         </div>
       </div>
       <div class="sbars">${bars}</div>
+      ${notes?`<div style="margin-top:10px;padding:10px;background:rgba(0,168,150,0.04);border-radius:10px;border-right:3px solid var(--accent);">
+        <div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:6px;">ملاحظات العميل</div>
+        ${notes}
+      </div>`:''}
     </div>`;
   }).join('');
 }
@@ -6995,7 +7000,7 @@ async function exportSurveysStyled(){
     const ws=wb.addWorksheet('بيانات الاستطلاع'); ws.views=[{rightToLeft:true}];
     exMerge(ws,1,1,1,11,'تقرير استطلاع رضا العملاء  |  إدارة الجودة  |  نورة لتعليم القيادة',{size:13,height:34});
     exMerge(ws,2,1,2,11,`إجمالي: ${recs.length} | متوسط الرضا: ${avg.toFixed(1)}%`,{bold:false,bg:EX.TEAL,size:10,height:22});
-    exHeader(ws,3,['م','التاريخ','الموظف','خدمة العملاء/5','التدريب النظري/5','مبنى العملي/5','التدريب العملي/5','ما بعد التدريب/5','المجموع/25','نسبة الرضا%','ملاحظات']);
+    exHeader(ws,3,['م','التاريخ','الموظف','خدمة العملاء/5','التدريب النظري/5','مبنى العملي/5','التدريب العملي/5','ما بعد التدريب/5','المجموع/25','نسبة الرضا%','ملاحظات مجمعة']);
     recs.forEach((rec,ri)=>{
       const r=4+ri; const bg=ri%2===0?EX.ALT1:'FFFFFF';
       const q=[rec.q1||0,rec.q2||0,rec.q3||0,rec.q4||0,rec.q5||0];
@@ -7006,10 +7011,37 @@ async function exportSurveysStyled(){
       exCell(ws,r,9,tot,{bold:true,bg});
       const pc=ws.getCell(r,10); pc.value=`${pct.toFixed(1)}%`;
       pc.font=exFont(true,10,'FFFFFF'); pc.fill=exFill(pctBg); pc.alignment=exAlign(); pc.border=exBd();
-      exCell(ws,r,11,rec.notes||'',{bg,wrap:true}); ws.getRow(r).height=20;
+      // الملاحظات — دمج كل note1-5
+      const allNotes=[rec.note1,rec.note2,rec.note3,rec.note4,rec.note5].filter(Boolean).join(' | ');
+      exCell(ws,r,11,allNotes||rec.notes||'',{bg,wrap:true});
+      ws.getRow(r).height=allNotes?35:20;
     });
-    [5,12,18,12,14,12,14,16,10,11,20].forEach((w,i)=>{ws.getColumn(i+1).width=w;});
+    [5,12,18,12,14,12,14,16,10,11,35].forEach((w,i)=>{ws.getColumn(i+1).width=w;});
     ws.views=[{state:'frozen',ySplit:3,rightToLeft:true}];
+
+    // شيت ملاحظات العملاء المفصلة
+    const wsN=wb.addWorksheet('ملاحظات العملاء'); wsN.views=[{rightToLeft:true}];
+    exMerge(wsN,1,1,1,8,'ملاحظات العملاء التفصيلية  |  استطلاع رضا العملاء',{size:12,height:30});
+    exHeader(wsN,2,['التاريخ','العميل','الموظف','المحور','الملاحظة','التقييم/5','نسبة الرضا%','']);
+    const qLabels=['خدمة العملاء','التدريب النظري','مبنى العملي','التدريب العملي','ما بعد التدريب'];
+    let noteRow=3;
+    recs.forEach(rec=>{
+      [rec.note1,rec.note2,rec.note3,rec.note4,rec.note5].forEach((n,i)=>{
+        if(!n||!n.trim())return;
+        const bg=noteRow%2===0?EX.ALT1:'FFFFFF';
+        exCell(wsN,noteRow,1,rec.date||'',{bg});
+        exCell(wsN,noteRow,2,rec.client_name||'',{bg,bold:true});
+        exCell(wsN,noteRow,3,rec.observer||'',{bg});
+        exCell(wsN,noteRow,4,qLabels[i],{bg});
+        exCell(wsN,noteRow,5,n.trim(),{bg,wrap:true});
+        exCell(wsN,noteRow,6,rec['q'+(i+1)]||0,{bg});
+        exCell(wsN,noteRow,7,(rec.satisfaction_pct||0)+'%',{bg});
+        wsN.getRow(noteRow).height=30;
+        noteRow++;
+      });
+    });
+    if(noteRow===3){exCell(wsN,3,1,'لا توجد ملاحظات مسجلة',{});}
+    [12,20,16,16,45,10,12,8].forEach((w,i)=>{wsN.getColumn(i+1).width=w;});
 
     // شيت KPIs
     const la=wb.addWorksheet('لوحة التحليل'); la.views=[{rightToLeft:true}];
