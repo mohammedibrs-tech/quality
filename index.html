@@ -9905,15 +9905,16 @@ function renderQuarterlyResults() {
 
 async function qFetchCard(cardLabel, q, year) {
   if(!_qData){toast('❌ اختر الربع أولاً');return;}
-  const months = Q_MONTHS[q];
+  const months = Q_MONTHS[parseInt(q)];
+  if(!months){toast('❌ خطأ في رقم الربع');return;}
   const dateFrom = `${year}-${String(months[0]).padStart(2,'0')}-01`;
   const dateTo   = `${year}-${String(months[months.length-1]).padStart(2,'0')}-31`;
-  const violFrom = (year===2026 && months[0]<3) ? `${year}-03-01` : dateFrom;
-  const monthStrs = months.map(m=>String(m));
+  const violFrom = (parseInt(year)===2026 && months[0]<3) ? `${year}-03-01` : dateFrom;
+  const monthStrs    = months.map(m=>String(m));
   const monthStrsPad = months.map(m=>String(m).padStart(2,'0'));
 
   toast('⏳ جاري جلب البيانات...');
-  const safe = async (p) => { try{const r=await p;return r.data||[];}catch(e){return[];} };
+  const safe = async (p) => { try{const r=await p;return r.data||[];}catch(e){console.error('qFetch safe:',e);return[];} };
 
   try{
     if(cardLabel==='مخالفات نسائي'||cardLabel==='مخالفات رجالي'){
