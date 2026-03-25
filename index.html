@@ -3298,7 +3298,7 @@ const NQ = {
       const START = '2026-03-01';
       const safe = async (p) => { try { const r = await p; return r.data||[]; } catch(e) { return []; } };
 
-      const [violations, surveys, facility, building, ops, sales, ratings, pending, gameScores] = await Promise.all([
+      const [violations, surveys, facility, building, ops, sales, ratings, pending, gameScores, incentives] = await Promise.all([
         safe(db.from('violations').select('*').gte('date', START).order('created_at', {ascending:false})),
         safe(db.from('surveys').select('*').order('created_at', {ascending:false})),
         safe(db.from('facility_reports').select('*').order('created_at', {ascending:false})),
@@ -3308,15 +3308,15 @@ const NQ = {
         safe(db.from('trainer_ratings').select('*').order('created_at', {ascending:false})),
         safe(db.from('pending_violations').select('*').eq('status','pending')),
         safe(db.from('game_scores').select('player_name,score,play_date').eq('play_date', new Date().toISOString().slice(0,10)).order('score', {ascending:false}).limit(10)),
+        safe(db.from('incentives').select('*').order('created_at', {ascending:false})),
       ]);
 
-      this._cache = { violations, surveys, facility, building, ops, sales, ratings, pending, gameScores };
+      this._cache = { violations, surveys, facility, building, ops, sales, ratings, pending, gameScores, incentives };
       this._lastFetch = now;
       this._loading = false;
 
-      // أبلغ كل المستمعين بتحديث البيانات
       this._listeners.forEach(fn => { try { fn(this._cache); } catch(e) {} });
-      console.log(`✅ NQ DataLayer: جُلب ${violations.length} مخالفة، ${surveys.length} استطلاع، ${facility.length} مرفق، ${ops.length} تشغيل`);
+      console.log(`✅ NQ DataLayer: جُلب ${violations.length} مخالفة، ${surveys.length} استطلاع، ${facility.length} مرفق، ${ops.length} تشغيل، ${incentives.length} حافز`);
       return this._cache;
     } catch(e) {
       this._loading = false;
@@ -9448,15 +9448,34 @@ function renderQuarterlyResults() {
 
   const femViol=violations.filter(v=>v.section==='female');
   const malViol=violations.filter(v=>v.section==='male');
-  const femOps =ops.filter(r=>r.zone==='female'||r.section==='female');
-  const malOps =ops.filter(r=>r.zone==='male'  ||r.section==='male');
-  const bikeOps=ops.filter(r=>r.zone==='bike'  ||r.section==='bike');
-  const retSales=sales.filter(r=>r.call_type==='retention'||r.outcome);
+  const FEMALE_ZONES=['female','L','E','D','B','A'];
+  const MALE_ZONES=['male','O','H'];
+  const BIKE_ZONES=['bike','دراجات'];
+  const femOps =ops.filter(r=>FEMALE_ZONES.includes(r.zone)||FEMALE_ZONES.includes(r.section));
+  const malOps =ops.filter(r=>MALE_ZONES.includes(r.zone)||MALE_ZONES.includes(r.section));
+  const bikeOps=ops.filter(r=>BIKE_ZONES.includes(r.zone)||BIKE_ZONES.includes(r.section));
+
+  // المبيعات
+  const retSales  = sales.filter(r=>r.request_type==='احتفاظ'||(r.outcome||'').includes('احتفاظ'));
+  const recSales  = sales.filter(r=>r.request_type==='استرداد'||(r.request_type||'').includes('استرداد'));
+  const totSales  = sales.length;
+  const retRate   = totSales ? Math.round(retSales.length/totSales*100) : 0;
+  const recRate   = totSales ? Math.round(recSales.length/totSales*100) : 0;
+  const recFees   = recSales.reduce((s,r)=>s+parseFloat(r.fees||0),0);
+
+  // التقييمات — أعلى 3 مدربين
+  const topRatings = [...ratings].sort((a,b)=>(b.mention_pct||b.rating||0)-(a.mention_pct||a.rating||0)).slice(0,3);
+
+  // الحوافز
+  const incTotal  = incentives.reduce((s,r)=>s+parseFloat(r.score||0),0);
+  const incByStaff= {};
+  incentives.forEach(r=>{ if(r.staff_name) incByStaff[r.staff_name]=(incByStaff[r.staff_name]||0)+parseFloat(r.score||0); });
+  const topInc    = Object.entries(incByStaff).sort((a,b)=>b[1]-a[1]).slice(0,3);
+
   const avgSurvey =surveys.length ?Math.round(surveys.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/surveys.length):0;
   const avgFemOps =femOps.length  ?Math.round(femOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/femOps.length):0;
   const avgMalOps =malOps.length  ?Math.round(malOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/malOps.length):0;
   const avgBikeOps=bikeOps.length ?Math.round(bikeOps.reduce((s,r)=>s+(r.efficiency_pct||0),0)/bikeOps.length):0;
-  const retRate   =retSales.length?Math.round(retSales.filter(r=>(r.outcome||'').includes('احتفاظ')).length/retSales.length*100):0;
   const avgBuild  =buildings.filter(r=>r.total_score).length?Math.round(buildings.filter(r=>r.total_score).reduce((s,r)=>s+(r.total_score||0),0)/buildings.filter(r=>r.total_score).length):0;
   const avgFacil  =facilities.filter(r=>r.total_score).length?Math.round(facilities.filter(r=>r.total_score).reduce((s,r)=>s+(r.total_score||0),0)/facilities.filter(r=>r.total_score).length):0;
 
@@ -9489,19 +9508,22 @@ function renderQuarterlyResults() {
 
   // KPI Cards
   document.getElementById('qKpiCards').innerHTML=[
-    {icon:'👩',label:'مخالفات نسائي', value:femViol.length,  sub:`A:${femViol.filter(v=>v.grade==='A').length} B:${femViol.filter(v=>v.grade==='B').length}`,color:'#E74C3C'},
-    {icon:'👨',label:'مخالفات رجالي', value:malViol.length,  sub:`A:${malViol.filter(v=>v.grade==='A').length} B:${malViol.filter(v=>v.grade==='B').length}`,color:'#2E86C1'},
-    {icon:'⭐',label:'رضا العملاء',   value:avgSurvey+'%',   sub:`${surveys.length} استطلاع`,color:ec(avgSurvey)},
-    {icon:'👩‍🏫',label:'كفاءة نسائي', value:avgFemOps+'%',   sub:`${femOps.length} مدربة`,  color:ec(avgFemOps)},
-    {icon:'👨‍🏫',label:'كفاءة رجالي', value:avgMalOps+'%',   sub:`${malOps.length} مدرب`,   color:ec(avgMalOps)},
-    {icon:'🏍️',label:'كفاءة دراجات', value:avgBikeOps+'%',  sub:`${bikeOps.length} مدرب`,  color:ec(avgBikeOps)},
-    {icon:'💼',label:'احتفاظ بالرسوم',value:retRate+'%',     sub:`${retSales.length} حالة`, color:retRate>=60?'#27AE60':retRate>=40?'#D4AC0D':'#E74C3C'},
-    {icon:'🏢',label:'المبنى',         value:avgBuild||buildings.length, sub:`${buildings.length} تقرير`,color:'#7D3C98'},
-    {icon:'🔧',label:'المرافق',        value:avgFacil||facilities.length,sub:`${facilities.length} ملاحظة`,color:'#16A085'},
+    {icon:'👩',  label:'مخالفات نسائي',  value:femViol.length,   sub:`A:${femViol.filter(v=>v.grade==='A').length} B:${femViol.filter(v=>v.grade==='B').length}`, color:'#E74C3C'},
+    {icon:'👨',  label:'مخالفات رجالي',  value:malViol.length,   sub:`A:${malViol.filter(v=>v.grade==='A').length} B:${malViol.filter(v=>v.grade==='B').length}`, color:'#2E86C1'},
+    {icon:'⭐',  label:'رضا العملاء',    value:avgSurvey?avgSurvey+'%':'—', sub:`${surveys.length} استطلاع`, color:ec(avgSurvey)},
+    {icon:'👩‍🏫',label:'كفاءة نسائي',   value:avgFemOps?avgFemOps+'%':'—',  sub:`${femOps.length} مدربة`, color:ec(avgFemOps)},
+    {icon:'👨‍🏫',label:'كفاءة رجالي',   value:avgMalOps?avgMalOps+'%':'—',  sub:`${malOps.length} مدرب`,  color:ec(avgMalOps)},
+    {icon:'🏍️', label:'كفاءة دراجات',   value:avgBikeOps?avgBikeOps+'%':'—',sub:`${bikeOps.length} مدرب`, color:ec(avgBikeOps)},
+    {icon:'✅',  label:'احتفاظ بالرسوم', value:retSales.length?retSales.length+'':'—', sub:retRate?`${retRate}% من ${totSales}`:'—', color:'#27AE60'},
+    {icon:'🔄',  label:'عملاء الاسترداد',value:recSales.length?recSales.length+'':'—', sub:recFees?`${recFees.toLocaleString()} ر`:`${recRate}%`, color:'#E74C3C'},
+    {icon:'🏆',  label:'الأعلى تقييماً', value:topRatings[0]?topRatings[0].trainer_name?.split(' ')[0]||'—':'—', sub:topRatings[0]?`${(topRatings[0].mention_pct||topRatings[0].rating||0).toFixed(1)}%`:'—', color:'#F5C518'},
+    {icon:'💰',  label:'الحوافز الشهرية',value:incentives.length?incentives.length+'':'—', sub:incTotal?`${incTotal} نقطة`:'—', color:'#9B59B6'},
+    {icon:'🏢',  label:'المبنى',           value:buildings.length||'—', sub:`${buildings.length} تقرير`, color:'#7D3C98'},
+    {icon:'🔧',  label:'المرافق',          value:facilities.length||'—',sub:`${facilities.length} ملاحظة`,color:'#16A085'},
   ].map(k=>`<div style="background:var(--card2);border-radius:14px;padding:12px 10px;border-right:4px solid ${k.color};">
     <div style="font-size:18px;margin-bottom:4px;">${k.icon}</div>
-    <div style="font-size:20px;font-weight:900;color:${k.color};">${k.value}</div>
-    <div style="font-size:10px;font-weight:700;color:var(--text);">${k.label}</div>
+    <div style="font-size:18px;font-weight:900;color:${k.color};line-height:1.2;">${k.value}</div>
+    <div style="font-size:10px;font-weight:700;color:var(--text);margin-top:4px;">${k.label}</div>
     <div style="font-size:9px;color:var(--text-dim);">${k.sub}</div>
   </div>`).join('');
 
@@ -9770,6 +9792,39 @@ function renderQuarterlyResults() {
       <div style="font-size:14px;font-weight:900;margin-bottom:12px;">🏅 الأعلى بالتقييم — آراء العملاء</div>
       ${renderRatSec(ratings.filter(r=>r.section==='female'||r.zone==='female'),'👩 نسائي','#E74C3C')}
       ${renderRatSec(ratings.filter(r=>r.section==='male'||r.zone==='male'),'👨 رجالي','#2E86C1')}
+    </div>`;
+  }
+
+  // ── ٨ الحوافز الشهرية ──
+  if(incentives.length){
+    const byMonth={};
+    const MNS=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    incentives.forEach(r=>{
+      const k=MNS[parseInt(r.month)]||r.month;
+      if(!byMonth[k])byMonth[k]={count:0,total:0};
+      byMonth[k].count++;
+      byMonth[k].total+=parseFloat(r.score||0);
+    });
+    html+=`<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <span style="font-size:14px;font-weight:900;">💰 الحوافز الشهرية</span>
+        <div style="display:flex;gap:8px;">
+          <span style="background:rgba(155,89,182,0.1);color:#9B59B6;border-radius:10px;padding:3px 10px;font-size:11px;font-weight:700;">${incentives.length} سجل</span>
+          <span style="background:rgba(155,89,182,0.1);color:#9B59B6;border-radius:10px;padding:3px 10px;font-size:11px;font-weight:700;">${incTotal} إجمالي</span>
+        </div>
+      </div>
+      ${topInc.length?`<div style="font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:8px;">🏆 الأعلى:</div>
+      ${topInc.map(([name,score],i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:14px;">${['🥇','🥈','🥉'][i]}</span>
+        <span style="flex:1;font-size:12px;font-weight:700;">${name}</span>
+        <span style="background:rgba(155,89,182,0.12);color:#9B59B6;border-radius:8px;padding:2px 10px;font-size:11px;font-weight:900;">${score} نقطة</span>
+      </div>`).join('')}`:''}
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        ${Object.entries(byMonth).map(([m,v])=>`<div style="background:rgba(155,89,182,0.06);border-radius:10px;padding:8px 12px;text-align:center;min-width:70px;">
+          <div style="font-size:13px;font-weight:900;color:#9B59B6;">${v.total}</div>
+          <div style="font-size:9px;color:var(--text-dim);">${m}</div>
+        </div>`).join('')}
+      </div>
     </div>`;
   }
 
