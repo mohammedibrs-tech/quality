@@ -5,7 +5,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- v1773553283 -->
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>منصة إدارة الجودة | Noura Quality</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
@@ -997,7 +997,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 }
 .arcade-sub { font-size:9px;color:rgba(255,255,255,0.4);font-weight:400; }
 
-
 /* ══ Platform Ticker ══ */
 @keyframes tickerScroll {
   0%   { transform: translateX(0); }
@@ -1118,10 +1117,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 </head>
 <body>
 
-<!-- ══ DESKTOP SIDEBAR ══ -->
 <div id="desktopSidebar" style="display:none;">
 
-  <!-- زر الطي/التوسيع -->
+
   <button id="sbToggleBtn" onclick="toggleSidebar()">
     <span class="sb-icon" id="sbToggleIcon">☰</span>
     <span class="sb-label">طي القائمة</span>
@@ -1129,7 +1127,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
   <div class="sb-divider"></div>
 
-  <!-- بطاقة المستخدم -->
+
   <div id="sbUserCard" onclick="openProfileModal()">
     <div class="sb-user-inner">
       <div class="sb-avatar" id="sbAvatarEl">م</div>
@@ -1142,19 +1140,19 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
   <div class="sb-divider"></div>
 
-  <!-- 1. الرئيسية -->
+
   <div class="sb-item active" id="sb-home" onclick="sbNav('home')">
     <span class="sb-icon">🏠</span>
     <span class="sb-label">الرئيسية</span>
   </div>
 
-  <!-- 2. السجلات -->
+
   <div class="sb-item" id="sb-records" onclick="sbNav('records')">
     <span class="sb-icon">📋</span>
     <span class="sb-label">السجلات</span>
   </div>
 
-  <!-- 3. Dashboard (admin فقط) -->
+
   <div class="sb-item" id="sb-dashboard" onclick="showDashboard(this)" style="display:none;">
     <span class="sb-icon">📈</span>
     <span class="sb-label">Dashboard</span>
@@ -1162,20 +1160,19 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
   <div class="sb-divider"></div>
 
-  <!-- الوضع الداكن/الفاتح -->
+
   <div class="sb-item" onclick="toggleTheme()">
     <span class="sb-icon" id="sbThemeIcon">🌙</span>
     <span class="sb-label" id="sbThemeLabel">الوضع الداكن</span>
   </div>
 
-  <!-- تسجيل دخول/خروج -->
+
   <div class="sb-item" id="sb-auth" onclick="sbAuthAction()">
     <span class="sb-icon" id="sbAuthIcon">🔑</span>
     <span class="sb-label" id="sbAuthLabel">تسجيل الدخول</span>
   </div>
 </div>
 
-<!-- ══ SPLASH SCREEN ══ -->
 <div id="splashScreen" style="
   position:fixed;inset:0;z-index:99999;
   background:radial-gradient(ellipse at 50% 40%, #0D2E3A 0%, #061520 60%, #030D14 100%);
@@ -1236,41 +1233,39 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 })();
 </script>
 
-
 <div id="app">
 
-<!-- ══ DESKTOP TOP BAR ══ -->
 <div id="desktopTopBar" style="display:none;position:fixed;top:0;right:0;left:0;height:52px;background:var(--card);border-bottom:1px solid var(--border);z-index:8000;box-shadow:0 2px 12px rgba(0,0,0,0.07);box-sizing:border-box;padding:0 20px;align-items:center;gap:6px;direction:rtl;">
 
-  <!-- لوقو -->
+
   <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:900;color:var(--accent);margin-left:16px;flex-shrink:0;">
     <span style="font-size:18px;">⚙️</span>
   </div>
 
-  <!-- فاصل رأسي -->
+
   <div style="width:1px;height:24px;background:var(--border);margin:0 4px;flex-shrink:0;"></div>
 
-  <!-- أزرار التنقل — كلها جنب بعض -->
+
   <button class="tb-btn active" id="tb-home" onclick="tbNav('home')">🏠 الرئيسية</button>
   <button class="tb-btn" id="tb-records" onclick="tbNavRecords()">📋 السجلات</button>
   <button class="tb-btn" id="tb-dashboard" onclick="tbNavDash()">📈 Dashboard</button>
   <button class="tb-btn" id="tb-login" onclick="showLM()">🔑 تسجيل الدخول</button>
 
-  <!-- مساحة مرنة -->
+
   <div style="flex:1;"></div>
 
-  <!-- ثيم -->
+
   <button class="tb-btn" onclick="tbToggleTheme()" style="padding:6px 10px;min-width:0;"><span id="tbThemeIcon">🌙</span></button>
 
-  <!-- فاصل -->
+
   <div style="width:1px;height:24px;background:var(--border);margin:0 4px;flex-shrink:0;"></div>
 
-  <!-- غير مسجل -->
+
   <button id="tbBtnLogin" onclick="showLM()" style="display:none;align-items:center;gap:6px;padding:7px 14px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
     🔑 تسجيل الدخول
   </button>
 
-  <!-- مسجل دخول: صورة + اسم + خروج -->
+
   <div id="tbUserArea" style="display:none;align-items:center;gap:8px;">
     <div onclick="openProfileModal()" style="display:flex;align-items:center;gap:7px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
       <div id="tbAvatarEl" style="width:28px;height:28px;border-radius:50%;background:rgba(0,168,150,0.15);border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:var(--accent);overflow:hidden;flex-shrink:0;">م</div>
@@ -1297,7 +1292,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </nav>
 
-<!-- HOME -->
 <div id="page-home" class="page active" style="position:relative;">
   <canvas id="qualityCanvas" style="position:absolute;inset:0;width:100%;height:100%;opacity:0.15;pointer-events:none;z-index:0;"></canvas>
   <div class="home-hero">
@@ -1310,12 +1304,11 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <p>اختر القسم المناسب — Select a section</p>
     <div class="hero-line"></div>
   </div>
-  
 
 
   <div class="home-sections">
 
-    <!-- ══ الخدمات الإلكترونية لموظفي الجودة ══ -->
+
     <div class="sec-group-label" style="font-size:12px;font-weight:900;color:var(--accent);background:rgba(0,168,150,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid var(--accent);">🛠️ الخدمات الإلكترونية لموظفي الجودة</div>
 
     <div class="section-card full-w" onclick="showWeeklyTasks()" style="background:linear-gradient(to right,#00C8B4,#0D3040);">
@@ -1341,7 +1334,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="section-card facility" onclick="showSection('facility')"><div class="s-icon">🔧</div><div class="s-text"><div class="s-title-ar">ملاحظات المرافق</div><div class="s-title-en">FACILITY REPORTS</div></div><div class="s-arrow">›</div></div>
     <div class="section-card building" onclick="showSection('building')"><div class="s-icon">🏢</div><div class="s-text"><div class="s-title-ar">تقرير المبنى الرئيسي</div><div class="s-title-en">MAIN BUILDING REPORT</div></div><div class="s-arrow">›</div></div>
 
-    <!-- ══ التقارير الإدارية ══ -->
+
     <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#7D3C98;background:rgba(125,60,152,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #7D3C98;">📊 التقارير الإدارية</div>
 
     <div class="section-card ops" onclick="showOpsMonthModal()"><div class="s-icon">⚙️</div><div class="s-text"><div class="s-title-ar">كفاءة التشغيل</div><div class="s-title-en">OPERATIONAL EFFICIENCY</div></div><div class="s-arrow">›</div></div>
@@ -1350,15 +1343,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon">🌟</div><div class="s-text"><div class="s-title-ar">الأعلى بالتقييم</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
     <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon">🗂️</div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
 
-    <!-- ══ الأنشطة والفعاليات ══ -->
+
     <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#6A0DAD;background:rgba(106,13,173,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #6A0DAD;">🎯 الأنشطة والفعاليات</div>
   </div>
 
-  <!-- بنك الأفكار + لعبة اليوم في grid متناسق -->
+
   <div style="padding:0 14px 8px;max-width:900px;margin:0 auto;">
     <div class="cards-row-2" style="grid-template-columns:1fr 1fr;align-items:stretch;">
 
-      <!-- بنك الأفكار -->
+
       <div class="section-card" onclick="openIdeasBank()" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);position:relative;border-radius:20px;min-height:80px;">
         <div class="s-icon">💡</div>
         <div class="s-text">
@@ -1369,7 +1362,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         <div class="s-arrow">›</div>
       </div>
 
-  <!-- ══ لعبة اليوم ══ -->
+
       <div id="gameDayCard" onclick="openGameModal()" class="section-card" style="background:linear-gradient(135deg,#1A0533,#3D0B6B,#6A0DAD);position:relative;border-radius:20px;min-height:80px;overflow:hidden;cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
         <div style="position:absolute;inset:0;opacity:0.12;background:radial-gradient(circle at 20% 50%,#fff 1px,transparent 1px),radial-gradient(circle at 80% 20%,#fff 1px,transparent 1px);background-size:40px 40px,60px 60px;pointer-events:none;"></div>
         <div class="s-icon" style="background:rgba(255,255,255,0.1);">🎮</div>
@@ -1384,17 +1377,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     </div>
   </div>
 
-  <!-- leaderCard hidden but kept for JS -->
+
   <div id="gameLeaderCardOld" style="display:none;"></div>
 
 
-
-  <!-- ══ DAILY BULLETIN ══ -->
   <div style="padding:0 14px 8px;max-width:900px;margin:0 auto;">
     <div id="dailyBulletin" style="display:none;border-radius:16px;overflow:hidden;cursor:pointer;" onclick="showBulletinPopup()"></div>
   </div>
 
-  <!-- Active Staff Widget -->
+
   <div style="padding:0 14px 12px;max-width:900px;margin:0 auto;">
     <div style="background:linear-gradient(to right,#00C8B4,#00897A);border-radius:18px;padding:14px 16px;box-shadow:0 4px 16px rgba(0,200,180,0.3);">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -1408,8 +1399,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 
 
-
-  <!-- QUICK SUMMARY WIDGETS -->
   <div style="padding:0 14px 20px;max-width:900px;margin:0 auto;">
     <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:10px;text-transform:uppercase;display:flex;align-items:center;gap:8px;">
       📊 ملخص الشهر الحالي
@@ -1457,7 +1446,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
-<!-- VIOLATIONS -->
 <div id="page-violations" class="page">
   <div class="container">
     <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
@@ -1467,7 +1455,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="sub" id="vSub">VIOLATIONS — FEMALE SECTION</div>
     </div>
 
-    <!-- زر مراجعة المعلقة (admin فقط) -->
+
     <div id="pendingReviewBanner" style="display:none;background:rgba(231,76,60,0.08);border:1.5px solid rgba(231,76,60,0.3);border-radius:14px;padding:12px 16px;margin-bottom:14px;cursor:pointer;" onclick="openPendingModal()">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div style="display:flex;align-items:center;gap:8px;">
@@ -1481,7 +1469,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
 
-    <!-- ✅ NOTICE BANNER -->
+
     <div style="background:rgba(0,168,150,0.07);border:1.5px solid rgba(0,168,150,0.25);border-radius:14px;padding:13px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:10px;">
       <div style="font-size:20px;flex-shrink:0;">📢</div>
       <div>
@@ -1492,15 +1480,13 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
 
-
-
     <div class="card">
       <div id="vForm">
         <div class="slabel">بيانات المدربين / Trainers Info</div>
 
-        <!-- Trainer entries container -->
+
         <div id="trainerEntries">
-          <!-- First trainer -->
+
           <div class="trainer-entry" id="te0">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
               <div style="font-size:11px;font-weight:700;color:var(--accent);">المدرب الأول / Trainer 1</div>
@@ -1551,7 +1537,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
                 <div id="vAutoGrade0" class="auto-grade-display">—</div>
               </div>
             </div>
-            <!-- خانة عداد مشاهدات الجوال — تظهر فقط عند اختيار مخالفة الجوال -->
+
             <div id="phoneObsField0" style="display:none;margin-top:10px;">
               <div style="background:rgba(224,123,42,0.06);border:1.5px solid rgba(224,123,42,0.25);border-radius:12px;padding:14px 16px;">
                 <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--orange);margin-bottom:12px;">📱 عدد مرات مشاهدة استخدام الجوال</div>
@@ -1563,7 +1549,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           </div>
         </div>
 
-        <!-- Add trainer button -->
+
         <button type="button" class="add-trainer-btn" onclick="addTrainerEntry()">+ إضافة مدرب آخر / Add Another Trainer</button>
 
         <div class="sep"></div>
@@ -1598,7 +1584,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
-<!-- SURVEY -->
 <div id="page-survey" class="page">
   <div class="container">
     <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
@@ -1661,7 +1646,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
-<!-- FACILITY -->
 <div id="page-facility" class="page">
   <div class="container">
     <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
@@ -1671,7 +1655,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="sub">FACILITY &amp; CLEANLINESS REPORTS</div>
     </div>
 
-    <!-- تبويبات -->
+
     <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
       <button onclick="switchFacTab('note')" id="fTab_note"
         style="padding:10px 18px;border-radius:20px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
@@ -1699,9 +1683,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </button>
     </div>
 
-    <!-- ملاحظة المرافق الأصلية -->
+
     <div id="fSection_note">
-<!-- زر أضف ملاحظة أخرى — يظهر دائماً -->
+
     <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
       <button onclick="addAnotherFacility()" style="display:flex;align-items:center;gap:7px;padding:9px 16px;background:rgba(0,168,150,0.08);border:1.5px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;color:var(--accent);cursor:pointer;transition:all .2s ease;">
         <span style="font-size:16px;">+</span> أضف ملاحظة أخرى
@@ -1753,7 +1737,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     </div>
     </div>
 
-    <!-- نماذج الرصد الأربعة -->
+
     <div id="fSection_clean" style="display:none;">
       <div class="card">
         <div class="slabel">نموذج (أ) — المرافق والنظافة <span style="font-size:10px;color:var(--text-dim);">FACILITY & CLEANLINESS</span></div>
@@ -1833,8 +1817,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
-
-<!-- ══ PAGE: DASHBOARD ══ -->
 <div id="page-dashboard" class="page">
   <div style="max-width:100%;box-sizing:border-box;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;border-bottom:1px solid #E2E8F0;padding-bottom:12px;">
@@ -1937,7 +1919,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 </div>
 </div>
 
-<!-- INCENTIVES PAGE -->
 <div id="page-incentives" class="page">
   <div class="container-wide">
     <div class="page-header">
@@ -1946,14 +1927,14 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="sub">MONTHLY INCENTIVES — رفع وتحليل وتصدير</div>
     </div>
 
-    <!-- تبويبات -->
+
     <div class="section-tabs" style="margin-bottom:20px;">
       <button class="stab active" onclick="switchIncTab('upload',this)">📤 رفع ملف</button>
       <button class="stab" onclick="switchIncTab('manual',this)">✏️ إدخال يدوي</button>
       <button class="stab" onclick="switchIncTab('analysis',this)">📊 التحليل</button>
     </div>
 
-    <!-- تبويب رفع ملف -->
+
     <div id="inc-tab-upload">
       <div id="incDropArea" onclick="document.getElementById('incFileInput').click()"
         style="background:var(--card);border:2.5px dashed var(--border);border-radius:16px;padding:36px;text-align:center;cursor:pointer;transition:all .2s;"
@@ -1972,11 +1953,11 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
 
-    <!-- تبويب إدخال يدوي -->
+
     <div id="inc-tab-manual" style="display:none;">
       <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;">
         <div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:14px;">✦ إضافة سجل يدوي</div>
-        <!-- اختيار الشيت -->
+
         <div class="field">
           <label>القسم / الشيت <span class="req">*</span></label>
           <select id="incSheetSelect" class="filter-select" onchange="onIncSheetChange()">
@@ -1990,19 +1971,19 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
             <option>الدراجات النارية</option>
           </select>
         </div>
-        <!-- حقول ديناميكية -->
+
         <div id="incManualForm"></div>
       </div>
-      <!-- قائمة المدخلات -->
+
       <div id="incManualList"></div>
-      <!-- زر دمج ودفع للتحليل -->
+
       <button onclick="mergeIncManualToData();switchIncTab('analysis',document.querySelectorAll('#page-incentives .stab')[2]);renderIncAnalysis();"
         style="width:100%;margin-top:12px;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:900;cursor:pointer;">
         📊 انتقل للتحليل
       </button>
     </div>
 
-    <!-- تبويب التحليل -->
+
     <div id="inc-tab-analysis" style="display:none;">
       <div id="incAnalysisContent">
         <div style="text-align:center;padding:40px;color:var(--text-dim);">
@@ -2029,7 +2010,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="sub">MAIN BUILDING REPORT</div>
     </div>
 
-    <!-- تبويبات -->
+
     <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
       <button onclick="switchBuildingTab('report')" id="bTab_report"
         style="padding:10px 18px;border-radius:20px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
@@ -2057,9 +2038,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </button>
     </div>
 
-    <!-- ══ تقرير المبنى الأصلي ══ -->
+
     <div id="bSection_report">
-      <!-- زر أضف ملاحظة أخرى -->
+
       <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
         <button onclick="addAnotherBuilding()" style="display:flex;align-items:center;gap:7px;padding:9px 16px;background:rgba(0,168,150,0.08);border:1.5px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;color:var(--accent);cursor:pointer;">
           <span style="font-size:16px;">+</span> أضف ملاحظة أخرى
@@ -2153,7 +2134,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
 
-    <!-- ══ نموذج (أ) خدمة العملاء ══ -->
+
     <div id="bSection_cust" style="display:none;">
       <div class="card">
         <div class="slabel">نموذج (أ) — قسم خدمة العملاء <span style="font-size:10px;color:var(--text-dim);">CUSTOMER SERVICE</span></div>
@@ -2180,7 +2161,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
 
-    <!-- ══ نموذج (ب) الكاونتر ══ -->
+
     <div id="bSection_counter" style="display:none;">
       <div class="card">
         <div class="slabel">نموذج (ب) — قسم الكاونتر <span style="font-size:10px;color:var(--text-dim);">COUNTER</span></div>
@@ -2207,7 +2188,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
 
-    <!-- ══ نموذج (ج) قاعات الاختبار ══ -->
+
     <div id="bSection_exam" style="display:none;">
       <div class="card">
         <div class="slabel">نموذج (ج) — قاعات الاختبار <span style="font-size:10px;color:var(--text-dim);">EXAM HALLS</span></div>
@@ -2234,7 +2215,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
 
-    <!-- ══ نموذج (د) الإشراف الميداني ══ -->
+
     <div id="bSection_super" style="display:none;">
       <div class="card">
         <div class="slabel">نموذج (د) — الإشراف الميداني <span style="font-size:10px;color:var(--text-dim);">FIELD SUPERVISORS</span></div>
@@ -2265,9 +2246,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- PAGE: ARCHIVE -->
-<!-- ══════════════════════════════════════════ -->
 <div id="page-archive" class="page">
   <div class="container-wide">
     <div class="page-header">
@@ -2276,7 +2254,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="sub">ARCHIVE — ALL RECORDS</div>
     </div>
 
-    <!-- Archive Tabs -->
+
     <div class="section-tabs">
       <button class="stab active" onclick="archiveTab('vt',this)">👥 المخالفات</button>
       <button class="stab" onclick="archiveTab('st',this)">⭐ الاستطلاعات</button>
@@ -2284,7 +2262,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <button class="stab" onclick="archiveTab('bt',this)">🏢 المبنى</button>
     </div>
 
-    <!-- ── VIOLATIONS ARCHIVE ── -->
+
     <div id="arch-vt">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <div style="display:flex;gap:6px;">
@@ -2310,7 +2288,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
 
-    <!-- ── SURVEYS ARCHIVE ── -->
+
     <div id="arch-st" style="display:none;">
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
         <button class="export-btn" onclick="exportArchiveExcel()">⬇ تصدير Excel</button>
@@ -2323,7 +2301,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
 
-    <!-- ── FACILITY ARCHIVE ── -->
+
     <div id="arch-ft" style="display:none;">
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
         <button class="export-btn" onclick="exportArchiveExcel()">⬇ تصدير Excel</button>
@@ -2336,7 +2314,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
 
-    <!-- ── BUILDING ARCHIVE ── -->
+
     <div id="arch-bt" style="display:none;">
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
         <button class="export-btn" onclick="exportArchiveExcel()">⬇ تصدير Excel</button>
@@ -2354,9 +2332,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- PAGE: TOP RATED TRAINERS -->
-<!-- ══════════════════════════════════════════ -->
 <div id="page-rating" class="page">
   <div class="container-wide">
     <div class="page-header">
@@ -2365,7 +2340,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="sub">TOP RATED TRAINERS ANALYSIS</div>
     </div>
 
-    <!-- Upload Area -->
+
     <div id="ratingUploadArea" style="background:var(--card);border:2px dashed var(--border);border-radius:16px;padding:32px;text-align:center;margin-bottom:24px;cursor:pointer;" onclick="document.getElementById('ratingFileInput').click()">
       <div style="font-size:40px;margin-bottom:12px;">📊</div>
       <div style="font-size:15px;font-weight:900;margin-bottom:6px;">رفع ملف آراء العملاء</div>
@@ -2375,7 +2350,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <input type="file" id="ratingFileInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleRatingFile(this)">
     </div>
 
-    <!-- Column Mapping (shown after upload) -->
+
     <div id="ratingMappingArea" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;">
       <div style="font-size:13px;font-weight:900;margin-bottom:16px;">⚙️ حدد الأعمدة</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -2397,9 +2372,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
 
-    <!-- Results Area -->
+
     <div id="ratingResults" style="display:none;">
-      <!-- Filter -->
+
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
         <select class="filter-select" id="ratingSectionFilter" onchange="renderRatingResults()" style="max-width:160px;">
           <option value="">كل الأقسام</option>
@@ -2414,10 +2389,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         <button class="export-btn" onclick="exportRatingsExcelFull()" style="margin-right:auto;">⬇ تصدير Excel</button>
       </div>
 
-      <!-- KPI Row -->
+
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;" id="ratingKPIs"></div>
 
-      <!-- Top / Bottom tables -->
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
         <div>
           <div style="font-weight:900;font-size:13px;color:var(--green);margin-bottom:10px;">🏅 الأعلى تقييماً</div>
@@ -2429,7 +2404,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
       </div>
 
-      <!-- Recommendations -->
+
       <div class="dash-card dash-rec">
         <div class="dash-card-title">💡 توصيات التحليل</div>
         <div id="ratingRec"></div>
@@ -2441,9 +2416,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- PAGE: STAFF ATTENDANCE -->
-<!-- ══════════════════════════════════════════ -->
 <div id="page-attend" class="page">
   <div class="container-wide">
     <div class="page-header">
@@ -2452,7 +2424,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="sub">STAFF ATTENDANCE — إدارة حضور الموظفين</div>
     </div>
 
-    <!-- Registration Form -->
+
     <div id="attendFormArea" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;">
       <div style="font-size:13px;font-weight:900;margin-bottom:16px;color:var(--accent);">✦ تسجيل حضور / انصراف موظف</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -2512,7 +2484,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <button class="submit-btn" id="attBtn" onclick="submitAttendance()">✦ تسجيل / Submit</button>
     </div>
 
-    <!-- Filter & Export -->
+
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
       <select class="filter-select" id="attFilterStaff" onchange="renderAttendList()" style="max-width:180px;">
         <option value="">كل الموظفين</option>
@@ -2536,10 +2508,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <button onclick="exportAttendanceStyled()" style="padding:7px 14px;border:1.5px solid rgba(0,168,150,0.3);border-radius:9px;background:rgba(0,168,150,0.08);color:var(--accent);font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">📅 كشف شهري للـ HR</button>
     </div>
 
-    <!-- Stats Row -->
+
     <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:18px;" id="attKPIs"></div>
 
-    <!-- Table -->
+
     <div class="records-table">
       <div class="table-header" style="grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 0.7fr;">
         <span>الموظف</span><span>التاريخ</span><span>الحالة</span><span>الحضور</span><span>الانصراف</span><span>حذف</span>
@@ -2555,7 +2527,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
-<!-- VIOLATIONS REFERENCE MODAL -->
 <div id="vrefModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);z-index:9000;overflow-y:auto;padding:20px;">
   <div style="max-width:800px;margin:0 auto;background:#FFFFFF;border-radius:18px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,0.3);">
     <div style="background:linear-gradient(135deg,#081830,#0D2248);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;">
@@ -2566,7 +2537,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <button onclick="document.getElementById('vrefModal').style.display='none'" style="background:rgba(255,255,255,0.1);border:none;color:#FFF;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;">✕</button>
     </div>
     <div style="padding:20px;">
-      <!-- Grade A -->
+
       <div style="margin-bottom:16px;">
         <div style="background:#FFF0F0;border:1px solid #FFCDD2;border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">
           <div style="background:#D94F4F;color:#FFF;font-size:13px;font-weight:900;padding:4px 12px;border-radius:6px;">A</div>
@@ -2574,7 +2545,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
         <div id="vref-A"></div>
       </div>
-      <!-- Grade B -->
+
       <div style="margin-bottom:16px;">
         <div style="background:#FFF8F0;border:1px solid #FFE0B2;border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">
           <div style="background:#E07B2A;color:#FFF;font-size:13px;font-weight:900;padding:4px 12px;border-radius:6px;">B</div>
@@ -2582,7 +2553,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
         <div id="vref-B"></div>
       </div>
-      <!-- Grade C -->
+
       <div style="margin-bottom:16px;">
         <div style="background:#F0FFF6;border:1px solid #C8E6C9;border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">
           <div style="background:#2E9E6B;color:#FFF;font-size:13px;font-weight:900;padding:4px 12px;border-radius:6px;">C</div>
@@ -2594,7 +2565,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
-<!-- EDIT VIOLATION MODAL -->
 <div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);z-index:9000;overflow-y:auto;padding:20px;display:none;">
   <div style="max-width:520px;margin:40px auto;background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,0.3);">
     <div style="background:linear-gradient(135deg,#081830,#0D2248);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;">
@@ -2654,7 +2624,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
-<!-- DELETE CONFIRM MODAL -->
 <div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);z-index:9100;align-items:center;justify-content:center;">
   <div style="background:var(--card);border-radius:18px;padding:28px 32px;text-align:center;max-width:340px;margin:0 20px;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
     <div style="font-size:40px;margin-bottom:12px;">🗑️</div>
@@ -2667,7 +2636,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
-<!-- EXPORT SECTION MODAL -->
 <div id="exportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);z-index:9100;align-items:center;justify-content:center;">
   <div style="background:var(--card);border-radius:18px;padding:28px 32px;text-align:center;max-width:380px;margin:0 20px;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
     <div style="font-size:36px;margin-bottom:12px;">📤</div>
@@ -2732,7 +2700,6 @@ const USERS={
   'alhamad':{password:'1122Hd',role:'staff',name:'احمد الحماد'},
 };
 
-
 const STAFF_EMAILS = {
   'شهد المقرن':     'sialmqren@nouradriving.sa',
   'امجاد ابانمي':   'aaabanumy@nouradriving.sa',
@@ -2760,7 +2727,6 @@ async function sendToSheets(type, rows) {
     setTimeout(()=>{ try{document.head.removeChild(s);}catch(e){} }, 5000);
   } catch(e) { console.log('GS:', e.message); }
 }
-
 
 // ── EMAIL via mailto (no server needed) ──
 function sendEmailNotification(subject, body, to){
@@ -2953,7 +2919,7 @@ function openSec(type){
     if(type==='female'){ic.textContent='👩';ic.className='p-icon female';ti.textContent='رصد المخالفات — القسم النسائي';sb.textContent='VIOLATIONS — FEMALE SECTION';}
     else{ic.textContent='👨';ic.className='p-icon male';ti.textContent='رصد المخالفات — القسم الرجالي';sb.textContent='VIOLATIONS — MALE SECTION';}
     autoObs('vObs');
-    
+
   }else if(type==='survey'){
     document.getElementById('page-survey').classList.add('active');autoObs('sObs');
   }else if(type==='building'){
@@ -3580,8 +3546,6 @@ function exportV(section){
   doExportDownload();
 }
 
-
-
 // ── EDIT VIOLATION ──
 let pendingDeleteId=null;
 function openEditModal(id){
@@ -3960,7 +3924,6 @@ function splitObservers(raw){
   return names.length ? names : [normed || raw];
 }
 
-
 function switchOpsTab(tab,el){
   ['female-ops','male-ops','moto-ops'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.style.display='none';
@@ -4070,7 +4033,7 @@ function autoGrade(idx){
   const val=sel.value;
   const el=document.getElementById('vAutoGrade'+idx);
   if(!val){el.textContent='—';el.className='auto-grade-display';return;}
-  
+
   // خانة عداد الجوال
   const phoneField=document.getElementById('phoneObsField'+idx);
   if(phoneField){
@@ -4081,7 +4044,7 @@ function autoGrade(idx){
       phoneField.style.display='none';
     }
   }
-  
+
   const parts=val.split('|');
   const grade=parts[1]||'';
   const labels={A:'A — جسيمة',B:'B — متوسطة',C:'C — بسيطة'};
@@ -4784,7 +4747,6 @@ function showMyLogInRecords(tab){
   });
 }
 
-
 // ════════════════════════════════════════════════
 let myLogCurrentTab = 'violations';
 
@@ -4814,7 +4776,7 @@ async function renderMyLog(){
   const isAdmin = currentUser?.role === 'admin';
   // آخر 30 يوم
   const monthAgo = new Date(Date.now()-30*24*60*60*1000).toISOString().split('T')[0];
-  
+
   el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-dim);"><div class="spin" style="margin:0 auto 10px;"></div>جاري التحميل...</div>';
 
   if(myLogCurrentTab === 'violations'){
@@ -4847,7 +4809,7 @@ async function renderMyLog(){
         </div>
       </div>`;
     }).join('');
-      
+
   } else if(myLogCurrentTab === 'facilities'){
     let q = db.from('facility_reports').select('*').order('created_at',{ascending:false}).limit(100);
     if(!isAdmin) q = q.eq('observer', user);
@@ -4874,7 +4836,7 @@ async function renderMyLog(){
         </div>
       </div>`;
     }).join('');
-      
+
   } else if(myLogCurrentTab === 'building'){
     let q = db.from('building_reports').select('*').order('created_at',{ascending:false}).limit(100);
     if(!isAdmin) q = q.eq('observer', user);
@@ -5319,7 +5281,7 @@ function showPhoneObsToast(trainerName, n, isViolation){
   const div = document.createElement('div');
   div.id = 'phoneObsToast';
   div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px;';
-  
+
   const icon = isViolation ? '⚠️' : '👁';
   const title = isViolation ? 'تم تسجيل المخالفة' : `تم تسجيل مشاهدة استخدام الهاتف للمرة ${n}`;
   const sub = isViolation 
@@ -5339,7 +5301,6 @@ function showPhoneObsToast(trainerName, n, isViolation){
   </div>`;
   document.body.appendChild(div);
 }
-
 
 // ── تعديل ملاحظة مرفق ──
 function openEditFacility(id, type, loc, desc, date){
@@ -5413,7 +5374,6 @@ async function saveEditBuilding(id){
   }catch(e){ toast('❌ '+e.message); }
 }
 
-
 // ════════════════════════════════════════════════
 // سجلي الشهري في صفحة السجلات
 // ════════════════════════════════════════════════
@@ -5425,7 +5385,7 @@ async function renderMyLogRecords(tab){
 
   const user = currentUser ? currentUser.name : '';
   const isAdmin = currentUser?.role === 'admin';
-  
+
   container.innerHTML = '<div style="font-size:12px;font-weight:900;color:var(--accent);letter-spacing:1.5px;margin-bottom:12px;">📝 سجلك الشهري — آخر 30 يوم</div><div class="spin" style="margin:0 auto;"></div>';
 
   let recs = [];
@@ -5502,7 +5462,6 @@ async function renderMyLogRecords(tab){
   }catch(e){ container.innerHTML = '<div style="color:var(--red);font-size:12px;">خطأ في تحميل السجل</div>'; }
 }
 
-
 // ════════════════════════════════════════════════
 // SALES → SUPABASE
 // ════════════════════════════════════════════════
@@ -5538,7 +5497,6 @@ async function loadSalesFromSupabase(){
   }catch(e){}
   return [];
 }
-
 
 // ════════════════════════════════════════════════
 // INCENTIVES — الحوافز الشهرية
@@ -5628,7 +5586,6 @@ async function exportIncentivesExcel(){
   downloadXLSX(rows,`الحوافز_الشهرية_${year}`);
 }
 
-
 // ════════════════════════════════════════════════
 // OPS REPORTS → SUPABASE
 // ════════════════════════════════════════════════
@@ -5658,7 +5615,6 @@ async function saveOpsToSupabase(data, section){
     toast('✅ تم حفظ بيانات الكفاءة في قاعدة البيانات');
   }catch(e){ console.log('ops err:',e); }
 }
-
 
 // ════════════════════════════════════════════════
 // OPS FILE UPLOAD + ATTENDANCE MONTHLY EXPORT
@@ -5693,7 +5649,7 @@ function handleOpsFile(input){
       }
       if(!rows.length){ statusEl.textContent='❌ لم يتم قراءة بيانات'; return; }
       statusEl.textContent = `⏳ جاري حفظ ${rows.length} صف في Supabase...`;
-      
+
       // حدد الأعمدة تلقائياً
       const headers = Object.keys(rows[0]);
       const nameCol = headers.find(h=>h.includes('اسم')||h.includes('مدرب')||h.toLowerCase().includes('name'))||headers[0];
@@ -5701,7 +5657,7 @@ function handleOpsFile(input){
       const hoursCol = headers.find(h=>h.includes('ساعة')||h.includes('ساعات')||h.toLowerCase().includes('hour'))||'';
       const sessCol = headers.find(h=>h.includes('حصة')||h.includes('حصص')||h.toLowerCase().includes('session'))||'';
       const trainCol = headers.find(h=>h.includes('متدرب')||h.toLowerCase().includes('trainee'))||'';
-      
+
       const now = new Date();
       const opsRows = rows.map(r=>({
         report_month: String(now.getMonth()+1),
@@ -5884,7 +5840,6 @@ async function exportAttendanceMonthly(yearIn, monthIn){
   toast('✅ تم تصدير كشف الحضور بشيتين');
 }
 
-
 function toggleMyLogSection(){
   const el = document.getElementById('mylog-section-vt');
   const icon = document.getElementById('mylogToggleIcon');
@@ -5893,7 +5848,6 @@ function toggleMyLogSection(){
   el.style.display = visible ? 'none' : 'block';
   if(icon) icon.textContent = visible ? '▼' : '▲';
 }
-
 
 // ════════════════════════════════════════════════
 // STYLED EXCEL EXPORT — نظام تصدير Excel منسّق
@@ -5922,7 +5876,6 @@ function buildColoredSheet(headers, rows, title, subtitle){
   rows.forEach(r => data.push(r));
   return XLSX.utils.aoa_to_sheet(data);
 }
-
 
 // ════════════════════════════════════════════════
 // EXPORT API — يستدعي Vercel API لبناء Excel منسّق
@@ -5958,9 +5911,6 @@ async function callExportAPI(type, data, options={}){
 }
 
 // دوال التصدير المنسّق لكل خانة
-
-
-
 
 async function exportFacilityStyled(){
   const year = new Date().getFullYear();
@@ -6145,7 +6095,6 @@ async function exportRatingsStyled(){
     btn, btnText:'⬇ تصدير Excel'
   });
 }
-
 
 // ════════════════════════════════════════════════
 // EXCELJS STYLED EXPORT — تصدير Excel منسّق بالكامل
@@ -6644,7 +6593,6 @@ async function exportRatingsStyled(){
   }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تصدير التحليل Excel';} }
 }
 
-
 // ════════════════════════════════════════════════
 // INCENTIVES — الحوافز الشهرية
 // ════════════════════════════════════════════════
@@ -6879,7 +6827,6 @@ async function downloadIncTemplate(){
   }finally{ if(btn){btn.disabled=false;btn.textContent='⬇ تحميل القالب الجاهز';} }
 }
 
-
 // ════════════════════════════════════════════════
 // INCENTIVES MANUAL INPUT — الإدخال اليدوي للحوافز
 // ════════════════════════════════════════════════
@@ -6954,7 +6901,7 @@ function addIncManualRow(sheet){
 
   if(!incManualData[sheet]) incManualData[sheet]=[];
   incManualData[sheet].push(row);
-  
+
   // مسح الحقول
   config.cols.forEach(col=>{
     const el = document.getElementById('incField_'+col.replace(/\s/g,'_'));
@@ -7082,12 +7029,12 @@ function analyzeRating(){
   const cn=document.getElementById('colNotes').value;
   const cd=document.getElementById('colDate').value;
   if(!cn){toast('❌ يرجى تحديد عمود الملاحظات');return;}
-  
+
   // حساب تكرار كل مدرب
   const trainerCount={};
   const trainerDates={};
   let totalMentions=0;
-  
+
   ratingRawData.forEach(row=>{
     const notes=row[cn]||'';
     const date=cd?row[cd]||'':'';
@@ -7099,12 +7046,12 @@ function analyzeRating(){
       totalMentions++;
     });
   });
-  
+
   if(!Object.keys(trainerCount).length){
     toast('❌ لم يتم العثور على أسماء مدربين في الملاحظات — تأكد من اختيار العمود الصحيح');
     return;
   }
-  
+
   const parsed=Object.entries(trainerCount)
     .map(([name,count])=>({
       name,
@@ -7113,11 +7060,11 @@ function analyzeRating(){
       dates:trainerDates[name]||[]
     }))
     .sort((a,b)=>b.count-a.count);
-  
+
   window._ratingParsed=parsed;
   window._ratingTotal=ratingRawData.length;
   window._ratingMentions=totalMentions;
-  
+
   document.getElementById('ratingMappingArea').style.display='none';
   document.getElementById('ratingResults').style.display='block';
   renderRatingResults();
@@ -7130,7 +7077,7 @@ function renderRatingResults(){
   const topN=parseInt(document.getElementById('ratingTopN').value)||10;
   const topList=topN>0?data.slice(0,topN):data;
   const lowList=[...data].reverse().slice(0,5);
-  
+
   // KPIs
   document.getElementById('ratingKPIs').innerHTML=`
     <div class="dash-kpi"><div class="dk-icon">📋</div><div class="dk-num">${total}</div><div class="dk-label">إجمالي الآراء</div></div>
@@ -7168,7 +7115,7 @@ function renderRatingResults(){
   const top3pct=data.slice(0,3).reduce((s,r)=>s+r.count,0);
   if(total>0) recs.push(`📊 أعلى 3 مدربين يمثلون ${Math.round(top3pct/mentions*100)}% من إجمالي الإشارات`);
   if(data.length>10) recs.push(`📌 ${data.length-3} مدرب آخر مذكور — يُنصح بمكافأة أعلى 3 وتحفيز الباقين`);
-  
+
   document.getElementById('ratingRec').innerHTML=recs.map(r=>`<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;line-height:1.6;">${r}</div>`).join('')||'<div style="font-size:12px;color:var(--text-dim);">لا توصيات</div>';
 }
 
@@ -8149,7 +8096,6 @@ function getOpsAnalysis(){
   return all.sort((a,b)=>b.efficiency-a.efficiency);
 }
 
-
 function renderOpsTableFromData(trainers, sec){
   const filtered = sec==='all' ? trainers : trainers.filter(t=>t.section===sec);
   const el = document.getElementById('opsAnalysisOut') || document.getElementById('opsTableContainer');
@@ -8455,7 +8401,6 @@ async function exportOpsExcelFull(){
   toast('✅ تم تصدير Excel — '+mo);
 }
 
-
 async function exportOpsExcelNew(){
   const trainers = window._exportTrainers || window._lastTrainers || getOpsAnalysis();
   window._exportTrainers = null; // reset
@@ -8512,7 +8457,6 @@ function calcWorkDays(year, month, upToDay) {
   }
   return count;
 }
-
 
 function renderMonthTabs() {
   const c = document.getElementById('opsMonthTabs');
@@ -8668,7 +8612,6 @@ window.addEventListener('load', () => {
   if(label) label.textContent = isDark ? 'الوضع الفاتح' : 'الوضع الداكن';
   sbUpdateAuth();
 });
-
 
 // ══════════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════
@@ -8866,7 +8809,6 @@ async function rejectViolation(id) {
     toast('❌ خطأ: ' + e.message);
   }
 }
-
 
 // ══════════════════════════════════════════════════
 // 💡 بنك الأفكار — Ideas Bank
@@ -9122,7 +9064,6 @@ function deleteIdea(id) {
   renderApprovedIdeas();
 }
 
-
 // ══════════════════════════════════════════════════
 // 📈 Dashboard — لوحة المتابعة
 let _dashPeriod = 'month';
@@ -9356,7 +9297,6 @@ function updateDashboardVisibility() {
   if(sbBtn)  sbBtn.style.display  = isAdmin ? 'flex' : 'none';
 }
 
-
 // ══ Platform Ticker — مستجدات المنصة ══
 function initTicker() {
   const track = document.getElementById('tickerTrack');
@@ -9416,7 +9356,6 @@ function handleTickerClick(e) {
 // تحديث الـ ticker كل دقيقة
 setInterval(() => { if(document.getElementById('tickerTrack')) initTicker(); }, 60000);
 
-
 // ══ WN Toast ══
 const WN_VER='2.4';
 const WN_LIST=[
@@ -9445,7 +9384,6 @@ function closeWn(){
   setTimeout(function(){t.style.display='none';},300);
   localStorage.setItem('nq_wn',WN_VER);
 }
-
 
 // ══ كفاءة التشغيل — فتح Modal اختيار الشهر ══
 function showOpsMonthModal() {
@@ -9483,7 +9421,6 @@ function showOpsMonthModal() {
   }
   modal.style.display = 'block';
 }
-
 
 // ══ نماذج الرصد الميداني ══
 const OBS_FORMS = {
@@ -9708,7 +9645,6 @@ function initObsForms() {
   });
 }
 
-
 // ══ نماذج رصد المرافق ══
 const FAC_FORMS = {
   clean: {
@@ -9888,7 +9824,6 @@ function initFacObs() {
     renderFacObs(t);
   });
 }
-
 
 // ══ تصدير Excel — المرافق والمبنى ══
 
@@ -10154,7 +10089,6 @@ async function exportBuildingExcel() {
   }
 }
 
-
 // ══ تقييم مكالمات الاسترداد — قسم المبيعات ══
 const SALES_STAFF = {
   rowan:{ name:'روان الخشلان', key:'rowan' },
@@ -10216,7 +10150,7 @@ function renderSalesEvalForm(staffKey) {
         <span style="color:var(--accent);font-size:13px;margin-right:8px;">— ${staff.name}</span>
       </div>
 
-      <!-- بيانات المكالمة -->
+
       <div class="grid-2" style="margin-bottom:16px;">
         <div class="field">
           <label>اسم العميل *</label>
@@ -10228,7 +10162,7 @@ function renderSalesEvalForm(staffKey) {
         </div>
       </div>
 
-      <!-- مخرج المكالمة -->
+
       <div style="margin-bottom:20px;">
         <div style="font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:10px;">مخرج المكالمة *</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -10245,7 +10179,7 @@ function renderSalesEvalForm(staffKey) {
         <input type="hidden" id="se_outcome" value="">
       </div>
 
-      <!-- بنود التقييم -->
+
       <div id="se_items_container">
         ${RET_ITEMS.map((item,idx)=>`
           <div style="background:var(--card2);border-radius:14px;padding:14px;margin-bottom:10px;">
@@ -10267,7 +10201,7 @@ function renderSalesEvalForm(staffKey) {
           </div>`).join('')}
       </div>
 
-      <!-- المجموع والتصنيف -->
+
       <div style="background:var(--card2);border-radius:14px;padding:14px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;">
         <div style="font-size:13px;font-weight:700;">المجموع الكلي</div>
         <div id="se_total" style="font-size:22px;font-weight:900;color:var(--accent);">0 / 100</div>
@@ -10403,7 +10337,6 @@ async function submitSalesEval(staffKey) {
   }
 }
 
-
 // ══ صفحة التقارير الربعية ══
 function initQuarterlyPage() {
   // ملء سنوات
@@ -10490,12 +10423,6 @@ function loadSavedQuarter(key) {
   selectQuarter(q);
 }
 
-
-
-
-
-
-
 // ══ Sidebar Toggle ══
 let _sbExpanded = localStorage.getItem('nq_sb_expanded') === '1';
 
@@ -10565,7 +10492,7 @@ function openProfileModal() {
     <div style="position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:9600;display:flex;align-items:center;justify-content:center;padding:16px;">
       <div style="background:var(--card);border-radius:24px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.5);">
 
-        <!-- Header -->
+
         <div style="background:linear-gradient(135deg,#0D1F2D,#1a3a5c);padding:28px 20px;text-align:center;position:relative;">
           <button onclick="document.getElementById('profileModal').style.display='none'"
             style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.1);border:none;border-radius:50%;width:30px;height:30px;color:rgba(255,255,255,0.7);font-size:14px;cursor:pointer;">✕</button>
@@ -10576,10 +10503,10 @@ function openProfileModal() {
           <div style="font-size:11px;color:rgba(0,200,180,0.8);margin-top:4px;">${roleLabel}</div>
         </div>
 
-        <!-- Body -->
+
         <div style="padding:20px;">
 
-          <!-- رفع صورة -->
+
           <div style="margin-bottom:16px;">
             <div style="font-size:11px;font-weight:800;color:var(--text-dim);margin-bottom:8px;">📸 رفع صورة شخصية</div>
             <label style="display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:14px;padding:12px 16px;cursor:pointer;border:1.5px dashed var(--border);transition:all .2s;"
@@ -10590,7 +10517,7 @@ function openProfileModal() {
             </label>
           </div>
 
-          <!-- عيّنات جاهزة -->
+
           <div style="margin-bottom:20px;">
             <div style="font-size:11px;font-weight:800;color:var(--text-dim);margin-bottom:10px;">🎨 أو اختر أفاتار جاهز</div>
             <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;">
@@ -10604,7 +10531,7 @@ function openProfileModal() {
             </div>
           </div>
 
-          <!-- حذف الصورة -->
+
           ${savedImg ? `<button onclick="removeAvatar()" style="width:100%;padding:10px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:12px;color:#E74C3C;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:10px;">🗑️ حذف الصورة الحالية</button>` : ''}
 
           <button onclick="document.getElementById('profileModal').style.display='none'"
@@ -10641,7 +10568,6 @@ function removeAvatar() {
   openProfileModal();
   toast('✅ تم حذف الصورة');
 }
-
 
 // ══ إدخال بيانات يناير وفبراير 2026 ══
 async function seedHistoricalData() {
@@ -10685,7 +10611,6 @@ async function seedHistoricalData() {
     console.error('seed error:', e);
   }
 }
-
 
 // ══ Desktop Top Bar ══
 function initTopBar() {
@@ -10786,8 +10711,6 @@ window.addEventListener('resize', () => {
 
 </script>
 
-
-<!-- ══ WEEKLY TASKS MODAL ══ -->
 <div id="weeklyTasksModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9200;overflow-y:auto;padding:20px 12px;">
   <div style="max-width:700px;margin:0 auto;background:var(--card);border-radius:20px;padding:24px 20px;position:relative;">
     <button onclick="document.getElementById('weeklyTasksModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
@@ -10801,7 +10724,6 @@ window.addEventListener('resize', () => {
   </div>
 </div>
 
-<!-- ══ GAME MODAL ══ -->
 <div id="gameModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);z-index:9500;overflow-y:auto;padding:16px;">
   <div style="max-width:500px;margin:0 auto;background:linear-gradient(135deg,#1A0533,#3D0B6B);border-radius:24px;padding:24px 20px;position:relative;min-height:60vh;">
     <button onclick="closeGame()" style="position:absolute;top:16px;left:16px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:#fff;">✕</button>
@@ -10852,7 +10774,6 @@ window.addEventListener('resize', () => {
   </div>
 </div>
 
-<!-- ══ OPS MONTH MODAL ══ -->
 <div id="opsMonthModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9300;padding:20px 12px;overflow-y:auto;">
   <div style="max-width:600px;margin:0 auto;background:var(--card);border-radius:20px;padding:24px 20px;position:relative;">
     <button onclick="document.getElementById('opsMonthModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
@@ -10867,7 +10788,6 @@ window.addEventListener('resize', () => {
   </div>
 </div>
 
-<!-- ══ PENDING VIOLATIONS MODAL ══ -->
 <div id="pendingViolationsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:9600;overflow-y:auto;padding:16px 12px;">
   <div style="max-width:600px;margin:0 auto;background:var(--card);border-radius:24px;padding:24px 20px;position:relative;">
     <button onclick="document.getElementById('pendingViolationsModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
@@ -10880,7 +10800,6 @@ window.addEventListener('resize', () => {
   </div>
 </div>
 
-<!-- ══ IDEAS BANK MODAL ══ -->
 <div id="ideasBankModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(14px);z-index:9500;overflow-y:auto;padding:16px 12px;">
   <div style="max-width:640px;margin:0 auto;background:var(--card);border-radius:24px;padding:24px 20px;position:relative;">
     <button onclick="document.getElementById('ideasBankModal').style.display='none'" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:var(--text-dim);">✕</button>
@@ -10920,7 +10839,6 @@ window.addEventListener('resize', () => {
   </div>
 </div>
 
-
 <div id="wnT">
   <div style="padding:12px 14px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.07);">
     <div style="width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#00C8B4,#007B6E);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🚀</div>
@@ -10936,12 +10854,6 @@ window.addEventListener('resize', () => {
     <button onclick="closeWn()" style="background:rgba(0,200,180,.15);border:1px solid rgba(0,200,180,.25);color:#00C8B4;border-radius:9px;padding:5px 13px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:800;cursor:pointer;">فهمت ✓</button>
   </div>
 </div>
-
-
-
-
-
-
 
 </body>
 </html>
