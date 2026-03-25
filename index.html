@@ -10232,6 +10232,24 @@ const QUESTION_BANK=[
 const GAME_TIMER=10;
 let _gameQuestions=[],_gameCurrent=0,_gameScore=0,_gameTimerInt=null,_gameTimeLeft=GAME_TIMER,_gameAnswered=false;
 function _todayStr(){return new Date().toISOString().slice(0,10);}
+
+function _saveGameProgress(){
+  if(!currentUser||!_gameQuestions.length) return;
+  const key='nq_game_progress_'+currentUser.username+'_'+_todayStr();
+  localStorage.setItem(key, JSON.stringify({current:_gameCurrent, score:_gameScore, questions:_gameQuestions}));
+}
+
+function _loadGameProgress(){
+  if(!currentUser) return null;
+  const key='nq_game_progress_'+currentUser.username+'_'+_todayStr();
+  try{ const d=localStorage.getItem(key); return d?JSON.parse(d):null; }catch(e){return null;}
+}
+
+function _clearGameProgress(){
+  if(!currentUser) return;
+  const key='nq_game_progress_'+currentUser.username+'_'+_todayStr();
+  localStorage.removeItem(key);
+}
 function _getDailyQuestions(){
   const today=_todayStr(),username=currentUser?.username||'guest';
   const seedStr=today.replace(/-/g,'')+username;
@@ -10248,7 +10266,6 @@ async function openGameModal(){
   const modal=document.getElementById('gameModal');
   if(!modal)return;
   modal.style.display='block';
-  // لو ما سجل دخول — يشوف المراكز فقط
   if(!currentUser){
     _showState('already');
     const el=document.getElementById('gameAlreadyScore');
@@ -10258,7 +10275,25 @@ async function openGameModal(){
   }
   const already=await _gameCheckAlready();
   if(already){_showState('already');const el=document.getElementById('gameAlreadyScore');if(el)el.textContent=`نقاطك اليوم: ${already.score} نقطة`;await _loadLeader('gameLeaderAlready');return;}
-  _gameQuestions=_getDailyQuestions();_gameCurrent=0;_gameScore=0;_showQuestion();
+
+  // تحقق من تقدم محفوظ (لو أغلق بدون إكمال)
+  const saved=_loadGameProgress();
+  if(saved && saved.current < saved.questions.length){
+    _gameQuestions=saved.questions;
+    _gameScore=saved.score;
+    // السؤال الذي أغلق عليه يُحتسب خاطئ وننتقل للتالي
+    _gameCurrent=saved.current+1;
+    if(_gameCurrent>=_gameQuestions.length){
+      _clearGameProgress();
+      _gameEnd();
+      return;
+    }
+    toast('⚠️ السؤال السابق احتُسب خاطئاً — السؤال التالي');
+  } else {
+    _gameQuestions=_getDailyQuestions();_gameCurrent=0;_gameScore=0;
+  }
+  _saveGameProgress();
+  _showQuestion();
 }
 function _showQuestion(){
   if(_gameCurrent>=_gameQuestions.length){_gameEnd();return;}
@@ -10302,8 +10337,9 @@ function _gameAnswer(idx){
     const nb=document.getElementById('gameNextBtn');if(nb)nb.textContent=_gameCurrent+1>=_gameQuestions.length?'🏆 النتيجة':'التالي ›';
   },800);
 }
-function gameNext(){_gameCurrent++;_gameCurrent>=_gameQuestions.length?_gameEnd():_showQuestion();}
+function gameNext(){_gameCurrent++;_saveGameProgress();_gameCurrent>=_gameQuestions.length?_gameEnd():_showQuestion();}
 async function _gameEnd(){
+  _clearGameProgress();
   _showState('end');document.getElementById('gameFinalScore').textContent=_gameScore;
   try{await db.from('game_scores').upsert({player_name:currentUser.name,username:currentUser.username,score:_gameScore,play_date:_todayStr(),questions_count:_gameQuestions.length},{onConflict:'username,play_date'});toast('✅ نقاطك حُفظت!');}catch(e){console.log(e);}
   await _loadLeader('gameLeaderEnd');_refreshHomeLeader();
@@ -10327,7 +10363,14 @@ async function _refreshHomeLeader(){
     if(badge){const mine=data.find(r=>r.player_name===currentUser?.name);badge.textContent=mine?`نقاطك: ${mine.score} ⭐`:'العب الآن! 🎮';}
   }catch(e){}
 }
-function closeGame(){clearInterval(_gameTimerInt);const m=document.getElementById('gameModal');if(m)m.style.display='none';}
+function closeGame(){
+  clearInterval(_gameTimerInt);
+  // لو في وسط اللعبة — احفظ التقدم (السؤال الحالي سيُحتسب خاطئ عند الرجوع)
+  if(_gameQuestions.length && _gameCurrent < _gameQuestions.length && !_gameAnswered){
+    _saveGameProgress();
+  }
+  const m=document.getElementById('gameModal');if(m)m.style.display='none';
+}
 async function _gameDeleteScore(playerName,containerId){
   if(currentUser?.role!=='admin')return;if(!confirm(`حذف نتيجة "${playerName}"؟`))return;
   try{await db.from('game_scores').delete().eq('player_name',playerName).eq('play_date',_todayStr());toast('✅ تم الحذف');await _loadLeader(containerId);_refreshHomeLeader();}catch(e){toast('❌ '+e.message);}
