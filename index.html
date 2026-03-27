@@ -38,6 +38,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   background:radial-gradient(circle,rgba(0,168,150,0.04) 0%,transparent 65%);
   animation:pulse 10s ease-in-out infinite;pointer-events:none;z-index:0;}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15);opacity:.6}}
+@keyframes dashPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.7)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -2396,11 +2397,17 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         <div style="font-size:20px;font-weight:900;color:#0F172A;letter-spacing:-.3px;">لوحة المتابعة</div>
         <div style="font-size:10px;color:#94A3B8;letter-spacing:2.5px;margin-top:3px;font-weight:600;">QUALITY DASHBOARD</div>
       </div>
-      <div style="display:flex;gap:4px;background:#EEF2F7;border-radius:12px;padding:4px;">
-        <button onclick="setDashPeriod('week')"    id="dashBtn_week"    class="dash-period-btn active-period">أسبوع</button>
-        <button onclick="setDashPeriod('month')"   id="dashBtn_month"   class="dash-period-btn">شهر</button>
-        <button onclick="setDashPeriod('quarter')" id="dashBtn_quarter" class="dash-period-btn">ربع</button>
-        <button onclick="setDashPeriod('year')"    id="dashBtn_year"    class="dash-period-btn">سنة</button>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:6px;background:rgba(231,76,60,0.08);border-radius:20px;padding:5px 12px;">
+          <div id="dashLiveIndicator" style="width:8px;height:8px;border-radius:50%;background:#E74C3C;animation:dashPulse 1.5s ease-in-out infinite;"></div>
+          <span style="font-size:10px;font-weight:700;color:#E74C3C;letter-spacing:1px;">بث حي</span>
+        </div>
+        <div style="display:flex;gap:4px;background:#EEF2F7;border-radius:12px;padding:4px;">
+          <button onclick="setDashPeriod('week')"    id="dashBtn_week"    class="dash-period-btn active-period">أسبوع</button>
+          <button onclick="setDashPeriod('month')"   id="dashBtn_month"   class="dash-period-btn">شهر</button>
+          <button onclick="setDashPeriod('quarter')" id="dashBtn_quarter" class="dash-period-btn">ربع</button>
+          <button onclick="setDashPeriod('year')"    id="dashBtn_year"    class="dash-period-btn">سنة</button>
+        </div>
       </div>
     </div>
     <div id="dashKpiRow" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px;"></div>
@@ -3655,6 +3662,7 @@ function autoObs(id){
   if(id==='vObs') updateCoworkerList();
 }
 function goHome(){
+  _stopDashRealtime(); // أوقف البث لما يخرج من الـ Dashboard
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-home').classList.add('active');
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
@@ -11420,6 +11428,7 @@ function deleteIdea(id) {
 // ══════════════════════════════════════════════════
 // 📈 Dashboard — لوحة المتابعة
 let _dashPeriod = 'month';
+let _dashRealtimeChannels = [];
 
 function showDashboard(el) {
   if (currentUser?.role !== 'admin') { toast('❌ Dashboard للمدير فقط'); return; }
@@ -11429,6 +11438,38 @@ function showDashboard(el) {
   if (el?.classList) el.classList.add('active');
   document.getElementById('sb-dashboard')?.classList.add('active');
   loadDashboard();
+  _startDashRealtime();
+}
+
+// ── بث حي للـ Dashboard ──
+function _startDashRealtime() {
+  // لو في قنوات قديمة امسحها
+  _stopDashRealtime();
+
+  const tables = ['violations','surveys','facility_reports','building_reports','sales_reports','ops_reports'];
+  const indicator = document.getElementById('dashLiveIndicator');
+
+  tables.forEach(table => {
+    const ch = db.channel('dash_'+table)
+      .on('postgres_changes', { event:'*', schema:'public', table }, () => {
+        // تحديث الكاش وإعادة رسم الـ Dashboard
+        NQ.refresh().then(() => loadDashboard());
+        // وميض على المؤشر الحي
+        if (indicator) {
+          indicator.style.background = '#27AE60';
+          setTimeout(() => { indicator.style.background = '#E74C3C'; }, 800);
+        }
+      })
+      .subscribe();
+    _dashRealtimeChannels.push(ch);
+  });
+
+  console.log('✅ Dashboard Realtime: يستمع لـ', tables.length, 'جداول');
+}
+
+function _stopDashRealtime() {
+  _dashRealtimeChannels.forEach(ch => { try { db.removeChannel(ch); } catch(e){} });
+  _dashRealtimeChannels = [];
 }
 
 function setDashPeriod(p) {
