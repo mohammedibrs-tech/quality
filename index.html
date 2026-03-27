@@ -11443,28 +11443,26 @@ function showDashboard(el) {
 
 // ── بث حي للـ Dashboard ──
 function _startDashRealtime() {
-  // لو في قنوات قديمة امسحها
   _stopDashRealtime();
 
   const tables = ['violations','surveys','facility_reports','building_reports','sales_reports','ops_reports'];
   const indicator = document.getElementById('dashLiveIndicator');
 
   tables.forEach(table => {
-    const ch = db.channel('dash_'+table)
-      .on('postgres_changes', { event:'*', schema:'public', table }, () => {
-        // تحديث الكاش وإعادة رسم الـ Dashboard
+    const ch = db.channel('dash_rt_'+table+'_'+Date.now())
+      .on('postgres_changes', { event:'*', schema:'public', table }, (payload) => {
+        console.log('🔴 Realtime:', table, payload.eventType);
         NQ.refresh().then(() => loadDashboard());
-        // وميض على المؤشر الحي
         if (indicator) {
           indicator.style.background = '#27AE60';
-          setTimeout(() => { indicator.style.background = '#E74C3C'; }, 800);
+          setTimeout(() => { indicator.style.background = '#E74C3C'; }, 1000);
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 Channel', table, ':', status);
+      });
     _dashRealtimeChannels.push(ch);
   });
-
-  console.log('✅ Dashboard Realtime: يستمع لـ', tables.length, 'جداول');
 }
 
 function _stopDashRealtime() {
