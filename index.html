@@ -39,6 +39,20 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   animation:pulse 10s ease-in-out infinite;pointer-events:none;z-index:0;}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15);opacity:.6}}
 @keyframes dashPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.7)}}
+@keyframes dashGenieIn{0%{transform:scale(0.4) translateY(40px);opacity:0;}70%{transform:scale(1.03) translateY(-4px);opacity:1;}100%{transform:scale(1) translateY(0);opacity:1;}}
+@keyframes dashGenieOut{0%{transform:scale(1);opacity:1;}100%{transform:scale(0.3) translateY(40px);opacity:0;}}
+.dash-pulse-red   {animation:kpiPulseRed    3s ease infinite!important;}
+.dash-pulse-green {animation:kpiPulseGreen  3s ease infinite!important;}
+.dash-pulse-amber {animation:kpiPulseAmber  3s ease infinite!important;}
+.dash-pulse-purple{animation:kpiPulsePurple 3s ease infinite!important;}
+.dash-pulse-teal  {animation:kpiPulseTeal   3s ease infinite!important;}
+.dash-pulse-blue  {animation:kpiPulseBlue   3s ease infinite!important;}
+@keyframes kpiPulseRed   {0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0);}50%{box-shadow:0 0 0 7px rgba(220,38,38,0.15);border-color:rgba(220,38,38,0.35)!important;}}
+@keyframes kpiPulseGreen {0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,0);}50%{box-shadow:0 0 0 7px rgba(22,163,74,0.15);border-color:rgba(22,163,74,0.35)!important;}}
+@keyframes kpiPulseAmber {0%,100%{box-shadow:0 0 0 0 rgba(217,119,6,0);}50%{box-shadow:0 0 0 7px rgba(217,119,6,0.15);border-color:rgba(217,119,6,0.35)!important;}}
+@keyframes kpiPulsePurple{0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,0);}50%{box-shadow:0 0 0 7px rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.35)!important;}}
+@keyframes kpiPulseTeal  {0%,100%{box-shadow:0 0 0 0 rgba(15,118,110,0);}50%{box-shadow:0 0 0 7px rgba(15,118,110,0.15);border-color:rgba(15,118,110,0.35)!important;}}
+@keyframes kpiPulseBlue  {0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,0);}50%{box-shadow:0 0 0 7px rgba(37,99,235,0.15);border-color:rgba(37,99,235,0.35)!important;}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -3662,7 +3676,6 @@ function autoObs(id){
   if(id==='vObs') updateCoworkerList();
 }
 function goHome(){
-  _stopDashRealtime(); // أوقف البث لما يخرج من الـ Dashboard
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-home').classList.add('active');
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
@@ -11429,6 +11442,7 @@ function deleteIdea(id) {
 // 📈 Dashboard — لوحة المتابعة
 let _dashPeriod = 'month';
 let _dashRealtimeChannels = [];
+let _dashRealtimeStarted = false;
 
 function showDashboard(el) {
   if (currentUser?.role !== 'admin') { toast('❌ Dashboard للمدير فقط'); return; }
@@ -11438,31 +11452,170 @@ function showDashboard(el) {
   if (el?.classList) el.classList.add('active');
   document.getElementById('sb-dashboard')?.classList.add('active');
   loadDashboard();
-  _startDashRealtime();
+  // شغّل الـ Realtime مرة وحدة فقط
+  if (!_dashRealtimeStarted) _startDashRealtime();
 }
 
 // ── بث حي للـ Dashboard ──
 function _startDashRealtime() {
-  _stopDashRealtime();
+  if (_dashRealtimeStarted) return;
+  _dashRealtimeStarted = true;
 
   const tables = ['violations','surveys','facility_reports','building_reports','sales_reports','ops_reports'];
   const indicator = document.getElementById('dashLiveIndicator');
 
+  // خريطة الجدول → معلومات الـ Genie
+  const tableMap = {
+    'violations':       { kpiId:'dash-kpi-viol',    pulse:'dash-pulse-red',    color:'#DC2626', icon:'⚖️', getTitle: p => p.eventType==='INSERT'?'مخالفة جديدة':'تحديث مخالفة', getDetails: p => {
+      const r = p.new||{};
+      return [
+        {k:'القسم',       v: r.section==='female'?'نسائي':'رجالي'},
+        {k:'نوع المخالفة', v: (r.violation_type||'—').split('|')[0].trim().slice(0,40)},
+        {k:'الدرجة',       v: r.grade==='A'?'A — جسيمة':r.grade==='B'?'B — متوسطة':'C — بسيطة'},
+        {k:'المدرب/ة',     v: r.trainer_name||'—'},
+        {k:'الراصد',       v: r.observer||'—'},
+        {k:'الوقت',        v: r.time||new Date().toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})},
+      ];
+    }},
+    'surveys':          { kpiId:'dash-kpi-survey',  pulse:'dash-pulse-green',  color:'#16A34A', icon:'⭐', getTitle: ()=>'استطلاع رضا جديد', getDetails: p => {
+      const r = p.new||{};
+      const pct = r.satisfaction_pct||Math.round(((r.q1||0)+(r.q2||0)+(r.q3||0)+(r.q4||0)+(r.q5||0))/25*100);
+      return [
+        {k:'العميل',   v: r.client_name||'—'},
+        {k:'الرضا',    v: pct+'%'},
+        {k:'الراصد',   v: r.observer||'—'},
+        {k:'التاريخ',  v: r.date||'—'},
+      ];
+    }},
+    'facility_reports': { kpiId:'dash-kpi-facility', pulse:'dash-pulse-amber',  color:'#D97706', icon:'🔧', getTitle: ()=>'ملاحظة مرافق جديدة', getDetails: p => {
+      const r=p.new||{};
+      return [{k:'الموقع',v:r.location||'—'},{k:'المشكلة',v:(r.problem_type||r.description||'—').slice(0,40)},{k:'الراصد',v:r.observer||'—'}];
+    }},
+    'building_reports': { kpiId:'dash-kpi-building', pulse:'dash-pulse-purple', color:'#7C3AED', icon:'🏢', getTitle: ()=>'تقرير مبنى جديد', getDetails: p => {
+      const r=p.new||{};
+      return [{k:'القسم',v:r.section||'—'},{k:'النوع',v:r.observation_type||r.report_type||'—'},{k:'الراصد',v:r.observer||'—'}];
+    }},
+    'sales_reports':    { kpiId:'dash-kpi-sales',    pulse:'dash-pulse-teal',   color:'#0F766E', icon:'💼', getTitle: ()=>'سجل مبيعات جديد', getDetails: p => {
+      const r=p.new||{};
+      return [{k:'العميل',v:r.client_name||'—'},{k:'النوع',v:r.request_type||r.type||'—'},{k:'الموظف',v:r.uploaded_by||'—'}];
+    }},
+    'ops_reports':      { kpiId:'dash-kpi-ops',      pulse:'dash-pulse-blue',   color:'#2563EB', icon:'⚙️', getTitle: ()=>'تحديث كفاءة التشغيل', getDetails: p => {
+      const r=p.new||{};
+      return [{k:'المدرب',v:r.trainer_name||'—'},{k:'الكفاءة',v:(r.efficiency_pct||0)+'%'},{k:'الزون',v:r.zone||'—'}];
+    }},
+  };
+
   tables.forEach(table => {
-    const ch = db.channel('dash_rt_'+table+'_'+Date.now())
+    const ch = db.channel('dash_rt_'+table)
       .on('postgres_changes', { event:'*', schema:'public', table }, (payload) => {
-        console.log('🔴 Realtime:', table, payload.eventType);
-        NQ.refresh().then(() => loadDashboard());
+        if(payload.eventType === 'DELETE') return;
+        console.log('🟢 Realtime:', table, payload.eventType);
+
+        // تحديث الـ NQ والـ Dashboard
+        NQ.refresh().then(() => {
+          if (document.getElementById('page-dashboard')?.classList.contains('active')) {
+            loadDashboard();
+          }
+        });
+
+        // مؤشر البث
         if (indicator) {
           indicator.style.background = '#27AE60';
           setTimeout(() => { indicator.style.background = '#E74C3C'; }, 1000);
         }
+
+        // نبضة الكارد + Genie
+        const info = tableMap[table];
+        if (info && document.getElementById('page-dashboard')?.classList.contains('active')) {
+          _dashPulseCard(info.kpiId, info.pulse);
+          _showDashGenie({
+            color:   info.color,
+            icon:    info.icon,
+            title:   info.getTitle(payload),
+            details: info.getDetails(payload),
+          });
+        }
       })
       .subscribe((status) => {
-        console.log('📡 Channel', table, ':', status);
+        console.log('📡', table, ':', status);
       });
     _dashRealtimeChannels.push(ch);
   });
+  console.log('✅ Realtime يستمع لـ', tables.length, 'جداول');
+}
+
+// ── نبضة ناعمة على الكارد ──
+function _dashPulseCard(kpiId, pulseClass) {
+  const el = document.getElementById(kpiId);
+  if (!el) return;
+  el.classList.remove(pulseClass);
+  void el.offsetWidth;
+  el.classList.add(pulseClass);
+  setTimeout(() => el.classList.remove(pulseClass), 10000);
+}
+
+// ── Genie Alert ──
+let _genieTimer = null;
+function _showDashGenie({color, icon, title, details}) {
+  let overlay = document.getElementById('dashGenieOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'dashGenieOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0);pointer-events:none;z-index:9999;display:flex;align-items:center;justify-content:center;transition:background .3s ease;';
+    overlay.onclick = _hideDashGenie;
+    document.body.appendChild(overlay);
+
+    const card = document.createElement('div');
+    card.id = 'dashGenieCard';
+    card.style.cssText = 'width:440px;border-radius:20px;padding:28px;text-align:center;transform:scale(0);opacity:0;pointer-events:none;font-family:Cairo,sans-serif;direction:rtl;';
+    overlay.appendChild(card);
+  }
+
+  const card = document.getElementById('dashGenieCard');
+  card.innerHTML = `
+    <div style="font-size:46px;margin-bottom:10px;">${icon}</div>
+    <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:4px;">${title}</div>
+    <div style="background:rgba(0,0,0,0.12);border-radius:12px;padding:10px 14px;margin:12px 0;text-align:right;">
+      ${details.map(d=>`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px;color:rgba(255,255,255,0.9);border-bottom:1px solid rgba(255,255,255,0.08);">
+        <span>${d.k}</span><span style="font-weight:700;">${d.v}</span>
+      </div>`).join('')}
+    </div>
+    <div style="background:rgba(255,255,255,0.2);border-radius:4px;height:3px;overflow:hidden;">
+      <div id="dashGenieProgress" style="height:100%;background:rgba(255,255,255,0.7);border-radius:4px;width:100%;"></div>
+    </div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:8px;">يختفي تلقائياً · اضغط للإغلاق</div>
+  `;
+  card.style.background = color;
+  card.style.boxShadow = `0 24px 60px ${color}55`;
+
+  // إظهار
+  overlay.style.pointerEvents = 'all';
+  overlay.style.background = 'rgba(0,0,0,0.4)';
+  card.style.pointerEvents = 'all';
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'dashGenieIn .45s cubic-bezier(.34,1.4,.64,1) forwards';
+
+  // progress
+  const prog = document.getElementById('dashGenieProgress');
+  if (prog) {
+    prog.style.transition = 'none'; prog.style.width = '100%';
+    setTimeout(() => { prog.style.transition = 'width 5s linear'; prog.style.width = '0%'; }, 50);
+  }
+
+  clearTimeout(_genieTimer);
+  _genieTimer = setTimeout(_hideDashGenie, 5000);
+}
+
+function _hideDashGenie() {
+  clearTimeout(_genieTimer);
+  const overlay = document.getElementById('dashGenieOverlay');
+  const card = document.getElementById('dashGenieCard');
+  if (!overlay || !card) return;
+  card.style.animation = 'dashGenieOut .35s ease forwards';
+  overlay.style.background = 'rgba(0,0,0,0)';
+  overlay.style.pointerEvents = 'none';
+  setTimeout(() => { if(card) card.style.pointerEvents = 'none'; }, 350);
 }
 
 function _stopDashRealtime() {
@@ -11519,23 +11672,28 @@ function _renderKPI(V,O,S,B,F) {
   const grA=V.filter(v=>v.grade==='A').length;
   const ec=v=>v>=90?'#16A34A':v>=70?'#D97706':'#DC2626';
   const kpis=[
-    {icon:'⚖️',label:'إجمالي المخالفات',value:V.length,sub:`A:${grA}`,color:'#DC2626',bg:'#FEF2F2'},
-    {icon:'👩',label:'مخالفات نسائي',value:femV,sub:'',color:'#EF4444',bg:'#FFF5F5'},
-    {icon:'👨',label:'مخالفات رجالي',value:malV,sub:'',color:'#3B82F6',bg:'#EFF6FF'},
-    {icon:'⚙️',label:'متوسط الكفاءة',value:avgO+'%',sub:`${O.length} مدرب`,color:ec(avgO),bg:'#F0FDF4'},
-    {icon:'🏢',label:'تقارير المبنى',value:B.length,sub:'',color:'#2563EB',bg:'#EFF6FF'},
-    {icon:'🔧',label:'المرافق',value:F.length,sub:'',color:'#16A34A',bg:'#F0FDF4'},
+    {id:'dash-kpi-viol',   icon:'⚖️',label:'إجمالي المخالفات',value:V.length,sub:`A:${grA}`,color:'#DC2626',bg:'#FEF2F2'},
+    {id:'dash-kpi-female', icon:'👩',label:'مخالفات نسائي',value:femV,sub:'',color:'#EF4444',bg:'#FFF5F5'},
+    {id:'dash-kpi-male',   icon:'👨',label:'مخالفات رجالي',value:malV,sub:'',color:'#3B82F6',bg:'#EFF6FF'},
+    {id:'dash-kpi-ops',    icon:'⚙️',label:'متوسط الكفاءة',value:avgO+'%',sub:`${O.length} مدرب`,color:ec(avgO),bg:'#F0FDF4'},
+    {id:'dash-kpi-building',icon:'🏢',label:'تقارير المبنى',value:B.length,sub:'',color:'#2563EB',bg:'#EFF6FF'},
+    {id:'dash-kpi-facility',icon:'🔧',label:'المرافق',value:F.length,sub:'',color:'#16A34A',bg:'#F0FDF4'},
   ];
-  if(totS>0||S.length) kpis.splice(3,0,{icon:'💼',label:'المبيعات',value:totS>0?totS.toLocaleString()+' ر':S.length+'',sub:'',color:'#7C3AED',bg:'#F5F3FF'});
+  if(totS>0||S.length) kpis.splice(3,0,{id:'dash-kpi-sales',icon:'💼',label:'المبيعات',value:totS>0?totS.toLocaleString()+' ر':S.length+'',sub:'',color:'#7C3AED',bg:'#F5F3FF'});
   const el=document.getElementById('dashKpiRow');
   if(!el)return;
+  // احتفظ بأي pulse classes موجودة
+  const existingPulses={};
+  el.querySelectorAll('[id^="dash-kpi-"]').forEach(e=>{ const cls=[...e.classList].find(c=>c.startsWith('dash-pulse-')); if(cls) existingPulses[e.id]=cls; });
   el.innerHTML=kpis.map(k=>`
-    <div class="arcade-kpi" style="background:${k.bg};border-color:${k.color}22;">
+    <div id="${k.id}" class="arcade-kpi" style="background:${k.bg};border-color:${k.color}22;transition:box-shadow .5s ease,border-color .5s ease;">
       <div style="font-size:22px;margin-bottom:8px;">${k.icon}</div>
       <div style="font-size:24px;font-weight:900;color:${k.color};line-height:1;">${k.value}</div>
       <div style="font-size:10px;font-weight:700;color:#334155;margin-top:5px;">${k.label}</div>
       ${k.sub?`<div style="font-size:9px;color:#94A3B8;margin-top:2px;">${k.sub}</div>`:''}
     </div>`).join('');
+  // استعادة الـ pulse classes
+  Object.entries(existingPulses).forEach(([id,cls])=>{ const e=document.getElementById(id); if(e) e.classList.add(cls); });
 }
 
 function _insightRow(icon, badge, badgeColor, badgeBg, text) {
