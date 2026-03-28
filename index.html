@@ -12126,9 +12126,6 @@ function _stopDashRealtime() {
   _dashRealtimeChannels.forEach(ch => { try { db.removeChannel(ch); } catch(e){} });
   _dashRealtimeChannels = [];
 }
-  _dashRealtimeChannels.forEach(ch => { try { db.removeChannel(ch); } catch(e){} });
-  _dashRealtimeChannels = [];
-}
 
 function setDashPeriod(p) {
   _dashPeriod = p;
