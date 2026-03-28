@@ -2425,6 +2425,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   position:relative;
   cursor:pointer;
 }
+.dk-face{width:100%;flex:1;display:flex;flex-direction:column;min-height:0;}
+.dk-face-front{padding:14px 16px;}
+.dk-face-back{padding:14px 16px;background:#0F172A;}
 .dk::before{
   content:'';position:absolute;inset:0;border-radius:16px;
   background:linear-gradient(135deg,rgba(255,255,255,0.6) 0%,transparent 60%);
@@ -2469,24 +2472,6 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 .dash-pulse-purple{animation:kpiPulsePurple 3s ease infinite!important;}
 .dash-pulse-teal  {animation:kpiPulseTeal   3s ease infinite!important;}
 .dash-pulse-blue  {animation:kpiPulseBlue   3s ease infinite!important;}
-
-/* ── Flip Card — slide بسيط ── */
-.dk{cursor:pointer;}
-.dk-face{width:100%;height:100%;display:flex;flex-direction:column;}
-.dk-face-back{
-  background:#0F172A;
-  border-radius:12px;
-  padding:14px 16px;
-}
-#dash-root.dark .dk-face-back{background:#060C18;}
-.dk-back-title{font-size:10px;font-weight:700;letter-spacing:.4px;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;}
-.dk-back-section{margin-bottom:6px;flex-shrink:0;}
-.dk-back-label{font-size:8px;font-weight:700;letter-spacing:.6px;color:rgba(255,255,255,0.3);margin-bottom:2px;text-transform:uppercase;}
-.dk-back-text{font-size:10px;color:rgba(255,255,255,0.82);line-height:1.6;}
-.dk-back-risk{font-size:10px;color:#F87171;line-height:1.6;}
-.dk-flip-prog{height:2px;background:rgba(255,255,255,0.08);border-radius:1px;margin-top:auto;overflow:hidden;flex-shrink:0;}
-.dk-flip-prog-f{height:100%;border-radius:1px;}
-.dk-flip-hint{font-size:8px;color:rgba(255,255,255,0.2);text-align:center;margin-top:4px;flex-shrink:0;}
 
 /* header text */
 .dash-hdr-title{font-size:14px;font-weight:900;color:#0F172A;}
@@ -2611,7 +2596,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-viol_prog" style="background:#F87171;width:0%;"></div></div>
         </div>
-      </div>/div>/div>
+      </div>
 
       <!-- ٢. عملاء الاسترداد -->
             <div class="dk" id="dash-kpi-sales" onclick="_flipCard('dash-kpi-sales')">
@@ -2662,7 +2647,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-sales_prog" style="background:#A78BFA;width:0%;"></div></div>
         </div>
-      </div>/div>/div>
+      </div>
 
       <!-- ٣. كفاءة التشغيل -->
             <div class="dk" id="dash-kpi-ops" onclick="_flipCard('dash-kpi-ops')">
@@ -2718,7 +2703,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-ops_prog" style="background:#34D399;width:0%;"></div></div>
         </div>
-      </div>/div>/div>
+      </div>
     </div>
 
     <!-- الصف الثاني: 4 كروت -->
@@ -2774,7 +2759,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-survey_prog" style="background:#FCD34D;width:0%;"></div></div>
         </div>
-      </div>/div>/div>
+      </div>
 
       <!-- ٥. ملاحظات المرافق -->
             <div class="dk" id="dash-kpi-facility" onclick="_flipCard('dash-kpi-facility')">
@@ -2821,7 +2806,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-facility_prog" style="background:#6EE7B7;width:0%;"></div></div>
         </div>
-      </div>/div>/div>
+      </div>
 
       <!-- ٦. جدولة الحصص التدريبية -->
             <div class="dk" id="dash-kpi-nosession" onclick="_flipCard('dash-kpi-nosession')">
@@ -2868,7 +2853,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-nosession_prog" style="background:#FB923C;width:0%;"></div></div>
         </div>
-      </div>/div>/div>
+      </div>
 
       <!-- ٧. تقرير المبنى -->
             <div class="dk" id="dash-kpi-building" onclick="_flipCard('dash-kpi-building')">
@@ -2915,7 +2900,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-building_prog" style="background:#93C5FD;width:0%;"></div></div>
         </div>
-      </div>/div>/div>
+      </div>
 
     </div>
   </div>
