@@ -2571,8 +2571,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashViolRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashViolRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>/div>/div>/div>
+        </
+</div>
 
       <!-- ٢. عملاء الاسترداد -->
       <div class="dk" id="dash-kpi-sales">
@@ -2606,8 +2606,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashSalesRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashSalesRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>/div>/div>/div>
+        </
+</div>
 
       <!-- ٣. كفاءة التشغيل -->
       <div class="dk" id="dash-kpi-ops">
@@ -2642,8 +2642,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashOpsRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashOpsRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>/div>/div>/div>
+        </
+</div>
     </div>
 
     <!-- الصف الثاني: 4 كروت -->
@@ -2678,8 +2678,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashSurveyRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashSurveyRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>/div>/div>/div>
+        </
+</div>
 
       <!-- ٥. ملاحظات المرافق -->
       <div class="dk" id="dash-kpi-facility">
@@ -2709,8 +2709,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashFacilRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashFacilRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>/div>/div>/div>
+        </
+</div>
 
       <!-- ٦. جدولة الحصص التدريبية -->
       <div class="dk" id="dash-kpi-nosession">
@@ -2740,8 +2740,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashNSRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashNSRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>/div>/div>/div>
+        </
+</div>
 
       <!-- ٧. تقرير المبنى -->
       <div class="dk" id="dash-kpi-building">
@@ -2771,8 +2771,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashBuildRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashBuildRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>/div>/div>/div>
+        </
+</div>
 
     </div>
   </div>
@@ -12230,15 +12230,82 @@ function _flipCard(id) {
 }
 
 function _startAutoFlip() {
-  const seq = [
-    'dash-kpi-viol','dash-kpi-survey','dash-kpi-sales',
-    'dash-kpi-facility','dash-kpi-ops','dash-kpi-nosession','dash-kpi-building'
-  ];
+  const DURATION = 25000;
+
+  // بيانات كل كارد — تُجلب من الـ DOM الحالي
+  function getCardData(id) {
+    const map = {
+      'dash-kpi-viol': {
+        color:'#C0392B', title:'المخالفات',
+        getDetails: () => [
+          {icon:'📊', k:'الفجوات',          v: document.getElementById('dashViolGap')?.textContent?.trim()||'—'},
+          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashViolRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashViolRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+        ]
+      },
+      'dash-kpi-sales': {
+        color:'#0E7490', title:'عملاء الاسترداد',
+        getDetails: () => [
+          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashSalesRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashSalesRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+        ]
+      },
+      'dash-kpi-ops': {
+        color:'#1D4ED8', title:'كفاءة التشغيل',
+        getDetails: () => [
+          {icon:'📊', k:'الفجوات',          v: document.getElementById('dashOpsGap')?.textContent?.trim()||'—'},
+          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashOpsRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashOpsRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+        ]
+      },
+      'dash-kpi-survey': {
+        color:'#B45309', title:'رضا العملاء',
+        getDetails: () => [
+          {icon:'📊', k:'الفجوات',          v: document.getElementById('dashSurveyGap')?.textContent?.trim()||'—'},
+          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashSurveyRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashSurveyRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+        ]
+      },
+      'dash-kpi-facility': {
+        color:'#0A7C59', title:'ملاحظات المرافق',
+        getDetails: () => [
+          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashFacilRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashFacilRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+        ]
+      },
+      'dash-kpi-nosession': {
+        color:'#C2410C', title:'جدولة الحصص',
+        getDetails: () => [
+          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashNSRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashNSRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+        ]
+      },
+      'dash-kpi-building': {
+        color:'#1D4ED8', title:'تقرير المبنى',
+        getDetails: () => [
+          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashBuildRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashBuildRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
+        ]
+      },
+    };
+    return map[id];
+  }
+
+  const ids = ['dash-kpi-viol','dash-kpi-sales','dash-kpi-ops','dash-kpi-survey','dash-kpi-facility','dash-kpi-nosession','dash-kpi-building'];
   let i = 0;
-  setInterval(() => {
-    _expandCard(seq[i], '', 3);
-    i = (i+1) % seq.length;
-  }, _expandDuration);
+
+  function showNext() {
+    if (!document.getElementById('page-dashboard')?.classList.contains('active')) return;
+    const id = ids[i];
+    const d  = getCardData(id);
+    if (d) {
+      _showMindMap({ kpiId: id, title: d.title, details: d.getDetails(), color: d.color });
+    }
+    i = (i + 1) % ids.length;
+  }
+
+  showNext();
+  setInterval(showNext, DURATION);
 }
 
 function toggleDashDark() {
