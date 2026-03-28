@@ -2419,61 +2419,17 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 /* ── Flip Cards ── */
 /* wrapper في الـ Grid يحمل perspective */
 .dk{
-  perspective:900px;
-  cursor:pointer;
-  background:transparent!important;
-  border:none!important;
-  padding:0!important;
-  overflow:visible!important;
-  border-radius:16px;
-  /* يجب أن يأخذ كامل ارتفاع الـ grid cell */
-  display:flex;flex-direction:column;
-}
-/* الـ inner يدور ويأخذ كامل المساحة */
-.dk-inner{
-  flex:1;
-  position:relative;
-  transform-style:preserve-3d;
-  transition:transform .7s cubic-bezier(.4,0,.2,1);
-  border-radius:16px;
-  min-height:0;
-}
-.dk.flipped .dk-inner{transform:rotateY(180deg);}
-/* الوجهان */
-.dk-front,.dk-back{
-  position:absolute;inset:0;
-  backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;
-  border-radius:16px;
+  background:#fff;
+  border-radius:14px;
+  border:1px solid #E8EDF2;
   padding:14px 16px;
   display:flex;flex-direction:column;
-  overflow:hidden;
+  min-height:0;overflow:hidden;
+  transition:box-shadow .3s ease,border-color .3s ease;
+  position:relative;
 }
-.dk-front{
-  background:#fff;
-  border:1px solid #E8EDF2;
-  box-shadow:0 1px 4px rgba(0,0,0,.04);
-}
-.dk-back{
-  background:#0F172A;
-  border:1px solid rgba(255,255,255,0.07);
-  box-shadow:0 8px 30px rgba(0,0,0,0.25);
-  transform:rotateY(180deg);
-}
-#dash-root.dark .dk-front{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.07);}
-#dash-root.dark .dk-back{background:#060C18;}
+#dash-root.dark .dk{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.07);}
 .dk::before{display:none;}
-
-/* Back face content */
-.dk-back-title{font-size:10px;font-weight:700;letter-spacing:.3px;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;}
-.dk-back-section{margin-bottom:6px;flex-shrink:0;}
-.dk-back-label{font-size:7px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:.5px;margin-bottom:2px;text-transform:uppercase;}
-.dk-back-text{font-size:10px;color:rgba(255,255,255,0.82);line-height:1.55;}
-.dk-back-risk{font-size:10px;color:#F87171;line-height:1.55;}
-.dk-flip-hint{font-size:8px;color:rgba(255,255,255,0.18);text-align:center;margin-top:auto;padding-top:4px;flex-shrink:0;}
-.dk-flip-prog{height:2px;background:rgba(255,255,255,0.07);border-radius:1px;margin-top:4px;overflow:hidden;flex-shrink:0;}
-.dk-flip-prog-f{height:100%;border-radius:1px;width:0%;}
-
 .dk-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-shrink:0;}
 
 /* أيقونة — شريط ملون بدل مربع */
@@ -2585,8 +2541,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="dash-row dash-row-3">
 
       <!-- ١. المخالفات (نسائي + رجالي) -->
-      <div class="dk" id="dash-kpi-viol" onclick="_expandCard('dash-kpi-viol','row1',3)">
-    <div class="dk-front">
+      <div class="dk" id="dash-kpi-viol">
 <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#F87171,#C0392B);"></div>
@@ -2617,33 +2572,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashViolRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-    </div>
-    <div class="dk-detail">
-      <div class="dk-back-title" style="color:#F87171;">المخالفات — تحليل</div>
-      <div class="dk-back-title" style="color:#F87171;">المخالفات — تحليل</div>
-      
-          <div class="dk-back-section">
-            <div class="dk-back-label">الفجوات</div>
-            <div class="dk-back-text" id="dashViolGap_back"></div>
-          </div>
-      <div class="dk-back-section">
-        <div class="dk-back-label">التوصيات</div>
-        <div class="dk-back-text" id="dashViolRec_back"></div>
-      </div>
-      <div class="dk-back-section">
-        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
-        <div class="dk-back-risk" id="dashViolRisk_back"></div>
-      </div>
-      <div class="dk-flip-hint">اضغط للعودة</div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-viol_prog" style="background:#F87171;width:0%;"></div></div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-viol_prog" style="background:#F87171;"></div></div>
-      <div class="dk-flip-hint">اضغط للإغلاق</div>
-    </div>
-  </div>/div>/div>
+</div>/div>/div>/div>
 
       <!-- ٢. عملاء الاسترداد -->
-      <div class="dk" id="dash-kpi-sales" onclick="_expandCard('dash-kpi-sales','row1',3)">
-    <div class="dk-front">
+      <div class="dk" id="dash-kpi-sales">
 <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#A78BFA,#5B21B6);"></div>
@@ -2675,29 +2607,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashSalesRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-    </div>
-    <div class="dk-detail">
-      <div class="dk-back-title" style="color:#A78BFA;">عملاء الاسترداد — تحليل</div>
-      <div class="dk-back-title" style="color:#A78BFA;">عملاء الاسترداد — تحليل</div>
-      
-      <div class="dk-back-section">
-        <div class="dk-back-label">التوصيات</div>
-        <div class="dk-back-text" id="dashSalesRec_back"></div>
-      </div>
-      <div class="dk-back-section">
-        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
-        <div class="dk-back-risk" id="dashSalesRisk_back"></div>
-      </div>
-      <div class="dk-flip-hint">اضغط للعودة</div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-sales_prog" style="background:#A78BFA;width:0%;"></div></div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-sales_prog" style="background:#A78BFA;"></div></div>
-      <div class="dk-flip-hint">اضغط للإغلاق</div>
-    </div>
-  </div>/div>/div>
+</div>/div>/div>/div>
 
       <!-- ٣. كفاءة التشغيل -->
-      <div class="dk" id="dash-kpi-ops" onclick="_expandCard('dash-kpi-ops','row1',3)">
-    <div class="dk-front">
+      <div class="dk" id="dash-kpi-ops">
 <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#34D399,#0A7C59);"></div>
@@ -2730,58 +2643,14 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashOpsRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-    </div>
-    <div class="dk-detail">
-      <div class="dk-back-title" style="color:#34D399;">كفاءة التشغيل — تحليل</div>
-      <div class="dk-back-title" style="color:#34D399;">كفاءة التشغيل — تحليل</div>
-      
-          <div class="dk-back-section">
-            <div class="dk-back-label">الفجوات</div>
-            <div class="dk-back-text" id="dashOpsGap_back"></div>
-          </div>
-      <div class="dk-back-section">
-        <div class="dk-back-label">التوصيات</div>
-        <div class="dk-back-text" id="dashOpsRec_back"></div>
-      </div>
-      <div class="dk-back-section">
-        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
-        <div class="dk-back-risk" id="dashOpsRisk_back"></div>
-      </div>
-      <div class="dk-flip-hint">اضغط للعودة</div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-ops_prog" style="background:#34D399;width:0%;"></div></div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-ops_prog" style="background:#34D399;"></div></div>
-      <div class="dk-flip-hint">اضغط للإغلاق</div>
-    </div>
-  </div>/div>/div>
+</div>/div>/div>/div>
     </div>
 
     <!-- الصف الثاني: 4 كروت -->
     <div class="dash-row dash-row-4">
 
       <!-- ٤. استطلاع رضا العملاء -->
-      <div class="dk expand-up" id="dash-kpi-survey" onclick="_expandCard('dash-kpi-survey','row2',4)">
-    <div class="dk-detail">
-      <div class="dk-back-title" style="color:#FCD34D;">رضا العملاء — تحليل</div>
-      <div class="dk-back-title" style="color:#FCD34D;">رضا العملاء — تحليل</div>
-      
-          <div class="dk-back-section">
-            <div class="dk-back-label">الفجوات</div>
-            <div class="dk-back-text" id="dashSurveyGap_back"></div>
-          </div>
-      <div class="dk-back-section">
-        <div class="dk-back-label">التوصيات</div>
-        <div class="dk-back-text" id="dashSurveyRec_back"></div>
-      </div>
-      <div class="dk-back-section">
-        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
-        <div class="dk-back-risk" id="dashSurveyRisk_back"></div>
-      </div>
-      <div class="dk-flip-hint">اضغط للعودة</div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-survey_prog" style="background:#FCD34D;width:0%;"></div></div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-survey_prog" style="background:#FCD34D;"></div></div>
-      <div class="dk-flip-hint">اضغط للإغلاق</div>
-    </div>
-    <div class="dk-front">
+      <div class="dk" id="dash-kpi-survey">
 <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#FCD34D,#B45309);"></div>
@@ -2810,29 +2679,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashSurveyRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-    </div>
-  </div>/div>/div>
+</div>/div>/div>/div>
 
       <!-- ٥. ملاحظات المرافق -->
-      <div class="dk expand-up" id="dash-kpi-facility" onclick="_expandCard('dash-kpi-facility','row2',4)">
-    <div class="dk-detail">
-      <div class="dk-back-title" style="color:#6EE7B7;">ملاحظات المرافق — تحليل</div>
-      <div class="dk-back-title" style="color:#6EE7B7;">المرافق — تحليل</div>
-      
-      <div class="dk-back-section">
-        <div class="dk-back-label">التوصيات</div>
-        <div class="dk-back-text" id="dashFacilRec_back"></div>
-      </div>
-      <div class="dk-back-section">
-        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
-        <div class="dk-back-risk" id="dashFacilRisk_back"></div>
-      </div>
-      <div class="dk-flip-hint">اضغط للعودة</div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-facility_prog" style="background:#6EE7B7;width:0%;"></div></div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-facility_prog" style="background:#6EE7B7;"></div></div>
-      <div class="dk-flip-hint">اضغط للإغلاق</div>
-    </div>
-    <div class="dk-front">
+      <div class="dk" id="dash-kpi-facility">
 <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#6EE7B7,#0A7C59);"></div>
@@ -2860,29 +2710,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashFacilRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-    </div>
-  </div>/div>/div>
+</div>/div>/div>/div>
 
       <!-- ٦. جدولة الحصص التدريبية -->
-      <div class="dk expand-up" id="dash-kpi-nosession" onclick="_expandCard('dash-kpi-nosession','row2',4)">
-    <div class="dk-detail">
-      <div class="dk-back-title" style="color:#FB923C;">جدولة الحصص — تحليل</div>
-      <div class="dk-back-title" style="color:#FB923C;">الحصص — تحليل</div>
-      
-      <div class="dk-back-section">
-        <div class="dk-back-label">التوصيات</div>
-        <div class="dk-back-text" id="dashNSRec_back"></div>
-      </div>
-      <div class="dk-back-section">
-        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
-        <div class="dk-back-risk" id="dashNSRisk_back"></div>
-      </div>
-      <div class="dk-flip-hint">اضغط للعودة</div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-nosession_prog" style="background:#FB923C;width:0%;"></div></div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-nosession_prog" style="background:#FB923C;"></div></div>
-      <div class="dk-flip-hint">اضغط للإغلاق</div>
-    </div>
-    <div class="dk-front">
+      <div class="dk" id="dash-kpi-nosession">
 <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#FB923C,#C2410C);"></div>
@@ -2910,29 +2741,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashNSRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-    </div>
-  </div>/div>/div>
+</div>/div>/div>/div>
 
       <!-- ٧. تقرير المبنى -->
-      <div class="dk expand-up" id="dash-kpi-building" onclick="_expandCard('dash-kpi-building','row2',4)">
-    <div class="dk-detail">
-      <div class="dk-back-title" style="color:#93C5FD;">تقرير المبنى — تحليل</div>
-      <div class="dk-back-title" style="color:#93C5FD;">المبنى — تحليل</div>
-      
-      <div class="dk-back-section">
-        <div class="dk-back-label">التوصيات</div>
-        <div class="dk-back-text" id="dashBuildRec_back"></div>
-      </div>
-      <div class="dk-back-section">
-        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
-        <div class="dk-back-risk" id="dashBuildRisk_back"></div>
-      </div>
-      <div class="dk-flip-hint">اضغط للعودة</div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-building_prog" style="background:#93C5FD;width:0%;"></div></div>
-      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-building_prog" style="background:#93C5FD;"></div></div>
-      <div class="dk-flip-hint">اضغط للإغلاق</div>
-    </div>
-    <div class="dk-front">
+      <div class="dk" id="dash-kpi-building">
 <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#93C5FD,#1D4ED8);"></div>
@@ -2960,8 +2772,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashBuildRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-    </div>
-  </div>/div>/div>
+</div>/div>/div>/div>
 
     </div>
   </div>
