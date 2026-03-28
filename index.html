@@ -2407,8 +2407,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 <div id="page-dashboard" class="page">
 <style>
 /* ── Arcade Dashboard ── */
-#dash-root{height:100vh;display:flex;flex-direction:column;background:#0B0F1A;overflow:hidden;font-family:'Cairo',sans-serif;direction:rtl;box-sizing:border-box;}
-#dash-hdr{background:rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.06);padding:8px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;backdrop-filter:blur(10px);}
+#dash-root{height:100vh;display:flex;flex-direction:column;background:#F0F4F8;overflow:hidden;font-family:'Cairo',sans-serif;direction:rtl;box-sizing:border-box;}
+#dash-hdr{background:#fff;border-bottom:1px solid #E2E8F0;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;backdrop-filter:blur(10px);}
 #dash-body{flex:1;display:flex;flex-direction:column;gap:8px;padding:8px 14px;overflow:hidden;}
 .dash-row{display:grid;gap:8px;flex:1;min-height:0;}
 .dash-row-3{grid-template-columns:repeat(3,1fr);}
@@ -2416,9 +2416,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 /* الكارد */
 .dk{
-  background:rgba(255,255,255,0.04);
+  background:#fff;
   border-radius:16px;
-  border:1px solid rgba(255,255,255,0.07);
+  border:1px solid #E8EDF2;
   padding:14px 16px;
   display:flex;flex-direction:column;min-height:0;overflow:hidden;
   transition:box-shadow .5s ease,border-color .5s ease;
@@ -2426,7 +2426,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 }
 .dk::before{
   content:'';position:absolute;inset:0;border-radius:16px;
-  background:linear-gradient(135deg,rgba(255,255,255,0.03) 0%,transparent 60%);
+  background:linear-gradient(135deg,rgba(255,255,255,0.6) 0%,transparent 60%);
   pointer-events:none;
 }
 
@@ -2434,31 +2434,31 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 /* أيقونة — شريط ملون بدل مربع */
 .dk-bar{width:3px;height:32px;border-radius:2px;flex-shrink:0;}
-.dk-title{font-size:12px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:.2px;}
-.dk-update{font-size:8px;color:rgba(255,255,255,0.3);margin-top:2px;}
+.dk-title{font-size:12px;font-weight:700;color:#0F172A;letter-spacing:.2px;}
+.dk-update{font-size:8px;color:#94A3B8;margin-top:2px;}
 .dk-big{font-size:22px;font-weight:900;line-height:1;}
 
 /* KPI boxes */
 .dk-kpi-row{display:flex;gap:6px;margin-bottom:8px;flex-shrink:0;}
 .dk-kpi{
   flex:1;
-  background:rgba(255,255,255,0.05);
+  background:#F8FAFC;
   border-radius:10px;
   padding:8px 6px;
   text-align:center;
-  border:1px solid rgba(255,255,255,0.06);
+  border:1px solid #E8EDF2;
 }
 .dk-kpi-num{font-size:22px;font-weight:900;line-height:1;}
-.dk-kpi-lbl{font-size:8px;color:rgba(255,255,255,0.4);margin-top:3px;letter-spacing:.3px;}
-.dk-kpi-sub{font-size:7px;color:rgba(255,255,255,0.25);margin-top:2px;}
+.dk-kpi-lbl{font-size:8px;color:#64748B;margin-top:3px;letter-spacing:.3px;}
+.dk-kpi-sub{font-size:7px;color:#94A3B8;margin-top:2px;}
 
 /* فاصل */
-.dk-divider{height:1px;background:rgba(255,255,255,0.05);margin:7px 0;flex-shrink:0;}
+.dk-divider{height:1px;background:#EEF2F7;margin:7px 0;flex-shrink:0;}
 
 .dk-section{flex:1;overflow:hidden;display:flex;flex-direction:column;gap:4px;}
-.dk-rec-title{font-size:8px;font-weight:700;letter-spacing:.8px;color:rgba(255,255,255,0.25);margin-bottom:2px;text-transform:uppercase;}
-.dk-rec{font-size:10px;color:rgba(255,255,255,0.6);padding:2px 0;line-height:1.5;display:flex;align-items:flex-start;gap:6px;}
-.dk-risk{font-size:10px;color:#F87171;padding:2px 0;display:flex;align-items:flex-start;gap:6px;}
+.dk-rec-title{font-size:8px;font-weight:700;letter-spacing:.8px;color:#94A3B8;margin-bottom:2px;text-transform:uppercase;}
+.dk-rec{font-size:10px;color:#475569;padding:2px 0;line-height:1.5;display:flex;align-items:flex-start;gap:6px;}
+.dk-risk{font-size:10px;color:#DC2626;padding:2px 0;display:flex;align-items:flex-start;gap:6px;}
 .dk-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0;margin-top:5px;}
 
 /* pulse */
@@ -2470,20 +2470,20 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 .dash-pulse-blue  {animation:kpiPulseBlue   3s ease infinite!important;}
 
 /* header text */
-.dash-hdr-title{font-size:14px;font-weight:900;color:rgba(255,255,255,0.9);}
-.dash-hdr-sub{font-size:9px;color:rgba(255,255,255,0.3);margin-top:1px;}
+.dash-hdr-title{font-size:14px;font-weight:900;color:#0F172A;}
+.dash-hdr-sub{font-size:9px;color:#94A3B8;margin-top:1px;}
 
 /* period buttons */
-.dash-period-btn{border:none;background:none;border-radius:6px;padding:4px 10px;font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;cursor:pointer;color:rgba(255,255,255,0.4);transition:all .2s;}
-.dash-period-btn.active-period{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);}
-.dash-period-btns-wrap{display:flex;gap:2px;background:rgba(255,255,255,0.05);border-radius:8px;padding:2px;border:1px solid rgba(255,255,255,0.06);}
+.dash-period-btn{border:none;background:none;border-radius:6px;padding:4px 10px;font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;cursor:pointer;color:#64748B;transition:all .2s;}
+.dash-period-btn.active-period{background:#fff;color:#0F172A;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.dash-period-btns-wrap{display:flex;gap:2px;background:#EEF2F7;border-radius:8px;padding:2px;border:1px solid #E2E8F0;}
 </style>
 
 <div id="dash-root">
   <!-- Header -->
   <div id="dash-hdr">
     <div>
-      <div class="dash-hdr-title">لوحة تحكم الإدارة العليا — نورة لتعليم القيادة</div>
+      <div class="dash-hdr-title">لوحة متابعة — إدارة الجودة</div>
       <div id="dashLastUpdate" class="dash-hdr-sub">آخر تحديث: —</div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;">
@@ -2494,8 +2494,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         <button onclick="setDashPeriod('year')"    id="dashBtn_year"    class="dash-period-btn">سنة</button>
       </div>
       <div style="display:flex;align-items:center;gap:5px;background:rgba(248,113,113,0.1);border-radius:14px;padding:4px 10px;border:1px solid rgba(248,113,113,0.2);">
-        <div id="dashLiveIndicator" style="width:6px;height:6px;border-radius:50%;background:#F87171;animation:dashPulse 1.5s ease-in-out infinite;"></div>
-        <span style="font-size:9px;font-weight:700;color:#F87171;letter-spacing:.5px;">LIVE</span>
+        <div id="dashLiveIndicator" style="width:6px;height:6px;border-radius:50%;background:#E74C3C;animation:dashPulse 1.5s ease-in-out infinite;"></div>
+        <span style="font-size:9px;font-weight:700;color:#E74C3C;letter-spacing:.5px;">LIVE</span>
       </div>
     </div>
   </div>
@@ -2516,16 +2516,16 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
               <div class="dk-update" id="dashViolPeriod">—</div>
             </div>
           </div>
-          <div id="dashViolTotal" style="font-size:22px;font-weight:900;color:#F87171;">—</div>
+          <div id="dashViolTotal" style="font-size:22px;font-weight:900;color:#DC2626;">—</div>
         </div>
         <div class="dk-kpi-row">
-          <div class="dk-kpi" style="background:rgba(248,113,113,0.08);border-color:rgba(248,113,113,0.15);">
-            <div class="dk-kpi-num" id="dashViolFemCount" style="color:#F87171;">—</div>
+          <div class="dk-kpi" style="background:#FFF5F5;border-color:#FECACA;">
+            <div class="dk-kpi-num" id="dashViolFemCount" style="color:#DC2626;">—</div>
             <div class="dk-kpi-lbl">نسائي</div>
             <div class="dk-kpi-sub" id="dashViolFemBreak" style="color:#94A3B8;"></div>
           </div>
-          <div class="dk-kpi" style="background:rgba(147,197,253,0.08);border-color:rgba(147,197,253,0.15);">
-            <div class="dk-kpi-num" id="dashViolMalCount" style="color:#93C5FD;">—</div>
+          <div class="dk-kpi" style="background:#EFF6FF;border-color:#BFDBFE;">
+            <div class="dk-kpi-num" id="dashViolMalCount" style="color:#2563EB;">—</div>
             <div class="dk-kpi-lbl">رجالي</div>
             <div class="dk-kpi-sub" id="dashViolMalBreak" style="color:#94A3B8;"></div>
           </div>
@@ -2549,19 +2549,19 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
               <div class="dk-update">قسم المبيعات</div>
             </div>
           </div>
-          <div id="dashSalesTotal" style="font-size:22px;font-weight:900;color:#A78BFA;">—</div>
+          <div id="dashSalesTotal" style="font-size:22px;font-weight:900;color:#7C3AED;">—</div>
         </div>
         <div class="dk-kpi-row">
-          <div class="dk-kpi" style="background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.15);">
-            <div class="dk-kpi-num" id="dashSalesKept" style="color:#34D399;">—</div>
+          <div class="dk-kpi" style="background:#F0FDF4;border-color:#BBF7D0;">
+            <div class="dk-kpi-num" id="dashSalesKept" style="color:#16A34A;">—</div>
             <div class="dk-kpi-lbl">احتفاظ</div>
           </div>
-          <div class="dk-kpi" style="background:rgba(248,113,113,0.08);border-color:rgba(248,113,113,0.15);">
-            <div class="dk-kpi-num" id="dashSalesRecov" style="color:#F87171;">—</div>
+          <div class="dk-kpi" style="background:#FFF5F5;border-color:#FECACA;">
+            <div class="dk-kpi-num" id="dashSalesRecov" style="color:#DC2626;">—</div>
             <div class="dk-kpi-lbl">استرداد</div>
           </div>
-          <div class="dk-kpi" style="background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.15);">
-            <div class="dk-kpi-num" id="dashSalesRate" style="color:#A78BFA;">—</div>
+          <div class="dk-kpi" style="background:#F5F3FF;border-color:#DDD6FE;">
+            <div class="dk-kpi-num" id="dashSalesRate" style="color:#7C3AED;">—</div>
             <div class="dk-kpi-lbl">معدل الاحتفاظ</div>
           </div>
         </div>
@@ -2584,19 +2584,19 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
               <div class="dk-update" id="dashOpsPeriod">—</div>
             </div>
           </div>
-          <div id="dashOpsAvg" style="font-size:22px;font-weight:900;color:#34D399;">—</div>
+          <div id="dashOpsAvg" style="font-size:22px;font-weight:900;color:#16A34A;">—</div>
         </div>
         <div class="dk-kpi-row">
-          <div class="dk-kpi" style="background:rgba(248,113,113,0.08);border-color:rgba(248,113,113,0.15);">
-            <div class="dk-kpi-num" id="dashOpsFem" style="color:#F87171;">—</div>
+          <div class="dk-kpi" style="background:#FFF5F5;border-color:#FECACA;">
+            <div class="dk-kpi-num" id="dashOpsFem" style="color:#DC2626;">—</div>
             <div class="dk-kpi-lbl">نسائي</div>
           </div>
-          <div class="dk-kpi" style="background:rgba(147,197,253,0.08);border-color:rgba(147,197,253,0.15);">
-            <div class="dk-kpi-num" id="dashOpsMal" style="color:#93C5FD;">—</div>
+          <div class="dk-kpi" style="background:#EFF6FF;border-color:#BFDBFE;">
+            <div class="dk-kpi-num" id="dashOpsMal" style="color:#2563EB;">—</div>
             <div class="dk-kpi-lbl">رجالي</div>
           </div>
-          <div class="dk-kpi" style="background:rgba(252,211,77,0.08);border-color:rgba(252,211,77,0.15);">
-            <div class="dk-kpi-num" id="dashOpsBike" style="color:#FCD34D;">—</div>
+          <div class="dk-kpi" style="background:#FFFBEB;border-color:#FDE68A;">
+            <div class="dk-kpi-num" id="dashOpsBike" style="color:#D97706;">—</div>
             <div class="dk-kpi-lbl">دراجات</div>
           </div>
         </div>
@@ -2623,15 +2623,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
               <div class="dk-update" id="dashSurveyCount">—</div>
             </div>
           </div>
-          <div id="dashSurveyAvg" style="font-size:22px;font-weight:900;color:#FCD34D;">—</div>
+          <div id="dashSurveyAvg" style="font-size:22px;font-weight:900;color:#D97706;">—</div>
         </div>
         <div class="dk-kpi-row">
           <div class="dk-kpi">
-            <div class="dk-kpi-num" id="dashSurveyFem" style="color:#F87171;">—</div>
+            <div class="dk-kpi-num" id="dashSurveyFem" style="color:#DC2626;">—</div>
             <div class="dk-kpi-lbl">نسائي %</div>
           </div>
           <div class="dk-kpi">
-            <div class="dk-kpi-num" id="dashSurveyMal" style="color:#93C5FD;">—</div>
+            <div class="dk-kpi-num" id="dashSurveyMal" style="color:#2563EB;">—</div>
             <div class="dk-kpi-lbl">رجالي %</div>
           </div>
         </div>
@@ -2654,15 +2654,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
               <div class="dk-update">اليومية</div>
             </div>
           </div>
-          <div id="dashFacilTotal" style="font-size:22px;font-weight:900;color:#34D399;">—</div>
+          <div id="dashFacilTotal" style="font-size:22px;font-weight:900;color:#16A34A;">—</div>
         </div>
         <div class="dk-kpi-row">
           <div class="dk-kpi">
-            <div class="dk-kpi-num" id="dashFacilToday" style="color:#34D399;">—</div>
+            <div class="dk-kpi-num" id="dashFacilToday" style="color:#16A34A;">—</div>
             <div class="dk-kpi-lbl">اليوم</div>
           </div>
           <div class="dk-kpi">
-            <div class="dk-kpi-num" id="dashFacilWeek" style="color:#FCD34D;">—</div>
+            <div class="dk-kpi-num" id="dashFacilWeek" style="color:#D97706;">—</div>
             <div class="dk-kpi-lbl">الأسبوع</div>
           </div>
         </div>
@@ -2685,15 +2685,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
               <div class="dk-update">مدربين بلا حصة اليوم</div>
             </div>
           </div>
-          <div id="dashNSTotal" style="font-size:22px;font-weight:900;color:#FB923C;">—</div>
+          <div id="dashNSTotal" style="font-size:22px;font-weight:900;color:#EA580C;">—</div>
         </div>
         <div class="dk-kpi-row">
           <div class="dk-kpi">
-            <div class="dk-kpi-num" id="dashNSNoSession" style="color:#FB923C;">—</div>
+            <div class="dk-kpi-num" id="dashNSNoSession" style="color:#EA580C;">—</div>
             <div class="dk-kpi-lbl">بلا حصة</div>
           </div>
           <div class="dk-kpi">
-            <div class="dk-kpi-num" id="dashNSBackup" style="color:#A78BFA;">—</div>
+            <div class="dk-kpi-num" id="dashNSBackup" style="color:#7C3AED;">—</div>
             <div class="dk-kpi-lbl">احتياطيين</div>
           </div>
         </div>
@@ -2716,15 +2716,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
               <div class="dk-update">المبنى الرئيسي والعملي</div>
             </div>
           </div>
-          <div id="dashBuildTotal" style="font-size:22px;font-weight:900;color:#93C5FD;">—</div>
+          <div id="dashBuildTotal" style="font-size:22px;font-weight:900;color:#2563EB;">—</div>
         </div>
         <div class="dk-kpi-row">
           <div class="dk-kpi">
-            <div class="dk-kpi-num" id="dashBuildToday" style="color:#93C5FD;">—</div>
+            <div class="dk-kpi-num" id="dashBuildToday" style="color:#2563EB;">—</div>
             <div class="dk-kpi-lbl">اليوم</div>
           </div>
           <div class="dk-kpi">
-            <div class="dk-kpi-num" id="dashBuildWeek" style="color:#A78BFA;">—</div>
+            <div class="dk-kpi-num" id="dashBuildWeek" style="color:#7C3AED;">—</div>
             <div class="dk-kpi-lbl">الأسبوع</div>
           </div>
         </div>
@@ -12297,12 +12297,12 @@ function _renderSales(S) {
   const topTypes=Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,3);
 
   document.getElementById('dashSalesContent').innerHTML=`
-    <div class="db-stat-box" style="background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.15);">
-      <div class="db-stat-label" style="color:#A78BFA;">💰 إجمالي</div>
+    <div class="db-stat-box" style="background:#F5F3FF;border-color:#DDD6FE;">
+      <div class="db-stat-label" style="color:#7C3AED;">💰 إجمالي</div>
       <div class="db-stat-num" style="color:#6D28D9;font-size:18px;">${total>0?total.toLocaleString()+' ر':'—'}</div>
     </div>
-    <div class="db-stat-box" style="background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.15);">
-      <div class="db-stat-label" style="color:#A78BFA;">📋 سجلات</div>
+    <div class="db-stat-box" style="background:#F5F3FF;border-color:#DDD6FE;">
+      <div class="db-stat-label" style="color:#7C3AED;">📋 سجلات</div>
       <div class="db-stat-num" style="color:#6D28D9;">${S.length||'—'}</div>
     </div>`;
 
