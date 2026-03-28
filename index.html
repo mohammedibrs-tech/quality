@@ -11652,79 +11652,98 @@ function _startDashRealtime() {
   if (_dashRealtimeStarted) return;
   _dashRealtimeStarted = true;
 
-  const tables = ['violations','surveys','facility_reports','building_reports','sales_reports','ops_reports'];
+  const tables = ['violations','surveys','facility_reports','building_reports','sales_reports','ops_reports','no_session_reports'];
   const indicator = document.getElementById('dashLiveIndicator');
 
-  // خريطة الجدول → معلومات الـ Genie
+  // خريطة الجدول → معلومات الـ MindMap
   const tableMap = {
-    'violations': { kpiId:'dash-kpi-viol', pulse:'dash-pulse-red', color:'#DC2626', icon:'⚖️',
+    'violations': { kpiId:'dash-kpi-viol', pulse:'dash-pulse-red', color:'#C0392B', icon:'⚖️',
       getTitle: p => p.eventType==='INSERT'?'مخالفة جديدة':'تحديث مخالفة',
       getDetails: p => {
         const r=p.new||{};
+        const sec=r.section==='female'?'نسائي':r.section==='male'?'رجالي':'—';
         return [
-          {icon:'👤', k:'المدرب/ة',     v: r.trainer_name||'—'},
-          {icon:'📋', k:'نوع المخالفة', v: (r.violation_type||'—').split('|')[0].trim().slice(0,30)},
-          {icon:'📝', k:'شرح المخالفة', v: (r.description||r.violation_type||'—').slice(0,30)},
-          {icon:'🔢', k:'الدرجة',       v: r.grade==='A'?'A — جسيمة':r.grade==='B'?'B — متوسطة':'C — بسيطة'},
-          {icon:'📍', k:'الزون',        v: r.zone||r.section==='female'?'نسائي':'رجالي'},
-          {icon:'🕐', k:'الوقت',        v: r.time||new Date().toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})},
+          {icon:'👤', k:'اسم المدرب/ة',   v: r.trainer_name||'—'},
+          {icon:'📋', k:'نوع المخالفة',   v: (r.violation_type||'—').split('|')[0].trim().slice(0,35)},
+          {icon:'📝', k:'شرح المخالفة',   v: (r.description||r.notes||r.violation_type||'—').slice(0,35)},
+          {icon:'📅', k:'الوقت والتاريخ', v: (r.time?r.time+' · ':''+(r.date||new Date().toLocaleDateString('ar')))},
+          {icon:'📍', k:'الزون',           v: sec+(r.zone?' — '+r.zone:'')},
         ];
       }
     },
-    'surveys': { kpiId:'dash-kpi-survey', pulse:'dash-pulse-green', color:'#16A34A', icon:'⭐',
+    'surveys': { kpiId:'dash-kpi-survey', pulse:'dash-pulse-green', color:'#0A7C59', icon:'⭐',
       getTitle: ()=>'استطلاع رضا جديد',
       getDetails: p => {
         const r=p.new||{};
         const pct=r.satisfaction_pct||0;
+        const lvl=pct>=90?'😊 ممتاز':pct>=70?'🙂 جيد':'😐 متوسط';
         return [
-          {icon:'👤', k:'العميل',   v: r.client_name||'—'},
-          {icon:'⭐', k:'الرضا',    v: pct+'%'},
-          {icon:'👁️', k:'الراصد',   v: r.observer||'—'},
-          {icon:'📅', k:'التاريخ',  v: r.date||'—'},
+          {icon:'👤', k:'اسم العميل',     v: r.client_name||'—'},
+          {icon:'⭐', k:'نسبة الرضا',     v: pct+'% — '+lvl},
+          {icon:'📝', k:'ملاحظة العميل',  v: (r.note1||r.note2||r.note3||r.notes||'لا توجد ملاحظات').slice(0,40)},
+          {icon:'🕐', k:'وقت الاستطلاع', v: r.date||new Date().toLocaleDateString('ar')},
         ];
       }
     },
-    'facility_reports': { kpiId:'dash-kpi-facility', pulse:'dash-pulse-amber', color:'#D97706', icon:'🔧',
+    'facility_reports': { kpiId:'dash-kpi-facility', pulse:'dash-pulse-amber', color:'#B45309', icon:'🔧',
       getTitle: ()=>'ملاحظة مرافق جديدة',
       getDetails: p => {
         const r=p.new||{};
         return [
-          {icon:'📍', k:'الموقع',   v: r.location||'—'},
-          {icon:'🔧', k:'المشكلة',  v: (r.problem_type||r.description||'—').slice(0,30)},
-          {icon:'👁️', k:'الراصد',   v: r.observer||'—'},
+          {icon:'🏷️', k:'نوع الملاحظة',  v: r.observation_type||r.problem_type||r.type||'—'},
+          {icon:'📝', k:'وصف المشكلة',   v: (r.description||r.notes||'—').slice(0,40)},
+          {icon:'📍', k:'مكان الملاحظة', v: r.location||r.place||'—'},
+          {icon:'🔄', k:'المعالجة',       v: r.status||'قيد المعالجة'},
+          {icon:'🕐', k:'وقت الملاحظة',  v: r.report_date||r.date||new Date().toLocaleDateString('ar')},
         ];
       }
     },
-    'building_reports': { kpiId:'dash-kpi-building', pulse:'dash-pulse-purple', color:'#7C3AED', icon:'🏢',
+    'building_reports': { kpiId:'dash-kpi-building', pulse:'dash-pulse-purple', color:'#5B21B6', icon:'🏢',
       getTitle: ()=>'تقرير مبنى جديد',
       getDetails: p => {
         const r=p.new||{};
         return [
-          {icon:'🏢', k:'القسم',   v: r.section||'—'},
-          {icon:'📋', k:'النوع',   v: r.observation_type||r.report_type||'—'},
-          {icon:'👁️', k:'الراصد',  v: r.observer||'—'},
+          {icon:'🏷️', k:'نوع الملاحظة',  v: r.observation_type||r.report_type||'—'},
+          {icon:'📝', k:'وصف المشكلة',   v: (r.description||r.notes||'—').slice(0,40)},
+          {icon:'📍', k:'مكان الملاحظة', v: r.location||r.section||'—'},
+          {icon:'🔄', k:'المعالجة',       v: r.status||'قيد المعالجة'},
+          {icon:'🕐', k:'وقت الملاحظة',  v: r.report_date||r.date||new Date().toLocaleDateString('ar')},
         ];
       }
     },
-    'sales_reports': { kpiId:'dash-kpi-sales', pulse:'dash-pulse-teal', color:'#0F766E', icon:'💼',
+    'sales_reports': { kpiId:'dash-kpi-sales', pulse:'dash-pulse-teal', color:'#0E7490', icon:'💼',
       getTitle: ()=>'سجل مبيعات جديد',
       getDetails: p => {
         const r=p.new||{};
+        const isRefund=(r.request_type||'').includes('استرداد');
         return [
-          {icon:'👤', k:'العميل',  v: r.client_name||'—'},
-          {icon:'📋', k:'النوع',   v: r.request_type||r.type||'—'},
-          {icon:'👁️', k:'الموظف',  v: r.uploaded_by||'—'},
+          {icon:'👤', k:'اسم العميل',        v: r.client_name||'—'},
+          {icon:'📚', k:'البرنامج التدريبي', v: r.program||r.package||'—'},
+          {icon:'📋', k:'نوع الطلب',         v: isRefund?'💸 استرداد':'✅ احتفاظ بالرسوم'},
+          {icon:'📝', k:isRefund?'سبب الاسترداد':'الإجراء', v: isRefund?(r.reason||r.notes||'—'):'سيتم نقل الحالة إلى إدارة العمليات'},
         ];
       }
     },
-    'ops_reports': { kpiId:'dash-kpi-ops', pulse:'dash-pulse-blue', color:'#2563EB', icon:'⚙️',
+    'ops_reports': { kpiId:'dash-kpi-ops', pulse:'dash-pulse-blue', color:'#1D4ED8', icon:'⚙️',
       getTitle: ()=>'تحديث كفاءة التشغيل',
       getDetails: p => {
         const r=p.new||{};
         return [
-          {icon:'👤', k:'المدرب',    v: r.trainer_name||'—'},
-          {icon:'📊', k:'الكفاءة',   v: (r.efficiency_pct||0)+'%'},
-          {icon:'📍', k:'الزون',     v: r.zone||'—'},
+          {icon:'👤', k:'المدرب',   v: r.trainer_name||'—'},
+          {icon:'📊', k:'الكفاءة',  v: (r.efficiency_pct||0)+'%'},
+          {icon:'📍', k:'الزون',    v: r.zone||'—'},
+        ];
+      }
+    },
+    'no_session_reports': { kpiId:'dash-kpi-nosession', pulse:'dash-pulse-amber', color:'#C2410C', icon:'🚫',
+      getTitle: p => p.new?.report_type==='backup'?'مدرب/ة احتياطي':'مدرب/ة بلا حصة',
+      getDetails: p => {
+        const r=p.new||{};
+        return [
+          {icon:'👤', k:'اسم المدرب/ة', v: r.trainer_name||'—'},
+          {icon:'🕐', k:'وقت الحصة',    v: r.report_time||'—'},
+          {icon:'🌅', k:'الفترة',        v: r.shift||'—'},
+          {icon:'👁️', k:'اسم الراصد',   v: r.observer||'—'},
         ];
       }
     },
@@ -11820,11 +11839,11 @@ function _showMindMap({kpiId, title, details, color}) {
   if (mm) mm.remove();
   mm = document.createElement('div');
   mm.id = 'dashMindMap';
-  mm.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:8888;';
+  mm.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:8888;background:rgba(0,0,0,0.25);backdrop-filter:blur(2px);transition:background .3s ease;';
   document.body.appendChild(mm);
 
   // ألوان البطاقات
-  const colors = ['#2563EB','#0891B2','#7C3AED','#DB2777','#D97706','#16A34A'];
+  const colors = ['#1A1A2E','#16213E','#0F3460','#533483','#E94560','#0A7C59'];
 
   // SVG للخطوط
   const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -11849,13 +11868,14 @@ function _showMindMap({kpiId, title, details, color}) {
   const hub = document.createElement('div');
   hub.style.cssText = `
     position:fixed;
-    left:${hubX - 46}px;top:${hubY - 46}px;
-    width:92px;height:92px;border-radius:50%;
-    background:#fff;border:2.5px solid #cbd5e1;
-    box-shadow:0 4px 20px rgba(0,0,0,0.12),inset 0 2px 6px rgba(0,0,0,0.04);
+    left:${hubX - 52}px;top:${hubY - 52}px;
+    width:104px;height:104px;border-radius:50%;
+    background:linear-gradient(135deg,${color}ee,${color}99);
+    border:2px solid rgba(255,255,255,0.3);
+    box-shadow:0 8px 32px ${color}55,0 2px 8px rgba(0,0,0,0.2);
     display:flex;align-items:center;justify-content:center;text-align:center;
     font-family:Cairo,sans-serif;direction:rtl;
-    font-size:11px;font-weight:900;color:#0f172a;line-height:1.4;
+    font-size:11px;font-weight:900;color:#fff;line-height:1.5;
     pointer-events:none;
     transform:scale(0);opacity:0;
     transition:transform .5s cubic-bezier(.34,1.4,.64,1),opacity .3s ease;
@@ -11869,7 +11889,7 @@ function _showMindMap({kpiId, title, details, color}) {
   lineToHub.setAttribute('y1', cy);
   lineToHub.setAttribute('x2', hubX + (goLeft ? 46 : -46));
   lineToHub.setAttribute('y2', hubY);
-  lineToHub.setAttribute('stroke','#94a3b8');
+  lineToHub.setAttribute('stroke','rgba(255,255,255,0.4)');
   lineToHub.setAttribute('stroke-width','1.5');
   lineToHub.setAttribute('stroke-dasharray','200');
   lineToHub.setAttribute('stroke-dashoffset','200');
@@ -11888,7 +11908,7 @@ function _showMindMap({kpiId, title, details, color}) {
     ln.setAttribute('y1', hubY);
     ln.setAttribute('x2', goLeft ? spreadX + 44 : spreadX - 44);
     ln.setAttribute('y2', itemY);
-    ln.setAttribute('stroke','#94a3b8');
+    ln.setAttribute('stroke','rgba(255,255,255,0.3)');
     ln.setAttribute('stroke-width','1.5');
     ln.setAttribute('stroke-dasharray','300');
     ln.setAttribute('stroke-dashoffset','300');
@@ -11901,7 +11921,7 @@ function _showMindMap({kpiId, title, details, color}) {
     dot.setAttribute('cx', goLeft ? spreadX + 44 : spreadX - 44);
     dot.setAttribute('cy', itemY);
     dot.setAttribute('r','4');
-    dot.setAttribute('fill','#94a3b8');
+    dot.setAttribute('fill','rgba(255,255,255,0.6)');
     dot.style.cssText = 'opacity:0;transition:opacity .2s ease;';
     svg.appendChild(dot);
     dots.push(dot);
@@ -11918,33 +11938,34 @@ function _showMindMap({kpiId, title, details, color}) {
       direction:rtl;font-family:Cairo,sans-serif;
     `;
 
-    // دائرة صغيرة
+    // دائرة صغيرة - Arcade
     const circle = document.createElement('div');
+    const bg = colors[i % colors.length];
     circle.style.cssText = `
-      width:38px;height:38px;border-radius:50%;
-      background:#fff;border:2px solid #e2e8f0;
-      box-shadow:0 2px 8px rgba(0,0,0,0.08);
+      width:40px;height:40px;border-radius:50%;
+      background:${bg};
+      border:2px solid rgba(255,255,255,0.25);
+      box-shadow:0 4px 14px rgba(0,0,0,0.25);
       display:flex;align-items:center;justify-content:center;
-      font-size:12px;font-weight:700;color:#334155;
-      flex-shrink:0;z-index:1;
+      font-size:16px;flex-shrink:0;z-index:1;
     `;
     circle.textContent = d.icon || '•';
 
-    // سهم ملون
+    // بطاقة مستطيلة مع سهم - Arcade
     const arrow = document.createElement('div');
-    const bg = colors[i % colors.length];
     arrow.style.cssText = `
-      height:36px;min-width:170px;
+      height:40px;min-width:180px;
       display:flex;align-items:center;
       padding:0 18px 0 22px;
       margin-${goLeft ? 'left' : 'right'}:-16px;
       clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%);
       background:${bg};
+      box-shadow:0 4px 16px rgba(0,0,0,0.2);
     `;
     arrow.innerHTML = `
       <div>
-        <div style="font-size:8px;color:rgba(255,255,255,.75);margin-bottom:1px;">${d.k}</div>
-        <div style="font-size:11px;font-weight:900;color:#fff;">${d.v}</div>
+        <div style="font-size:8px;color:rgba(255,255,255,.65);margin-bottom:2px;letter-spacing:.3px;">${d.k}</div>
+        <div style="font-size:12px;font-weight:900;color:#fff;letter-spacing:-.2px;">${d.v}</div>
       </div>
     `;
 
