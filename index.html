@@ -2411,32 +2411,34 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 #dash-hdr{background:#fff;border-bottom:1px solid #E2E8F0;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;backdrop-filter:blur(10px);}
 #dash-body{flex:1;display:flex;flex-direction:column;gap:8px;padding:8px 14px;overflow:hidden;}
 .dash-row{display:grid;gap:8px;flex:1;min-height:0;}
+.dash-row > .dk{min-height:0;}
 .dash-row-3{grid-template-columns:repeat(3,1fr);}
 .dash-row-4{grid-template-columns:repeat(4,1fr);}
 
 /* الكارد */
-/* الـ dk هو الـ perspective container */
+/* ── Flip Cards ── */
+/* wrapper في الـ Grid يحمل perspective */
 .dk{
-  height:100%;
   perspective:900px;
   cursor:pointer;
   background:transparent!important;
   border:none!important;
   padding:0!important;
   overflow:visible!important;
-  position:relative;
+  border-radius:16px;
+  /* يجب أن يأخذ كامل ارتفاع الـ grid cell */
+  display:flex;flex-direction:column;
 }
-/* الـ inner يدور */
+/* الـ inner يدور ويأخذ كامل المساحة */
 .dk-inner{
-  width:100%;height:100%;
+  flex:1;
   position:relative;
   transform-style:preserve-3d;
   transition:transform .7s cubic-bezier(.4,0,.2,1);
   border-radius:16px;
+  min-height:0;
 }
-.dk.flipped .dk-inner{
-  transform:rotateY(180deg);
-}
+.dk.flipped .dk-inner{transform:rotateY(180deg);}
 /* الوجهان */
 .dk-front,.dk-back{
   position:absolute;inset:0;
