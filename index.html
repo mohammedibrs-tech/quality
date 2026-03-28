@@ -12121,6 +12121,11 @@ function initDashDark() {
     if (btn)  btn.textContent = '☀';
   }
 }
+
+function _stopDashRealtime() {
+  _dashRealtimeChannels.forEach(ch => { try { db.removeChannel(ch); } catch(e){} });
+  _dashRealtimeChannels = [];
+}
   _dashRealtimeChannels.forEach(ch => { try { db.removeChannel(ch); } catch(e){} });
   _dashRealtimeChannels = [];
 }
