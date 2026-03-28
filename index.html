@@ -2502,13 +2502,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 #dash-root.dark .dk-gap-val{color:rgba(255,255,255,0.75)!important;}
 #dash-root.dark #dashLastUpdate{color:rgba(255,255,255,0.3)!important;}
 
-/* ── الفجوات والفروقات ── */
-.dk-gap-wrap{margin-top:5px;display:flex;flex-direction:column;gap:4px;}
-.dk-gap-row{display:flex;align-items:center;gap:6px;}
-.dk-gap-label{font-size:8px;color:#64748B;width:44px;flex-shrink:0;text-align:right;}
-.dk-gap-bar-bg{flex:1;height:5px;background:#F1F5F9;border-radius:3px;overflow:hidden;}
-.dk-gap-bar-fill{height:100%;border-radius:3px;transition:width .8s ease;}
-.dk-gap-val{font-size:8px;font-weight:700;width:30px;text-align:left;}
+
+/* ── نص الفجوات ── */
+.dk-gap-text{font-size:9px;color:#475569;line-height:1.6;padding:4px 0 2px;margin-bottom:2px;}
+#dash-root.dark .dk-gap-text{color:rgba(255,255,255,0.5);}
 
 /* ── زر Dark Mode ── */
 .dash-dark-btn{border:1px solid #E2E8F0;background:#fff;border-radius:8px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;}
@@ -2569,8 +2566,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
         <div class="dk-divider"></div>
         <div class="dk-section">
-          <div class="dk-gap-wrap" id="dashViolGap"></div>
-          <div class="dk-divider"></div>
+          <div id="dashViolGap" class="dk-gap-text"></div>
           <div class="dk-rec-title">التوصيات</div>
           <div id="dashViolRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
@@ -2641,8 +2637,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
         <div class="dk-divider"></div>
         <div class="dk-section">
-          <div class="dk-gap-wrap" id="dashOpsGap"></div>
-          <div class="dk-divider"></div>
+          <div id="dashOpsGap" class="dk-gap-text"></div>
           <div class="dk-rec-title">التوصيات</div>
           <div id="dashOpsRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
@@ -2678,8 +2673,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
         <div class="dk-divider"></div>
         <div class="dk-section">
-          <div class="dk-gap-wrap" id="dashSurveyGap"></div>
-          <div class="dk-divider"></div>
+          <div id="dashSurveyGap" class="dk-gap-text"></div>
           <div class="dk-rec-title">التوصيات</div>
           <div id="dashSurveyRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
@@ -12169,22 +12163,17 @@ function _renderDashNew(V,O,S,B,F,SV,NS,from,to,today,label) {
   const set  = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
   const html = (id,v) => { const e=document.getElementById(id); if(e) e.innerHTML=v; };
   const ec   = v => v>=90?'#16A34A':v>=70?'#D97706':'#DC2626';
-  const dot  = c => `<div class="dk-dot" style="background:${c};margin-top:4px;flex-shrink:0;width:5px;height:5px;border-radius:50%;"></div>`;
+  const dot  = c => `<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:${c};margin-left:5px;margin-bottom:1px;flex-shrink:0;"></span>`;
   const FEMALE_ZONES=['female','L','E','D','B','A'];
   const MALE_ZONES=['male','O','H'];
-  const BIKE_ZONES=['bike','دراجات'];
+  const BIKE_ZONES=['bike','\u062f\u0631\u0627\u062c\u0627\u062a'];
 
-  // دالة رسم شريط الفجوة
-  const gapBar = (label, val, target, color) => {
-    const pct = Math.min(Math.round((val/target)*100), 100);
-    const diff = val - target;
-    const diffTxt = diff>0?`+${diff} فوق الهدف`:diff<0?`${diff} دون الهدف`:'مطابق للهدف';
-    return `<div class="dk-gap-row">
-      <div class="dk-gap-label">${label}</div>
-      <div class="dk-gap-bar-bg"><div class="dk-gap-bar-fill" style="width:${pct}%;background:${color};"></div></div>
-      <div class="dk-gap-val" style="color:${color};">${val}</div>
-    </div>`;
-  };
+  // حساب الشهر الفائت للمقارنة
+  const now = new Date();
+  const prevMonthStart = new Date(now.getFullYear(), now.getMonth()-1, 1).toISOString().slice(0,10);
+  const prevMonthEnd   = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().slice(0,10);
+  const isLastMonth = r => { const d=r.date||r.report_date||r.created_at||''; return d>=prevMonthStart&&d<=prevMonthEnd; };
+  const trend = (cur, prev) => cur===0&&prev===0?'':cur>prev?`▲ ارتفع بـ${cur-prev} عن الشهر الفائت`:cur<prev?`▼ انخفض بـ${prev-cur} عن الشهر الفائت`:'= مستقر مقارنة بالشهر الفائت';
 
   // ── ١. المخالفات ──
   const femV = V.filter(v=>v.section==='female');
@@ -12194,46 +12183,52 @@ function _renderDashNew(V,O,S,B,F,SV,NS,from,to,today,label) {
   const grC  = V.filter(v=>v.grade==='C').length;
   const femA = femV.filter(v=>v.grade==='A').length;
   const malA = malV.filter(v=>v.grade==='A').length;
+  const prevViol     = (window._NQ_prev?.violations||[]);
+  const prevFemV     = prevViol.filter(v=>v.section==='female').length;
+  const prevMalV     = prevViol.filter(v=>v.section==='male').length;
   set('dashViolTotal',    V.length);
   set('dashViolFemCount', femV.length);
   set('dashViolMalCount', malV.length);
   set('dashViolFemBreak', `A:${femV.filter(v=>v.grade==='A').length} B:${femV.filter(v=>v.grade==='B').length} C:${femV.filter(v=>v.grade==='C').length}`);
   set('dashViolMalBreak', `A:${malV.filter(v=>v.grade==='A').length} B:${malV.filter(v=>v.grade==='B').length} C:${malV.filter(v=>v.grade==='C').length}`);
-  const maxViol = Math.max(femV.length, malV.length, 1);
-  html('dashViolGap', `
-    ${gapBar('نسائي', femV.length, maxViol, '#DC2626')}
-    ${gapBar('رجالي', malV.length, maxViol, '#2563EB')}
-    ${gapBar('جسيمة A', grA, Math.max(grA,grB,grC,1), '#7C3AED')}
-  `);
+  const violDiff = femV.length - malV.length;
+  const violGapTxt = violDiff>0
+    ? `الفجوة: نسائي أعلى من رجالي بـ ${violDiff} مخالفة — تركّز في الزونات L, E, D`
+    : violDiff<0
+    ? `الفجوة: رجالي أعلى من نسائي بـ ${Math.abs(violDiff)} مخالفة — تركّز في الزونات O, H`
+    : 'توزيع متساوٍ بين القسمين';
+  html('dashViolGap', violGapTxt + (prevFemV||prevMalV ? ` · ${trend(V.length, prevFemV+prevMalV)}` : ''));
   const violRec = femV.length>malV.length
-    ? `مخالفات نسائي أعلى بـ${femV.length-malV.length} — يُنصح بمراجعة الزونات L,E,D`
+    ? `مراجعة الزونات L, E, D النسائية — ${femV.length} مخالفة بفارق ${femV.length-malV.length} عن الرجالي. يُنصح بتكثيف الجولات الميدانية في فترة الذروة`
     : malV.length>femV.length
-    ? `مخالفات رجالي أعلى بـ${malV.length-femV.length} — يُنصح بمراجعة الزونات O,H`
-    : 'المخالفات متساوية بين القسمين';
+    ? `مراجعة الزونات O, H الرجالية — ${malV.length} مخالفة بفارق ${malV.length-femV.length} عن النسائي. يُنصح برفع وتيرة الرصد في الشفت المسائي`
+    : 'الأداء متوازن — الحفاظ على المستوى الحالي مع استمرار الرصد الدوري';
   const violRisk = grA>0
-    ? `${grA} مخالفة جسيمة (درجة A) تستوجب إجراءً فورياً — ${femA>0?'نسائي '+femA:''}${malA>0?' رجالي '+malA:''}`
-    : grB>10 ? `${grB} مخالفة متوسطة (B) — مراقبة مستمرة مطلوبة` : 'لا توجد مخاطر جسيمة حالياً';
+    ? `${grA} مخالفة جسيمة درجة A تستوجب إجراءً فورياً${femA>0?' (نسائي: '+femA+')':''}${malA>0?' (رجالي: '+malA+')':''} — خطر على سلامة العملاء`
+    : grB>15 ? `${grB} مخالفة متوسطة درجة B — ارتفاع عن المعدل الطبيعي، مراقبة مستمرة مطلوبة قبل تحوّلها لجسيمة`
+    : 'لا توجد مخاطر جسيمة حالياً — الوضع تحت السيطرة';
   html('dashViolRec',  dot('#F59E0B')+violRec);
   html('dashViolRisk', dot('#DC2626')+violRisk);
 
   // ── ٢. عملاء الاسترداد ──
-  const kept   = S.filter(r=>r.request_type==='احتفاظ'||(r.outcome||'').includes('احتفاظ'));
-  const recov  = S.filter(r=>r.request_type==='استرداد'||(r.request_type||'').includes('استرداد'));
+  const kept   = S.filter(r=>r.request_type==='\u0627\u062d\u062a\u0641\u0627\u0638'||(r.outcome||'').includes('\u0627\u062d\u062a\u0641\u0627\u0638'));
+  const recov  = S.filter(r=>r.request_type==='\u0627\u0633\u062a\u0631\u062f\u0627\u062f'||(r.request_type||'').includes('\u0627\u0633\u062a\u0631\u062f\u0627\u062f'));
   const retRate= S.length ? Math.round(kept.length/S.length*100) : 0;
-  const recFees= recov.reduce((s,r)=>s+parseFloat(r.fees||r.amount||0),0);
-  set('dashSalesTotal',  S.length||'—');
+  set('dashSalesTotal',  S.length||'\u2014');
   set('dashSalesKept',   kept.length);
   set('dashSalesRecov',  recov.length);
   set('dashSalesRate',   retRate+'%');
   const salesRateEl = document.getElementById('dashSalesRate');
   if(salesRateEl) salesRateEl.style.color = ec(retRate);
-  const salesRec = retRate>=80 ? `معدل الاحتفاظ ممتاز ${retRate}% — يتجاوز الهدف 75%`
-    : retRate>=60 ? `معدل الاحتفاظ مقبول ${retRate}% — يُنصح بتعزيز منهجية الإقناع`
-    : `معدل الاحتفاظ ضعيف ${retRate}% — مراجعة فورية لأسباب الاسترداد`;
+  const salesRec = retRate>=80
+    ? `معدل الاحتفاظ ${retRate}% يتجاوز الهدف 75% — أداء ممتاز. يُنصح بتوثيق أسباب النجاح ومشاركتها مع الفريق`
+    : retRate>=60
+    ? `معدل الاحتفاظ ${retRate}% مقبول لكنه دون الهدف 75% — فجوة ${75-retRate}%. يُنصح بتعزيز منهجية الإقناع وعروض الاحتفاظ`
+    : `معدل الاحتفاظ ${retRate}% ضعيف — فجوة ${75-retRate}% عن الهدف. مراجعة فورية لأسباب الاسترداد وتدريب الفريق على التعامل مع الاعتراضات`;
   const salesRisk = recov.length>kept.length
-    ? `الاسترداد يتجاوز الاحتفاظ بفارق ${recov.length-kept.length} حالة — خطر على الإيرادات`
-    : recov.length>0 && retRate<70 ? `${recov.length} حالة استرداد — متابعة أسباب الاسترداد`
-    : '—';
+    ? `الاسترداد (${recov.length}) يتجاوز الاحتفاظ (${kept.length}) بفارق ${recov.length-kept.length} حالة — خطر مباشر على الإيرادات يستوجب تدخلاً إدارياً`
+    : retRate<60 && S.length>0 ? `معدل الاحتفاظ حرج (${retRate}%) — احتمال فقدان شريحة واسعة من العملاء إذا استمر الاتجاه`
+    : '\u2014';
   html('dashSalesRec',  dot('#F59E0B')+salesRec);
   html('dashSalesRisk', dot('#DC2626')+salesRisk);
 
@@ -12243,26 +12238,28 @@ function _renderDashNew(V,O,S,B,F,SV,NS,from,to,today,label) {
   const bikeO = O.filter(r=>BIKE_ZONES.includes(r.zone)||BIKE_ZONES.includes(r.section));
   const avg   = n => n.length?Math.round(n.reduce((s,r)=>s+(r.efficiency_pct||0),0)/n.length):0;
   const avgFem=avg(femO), avgMal=avg(malO), avgBike=avg(bikeO), avgAll=avg(O);
-  const TARGET_EFF = 90;
-  set('dashOpsAvg',  avgAll?avgAll+'%':'—');
-  set('dashOpsFem',  avgFem?avgFem+'%':'—');
-  set('dashOpsMal',  avgMal?avgMal+'%':'—');
-  set('dashOpsBike', avgBike?avgBike+'%':'—');
+  const TARGET = 90;
+  set('dashOpsAvg',  avgAll?avgAll+'%':'\u2014');
+  set('dashOpsFem',  avgFem?avgFem+'%':'\u2014');
+  set('dashOpsMal',  avgMal?avgMal+'%':'\u2014');
+  set('dashOpsBike', avgBike?avgBike+'%':'\u2014');
   const opsEl = document.getElementById('dashOpsAvg');
   if(opsEl) opsEl.style.color = ec(avgAll);
-  html('dashOpsGap', `
-    ${gapBar('نسائي', avgFem, TARGET_EFF, ec(avgFem))}
-    ${gapBar('رجالي', avgMal, TARGET_EFF, ec(avgMal))}
-    ${gapBar('دراجات', avgBike, TARGET_EFF, ec(avgBike))}
-  `);
-  const belowTarget = [avgFem<TARGET_EFF&&avgFem>0?`نسائي (${TARGET_EFF-avgFem}% فجوة)`:'', avgMal<TARGET_EFF&&avgMal>0?`رجالي (${TARGET_EFF-avgMal}% فجوة)`:'', avgBike<TARGET_EFF&&avgBike>0?`دراجات (${TARGET_EFF-avgBike}% فجوة)`:''].filter(Boolean);
-  const opsRec = belowTarget.length===0 ? 'جميع الأقسام تتجاوز هدف 90% — أداء ممتاز'
-    : `${belowTarget.join(' · ')} دون الهدف — يُوصى بمراجعة جداول الحصص`;
+  const gaps = [
+    avgFem>0&&avgFem<TARGET?`نسائي (فجوة ${TARGET-avgFem}%)`:'',
+    avgMal>0&&avgMal<TARGET?`رجالي (فجوة ${TARGET-avgMal}%)`:'',
+    avgBike>0&&avgBike<TARGET?`دراجات (فجوة ${TARGET-avgBike}%)`:''
+  ].filter(Boolean);
+  html('dashOpsGap', gaps.length ? 'أقسام دون الهدف 90%: '+gaps.join(' · ') : 'جميع الأقسام تحقق الهدف 90%');
   const worst = Math.min(avgFem||100, avgMal||100, avgBike||100);
   const worstName = avgBike===worst&&avgBike>0?'الدراجات':avgMal===worst&&avgMal>0?'الرجالي':'النسائي';
-  const opsRisk = worst<70&&worst>0 ? `${worstName} عند ${worst}% — أقل من الحد الأدنى المقبول 70% — تدخل عاجل`
-    : worst<TARGET_EFF&&worst>0 ? `${worstName} عند ${worst}% — فجوة ${TARGET_EFF-worst}% عن الهدف`
-    : 'لا توجد مخاطر حرجة في كفاءة التشغيل';
+  const belowAll = gaps.length;
+  const opsRec = belowAll===0 ? 'جميع الأقسام تتجاوز هدف الكفاءة 90% — أداء ممتاز. الحفاظ على هذا المستوى مع التحقق من استمرارية الجداول'
+    : belowAll===1 ? `${gaps[0]} — مراجعة جدول الحصص وأسباب الغياب وتوزيع الأحمال على المدربين`
+    : `${belowAll} أقسام دون الهدف — مراجعة شاملة للجداول التشغيلية وخطة تحسين عاجلة`;
+  const opsRisk = worst<70&&worst>0 ? `${worstName} عند ${worst}% — أقل من الحد الأدنى المقبول 70%، تدخل فوري مطلوب لتفادي تأثير مباشر على المتدربين`
+    : worst<TARGET&&worst>0 ? `${worstName} الأضعف عند ${worst}% — فجوة ${TARGET-worst}% عن الهدف، يُنصح بخطة تحسين خلال أسبوعين`
+    : 'لا توجد مخاطر حرجة في كفاءة التشغيل حالياً';
   html('dashOpsRec',  dot('#F59E0B')+opsRec);
   html('dashOpsRisk', dot('#DC2626')+opsRisk);
 
@@ -12272,71 +12269,83 @@ function _renderDashNew(V,O,S,B,F,SV,NS,from,to,today,label) {
   const malSurv = SV.filter(r=>r.section==='male');
   const avgFS   = femSurv.length?Math.round(femSurv.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/femSurv.length):0;
   const avgMS   = malSurv.length?Math.round(malSurv.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/malSurv.length):0;
-  const lowSurv = SV.filter(r=>r.satisfaction_pct<70).length;
-  set('dashSurveyAvg',   avgSurv?avgSurv+'%':'—');
-  set('dashSurveyCount', SV.length+' استطلاع');
-  set('dashSurveyFem',   avgFS?avgFS+'%':'—');
-  set('dashSurveyMal',   avgMS?avgMS+'%':'—');
+  const lowSurv = SV.filter(r=>(r.satisfaction_pct||0)<70).length;
+  const survGap = Math.abs(avgFS-avgMS);
+  set('dashSurveyAvg',   avgSurv?avgSurv+'%':'\u2014');
+  set('dashSurveyCount', SV.length+' \u0627\u0633\u062a\u0637\u0644\u0627\u0639');
+  set('dashSurveyFem',   avgFS?avgFS+'%':'\u2014');
+  set('dashSurveyMal',   avgMS?avgMS+'%':'\u2014');
   const survEl = document.getElementById('dashSurveyAvg');
   if(survEl) survEl.style.color = ec(avgSurv);
-  html('dashSurveyGap', `
-    ${gapBar('نسائي', avgFS, 90, ec(avgFS))}
-    ${gapBar('رجالي', avgMS, 90, ec(avgMS))}
-  `);
-  const survRec = avgSurv>=90 ? `رضا ممتاز ${avgSurv}% — يتجاوز الهدف 90% · استمر في نفس المستوى`
-    : avgSurv>=75 ? `رضا جيد ${avgSurv}% — فجوة ${90-avgSurv}% عن الهدف · تعزيز تجربة العميل مطلوب`
-    : `رضا متدنٍ ${avgSurv}% — مراجعة فورية لأسباب الاستياء · اجتماع طارئ مع الفريق`;
-  const survRisk = lowSurv>0 ? `${lowSurv} استطلاع دون 70% — عملاء غير راضين يحتاجون متابعة شخصية`
-    : avgFS!==avgMS && Math.abs(avgFS-avgMS)>10 ? `فجوة ${Math.abs(avgFS-avgMS)}% بين النسائي والرجالي — تحليل الأسباب مطلوب`
-    : '—';
+  const survGapTxt = survGap>10
+    ? `فجوة ${survGap}% بين النسائي (${avgFS}%) والرجالي (${avgMS}%) — يستوجب تحليل الأسباب`
+    : avgSurv>0 ? `فجوة ${90-avgSurv}% عن الهدف 90%` : '';
+  html('dashSurveyGap', survGapTxt);
+  const survRec = avgSurv>=90
+    ? `رضا ممتاز ${avgSurv}% يتجاوز الهدف — استمر في نفس الأسلوب. يُنصح بتوثيق أفضل الممارسات`
+    : avgSurv>=75
+    ? `رضا جيد ${avgSurv}% — فجوة ${90-avgSurv}% عن الهدف. تعزيز تجربة العميل وتدريب المدربين على التواصل`
+    : `رضا ${avgSurv}% متدنٍ — مراجعة فورية لمصادر الاستياء وعقد اجتماع طارئ مع الفريق الميداني`;
+  const survRisk = lowSurv>0
+    ? `${lowSurv} استطلاع دون 70% — عملاء غير راضين يحتاجون متابعة شخصية فورية قبل تصعيد الشكوى`
+    : survGap>15 ? `فجوة كبيرة بين القسمين (${survGap}%) — خطر عدم تجانس في جودة الخدمة`
+    : '\u2014';
   html('dashSurveyRec',  dot('#F59E0B')+survRec);
   html('dashSurveyRisk', dot('#DC2626')+survRisk);
 
   // ── ٥. ملاحظات المرافق ──
-  const fToday  = F.filter(r=>(r.report_date||'').startsWith(today));
-  const fWeek   = F.length;
-  const fRepeat = F.length>0 ? Math.round(F.length/7) : 0;
-  set('dashFacilTotal', F.length||'—');
+  const fToday = F.filter(r=>(r.report_date||'').startsWith(today));
+  set('dashFacilTotal', F.length||'\u2014');
   set('dashFacilToday', fToday.length);
-  set('dashFacilWeek',  fWeek);
-  const facilRec = fToday.length===0 ? 'لا توجد ملاحظات اليوم — تحقق من تفعيل الرصد الميداني'
-    : fToday.length>5 ? `${fToday.length} ملاحظات اليوم — ارتفاع ملحوظ · تحديد الأسباب المتكررة`
-    : `${fToday.length} ملاحظات اليوم — معدل طبيعي · متابعة دورية كافية`;
-  const facilRisk = fWeek>20 ? `${fWeek} ملاحظة هذا الشهر — معدل مرتفع يستوجب مراجعة هيكلية للمرافق`
-    : fToday.length>7 ? 'تراكم ملاحظات اليوم يشير لمشكلة منهجية — تدخل فوري'
-    : '—';
+  set('dashFacilWeek',  F.length);
+  const facilRec = fToday.length===0
+    ? 'لا توجد ملاحظات اليوم — تحقق من استمرارية الرصد الميداني وتفعيل التقارير اليومية'
+    : fToday.length>5
+    ? `${fToday.length} ملاحظات اليوم — ارتفاع ملحوظ عن المعدل. تحديد الأسباب المتكررة ومعالجتها ضرورة`
+    : `${fToday.length} ملاحظات اليوم — معدل طبيعي. متابعة دورية والتأكد من إغلاق الملاحظات السابقة`;
+  const facilRisk = F.length>20
+    ? `${F.length} ملاحظة خلال الفترة — تراكم مرتفع يستوجب مراجعة هيكلية للمرافق وخطة صيانة منهجية`
+    : fToday.length>7 ? 'ارتفاع حاد في ملاحظات اليوم يشير لمشكلة منهجية — تدخل فوري'
+    : '\u2014';
   html('dashFacilRec',  dot('#F59E0B')+facilRec);
   html('dashFacilRisk', dot('#DC2626')+facilRisk);
 
   // ── ٦. جدولة الحصص ──
   const nsNo = NS.filter(r=>r.report_type==='no_session');
   const nsBU = NS.filter(r=>r.report_type==='backup');
-  set('dashNSTotal',     NS.length||'—');
+  set('dashNSTotal',     NS.length||'\u2014');
   set('dashNSNoSession', nsNo.length);
   set('dashNSBackup',    nsBU.length);
-  const nsRec = nsNo.length===0 ? 'لا توجد حصص شاغرة اليوم — جدولة سليمة'
-    : nsNo.length<=3 ? `${nsNo.length} مدربين بلا حصة — يُنصح بتفعيل الاحتياطيين المتاحين`
-    : `${nsNo.length} مدربين بلا حصة — غياب مرتفع · مراجعة الجدول وتوزيع الأحمال`;
-  const nsRisk = nsNo.length>5 ? `${nsNo.length} حصة شاغرة — تأثير مباشر على استيعاب المتدربين وإيرادات اليوم`
-    : nsNo.length>0&&nsBU.length===0 ? 'لا يوجد احتياطيون متاحون — خطر تعطل الحصص'
-    : '—';
+  const nsRec = nsNo.length===0
+    ? 'لا توجد حصص شاغرة اليوم — جدولة سليمة. الاحتياطيون في وضع الاستعداد'
+    : nsNo.length<=3
+    ? `${nsNo.length} مدربين بلا حصة — يُنصح بتفعيل الاحتياطيين المتاحين (${nsBU.length}) لسد الفجوة فوراً`
+    : `${nsNo.length} مدربين بلا حصة — غياب مرتفع يؤثر على الطاقة الاستيعابية. مراجعة الجدول وإعادة توزيع الأحمال`;
+  const nsRisk = nsNo.length>5
+    ? `${nsNo.length} حصة شاغرة مع ${nsBU.length} احتياطي فقط — عجز في التغطية يؤثر مباشرة على المتدربين والإيراد اليومي`
+    : nsNo.length>0&&nsBU.length===0 ? 'حصص شاغرة بدون احتياطيين — خطر تعطل كامل لبعض الحصص'
+    : '\u2014';
   html('dashNSRec',  dot('#F59E0B')+nsRec);
   html('dashNSRisk', dot('#DC2626')+nsRisk);
 
   // ── ٧. تقرير المبنى ──
   const bToday = B.filter(r=>(r.report_date||'').startsWith(today));
-  set('dashBuildTotal', B.length||'—');
+  set('dashBuildTotal', B.length||'\u2014');
   set('dashBuildToday', bToday.length);
   set('dashBuildWeek',  B.length);
-  const buildRec = bToday.length===0 ? 'لا تقارير مبنى اليوم — تحقق من استمرارية الرصد الميداني'
-    : bToday.length>3 ? `${bToday.length} تقارير اليوم — ملاحظات مرتفعة · أولوية لمعالجة الطارئ`
-    : `${bToday.length} تقارير اليوم — متابعة الملاحظات المفتوحة وإغلاقها`;
-  const buildRisk = B.length>15 ? `${B.length} تقرير هذا الشهر — تراكم يستوجب خطة صيانة منهجية`
-    : bToday.length>5 ? 'تقارير مبنى مرتفعة — احتمال مشكلة هيكلية تحتاج تفتيشاً فورياً'
-    : '—';
+  const buildRec = bToday.length===0
+    ? 'لا تقارير مبنى اليوم — تحقق من تفعيل الرصد الميداني والتزام الموظفين بالتقارير اليومية'
+    : bToday.length>3
+    ? `${bToday.length} تقارير اليوم — ملاحظات مرتفعة. أولوية لمعالجة الطارئ وتحديد الملاحظات المتكررة`
+    : `${bToday.length} تقارير اليوم — متابعة الملاحظات المفتوحة وإغلاقها ضمن الوقت المحدد`;
+  const buildRisk = B.length>15
+    ? `${B.length} تقرير خلال الفترة — تراكم يستوجب خطة صيانة منهجية وتدخل من إدارة المرافق`
+    : bToday.length>5 ? 'ارتفاع تقارير المبنى — احتمال مشكلة هيكلية تحتاج تفتيشاً فورياً'
+    : '\u2014';
   html('dashBuildRec',  dot('#F59E0B')+buildRec);
   html('dashBuildRisk', dot('#DC2626')+buildRisk);
 }
+
 
 function _renderKPI(V,O,S,B,F) {
   const femV=V.filter(v=>v.section==='female').length;
