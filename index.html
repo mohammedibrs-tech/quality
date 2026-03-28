@@ -2415,30 +2415,62 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 .dash-row-4{grid-template-columns:repeat(4,1fr);}
 
 /* الكارد */
+/* الـ dk هو الـ perspective container */
 .dk{
-  background:#fff;
-  border-radius:16px;
-  border:1px solid #E8EDF2;
-  display:flex;flex-direction:column;min-height:0;
-  overflow:hidden;
-  transition:box-shadow .5s ease,border-color .5s ease,background .4s ease;
-  position:relative;
+  height:100%;
+  perspective:900px;
   cursor:pointer;
+  background:transparent!important;
+  border:none!important;
+  padding:0!important;
+  overflow:visible!important;
+  position:relative;
 }
-.dk-face{width:100%;flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
-.dk-face-front{padding:14px 16px;}
-.dk-face-back{
+/* الـ inner يدور */
+.dk-inner{
+  width:100%;height:100%;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:transform .7s cubic-bezier(.4,0,.2,1);
+  border-radius:16px;
+}
+.dk.flipped .dk-inner{
+  transform:rotateY(180deg);
+}
+/* الوجهان */
+.dk-front,.dk-back{
+  position:absolute;inset:0;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  border-radius:16px;
   padding:14px 16px;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.dk-front{
+  background:#fff;
+  border:1px solid #E8EDF2;
+  box-shadow:0 1px 4px rgba(0,0,0,.04);
+}
+.dk-back{
   background:#0F172A;
-  display:none;
-  flex-direction:column;
+  border:1px solid rgba(255,255,255,0.07);
+  box-shadow:0 8px 30px rgba(0,0,0,0.25);
+  transform:rotateY(180deg);
 }
-#dash-root.dark .dk-face-back{background:#060C18;}
-.dk::before{
-  content:'';position:absolute;inset:0;border-radius:16px;
-  background:linear-gradient(135deg,rgba(255,255,255,0.6) 0%,transparent 60%);
-  pointer-events:none;
-}
+#dash-root.dark .dk-front{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.07);}
+#dash-root.dark .dk-back{background:#060C18;}
+.dk::before{display:none;}
+
+/* Back face content */
+.dk-back-title{font-size:10px;font-weight:700;letter-spacing:.3px;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;}
+.dk-back-section{margin-bottom:6px;flex-shrink:0;}
+.dk-back-label{font-size:7px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:.5px;margin-bottom:2px;text-transform:uppercase;}
+.dk-back-text{font-size:10px;color:rgba(255,255,255,0.82);line-height:1.55;}
+.dk-back-risk{font-size:10px;color:#F87171;line-height:1.55;}
+.dk-flip-hint{font-size:8px;color:rgba(255,255,255,0.18);text-align:center;margin-top:auto;padding-top:4px;flex-shrink:0;}
+.dk-flip-prog{height:2px;background:rgba(255,255,255,0.07);border-radius:1px;margin-top:4px;overflow:hidden;flex-shrink:0;}
+.dk-flip-prog-f{height:100%;border-radius:1px;width:0%;}
 
 .dk-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-shrink:0;}
 
@@ -2552,8 +2584,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
       <!-- ١. المخالفات (نسائي + رجالي) -->
       <div class="dk" id="dash-kpi-viol" onclick="_flipCard('dash-kpi-viol')">
-        <div class="dk-face dk-face-front" id="dash-kpi-viol_front">
-          <div class="dk-head">
+  <div class="dk-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#F87171,#C0392B);"></div>
             <div>
@@ -2583,9 +2616,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashViolRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-        </div>
-        <div class="dk-face dk-face-back" id="dash-kpi-viol_back_face" style="display:none;">
-<div class="dk-back-title" style="color:#F87171;">المخالفات — تحليل</div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#F87171;">المخالفات — تحليل</div>
       
           <div class="dk-back-section">
             <div class="dk-back-label">الفجوات</div>
@@ -2601,13 +2634,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-viol_prog" style="background:#F87171;width:0%;"></div></div>
-        </div>
-      </div>
+    </div>
+  </div>
+</div>/div>
 
       <!-- ٢. عملاء الاسترداد -->
       <div class="dk" id="dash-kpi-sales" onclick="_flipCard('dash-kpi-sales')">
-        <div class="dk-face dk-face-front" id="dash-kpi-sales_front">
-          <div class="dk-head">
+  <div class="dk-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#A78BFA,#5B21B6);"></div>
             <div>
@@ -2638,9 +2673,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashSalesRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-        </div>
-        <div class="dk-face dk-face-back" id="dash-kpi-sales_back_face" style="display:none;">
-<div class="dk-back-title" style="color:#A78BFA;">عملاء الاسترداد — تحليل</div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#A78BFA;">عملاء الاسترداد — تحليل</div>
       
       <div class="dk-back-section">
         <div class="dk-back-label">التوصيات</div>
@@ -2652,13 +2687,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-sales_prog" style="background:#A78BFA;width:0%;"></div></div>
-        </div>
-      </div>
+    </div>
+  </div>
+</div>/div>
 
       <!-- ٣. كفاءة التشغيل -->
       <div class="dk" id="dash-kpi-ops" onclick="_flipCard('dash-kpi-ops')">
-        <div class="dk-face dk-face-front" id="dash-kpi-ops_front">
-          <div class="dk-head">
+  <div class="dk-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#34D399,#0A7C59);"></div>
             <div>
@@ -2690,9 +2727,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashOpsRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-        </div>
-        <div class="dk-face dk-face-back" id="dash-kpi-ops_back_face" style="display:none;">
-<div class="dk-back-title" style="color:#34D399;">كفاءة التشغيل — تحليل</div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#34D399;">كفاءة التشغيل — تحليل</div>
       
           <div class="dk-back-section">
             <div class="dk-back-label">الفجوات</div>
@@ -2708,8 +2745,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-ops_prog" style="background:#34D399;width:0%;"></div></div>
-        </div>
-      </div>
+    </div>
+  </div>
+</div>/div>
     </div>
 
     <!-- الصف الثاني: 4 كروت -->
@@ -2717,8 +2755,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
       <!-- ٤. استطلاع رضا العملاء -->
       <div class="dk" id="dash-kpi-survey" onclick="_flipCard('dash-kpi-survey')">
-        <div class="dk-face dk-face-front" id="dash-kpi-survey_front">
-          <div class="dk-head">
+  <div class="dk-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#FCD34D,#B45309);"></div>
             <div>
@@ -2746,9 +2785,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashSurveyRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-        </div>
-        <div class="dk-face dk-face-back" id="dash-kpi-survey_back_face" style="display:none;">
-<div class="dk-back-title" style="color:#FCD34D;">رضا العملاء — تحليل</div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#FCD34D;">رضا العملاء — تحليل</div>
       
           <div class="dk-back-section">
             <div class="dk-back-label">الفجوات</div>
@@ -2764,13 +2803,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-survey_prog" style="background:#FCD34D;width:0%;"></div></div>
-        </div>
-      </div>
+    </div>
+  </div>
+</div>/div>
 
       <!-- ٥. ملاحظات المرافق -->
       <div class="dk" id="dash-kpi-facility" onclick="_flipCard('dash-kpi-facility')">
-        <div class="dk-face dk-face-front" id="dash-kpi-facility_front">
-          <div class="dk-head">
+  <div class="dk-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#6EE7B7,#0A7C59);"></div>
             <div>
@@ -2797,9 +2838,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashFacilRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-        </div>
-        <div class="dk-face dk-face-back" id="dash-kpi-facility_back_face" style="display:none;">
-<div class="dk-back-title" style="color:#6EE7B7;">المرافق — تحليل</div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#6EE7B7;">المرافق — تحليل</div>
       
       <div class="dk-back-section">
         <div class="dk-back-label">التوصيات</div>
@@ -2811,13 +2852,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-facility_prog" style="background:#6EE7B7;width:0%;"></div></div>
-        </div>
-      </div>
+    </div>
+  </div>
+</div>/div>
 
       <!-- ٦. جدولة الحصص التدريبية -->
       <div class="dk" id="dash-kpi-nosession" onclick="_flipCard('dash-kpi-nosession')">
-        <div class="dk-face dk-face-front" id="dash-kpi-nosession_front">
-          <div class="dk-head">
+  <div class="dk-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#FB923C,#C2410C);"></div>
             <div>
@@ -2844,9 +2887,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashNSRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-        </div>
-        <div class="dk-face dk-face-back" id="dash-kpi-nosession_back_face" style="display:none;">
-<div class="dk-back-title" style="color:#FB923C;">الحصص — تحليل</div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#FB923C;">الحصص — تحليل</div>
       
       <div class="dk-back-section">
         <div class="dk-back-label">التوصيات</div>
@@ -2858,13 +2901,15 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-nosession_prog" style="background:#FB923C;width:0%;"></div></div>
-        </div>
-      </div>
+    </div>
+  </div>
+</div>/div>
 
       <!-- ٧. تقرير المبنى -->
       <div class="dk" id="dash-kpi-building" onclick="_flipCard('dash-kpi-building')">
-        <div class="dk-face dk-face-front" id="dash-kpi-building_front">
-          <div class="dk-head">
+  <div class="dk-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#93C5FD,#1D4ED8);"></div>
             <div>
@@ -2891,9 +2936,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashBuildRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
-        </div>
-        <div class="dk-face dk-face-back" id="dash-kpi-building_back_face" style="display:none;">
-<div class="dk-back-title" style="color:#93C5FD;">المبنى — تحليل</div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#93C5FD;">المبنى — تحليل</div>
       
       <div class="dk-back-section">
         <div class="dk-back-label">التوصيات</div>
@@ -2905,8 +2950,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
       <div class="dk-flip-hint">اضغط للعودة</div>
       <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-building_prog" style="background:#93C5FD;width:0%;"></div></div>
-        </div>
-      </div>
+    </div>
+  </div>
+</div>/div>
 
     </div>
   </div>
@@ -12311,36 +12357,25 @@ function _hideMindMap() {
   setTimeout(() => { mm.remove(); _mmActive = false; }, 500);
 }
 
-// ── Flip Cards ──
+// ── Flip Cards 3D ──
 const _flipTimers = {};
 const _flipDuration = 30000;
 
 function _flipCard(id) {
-  const card  = document.getElementById(id);
-  const front = document.getElementById(id+'_front');
-  const back  = document.getElementById(id+'_back_face');
-  if (!card || !front || !back) return;
-
-  const isBack = back.style.display === 'flex';
-
-  if (isBack) {
-    back.style.display  = 'none';
-    front.style.display = '';
-    card.style.background = '';
-    card.style.border = '';
-    clearTimeout(_flipTimers[id]);
-  } else {
-    front.style.display = 'none';
-    back.style.display  = 'flex';
-    card.style.background = '#0F172A';
-    card.style.border = '1px solid rgba(255,255,255,0.08)';
+  const card = document.getElementById(id);
+  if (!card) return;
+  const isFlipped = card.classList.contains('flipped');
+  card.classList.toggle('flipped');
+  clearTimeout(_flipTimers[id]);
+  if (!isFlipped) {
     const prog = document.getElementById(id+'_prog');
     if (prog) {
       prog.style.transition = 'none'; prog.style.width = '0%';
       setTimeout(() => { prog.style.transition = `width ${_flipDuration/1000}s linear`; prog.style.width = '100%'; }, 50);
     }
-    clearTimeout(_flipTimers[id]);
-    _flipTimers[id] = setTimeout(() => _flipCard(id), _flipDuration);
+    _flipTimers[id] = setTimeout(() => {
+      card.classList.remove('flipped');
+    }, _flipDuration);
   }
 }
 
@@ -12349,8 +12384,8 @@ function _startAutoFlip() {
   let i = 0;
   setInterval(() => {
     ids.forEach(id => {
-      const b = document.getElementById(id+'_back_face');
-      if (b && b.style.display === 'flex') _flipCard(id);
+      document.getElementById(id)?.classList.remove('flipped');
+      clearTimeout(_flipTimers[id]);
     });
     _flipCard(ids[i]);
     i = (i + 1) % ids.length;
