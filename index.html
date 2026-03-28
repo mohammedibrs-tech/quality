@@ -2541,8 +2541,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="dash-row dash-row-3">
 
       <!-- ١. المخالفات (نسائي + رجالي) -->
-      <div class="dk" id="dash-kpi-viol">
-        <div class="dk-head">
+      <div class="dk" id="dash-kpi-viol" onclick="_flipCard('dash-kpi-viol')">
+  <div class="dk-flip-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#F87171,#C0392B);"></div>
             <div>
@@ -2572,11 +2574,33 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashViolRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#F87171;">المخالفات — تحليل وقرارات</div>
+      
+          <div class="dk-back-section">
+            <div class="dk-back-label">الفجوات</div>
+            <div class="dk-back-text" id="dashViolGap_back"></div>
+          </div>
+      <div class="dk-back-section">
+        <div class="dk-back-label">التوصيات</div>
+        <div class="dk-back-text" id="dashViolRec_back"></div>
       </div>
+      <div class="dk-back-section">
+        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
+        <div class="dk-back-risk" id="dashViolRisk_back"></div>
+      </div>
+      <div class="dk-flip-hint">اضغط للعودة</div>
+      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-viol_prog" style="background:#F87171;width:0%;"></div></div>
+    </div>
+  </div>
+</div>/div>
 
       <!-- ٢. عملاء الاسترداد -->
-      <div class="dk" id="dash-kpi-sales">
-        <div class="dk-head">
+      <div class="dk" id="dash-kpi-sales" onclick="_flipCard('dash-kpi-sales')">
+  <div class="dk-flip-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#A78BFA,#5B21B6);"></div>
             <div>
@@ -2607,11 +2631,29 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashSalesRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#A78BFA;">عملاء الاسترداد — تحليل وقرارات</div>
+      
+      <div class="dk-back-section">
+        <div class="dk-back-label">التوصيات</div>
+        <div class="dk-back-text" id="dashSalesRec_back"></div>
       </div>
+      <div class="dk-back-section">
+        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
+        <div class="dk-back-risk" id="dashSalesRisk_back"></div>
+      </div>
+      <div class="dk-flip-hint">اضغط للعودة</div>
+      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-sales_prog" style="background:#A78BFA;width:0%;"></div></div>
+    </div>
+  </div>
+</div>/div>
 
       <!-- ٣. كفاءة التشغيل -->
-      <div class="dk" id="dash-kpi-ops">
-        <div class="dk-head">
+      <div class="dk" id="dash-kpi-ops" onclick="_flipCard('dash-kpi-ops')">
+  <div class="dk-flip-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#34D399,#0A7C59);"></div>
             <div>
@@ -2643,15 +2685,37 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashOpsRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#34D399;">كفاءة التشغيل — تحليل وقرارات</div>
+      
+          <div class="dk-back-section">
+            <div class="dk-back-label">الفجوات</div>
+            <div class="dk-back-text" id="dashOpsGap_back"></div>
+          </div>
+      <div class="dk-back-section">
+        <div class="dk-back-label">التوصيات</div>
+        <div class="dk-back-text" id="dashOpsRec_back"></div>
       </div>
+      <div class="dk-back-section">
+        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
+        <div class="dk-back-risk" id="dashOpsRisk_back"></div>
+      </div>
+      <div class="dk-flip-hint">اضغط للعودة</div>
+      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-ops_prog" style="background:#34D399;width:0%;"></div></div>
+    </div>
+  </div>
+</div>/div>
     </div>
 
     <!-- الصف الثاني: 4 كروت -->
     <div class="dash-row dash-row-4">
 
       <!-- ٤. استطلاع رضا العملاء -->
-      <div class="dk" id="dash-kpi-survey">
-        <div class="dk-head">
+      <div class="dk" id="dash-kpi-survey" onclick="_flipCard('dash-kpi-survey')">
+  <div class="dk-flip-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#FCD34D,#B45309);"></div>
             <div>
@@ -2679,11 +2743,33 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashSurveyRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#FCD34D;">رضا العملاء — تحليل وقرارات</div>
+      
+          <div class="dk-back-section">
+            <div class="dk-back-label">الفجوات</div>
+            <div class="dk-back-text" id="dashSurveyGap_back"></div>
+          </div>
+      <div class="dk-back-section">
+        <div class="dk-back-label">التوصيات</div>
+        <div class="dk-back-text" id="dashSurveyRec_back"></div>
       </div>
+      <div class="dk-back-section">
+        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
+        <div class="dk-back-risk" id="dashSurveyRisk_back"></div>
+      </div>
+      <div class="dk-flip-hint">اضغط للعودة</div>
+      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-survey_prog" style="background:#FCD34D;width:0%;"></div></div>
+    </div>
+  </div>
+</div>/div>
 
       <!-- ٥. ملاحظات المرافق -->
-      <div class="dk" id="dash-kpi-facility">
-        <div class="dk-head">
+      <div class="dk" id="dash-kpi-facility" onclick="_flipCard('dash-kpi-facility')">
+  <div class="dk-flip-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#6EE7B7,#0A7C59);"></div>
             <div>
@@ -2710,11 +2796,29 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashFacilRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#6EE7B7;">المرافق — تحليل وقرارات</div>
+      
+      <div class="dk-back-section">
+        <div class="dk-back-label">التوصيات</div>
+        <div class="dk-back-text" id="dashFacilRec_back"></div>
       </div>
+      <div class="dk-back-section">
+        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
+        <div class="dk-back-risk" id="dashFacilRisk_back"></div>
+      </div>
+      <div class="dk-flip-hint">اضغط للعودة</div>
+      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-facility_prog" style="background:#6EE7B7;width:0%;"></div></div>
+    </div>
+  </div>
+</div>/div>
 
       <!-- ٦. جدولة الحصص التدريبية -->
-      <div class="dk" id="dash-kpi-nosession">
-        <div class="dk-head">
+      <div class="dk" id="dash-kpi-nosession" onclick="_flipCard('dash-kpi-nosession')">
+  <div class="dk-flip-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#FB923C,#C2410C);"></div>
             <div>
@@ -2741,11 +2845,29 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashNSRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#FB923C;">الحصص — تحليل وقرارات</div>
+      
+      <div class="dk-back-section">
+        <div class="dk-back-label">التوصيات</div>
+        <div class="dk-back-text" id="dashNSRec_back"></div>
       </div>
+      <div class="dk-back-section">
+        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
+        <div class="dk-back-risk" id="dashNSRisk_back"></div>
+      </div>
+      <div class="dk-flip-hint">اضغط للعودة</div>
+      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-nosession_prog" style="background:#FB923C;width:0%;"></div></div>
+    </div>
+  </div>
+</div>/div>
 
       <!-- ٧. تقرير المبنى -->
-      <div class="dk" id="dash-kpi-building">
-        <div class="dk-head">
+      <div class="dk" id="dash-kpi-building" onclick="_flipCard('dash-kpi-building')">
+  <div class="dk-flip-inner">
+    <div class="dk-front">
+      <div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#93C5FD,#1D4ED8);"></div>
             <div>
@@ -2772,7 +2894,23 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashBuildRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
         </div>
+    </div>
+    <div class="dk-back">
+      <div class="dk-back-title" style="color:#93C5FD;">المبنى — تحليل وقرارات</div>
+      
+      <div class="dk-back-section">
+        <div class="dk-back-label">التوصيات</div>
+        <div class="dk-back-text" id="dashBuildRec_back"></div>
       </div>
+      <div class="dk-back-section">
+        <div class="dk-back-label" style="color:#F87171;">المخاطر المحتملة</div>
+        <div class="dk-back-risk" id="dashBuildRisk_back"></div>
+      </div>
+      <div class="dk-flip-hint">اضغط للعودة</div>
+      <div class="dk-flip-prog"><div class="dk-flip-prog-f" id="dash-kpi-building_prog" style="background:#93C5FD;width:0%;"></div></div>
+    </div>
+  </div>
+</div>/div>
 
     </div>
   </div>
@@ -10899,23 +11037,103 @@ function refreshQuarterlyCard() {
 
 // ══ GAME JS ══
 const QUESTION_BANK=[
-  {cat:'🏆 إدارة الجودة',q:'ما معنى اختصار TQM؟',opts:['Total Quality Management','Technical Quality Monitoring','Team Quality Measurement','Training Quality Methods'],ans:0,exp:'TQM تعني إدارة الجودة الشاملة.'},
-  {cat:'🏆 إدارة الجودة',q:'من هو مؤسس مفهوم دورة PDCA؟',opts:['جوزيف جوران','إدواردز ديمينغ','فيليب كروسبي','كاورو إيشيكاوا'],ans:1,exp:'إدواردز ديمينغ طوّر دورة PDCA.'},
-  {cat:'🏆 إدارة الجودة',q:'ما هي خطوات دورة PDCA بالترتيب؟',opts:['نفّذ، خطط، تحقق، تصرف','تحقق، خطط، نفّذ، تصرف','خطط، نفّذ، تحقق، تصرف','تصرف، خطط، نفّذ، تحقق'],ans:2,exp:'Plan→Do→Check→Act.'},
-  {cat:'🏆 إدارة الجودة',q:'ما الهدف الرئيسي للتحسين المستمر؟',opts:['تقليل التكاليف','زيادة الإنتاج','سرعة التسليم','رضا العميل'],ans:3,exp:'رضا العميل هو المحور الأساسي.'},
-  {cat:'🏆 إدارة الجودة',q:'ما هو مخطط إيشيكاوا المستخدم لـ؟',opts:['جدولة المهام','حساب التكاليف','تحليل أسباب المشاكل','قياس الإنتاج'],ans:2,exp:'يُستخدم لتحليل الأسباب الجذرية.'},
-  {cat:'🏆 إدارة الجودة',q:'كم مبدأ في ISO 9001:2015؟',opts:['5 مبادئ','10 مبادئ','3 مبادئ','7 مبادئ'],ans:3,exp:'7 مبادئ للجودة.'},
-  {cat:'🏆 إدارة الجودة',q:'ماذا تعني كلمة كايزن؟',opts:['ضبط العمليات','الجودة الشاملة','إدارة الوقت','التحسين المستمر'],ans:3,exp:'كايزن = التحسين المستمر.'},
-  {cat:'🌍 معلومات عامة',q:'كم عدد طبقات الغلاف الجوي؟',opts:['3 طبقات','7 طبقات','4 طبقات','5 طبقات'],ans:3,exp:'5 طبقات.'},
-  {cat:'🌍 معلومات عامة',q:'من اخترع المصباح الكهربائي؟',opts:['نيكولا تسلا','ألبرت أينشتاين','ألكسندر بيل','توماس إديسون'],ans:3,exp:'توماس إديسون 1879م.'},
-  {cat:'🌍 معلومات عامة',q:'ما أكبر محيط في العالم؟',opts:['الأطلسي','الهندي','المتجمد الشمالي','الهادئ'],ans:3,exp:'المحيط الهادئ.'},
-  {cat:'🌍 معلومات عامة',q:'كم دولة في الأمم المتحدة؟',opts:['180','200','150','193'],ans:3,exp:'193 دولة.'},
-  {cat:'🌍 معلومات عامة',q:'ما أطول سلسلة جبال في العالم؟',opts:['الهيمالايا','الألب','الأورال','الأنديز'],ans:3,exp:'جبال الأنديز 7000 كم.'},
-  {cat:'🇸🇦 وطنية',q:'في أي عام تأسست المملكة؟',opts:['1902م','1945م','1960م','1932م'],ans:3,exp:'1932م.'},
-  {cat:'🇸🇦 وطنية',q:'ما شعار رؤية 2030؟',opts:['الاستدامة والتطوير','التحول الرقمي','القيادة والريادة','مجتمع حيوي، اقتصاد مزدهر، وطن طموح'],ans:3,exp:'مجتمع حيوي، اقتصاد مزدهر، وطن طموح.'},
-  {cat:'🇸🇦 وطنية',q:'متى اليوم الوطني السعودي؟',opts:['17 رجب','1 محرم','12 ربيع الأول','23 سبتمبر'],ans:3,exp:'23 سبتمبر.'},
-  {cat:'🇸🇦 وطنية',q:'ما عاصمة المملكة؟',opts:['جدة','مكة المكرمة','المدينة المنورة','الرياض'],ans:3,exp:'الرياض.'},
-  {cat:'🇸🇦 وطنية',q:'أي مدينة تعرف بعروس البحر الأحمر؟',opts:['ينبع','جازان','الليث','جدة'],ans:3,exp:'جدة.'},
+  // ── إدارة الجودة (25 سؤال) ──
+  {cat:'🏆 إدارة الجودة',q:'ما معنى اختصار TQM؟',opts:['Total Quality Management','Technical Quality Monitoring','Team Quality Measurement','Training Quality Methods'],ans:0,exp:'TQM = إدارة الجودة الشاملة، تركّز على رضا العميل وتحسين العمليات.'},
+  {cat:'🏆 إدارة الجودة',q:'من طوّر دورة PDCA؟',opts:['جوزيف جوران','إدواردز ديمينغ','فيليب كروسبي','كاورو إيشيكاوا'],ans:1,exp:'إدواردز ديمينغ طوّر دورة PDCA كأساس للتحسين المستمر.'},
+  {cat:'🏆 إدارة الجودة',q:'ترتيب دورة PDCA الصحيح؟',opts:['نفّذ-خطط-تحقق-تصرف','تحقق-خطط-نفّذ-تصرف','خطط-نفّذ-تحقق-تصرف','تصرف-خطط-نفّذ-تحقق'],ans:2,exp:'Plan→Do→Check→Act = خطط→نفّذ→تحقق→تصرف.'},
+  {cat:'🏆 إدارة الجودة',q:'الهدف الرئيسي للتحسين المستمر؟',opts:['تقليل التكاليف','زيادة الإنتاج','سرعة التسليم','رضا العميل'],ans:3,exp:'رضا العميل هو المحور الأساسي لأي نظام جودة.'},
+  {cat:'🏆 إدارة الجودة',q:'مخطط إيشيكاوا يُستخدم لـ؟',opts:['جدولة المهام','حساب التكاليف','تحليل الأسباب الجذرية','قياس الإنتاج'],ans:2,exp:'مخطط السمكة يحلل الأسباب الجذرية للمشاكل.'},
+  {cat:'🏆 إدارة الجودة',q:'كم مبدأ في ISO 9001:2015؟',opts:['5','10','3','7'],ans:3,exp:'7 مبادئ: التركيز على العميل، القيادة، المشاركة، العمليات، التحسين، الأدلة، إدارة العلاقات.'},
+  {cat:'🏆 إدارة الجودة',q:'ماذا تعني كايزن؟',opts:['ضبط العمليات','الجودة الشاملة','إدارة الوقت','التحسين المستمر'],ans:3,exp:'كايزن يابانية = التحسين المستمر بخطوات صغيرة.'},
+  {cat:'🏆 إدارة الجودة',q:'ما هو الـ Benchmarking؟',opts:['قياس الإنتاج','المقارنة المرجعية مع الأفضل','تقليل الهدر','رقابة الجودة'],ans:1,exp:'المقارنة المرجعية تعني قياس أداء مؤسستك مقارنةً بالمنافسين الأفضل.'},
+  {cat:'🏆 إدارة الجودة',q:'ما مؤشر KPI اختصار لـ؟',opts:['Key Performance Index','Key Process Indicator','Key Performance Indicator','Key Production Input'],ans:2,exp:'KPI = مؤشر الأداء الرئيسي، يُقيس مدى تحقيق الأهداف.'},
+  {cat:'🏆 إدارة الجودة',q:'في نموذج EFQM ما وزن النتائج؟',opts:['50%','75%','25%','60%'],ans:0,exp:'نموذج EFQM يقسم 50% للممكّنات و50% للنتائج.'},
+  {cat:'🏆 إدارة الجودة',q:'ما الفرق بين الرقابة والتفتيش في الجودة؟',opts:['لا فرق','الرقابة وقائية، التفتيش علاجي','التفتيش وقائي، الرقابة علاجية','الرقابة أشمل من التفتيش'],ans:1,exp:'الرقابة تمنع الأخطاء، التفتيش يكتشفها بعد حدوثها.'},
+  {cat:'🏆 إدارة الجودة',q:'ما معيار ISO المتعلق بالبيئة؟',opts:['ISO 9001','ISO 45001','ISO 14001','ISO 27001'],ans:2,exp:'ISO 14001 خاص بنظام الإدارة البيئية.'},
+  {cat:'🏆 إدارة الجودة',q:'ما معنى Six Sigma؟',opts:['6 خطوات للجودة','منهجية لتقليل العيوب إلى 3.4 في المليون','6 أدوات للرقابة','ستة معايير ISO'],ans:1,exp:'Six Sigma تستهدف تقليل العيوب إلى 3.4 لكل مليون فرصة.'},
+  {cat:'🏆 إدارة الجودة',q:'ما خطوات DMAIC في Six Sigma؟',opts:['تعريف-قياس-تحليل-تحسين-تحكم','تخطيط-تنفيذ-رقابة-تقييم-إغلاق','تحديد-قياس-تحليل-تطوير-إدارة','فحص-تصحيح-تحسين-مراجعة-ختم'],ans:0,exp:'Define→Measure→Analyze→Improve→Control.'},
+  {cat:'🏆 إدارة الجودة',q:'ما أداة الـ 5S الأولى؟',opts:['Shine (تلميع)','Sort (فرز)','Sustain (استدامة)','Standardize (توحيد)'],ans:1,exp:'5S: Sort, Set, Shine, Standardize, Sustain — تبدأ بالفرز.'},
+  {cat:'🏆 إدارة الجودة',q:'متى تُستخدم خريطة تدفق القيمة VSM؟',opts:['لحساب التكاليف','لتحديد الهدر في العمليات','لجدولة الموظفين','لقياس الرضا'],ans:1,exp:'VSM تُظهر جميع خطوات العملية لتحديد مواطن الهدر.'},
+  {cat:'🏆 إدارة الجودة',q:'ما نسبة التركيز في مبدأ باريتو 80/20؟',opts:['80% من النتائج من 20% من الأسباب','20% جهد يحقق 80% نتائج','كلاهما صحيح','لا علاقة بين الرقمين'],ans:2,exp:'مبدأ باريتو: 80% من المشاكل ناتجة عن 20% من الأسباب.'},
+  {cat:'🏆 إدارة الجودة',q:'ما هدف تحليل سبب الجذر RCA؟',opts:['معرفة المسؤول','منع تكرار المشكلة','تقليل التكاليف','تسريع العمل'],ans:1,exp:'RCA تهدف لفهم السبب الجذري ومنع تكرار المشكلة.'},
+  {cat:'🏆 إدارة الجودة',q:'ماذا يعني الـ SLA في الخدمات؟',opts:['معيار خدمة المستوى','اتفاقية مستوى الخدمة','نظام لوجستي متقدم','تقييم الخدمة السنوي'],ans:1,exp:'SLA = Service Level Agreement، اتفاقية تحدد مستوى الخدمة المتوقع.'},
+  {cat:'🏆 إدارة الجودة',q:'ما أداة تحليل SWOT؟',opts:['تحليل المخاطر المالية','تحليل نقاط القوة والضعف والفرص والتهديدات','أداة جدولة المشاريع','قياس رضا الموظفين'],ans:1,exp:'SWOT: Strengths, Weaknesses, Opportunities, Threats.'},
+  {cat:'🏆 إدارة الجودة',q:'ما الفرق بين المراجعة الداخلية والخارجية للجودة؟',opts:['لا فرق','الداخلية من الموظفين، الخارجية من جهة مستقلة','الخارجية أدق دائماً','الداخلية أكثر موضوعية'],ans:1,exp:'الداخلية: الفريق الداخلي. الخارجية: جهة محايدة مستقلة.'},
+  {cat:'🏆 إدارة الجودة',q:'ما معنى المطابقة Conformance في الجودة؟',opts:['تفوق التوقعات','تحقيق المتطلبات المحددة بالضبط','تجاوز المعايير','تقليل التكاليف'],ans:1,exp:'المطابقة = تحقيق المنتج أو الخدمة للمواصفات المحددة بدقة.'},
+  {cat:'🏆 إدارة الجودة',q:'ما الغرض من مخطط السيطرة Control Chart؟',opts:['جدولة الإنتاج','رصد تذبذب العمليات عبر الزمن','حساب الأرباح','توزيع المهام'],ans:1,exp:'مخطط السيطرة يرصد انحراف العملية عن المعدل الطبيعي.'},
+  {cat:'🏆 إدارة الجودة',q:'ما مبدأ الإدارة الأول في ISO 9001؟',opts:['التحسين','القيادة','التركيز على العميل','اتخاذ القرار بالأدلة'],ans:2,exp:'التركيز على العميل هو المبدأ الأول والأساسي في ISO 9001.'},
+  {cat:'🏆 إدارة الجودة',q:'ما هي الرقابة الإحصائية للعمليات SPC؟',opts:['أسلوب لحساب الإنتاج','استخدام الإحصاء لرصد جودة العمليات وضبطها','نظام تقارير يومي','برنامج حاسوبي للجودة'],ans:1,exp:'SPC تستخدم البيانات الإحصائية لمراقبة العمليات والكشف المبكر عن الانحرافات.'},
+
+  // ── معلومات عامة (25 سؤال) ──
+  {cat:'🌍 معلومات عامة',q:'كم عدد طبقات الغلاف الجوي؟',opts:['3','7','4','5'],ans:3,exp:'5 طبقات: التروبوسفير، الستراتوسفير، الميزوسفير، الثيرموسفير، الإكسوسفير.'},
+  {cat:'🌍 معلومات عامة',q:'من اخترع المصباح الكهربائي؟',opts:['نيكولا تسلا','ألبرت أينشتاين','ألكسندر بيل','توماس إديسون'],ans:3,exp:'توماس إديسون اخترع المصباح العملي عام 1879م.'},
+  {cat:'🌍 معلومات عامة',q:'ما أكبر محيط في العالم؟',opts:['الأطلسي','الهندي','المتجمد الشمالي','الهادئ'],ans:3,exp:'المحيط الهادئ يغطي أكثر من 30% من سطح الأرض.'},
+  {cat:'🌍 معلومات عامة',q:'كم دولة في الأمم المتحدة؟',opts:['180','200','150','193'],ans:3,exp:'193 دولة عضو في الأمم المتحدة.'},
+  {cat:'🌍 معلومات عامة',q:'أطول سلسلة جبال في العالم؟',opts:['الهيمالايا','الألب','الأورال','الأنديز'],ans:3,exp:'جبال الأنديز تمتد 7000 كم في أمريكا الجنوبية.'},
+  {cat:'🌍 معلومات عامة',q:'ما أسرع حيوان بري؟',opts:['الأسد','الفهد الصياد','النمر','الغزال'],ans:1,exp:'الفهد الصياد يصل 120 كم/ساعة.'},
+  {cat:'🌍 معلومات عامة',q:'ما أعمق بحيرة في العالم؟',opts:['بحيرة فيكتوريا','بحيرة تيتيكاكا','بحيرة بايكال','بحيرة ميشيغان'],ans:2,exp:'بحيرة بايكال في روسيا بعمق 1642 متراً.'},
+  {cat:'🌍 معلومات عامة',q:'كم كوكباً في المجموعة الشمسية؟',opts:['7','9','10','8'],ans:3,exp:'8 كواكب بعد استبعاد بلوتو عام 2006.'},
+  {cat:'🌍 معلومات عامة',q:'من كتب مسرحية هاملت؟',opts:['تشارلز ديكنز','جوته','فولتير','وليم شكسبير'],ans:3,exp:'وليم شكسبير كتب هاملت في مطلع القرن السابع عشر.'},
+  {cat:'🌍 معلومات عامة',q:'ما عاصمة كندا؟',opts:['تورنتو','فانكوفر','مونتريال','أوتاوا'],ans:3,exp:'أوتاوا عاصمة كندا وليس تورنتو.'},
+  {cat:'🌍 معلومات عامة',q:'كم تبعد الأرض عن الشمس تقريباً؟',opts:['50 مليون كم','200 مليون كم','100 مليون كم','150 مليون كم'],ans:3,exp:'150 مليون كيلومتر، أو وحدة فلكية واحدة.'},
+  {cat:'🌍 معلومات عامة',q:'ما أكبر صحراء في العالم؟',opts:['صحراء كالاهاري','صحراء غوبي','صحراء أفريقيا الجنوبية','صحراء أنتاركتيكا'],ans:3,exp:'صحراء أنتاركتيكا هي الأكبر (قطبية) وليست الصحراء الكبرى.'},
+  {cat:'🌍 معلومات عامة',q:'ما أطول نهر في العالم؟',opts:['نهر الأمازون','نهر المسيسيبي','نهر الكونغو','نهر النيل'],ans:3,exp:'النيل 6650 كم هو الأطول، والأمازون الأكبر حجماً.'},
+  {cat:'🌍 معلومات عامة',q:'ما عدد دول العالم تقريباً؟',opts:['150','180','250','195'],ans:3,exp:'195 دولة معترف بها دولياً بما فيها فلسطين والفاتيكان.'},
+  {cat:'🌍 معلومات عامة',q:'من اخترع الهاتف؟',opts:['توماس إديسون','نيكولا تسلا','غراهام بيل','ماركوني'],ans:2,exp:'ألكسندر غراهام بيل اخترع الهاتف عام 1876.'},
+  {cat:'🌍 معلومات عامة',q:'ما أثقل عنصر في الجدول الدوري طبيعياً؟',opts:['الرصاص','الذهب','البلاتين','اليورانيوم'],ans:3,exp:'اليورانيوم هو أثقل العناصر الطبيعية برقم ذري 92.'},
+  {cat:'🌍 معلومات عامة',q:'كم يوماً في السنة الكبيسة؟',opts:['365','367','364','366'],ans:3,exp:'366 يوماً كل 4 سنوات لتعويض 0.25 يوم سنوياً.'},
+  {cat:'🌍 معلومات عامة',q:'ما أكبر بلد في العالم مساحةً؟',opts:['الصين','كندا','الولايات المتحدة','روسيا'],ans:3,exp:'روسيا 17 مليون كم² — أكثر من ضعف كندا.'},
+  {cat:'🌍 معلومات عامة',q:'من رسم الموناليزا؟',opts:['ميكيلانجيلو','رافائيل','فينسنت فان غوخ','ليوناردو دافنشي'],ans:3,exp:'رسمها دافنشي بين 1503 و1519م.'},
+  {cat:'🌍 معلومات عامة',q:'ما أصغر قارة في العالم؟',opts:['أنتاركتيكا','أوروبا','أمريكا الجنوبية','أستراليا'],ans:3,exp:'أستراليا/أوقيانوسيا هي أصغر القارات.'},
+  {cat:'🌍 معلومات عامة',q:'ما العنصر الأكثر وفرة في الغلاف الجوي؟',opts:['الأكسجين','الأرغون','ثاني أكسيد الكربون','النيتروجين'],ans:3,exp:'النيتروجين 78% من الغلاف الجوي، الأكسجين 21%.'},
+  {cat:'🌍 معلومات عامة',q:'في أي قارة يقع جبل إيفرست؟',opts:['أفريقيا','أوروبا','أمريكا الجنوبية','آسيا'],ans:3,exp:'جبل إيفرست على الحدود بين نيبال والصين.'},
+  {cat:'🌍 معلومات عامة',q:'ما أسرع طائر في العالم؟',opts:['النسر','طائر الحر','صقر الشاهين','النعامة'],ans:2,exp:'صقر الشاهين Peregrine Falcon يصل 320 كم/ساعة في الغطس.'},
+  {cat:'🌍 معلومات عامة',q:'من اكتشف البنسلين؟',opts:['لويس باستور','ماري كوري','روبرت كوخ','ألكسندر فلمنغ'],ans:3,exp:'ألكسندر فلمنغ اكتشف البنسلين عام 1928.'},
+  {cat:'🌍 معلومات عامة',q:'ما عاصمة البرازيل؟',opts:['ريو دي جانيرو','ساو باولو','سلفادور','برازيليا'],ans:3,exp:'برازيليا عاصمة البرازيل منذ 1960، وليست ريو.'},
+
+  // ── ثقافة إسلامية (20 سؤال) ──
+  {cat:'☪️ ثقافة إسلامية',q:'كم عدد أركان الإسلام؟',opts:['3','7','4','5'],ans:3,exp:'5 أركان: الشهادتان، الصلاة، الزكاة، الصوم، الحج.'},
+  {cat:'☪️ ثقافة إسلامية',q:'ما أول آية نزلت من القرآن؟',opts:['الفاتحة','المدثر','الضحى','اقرأ'],ans:3,exp:'اقرأ باسم ربك — أول آيات سورة العلق.'},
+  {cat:'☪️ ثقافة إسلامية',q:'كم سنة استغرق تنزيل القرآن الكريم؟',opts:['10 سنوات','30 سنة','15 سنة','23 سنة'],ans:3,exp:'23 سنة منذ بعثة النبي ﷺ حتى وفاته.'},
+  {cat:'☪️ ثقافة إسلامية',q:'ما أطول سورة في القرآن؟',opts:['آل عمران','النساء','يوسف','البقرة'],ans:3,exp:'سورة البقرة 286 آية هي الأطول.'},
+  {cat:'☪️ ثقافة إسلامية',q:'كم عدد أنبياء الله المذكورين في القرآن؟',opts:['20','30','15','25'],ans:3,exp:'25 نبياً مذكوراً بالاسم في القرآن الكريم.'},
+  {cat:'☪️ ثقافة إسلامية',q:'ما اسم والدة النبي محمد ﷺ؟',opts:['فاطمة','خديجة','مريم','آمنة'],ans:3,exp:'آمنة بنت وهب والدته الكريمة.'},
+  {cat:'☪️ ثقافة إسلامية',q:'متى كانت غزوة بدر؟',opts:['السنة الثالثة هجرية','السنة الأولى هجرية','السنة الخامسة هجرية','السنة الثانية هجرية'],ans:3,exp:'غزوة بدر الكبرى في رمضان سنة 2هـ.'},
+  {cat:'☪️ ثقافة إسلامية',q:'ما معنى الزكاة لغةً؟',opts:['العطاء','الطهارة والنماء','التكافل','الإنفاق'],ans:1,exp:'الزكاة لغة: الطهارة والنماء والبركة.'},
+  {cat:'☪️ ثقافة إسلامية',q:'كم عدد أجزاء القرآن الكريم؟',opts:['20','15','40','30'],ans:3,exp:'القرآن 30 جزءاً، 114 سورة، 6236 آية.'},
+  {cat:'☪️ ثقافة إسلامية',q:'ما الاسم الآخر لليلة القدر؟',opts:['ليلة الإسراء','ليلة النصف من شعبان','ليلة الجمعة','ليلة البركة والغفران'],ans:3,exp:'سميت بليلة القدر والبركة والغفران في القرآن والسنة.'},
+  {cat:'☪️ ثقافة إسلامية',q:'ما أول مسجد بُني في الإسلام؟',opts:['المسجد الحرام','المسجد النبوي','المسجد الأقصى','مسجد قباء'],ans:3,exp:'مسجد قباء أُسِّس عند وصول النبي ﷺ المدينة.'},
+  {cat:'☪️ ثقافة إسلامية',q:'من هو النبي الملقب بخليل الله؟',opts:['موسى عليه السلام','عيسى عليه السلام','نوح عليه السلام','إبراهيم عليه السلام'],ans:3,exp:'إبراهيم عليه السلام لقّبه الله خليل الرحمن.'},
+  {cat:'☪️ ثقافة إسلامية',q:'ما الكتاب المقدس لليهود؟',opts:['الإنجيل','القرآن','الزبور','التوراة'],ans:3,exp:'التوراة هي الكتاب المقدس لليهود، نزلت على موسى عليه السلام.'},
+  {cat:'☪️ ثقافة إسلامية',q:'كم ركعة في صلاة الفجر؟',opts:['4','3','1','2'],ans:3,exp:'ركعتان فريضة، ويستحب ركعتا السنة قبلها.'},
+  {cat:'☪️ ثقافة إسلامية',q:'ما الهجرة النبوية المشهورة؟',opts:['من مكة إلى الطائف','من المدينة إلى مكة','من الحبشة إلى مكة','من مكة إلى المدينة'],ans:3,exp:'الهجرة من مكة إلى المدينة عام 622م، تبدأ منها التقويم الهجري.'},
+  {cat:'☪️ ثقافة إسلامية',q:'كم نوعاً من الصيام في الفقه الإسلامي؟',opts:['2','5','1','3'],ans:3,exp:'3 أنواع: فرض (رمضان)، واجب (نذر وكفارة)، مستحب.'},
+  {cat:'☪️ ثقافة إسلامية',q:'ما اسم جبل الوحي؟',opts:['جبل ثور','جبل أحد','جبل الرحمة','جبل النور (حراء)'],ans:3,exp:'جبل النور وفيه غار حراء حيث نزل أول الوحي.'},
+  {cat:'☪️ ثقافة إسلامية',q:'ما سورة قلب القرآن؟',opts:['الكهف','آل عمران','الفاتحة','يس'],ans:3,exp:'سورة يس تُسمى قلب القرآن لكثرة فضائلها.'},
+  {cat:'☪️ ثقافة إسلامية',q:'من هو أول من أسلم من الرجال؟',opts:['عمر بن الخطاب','علي بن أبي طالب','عثمان بن عفان','أبو بكر الصديق'],ans:1,exp:'علي بن أبي طالب أول الصبيان، وأبو بكر أول الرجال الأحرار.'},
+  {cat:'☪️ ثقافة إسلامية',q:'ما عدد آيات سورة الإخلاص؟',opts:['7','3','6','4'],ans:3,exp:'سورة الإخلاص 4 آيات وتعدل ثلث القرآن.'},
+
+  // ── وطنية وسعودية (20 سؤال) ──
+  {cat:'🇸🇦 وطنية',q:'في أي عام تأسست المملكة العربية السعودية؟',opts:['1902م','1945م','1960م','1932م'],ans:3,exp:'1932م وحدة المملكة على يد الملك عبدالعزيز آل سعود.'},
+  {cat:'🇸🇦 وطنية',q:'ما شعار رؤية 2030؟',opts:['الاستدامة والتطوير','التحول الرقمي','القيادة والريادة','مجتمع حيوي، اقتصاد مزدهر، وطن طموح'],ans:3,exp:'مجتمع حيوي، اقتصاد مزدهر، وطن طموح — رؤية الأمير محمد بن سلمان.'},
+  {cat:'🇸🇦 وطنية',q:'متى اليوم الوطني السعودي؟',opts:['17 رجب','1 محرم','12 ربيع الأول','23 سبتمبر'],ans:3,exp:'23 سبتمبر 1932م يوم إعلان توحيد المملكة.'},
+  {cat:'🇸🇦 وطنية',q:'ما عاصمة المملكة؟',opts:['جدة','مكة المكرمة','المدينة المنورة','الرياض'],ans:3,exp:'الرياض العاصمة السياسية والإدارية للمملكة.'},
+  {cat:'🇸🇦 وطنية',q:'أي مدينة تعرف بعروس البحر الأحمر؟',opts:['ينبع','جازان','الليث','جدة'],ans:3,exp:'جدة على ساحل البحر الأحمر ميناء تجاري وبوابة الحرمين.'},
+  {cat:'🇸🇦 وطنية',q:'ما أطول جسر في المملكة؟',opts:['جسر الملك فهد','جسر الملك عبدالله','جسر الجبيل','جسر المشاة بالرياض'],ans:0,exp:'جسر الملك فهد يربط المملكة بالبحرين طوله 25 كم.'},
+  {cat:'🇸🇦 وطنية',q:'كم منطقة إدارية في المملكة؟',opts:['10','15','8','13'],ans:3,exp:'13 منطقة إدارية، يتبعها محافظات ومراكز.'},
+  {cat:'🇸🇦 وطنية',q:'ما أعلى قمة جبلية في المملكة؟',opts:['جبل أحد','جبل طويق','جبل رضوى','جبل السودة'],ans:3,exp:'جبل السودة في عسير يصل 3015 متراً.'},
+  {cat:'🇸🇦 وطنية',q:'أين تقع العلا؟',opts:['تبوك','القصيم','عسير','المدينة المنورة'],ans:3,exp:'العلا في منطقة المدينة المنورة وتضم آثار الحِجر الصالحة.'},
+  {cat:'🇸🇦 وطنية',q:'ما موقع المملكة من حيث مساحة الدول العربية؟',opts:['الثالثة','الرابعة','الثانية','الأولى'],ans:3,exp:'المملكة الأكبر عربياً بمساحة 2.15 مليون كم².'},
+  {cat:'🇸🇦 وطنية',q:'ما اسم عملة المملكة؟',opts:['الدينار','الدرهم','الجنيه','الريال'],ans:3,exp:'الريال السعودي مرتبط بالدولار الأمريكي.'},
+  {cat:'🇸🇦 وطنية',q:'في أي مدينة يقع مطار الملك خالد الدولي؟',opts:['جدة','الدمام','المدينة المنورة','الرياض'],ans:3,exp:'مطار الملك خالد الدولي من أكبر مطارات العالم، شمال الرياض.'},
+  {cat:'🇸🇦 وطنية',q:'ما أكبر صحراء في المملكة؟',opts:['صحراء النفود','صحراء الدهناء','صحراء الجوف','الربع الخالي'],ans:3,exp:'الربع الخالي من أكبر صحاري الرمال المتواصلة في العالم.'},
+  {cat:'🇸🇦 وطنية',q:'ما ترتيب المملكة في إنتاج النفط عالمياً؟',opts:['الخامس','الثالث','الرابع','الثاني'],ans:3,exp:'المملكة ثاني أكبر منتج للنفط بعد الولايات المتحدة.'},
+  {cat:'🇸🇦 وطنية',q:'من مؤسس مدينة الرياض حديثاً؟',opts:['الملك سعود','الملك فيصل','الملك فهد','الملك عبدالعزيز'],ans:3,exp:'الملك عبدالعزيز آل سعود أعاد تأسيس الرياض وجعلها عاصمة.'},
+  {cat:'🇸🇦 وطنية',q:'ما اسم البرنامج الاقتصادي السعودي ضمن رؤية 2030؟',opts:['برنامج التحول الوطني','برنامج جودة الحياة','برنامج التوازن المالي','كلها صحيحة'],ans:3,exp:'رؤية 2030 تضم برامج متعددة: التحول الوطني، التوازن المالي، جودة الحياة وغيرها.'},
+  {cat:'🇸🇦 وطنية',q:'ما شركة النفط الوطنية السعودية؟',opts:['شركة نيوم','شركة معادن','شركة سابك','أرامكو السعودية'],ans:3,exp:'أرامكو السعودية الأكبر في العالم من حيث الإنتاج والقيمة السوقية.'},
+  {cat:'🇸🇦 وطنية',q:'أين يقع الدرعية التاريخية؟',opts:['المنطقة الشرقية','الباحة','عسير','شمال الرياض'],ans:3,exp:'الدرعية في شمال الرياض، مهد الدولة السعودية الأولى، مدرجة باليونسكو.'},
+  {cat:'🇸🇦 وطنية',q:'ما اسم منظومة القطارات في الرياض؟',opts:['المترو السريع','قطار الرياض','الهيئة السعودية للمطارات','قطار الحرمين'],ans:1,exp:'قطار الرياض (المترو) يضم 6 خطوط بطول 176 كم.'},
+  {cat:'🇸🇦 وطنية',q:'ما هدف مشروع نيوم من رؤية 2030؟',opts:['منطقة صناعية','مدينة سياحية بحرية','مدينة مستقبلية تعتمد الطاقة النظيفة والتقنية','ميناء تجاري'],ans:2,exp:'نيوم مدينة المستقبل في تبوك تعتمد 100% طاقة متجددة وتقنيات متقدمة.'},
 ];
 const GAME_TIMER=10;
 let _gameQuestions=[],_gameCurrent=0,_gameScore=0,_gameTimerInt=null,_gameTimeLeft=GAME_TIMER,_gameAnswered=false;
@@ -11723,8 +11941,8 @@ function showDashboard(el) {
   document.getElementById('sb-dashboard')?.classList.add('active');
   loadDashboard();
   initDashDark();
-  // شغّل الـ Realtime مرة وحدة فقط
   if (!_dashRealtimeStarted) _startDashRealtime();
+  if (!window._autoFlipStarted) { window._autoFlipStarted=true; setTimeout(_startAutoFlip, 5000); }
 }
 
 // ── بث حي للـ Dashboard ──
@@ -12097,6 +12315,46 @@ function _hideMindMap() {
   setTimeout(() => { mm.remove(); _mmActive = false; }, 500);
 }
 
+// ── Flip Cards ──
+const _flipTimers = {};
+const _flipDuration = 30000;
+
+function _flipCard(id) {
+  const card = document.getElementById(id);
+  if (!card) return;
+  const isFlipped = card.classList.contains('flipped');
+  card.classList.toggle('flipped');
+  clearTimeout(_flipTimers[id]);
+  if (!isFlipped) {
+    // شغّل progress وأرجع تلقائياً بعد 30 ثانية
+    const prog = document.getElementById(id+'_prog');
+    if (prog) {
+      prog.style.transition = 'none'; prog.style.width = '0%';
+      setTimeout(() => { prog.style.transition = `width ${_flipDuration/1000}s linear`; prog.style.width = '100%'; }, 50);
+    }
+    _flipTimers[id] = setTimeout(() => {
+      card.classList.remove('flipped');
+    }, _flipDuration);
+  }
+}
+
+function _startAutoFlip() {
+  const ids = ['dash-kpi-viol','dash-kpi-sales','dash-kpi-ops','dash-kpi-survey','dash-kpi-facility','dash-kpi-nosession','dash-kpi-building'];
+  let i = 0;
+  // كل 30 ثانية يفتح كارد مختلف تلقائياً
+  setInterval(() => {
+    // أغلق كل الكروت أولاً
+    ids.forEach(id => {
+      const c = document.getElementById(id);
+      if (c) c.classList.remove('flipped');
+      clearTimeout(_flipTimers[id]);
+    });
+    // افتح الكارد الحالي
+    _flipCard(ids[i]);
+    i = (i + 1) % ids.length;
+  }, _flipDuration);
+}
+
 function toggleDashDark() {
   const root = document.getElementById('dash-root');
   const btn  = document.getElementById('dashDarkBtn');
@@ -12209,6 +12467,10 @@ function _renderDashNew(V,O,S,B,F,SV,NS,from,to,today,label) {
     : 'لا توجد مخاطر جسيمة حالياً — الوضع تحت السيطرة';
   html('dashViolRec',  dot('#F59E0B')+violRec);
   html('dashViolRisk', dot('#DC2626')+violRisk);
+  // وجه خلفي
+  html('dashViolGap_back', document.getElementById('dashViolGap')?.innerHTML||'');
+  html('dashViolRec_back', violRec);
+  html('dashViolRisk_back', violRisk);
 
   // ── ٢. عملاء الاسترداد ──
   const kept   = S.filter(r=>r.request_type==='\u0627\u062d\u062a\u0641\u0627\u0638'||(r.outcome||'').includes('\u0627\u062d\u062a\u0641\u0627\u0638'));
@@ -12231,6 +12493,9 @@ function _renderDashNew(V,O,S,B,F,SV,NS,from,to,today,label) {
     : '\u2014';
   html('dashSalesRec',  dot('#F59E0B')+salesRec);
   html('dashSalesRisk', dot('#DC2626')+salesRisk);
+  // وجه خلفي
+  html('dashSalesRec_back', salesRec);
+  html('dashSalesRisk_back', salesRisk);
 
   // ── ٣. كفاءة التشغيل ──
   const femO  = O.filter(r=>FEMALE_ZONES.includes(r.zone)||FEMALE_ZONES.includes(r.section));
@@ -12262,6 +12527,10 @@ function _renderDashNew(V,O,S,B,F,SV,NS,from,to,today,label) {
     : 'لا توجد مخاطر حرجة في كفاءة التشغيل حالياً';
   html('dashOpsRec',  dot('#F59E0B')+opsRec);
   html('dashOpsRisk', dot('#DC2626')+opsRisk);
+  // وجه خلفي
+  html('dashOpsGap_back', document.getElementById('dashOpsGap')?.innerHTML||'');
+  html('dashOpsRec_back', opsRec);
+  html('dashOpsRisk_back', opsRisk);
 
   // ── ٤. رضا العملاء ──
   const avgSurv = SV.length?Math.round(SV.reduce((s,r)=>s+(r.satisfaction_pct||0),0)/SV.length):0;
@@ -12292,6 +12561,10 @@ function _renderDashNew(V,O,S,B,F,SV,NS,from,to,today,label) {
     : '\u2014';
   html('dashSurveyRec',  dot('#F59E0B')+survRec);
   html('dashSurveyRisk', dot('#DC2626')+survRisk);
+  // وجه خلفي
+  html('dashSurveyGap_back', document.getElementById('dashSurveyGap')?.innerHTML||'');
+  html('dashSurveyRec_back', survRec);
+  html('dashSurveyRisk_back', survRisk);
 
   // ── ٥. ملاحظات المرافق ──
   const fToday = F.filter(r=>(r.report_date||'').startsWith(today));
@@ -12309,6 +12582,9 @@ function _renderDashNew(V,O,S,B,F,SV,NS,from,to,today,label) {
     : '\u2014';
   html('dashFacilRec',  dot('#F59E0B')+facilRec);
   html('dashFacilRisk', dot('#DC2626')+facilRisk);
+  // وجه خلفي
+  html('dashFacilRec_back', facilRec);
+  html('dashFacilRisk_back', facilRisk);
 
   // ── ٦. جدولة الحصص ──
   const nsNo = NS.filter(r=>r.report_type==='no_session');
@@ -12327,6 +12603,9 @@ function _renderDashNew(V,O,S,B,F,SV,NS,from,to,today,label) {
     : '\u2014';
   html('dashNSRec',  dot('#F59E0B')+nsRec);
   html('dashNSRisk', dot('#DC2626')+nsRisk);
+  // وجه خلفي
+  html('dashNSRec_back', nsRec);
+  html('dashNSRisk_back', nsRisk);
 
   // ── ٧. تقرير المبنى ──
   const bToday = B.filter(r=>(r.report_date||'').startsWith(today));
@@ -12344,6 +12623,9 @@ function _renderDashNew(V,O,S,B,F,SV,NS,from,to,today,label) {
     : '\u2014';
   html('dashBuildRec',  dot('#F59E0B')+buildRec);
   html('dashBuildRisk', dot('#DC2626')+buildRisk);
+  // وجه خلفي
+  html('dashBuildRec_back', buildRec);
+  html('dashBuildRisk_back', buildRisk);
 }
 
 
