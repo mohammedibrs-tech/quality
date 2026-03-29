@@ -12142,6 +12142,8 @@ function _showMindMap({kpiId, title, details, color}) {
   if (_mmActive) { _hideMindMap(); setTimeout(() => _showMindMap({kpiId, title, details, color}), 450); return; }
   _mmActive = true;
   _playSoftPulse();
+
+  const card = document.getElementById(kpiId);
   if (!card) { _mmActive = false; return; }
 
   const rect = card.getBoundingClientRect();
@@ -14347,21 +14349,8 @@ async function openProfileModal(tab = 'main') {
   const prog = await calcWeeklyProgress(currentUser.username);
   const progColor = prog.pct >= 80 ? '#16A34A' : prog.pct >= 50 ? '#D97706' : '#DC2626';
 
-  // الأيقونات الكرتونية الرسمية — DiceBear lorelei & adventurer
-  const AVATAR_SAMPLES = [
-    'https://api.dicebear.com/9.x/lorelei/svg?seed=nq1&backgroundColor=0d1f2d',
-    'https://api.dicebear.com/9.x/lorelei/svg?seed=nq2&backgroundColor=1a3a5c',
-    'https://api.dicebear.com/9.x/lorelei/svg?seed=nq3&backgroundColor=1b4332',
-    'https://api.dicebear.com/9.x/lorelei/svg?seed=nq4&backgroundColor=3b1f6a',
-    'https://api.dicebear.com/9.x/adventurer/svg?seed=nq5&backgroundColor=0d1f2d',
-    'https://api.dicebear.com/9.x/adventurer/svg?seed=nq6&backgroundColor=1a3a5c',
-    'https://api.dicebear.com/9.x/adventurer/svg?seed=nq7&backgroundColor=7b1d1d',
-    'https://api.dicebear.com/9.x/adventurer/svg?seed=nq8&backgroundColor=1a3a4b',
-    'https://api.dicebear.com/9.x/personas/svg?seed=nq9&backgroundColor=0d1f2d',
-    'https://api.dicebear.com/9.x/personas/svg?seed=nq10&backgroundColor=1b4332',
-    'https://api.dicebear.com/9.x/big-ears/svg?seed=nq11&backgroundColor=1a3a5c',
-    'https://api.dicebear.com/9.x/big-ears/svg?seed=nq12&backgroundColor=3b1f6a',
-  ];
+  // الأيقونات محذوفة — رفع صورة من الجهاز فقط
+  const AVATAR_SAMPLES = [];
 
   const tabs = [
     { id:'main',    label:'الرئيسية' },
@@ -14493,22 +14482,19 @@ function _pmInfo(info) {
 function _pmAvatar(samples, savedImg) {
   return `
     <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:12px;letter-spacing:.5px;">الصورة الشخصية</div>
-    <label style="display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:14px;padding:12px 16px;cursor:pointer;border:1.5px dashed var(--border);margin-bottom:16px;">
+    <label style="display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:14px;padding:14px 16px;cursor:pointer;border:1.5px dashed var(--border);margin-bottom:16px;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
       <input type="file" accept="image/*" style="display:none;" onchange="setProfilePic(this)">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      <span style="font-size:12px;font-weight:700;color:var(--text);">رفع صورة من الجهاز</span>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);">رفع صورة من الجهاز</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">PNG, JPG, JPEG</div>
+      </div>
     </label>
-    <div style="font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:10px;">أو اختر أفاتار كرتوني رسمي</div>
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px;">
-      ${samples.map(url=>`
-        <div onclick="selectAvatar('${url}')"
-          style="aspect-ratio:1;border-radius:50%;overflow:hidden;cursor:pointer;border:2.5px solid var(--border);transition:all .2s;background:#0D1F2D;"
-          onmouseover="this.style.borderColor='var(--accent)';this.style.transform='scale(1.1)'"
-          onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
-          <img src="${url}" style="width:100%;height:100%;" loading="lazy">
-        </div>`).join('')}
+    ${savedImg ? `
+    <div style="text-align:center;margin-bottom:16px;">
+      <img src="${savedImg}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);">
     </div>
-    ${savedImg ? `<button onclick="removeAvatar()" style="width:100%;padding:10px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:12px;color:#E74C3C;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">حذف الصورة الحالية</button>` : ''}`;
+    <button onclick="removeAvatar()" style="width:100%;padding:10px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:12px;color:#E74C3C;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">حذف الصورة الحالية</button>` : ''}`;
 }
 
 async function _loadMyRecords() {
