@@ -12132,8 +12132,7 @@ let _mmActive = false;
 function _showMindMap({kpiId, title, details, color}) {
   if (_mmActive) { _hideMindMap(); setTimeout(() => _showMindMap({kpiId, title, details, color}), 450); return; }
   _mmActive = true;
-
-  const card = document.getElementById(kpiId);
+  _playSoftPulse();
   if (!card) { _mmActive = false; return; }
 
   const rect = card.getBoundingClientRect();
@@ -14262,87 +14261,312 @@ function updateSbUserCard() {
 }
 
 // ══ Profile Modal ══
-const AVATAR_SAMPLES = [
-  'https://api.dicebear.com/9.x/initials/svg?seed=QM&backgroundColor=0D1F2D&fontFamily=Arial&fontSize=38&fontWeight=700&textColor=00C8B4',
-  'https://api.dicebear.com/9.x/initials/svg?seed=AD&backgroundColor=1a3a5c&fontFamily=Arial&fontSize=38&fontWeight=700&textColor=ffffff',
-  'https://api.dicebear.com/9.x/shapes/svg?seed=exec1&backgroundColor=0f2744',
-  'https://api.dicebear.com/9.x/shapes/svg?seed=exec2&backgroundColor=1a2e1a',
-  'https://api.dicebear.com/9.x/shapes/svg?seed=exec3&backgroundColor=2a1a3e',
-  'https://api.dicebear.com/9.x/shapes/svg?seed=exec4&backgroundColor=1a1a1a',
-];
+// ── Profile functions above ──
 
-function openProfileModal() {
+// ── حساب نسبة إنجاز المهام الدوارة للأسبوع الحالي ──
+async function calcWeeklyProgress(uname) {
+  const data = STAFF_SCHEDULES[uname];
+  if (!data || !data.rotating) return { done: 0, total: 0, pct: 0, tasks: [] };
+
+  const today = new Date();
+  const jsDay = today.getDay(); // 0=أحد ... 4=خميس
+  const weekDays = [0,1,2,3,4]; // أيام العمل
+  const weekStr = today.toISOString().slice(0,10).slice(0,8); // YYYY-MM-
+
+  // المهام الدوارة المرتبطة بقاعدة البيانات
+  const taskMap = {
+    '⭐ استطلاع رضا العملاء':      { table:'surveys',         col:'created_at' },
+    '🔧 ملاحظات المرافق والنظافة': { table:'facility_reports', col:'report_date' },
+    '🏢 تقرير المبنى الرئيسي':     { table:'building_reports', col:'report_date' },
+    '🏫 متابعة مبنى التدريب العملي (50د)': { table:'building_reports', col:'report_date' },
+  };
+
+  const maleUsers = ['alhamad','ibrahim','ahmed'];
+  const rotOffset = maleUsers.includes(uname) ? 4 : 0;
+
+  let totalExpected = 0, totalDone = 0;
+  const taskResults = [];
+
+  // جلب البيانات من الكاش
+  const cache = await NQ.fetchAll().catch(()=>({}));
+
+  for (const r of data.rotating) {
+    const dbInfo = taskMap[r.task];
+    // كم يوم في الأسبوع هذه المهمة لـ "أنا"
+    let myDaysThisWeek = [];
+    r.days.forEach((name, i) => {
+      const actualIdx = (i + rotOffset) % 5;
+      const displayName = r.days[actualIdx];
+      if (displayName === 'أنا' && weekDays[i] <= jsDay) {
+        myDaysThisWeek.push(weekDays[i]);
+      }
+    });
+
+    if (myDaysThisWeek.length === 0) continue;
+    totalExpected += myDaysThisWeek.length;
+
+    if (dbInfo && cache[dbInfo.table === 'surveys' ? 'surveys' : dbInfo.table === 'facility_reports' ? 'facility' : 'building']) {
+      const arr = cache[dbInfo.table === 'surveys' ? 'surveys' : dbInfo.table === 'facility_reports' ? 'facility' : 'building'] || [];
+      // عد السجلات التي رفعها هذا المستخدم هذا الأسبوع
+      const thisWeekRecords = arr.filter(rec => {
+        const d = (rec[dbInfo.col]||'').slice(0,10);
+        return d.startsWith(weekStr.slice(0,7)) && (rec.observer||rec.username||'').includes(uname);
+      });
+      const doneDays = Math.min(myDaysThisWeek.length, thisWeekRecords.length);
+      totalDone += doneDays;
+      taskResults.push({ task: r.task.replace(/^[^ ]+ /, ''), expected: myDaysThisWeek.length, done: doneDays });
+    } else {
+      taskResults.push({ task: r.task.replace(/^[^ ]+ /, ''), expected: myDaysThisWeek.length, done: 0 });
+    }
+  }
+
+  const pct = totalExpected > 0 ? Math.round(totalDone / totalExpected * 100) : 0;
+  return { done: totalDone, total: totalExpected, pct, tasks: taskResults };
+}
+
+// ── الملف الشخصي ──
+async function openProfileModal(tab = 'main') {
   if(!currentUser) { toast('⚠️ يرجى تسجيل الدخول أولاً'); return; }
   let modal = document.getElementById('profileModal');
-  if(!modal) {
-    modal = document.createElement('div');
-    modal.id = 'profileModal';
-    document.body.appendChild(modal);
-  }
-  const savedImg = localStorage.getItem('nq_avatar_' + currentUser.username) || '';
-  const roleLabel = currentUser.role === 'admin' ? '👑 مدير الجودة' : '👤 موظف جودة';
+  if(!modal) { modal = document.createElement('div'); modal.id = 'profileModal'; document.body.appendChild(modal); }
+
+  const savedImg   = localStorage.getItem('nq_avatar_' + currentUser.username) || '';
+  const roleLabel  = currentUser.role === 'admin' ? 'مدير الجودة' : 'موظف جودة';
+  const profileInfo = JSON.parse(localStorage.getItem('nq_profile_info_' + currentUser.username) || '{}');
+
+  // حساب الإنجاز
+  const prog = await calcWeeklyProgress(currentUser.username);
+  const progColor = prog.pct >= 80 ? '#16A34A' : prog.pct >= 50 ? '#D97706' : '#DC2626';
+
+  // الأيقونات الكرتونية الرسمية — DiceBear lorelei & adventurer
+  const AVATAR_SAMPLES = [
+    'https://api.dicebear.com/9.x/lorelei/svg?seed=nq1&backgroundColor=0d1f2d',
+    'https://api.dicebear.com/9.x/lorelei/svg?seed=nq2&backgroundColor=1a3a5c',
+    'https://api.dicebear.com/9.x/lorelei/svg?seed=nq3&backgroundColor=1b4332',
+    'https://api.dicebear.com/9.x/lorelei/svg?seed=nq4&backgroundColor=3b1f6a',
+    'https://api.dicebear.com/9.x/adventurer/svg?seed=nq5&backgroundColor=0d1f2d',
+    'https://api.dicebear.com/9.x/adventurer/svg?seed=nq6&backgroundColor=1a3a5c',
+    'https://api.dicebear.com/9.x/adventurer/svg?seed=nq7&backgroundColor=7b1d1d',
+    'https://api.dicebear.com/9.x/adventurer/svg?seed=nq8&backgroundColor=1a3a4b',
+    'https://api.dicebear.com/9.x/personas/svg?seed=nq9&backgroundColor=0d1f2d',
+    'https://api.dicebear.com/9.x/personas/svg?seed=nq10&backgroundColor=1b4332',
+    'https://api.dicebear.com/9.x/big-ears/svg?seed=nq11&backgroundColor=1a3a5c',
+    'https://api.dicebear.com/9.x/big-ears/svg?seed=nq12&backgroundColor=3b1f6a',
+  ];
+
+  const tabs = [
+    { id:'main',    label:'الرئيسية' },
+    { id:'records', label:'سجلاتي'   },
+    { id:'info',    label:'معلوماتي'  },
+    { id:'avatar',  label:'الصورة'   },
+  ];
+
   modal.innerHTML = `
-    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:9600;display:flex;align-items:center;justify-content:center;padding:16px;">
-      <div style="background:var(--card);border-radius:24px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.5);">
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);z-index:9600;display:flex;align-items:center;justify-content:center;padding:12px;" onclick="if(event.target===this)this.parentElement.style.display='none'">
+      <div style="background:var(--card);border-radius:24px;width:100%;max-width:480px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.5);">
 
         <!-- Header -->
-        <div style="background:linear-gradient(135deg,#0D1F2D,#1a3a5c);padding:28px 20px;text-align:center;position:relative;">
+        <div style="background:linear-gradient(135deg,#0D1F2D,#1a3a5c);padding:24px 20px 16px;text-align:center;position:relative;flex-shrink:0;">
           <button onclick="document.getElementById('profileModal').style.display='none'"
-            style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.1);border:none;border-radius:50%;width:30px;height:30px;color:rgba(255,255,255,0.7);font-size:14px;cursor:pointer;">✕</button>
-          <div id="pmAvatarBig" style="width:80px;height:80px;border-radius:50%;background:rgba(0,168,150,0.2);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:var(--accent);margin:0 auto 12px;overflow:hidden;">
-            ${savedImg ? `<img src="${savedImg}" style="width:100%;height:100%;object-fit:cover;">` : (currentUser.name||'م').charAt(0)}
+            style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.1);border:none;border-radius:50%;width:32px;height:32px;color:rgba(255,255,255,0.8);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+          <div style="width:80px;height:80px;border-radius:50%;background:rgba(0,168,150,0.2);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:var(--accent);margin:0 auto 10px;overflow:hidden;">
+            ${savedImg ? `<img src="${savedImg}" style="width:100%;height:100%;object-fit:cover;">` : `<span style="font-size:32px;font-weight:900;color:var(--accent);">${(currentUser.name||'م').charAt(0)}</span>`}
           </div>
           <div style="font-size:16px;font-weight:900;color:#fff;">${currentUser.name || '—'}</div>
-          <div style="font-size:11px;color:rgba(0,200,180,0.8);margin-top:4px;">${roleLabel}</div>
-        </div>
+          <div style="font-size:10px;color:rgba(0,200,180,0.8);margin-top:3px;letter-spacing:.5px;">${roleLabel}</div>
+          ${profileInfo.location ? `<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:2px;">${profileInfo.location} · ${profileInfo.period||''}</div>` : ''}
 
-        <!-- Body -->
-        <div style="padding:20px;">
-
-          <!-- رفع صورة -->
-          <div style="margin-bottom:16px;">
-            <div style="font-size:11px;font-weight:800;color:var(--text-dim);margin-bottom:8px;">📸 رفع صورة شخصية</div>
-            <label style="display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:14px;padding:12px 16px;cursor:pointer;border:1.5px dashed var(--border);transition:all .2s;"
-              onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-              <input type="file" accept="image/*" style="display:none;" onchange="setProfilePic(this)">
-              <span style="font-size:22px;">📁</span>
-              <span style="font-size:12px;font-weight:700;color:var(--text);">اختر صورة من جهازك</span>
-            </label>
-          </div>
-
-          <!-- عيّنات جاهزة -->
-          <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:800;color:var(--text-dim);margin-bottom:10px;">🎨 أو اختر أفاتار جاهز</div>
-            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;">
-              ${AVATAR_SAMPLES.map((url,i) => `
-                <div onclick="selectAvatar('${url}')"
-                  style="width:100%;aspect-ratio:1;border-radius:50%;overflow:hidden;cursor:pointer;border:2px solid var(--border);transition:all .2s;"
-                  onmouseover="this.style.borderColor='var(--accent)';this.style.transform='scale(1.1)'"
-                  onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
-                  <img src="${url}" style="width:100%;height:100%;" loading="lazy">
+          <!-- نسبة الإنجاز -->
+          <div style="margin-top:14px;background:rgba(255,255,255,0.06);border-radius:14px;padding:10px 16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:700;">إنجاز المهام الدوارة هذا الأسبوع</div>
+              <div style="font-size:16px;font-weight:900;color:${progColor};">${prog.pct}%</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:6px;overflow:hidden;">
+              <div style="height:100%;width:${prog.pct}%;background:${progColor};border-radius:4px;transition:width .8s ease;"></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+              ${prog.tasks.map(t=>`
+                <div style="background:rgba(255,255,255,0.07);border-radius:8px;padding:4px 8px;font-size:9px;color:rgba(255,255,255,0.7);">
+                  ${t.done}/${t.expected} ${t.task.slice(0,12)}
                 </div>`).join('')}
             </div>
           </div>
+        </div>
 
-          <!-- حذف الصورة -->
-          ${savedImg ? `<button onclick="removeAvatar()" style="width:100%;padding:10px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:12px;color:#E74C3C;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:10px;">🗑️ حذف الصورة الحالية</button>` : ''}
+        <!-- Tabs -->
+        <div style="display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--card);">
+          ${tabs.map(t=>`
+            <button onclick="openProfileModal('${t.id}')"
+              style="flex:1;padding:11px 4px;border:none;background:${tab===t.id?'var(--accent)':'transparent'};
+              color:${tab===t.id?'#fff':'var(--text-dim)'};font-family:Cairo,sans-serif;font-size:11px;font-weight:700;
+              cursor:pointer;border-bottom:${tab===t.id?'2px solid var(--accent)':'2px solid transparent'};transition:all .2s;">${t.label}</button>`).join('')}
+        </div>
 
-          <button onclick="document.getElementById('profileModal').style.display='none'"
-            style="width:100%;padding:12px;background:rgba(0,0,0,0.1);border:1px solid var(--border);border-radius:14px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text-dim);">إغلاق</button>
+        <!-- Body -->
+        <div style="overflow-y:auto;flex:1;padding:16px;" id="pmBody">
+          ${tab==='main' ? _pmMain(prog) : ''}
+          ${tab==='records' ? '<div style="text-align:center;padding:30px;color:var(--text-dim);font-size:12px;">جارٍ تحميل السجلات...</div>' : ''}
+          ${tab==='info' ? _pmInfo(profileInfo) : ''}
+          ${tab==='avatar' ? _pmAvatar(AVATAR_SAMPLES, savedImg) : ''}
         </div>
       </div>
     </div>`;
+
   modal.style.display = 'block';
+
+  if (tab === 'records') _loadMyRecords();
+}
+
+function _pmMain(prog) {
+  const d = new Date();
+  const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'];
+  const todayName = d.getDay() <= 4 ? days[d.getDay()] : 'إجازة';
+  return `
+    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:.5px;">ملخص الأسبوع</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div style="background:var(--card2);border-radius:12px;padding:12px;text-align:center;border-top:3px solid #16A34A;">
+        <div style="font-size:22px;font-weight:900;color:#16A34A;">${prog.done}</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:3px;">مهام مكتملة</div>
+      </div>
+      <div style="background:var(--card2);border-radius:12px;padding:12px;text-align:center;border-top:3px solid #D97706;">
+        <div style="font-size:22px;font-weight:900;color:#D97706;">${prog.total - prog.done}</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:3px;">مهام متبقية</div>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;">اليوم: ${todayName}</div>
+    ${prog.tasks.map(t=>{
+      const pct = t.expected > 0 ? Math.round(t.done/t.expected*100) : 0;
+      const c = pct===100?'#16A34A':pct>0?'#D97706':'#94A3B8';
+      return `<div style="background:var(--card2);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;">
+        <div style="flex:1;">
+          <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px;">${t.task}</div>
+          <div style="background:var(--border);border-radius:3px;height:4px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${c};border-radius:3px;"></div>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:900;color:${c};flex-shrink:0;">${t.done}/${t.expected}</div>
+      </div>`;
+    }).join('')}`;
+}
+
+function _pmInfo(info) {
+  return `
+    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:12px;letter-spacing:.5px;">المعلومات الشخصية</div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الاسم</label>
+      <input class="inp" value="${currentUser.name||''}" readonly style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;opacity:.7;">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">مكان العمل</label>
+      <input id="pmLocation" class="inp" value="${info.location||''}" placeholder="مثال: القسم النسائي" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الفترة</label>
+      <select id="pmPeriod" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
+        <option value="">اختر الفترة</option>
+        ${['صباحية','مسائية','موحدة'].map(p=>`<option ${info.period===p?'selected':''}>${p}</option>`).join('')}
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div>
+        <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">بداية الدوام</label>
+        <input id="pmStart" class="inp" type="time" value="${info.startTime||''}" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">نهاية الدوام</label>
+        <input id="pmEnd" class="inp" type="time" value="${info.endTime||''}" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
+      </div>
+    </div>
+    <button onclick="saveProfileInfo()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">💾 حفظ المعلومات</button>`;
+}
+
+function _pmAvatar(samples, savedImg) {
+  return `
+    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:12px;letter-spacing:.5px;">الصورة الشخصية</div>
+    <label style="display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:14px;padding:12px 16px;cursor:pointer;border:1.5px dashed var(--border);margin-bottom:16px;">
+      <input type="file" accept="image/*" style="display:none;" onchange="setProfilePic(this)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span style="font-size:12px;font-weight:700;color:var(--text);">رفع صورة من الجهاز</span>
+    </label>
+    <div style="font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:10px;">أو اختر أفاتار كرتوني رسمي</div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px;">
+      ${samples.map(url=>`
+        <div onclick="selectAvatar('${url}')"
+          style="aspect-ratio:1;border-radius:50%;overflow:hidden;cursor:pointer;border:2.5px solid var(--border);transition:all .2s;background:#0D1F2D;"
+          onmouseover="this.style.borderColor='var(--accent)';this.style.transform='scale(1.1)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+          <img src="${url}" style="width:100%;height:100%;" loading="lazy">
+        </div>`).join('')}
+    </div>
+    ${savedImg ? `<button onclick="removeAvatar()" style="width:100%;padding:10px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:12px;color:#E74C3C;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">حذف الصورة الحالية</button>` : ''}`;
+}
+
+async function _loadMyRecords() {
+  const el = document.getElementById('pmBody');
+  if (!el) return;
+  const u = currentUser.username;
+  const name = currentUser.name || u;
+  try {
+    const safe = async p => { try { const r = await p; return r.data||[]; } catch(e) { return []; } };
+    const [viol, surveys, facility, building] = await Promise.all([
+      safe(db.from('violations').select('*').or(`observer.ilike.%${name}%,observer.ilike.%${u}%`).order('created_at',{ascending:false}).limit(50)),
+      safe(db.from('surveys').select('*').or(`observer.ilike.%${name}%,observer.ilike.%${u}%`).order('created_at',{ascending:false}).limit(30)),
+      safe(db.from('facility_reports').select('*').or(`observer.ilike.%${name}%,observer.ilike.%${u}%`).order('created_at',{ascending:false}).limit(30)),
+      safe(db.from('building_reports').select('*').or(`observer.ilike.%${name}%,observer.ilike.%${u}%`).order('created_at',{ascending:false}).limit(30)),
+    ]);
+
+    const section = (title, color, items, renderFn) => items.length ? `
+      <div style="font-size:11px;font-weight:700;color:${color};margin:14px 0 8px;letter-spacing:.5px;">${title} (${items.length})</div>
+      ${items.map(renderFn).join('')}` : '';
+
+    const recRow = (r, main, sub, id, table) => `
+      <div style="background:var(--card2);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${main}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">${sub}</div>
+        </div>
+        <button onclick="myRecDelete('${table}','${id}')" style="padding:4px 8px;background:rgba(220,38,38,0.08);color:#DC2626;border:1px solid rgba(220,38,38,0.15);border-radius:7px;font-family:Cairo,sans-serif;font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0;">حذف</button>
+      </div>`;
+
+    el.innerHTML =
+      section('المخالفات المرصودة','#DC2626', viol, r => recRow(r, r.violation_type||'مخالفة', `${r.date||''} · ${r.zone||''} · ${r.section||''}`, r.id, 'violations')) +
+      section('استطلاعات الرضا','#D97706', surveys, r => recRow(r, `استطلاع — ${r.trainer_name||'—'}`, `${r.date||''} · تقييم: ${r.overall_rating||'—'}`, r.id, 'surveys')) +
+      section('تقارير المرافق','#16A34A', facility, r => recRow(r, r.problem_type||'ملاحظة مرفق', `${r.report_date||''} · ${r.location||''}`, r.id, 'facility_reports')) +
+      section('تقارير المبنى','#2563EB', building, r => recRow(r, 'تقرير مبنى', `${r.report_date||''} · ${r.report_time||''}`, r.id, 'building_reports')) ||
+      '<div style="text-align:center;padding:30px;color:var(--text-dim);font-size:12px;">لا توجد سجلات بعد</div>';
+  } catch(e) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);">—</div>';
+  }
+}
+
+async function myRecDelete(table, id) {
+  if (!confirm('حذف هذا السجل؟')) return;
+  const { error } = await db.from(table).delete().eq('id', id);
+  if (error) { toast('❌ فشل الحذف'); return; }
+  toast('✅ تم الحذف');
+  _loadMyRecords();
+}
+
+function saveProfileInfo() {
+  const info = {
+    location:  document.getElementById('pmLocation')?.value.trim() || '',
+    period:    document.getElementById('pmPeriod')?.value || '',
+    startTime: document.getElementById('pmStart')?.value || '',
+    endTime:   document.getElementById('pmEnd')?.value || '',
+  };
+  localStorage.setItem('nq_profile_info_' + currentUser.username, JSON.stringify(info));
+  toast('✅ تم حفظ المعلومات');
+  openProfileModal('info');
 }
 
 function setProfilePic(input) {
   const file = input.files[0]; if(!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const data = e.target.result;
-    localStorage.setItem('nq_avatar_' + currentUser.username, data);
+    localStorage.setItem('nq_avatar_' + currentUser.username, e.target.result);
     updateSbUserCard();
-    openProfileModal(); // إعادة فتح لتحديث الصورة
+    openProfileModal('avatar');
     toast('✅ تم حفظ الصورة');
   };
   reader.readAsDataURL(file);
@@ -14351,14 +14575,14 @@ function setProfilePic(input) {
 function selectAvatar(url) {
   localStorage.setItem('nq_avatar_' + currentUser.username, url);
   updateSbUserCard();
-  openProfileModal();
+  openProfileModal('avatar');
   toast('✅ تم اختيار الأفاتار');
 }
 
 function removeAvatar() {
   localStorage.removeItem('nq_avatar_' + currentUser.username);
   updateSbUserCard();
-  openProfileModal();
+  openProfileModal('avatar');
   toast('✅ تم حذف الصورة');
 }
 
