@@ -12254,10 +12254,14 @@ function _showMindMap({kpiId, title, details, color}) {
 
     // ── البطاقة ──
     // الدائرة الصغيرة + بطاقة نص (بدون clip-path للسماح بالتمدد)
-    const acLeft = onRight ? circEdgeX - CIRC_D - CARD_MIN_W : circEdgeX;
+    // موضع البطاقة: الدائرة الصغيرة تبدأ من حافة العمود، البطاقة تمتد منها
     const ac = document.createElement('div');
+    // onRight: البطاقة تمتد يساراً من الدائرة الصغيرة — نستخدم right
+    const posStyle = onRight
+      ? `right:${W - circEdgeX}px;top:${itemY - CARD_H_MIN/2}px;`
+      : `left:${circEdgeX}px;top:${itemY - CARD_H_MIN/2}px;`;
     ac.style.cssText = `
-      position:fixed;left:${acLeft}px;top:${itemY - CARD_H_MIN/2}px;
+      position:fixed;${posStyle}
       display:flex;align-items:stretch;gap:0;
       pointer-events:none;direction:rtl;font-family:Cairo,sans-serif;
       opacity:0;transform:translateX(${onRight?'8px':'-8px'});
@@ -12282,7 +12286,7 @@ function _showMindMap({kpiId, title, details, color}) {
     const marg = onRight ? `margin-left:-${CIRC_R}px` : `margin-right:-${CIRC_R}px`;
     const pad  = onRight ? `10px 16px 10px ${CIRC_R+12}px` : `10px ${CIRC_R+12}px 10px 16px`;
     txtBox.style.cssText = `
-      min-width:${CARD_MIN_W}px;max-width:420px;
+      width:auto;max-width:480px;
       min-height:${CARD_H_MIN}px;
       display:flex;align-items:center;
       padding:${pad};
