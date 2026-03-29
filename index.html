@@ -1299,12 +1299,13 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
   <!-- مسجل دخول: صورة + اسم + خروج -->
   <div id="tbUserArea" style="display:none;align-items:center;gap:8px;">
-    <div onclick="openProfileModal()" style="display:flex;align-items:center;gap:7px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+    <div onclick="openProfileModal()" style="display:flex;align-items:center;gap:7px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.background='rgba(0,168,150,0.06)'" onmouseout="this.style.borderColor='var(--border)';this.style.background=''">
       <div id="tbAvatarEl" style="width:28px;height:28px;border-radius:50%;background:rgba(0,168,150,0.15);border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:var(--accent);overflow:hidden;flex-shrink:0;">م</div>
       <span id="tbUserName" style="font-size:12px;font-weight:700;color:var(--text);">—</span>
+      <span style="font-size:9px;color:var(--accent);font-weight:700;">ملفي</span>
     </div>
     <button onclick="tbLogout()" style="display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:10px;border:1.5px solid rgba(231,76,60,0.3);background:rgba(231,76,60,0.08);color:#E74C3C;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(231,76,60,0.18)'" onmouseout="this.style.background='rgba(231,76,60,0.08)'">
-      🚪 خروج
+      خروج
     </button>
   </div>
 
@@ -3978,6 +3979,9 @@ function updateNav(){
   }else{
     el.innerHTML='';
   }
+  // تحديث شريط التنقل العلوي
+  if(typeof updateTopBarUser === 'function') updateTopBarUser();
+  if(typeof updateSbUserCard === 'function') updateSbUserCard();
   }catch(e){console.error("updateNav error:",e);}
 }
 
