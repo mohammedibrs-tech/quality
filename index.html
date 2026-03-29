@@ -12294,9 +12294,10 @@ function _showMindMap({kpiId, title, details, color}) {
 
     const arrow = document.createElement('div');
     arrow.style.cssText = `
-      height:${CARD_H}px;width:${CARD_W}px;
+      min-height:${CARD_H}px;height:auto;min-width:${CARD_W}px;max-width:400px;
       display:flex;align-items:center;
       padding:${arrowPad};
+      padding-top:12px;padding-bottom:12px;
       ${arrowMargin};
       clip-path:${arrowClip};
       background:${bg};
@@ -12304,9 +12305,9 @@ function _showMindMap({kpiId, title, details, color}) {
       flex-shrink:0;
     `;
     arrow.innerHTML = `
-      <div style="overflow:hidden;width:100%;">
-        <div style="font-size:9px;color:rgba(255,255,255,.55);margin-bottom:3px;letter-spacing:.6px;text-transform:uppercase;">${d.k}</div>
-        <div style="font-size:14px;font-weight:900;color:#fff;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${d.v}</div>
+      <div style="width:100%;">
+        <div style="font-size:9px;color:rgba(255,255,255,.55);margin-bottom:4px;letter-spacing:.6px;text-transform:uppercase;">${d.k}</div>
+        <div style="font-size:13px;font-weight:900;color:#fff;line-height:1.5;white-space:normal;word-break:break-word;">${d.v}</div>
       </div>
     `;
 
