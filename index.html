@@ -14698,24 +14698,118 @@ async function loadNSTodayList() {
     }
 
     if (!all.length) { el.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:30px;font-size:12px;">لا توجد سجلات اليوم</div>'; return; }
+
+    const recCard = (r, color, accentBg) => `
+      <div id="ns-rec-${r.id}" style="background:${accentBg};border-radius:10px;padding:10px 14px;margin-bottom:8px;transition:opacity .3s;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;">${r.trainer_name}
+              <span style="background:rgba(${color==='#E74C3C'?'231,76,60':'243,156,18'},0.12);color:${color};border-radius:6px;padding:1px 8px;font-size:10px;">زون ${r.zone||'—'}</span>
+            </div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:3px;">${r.report_time||''} · ${r.shift||''} ${r.session_number?' · الحصة '+r.session_number:''} · ${r.observer||''}</div>
+            ${r.notes?`<div style="font-size:10px;color:var(--text-dim);margin-top:2px;">📝 ${r.notes}</div>`:''}
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button onclick="nsEditRecord('${r.id}')" style="padding:5px 10px;background:rgba(37,99,235,0.1);color:#2563EB;border:1px solid rgba(37,99,235,0.2);border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;">تعديل</button>
+            <button onclick="nsDeleteRecord('${r.id}')" style="padding:5px 10px;background:rgba(220,38,38,0.08);color:#DC2626;border:1px solid rgba(220,38,38,0.15);border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;">حذف</button>
+          </div>
+        </div>
+      </div>`;
+
     let html = '';
     if (noSess.length) {
       html += `<div style="font-size:11px;font-weight:700;color:#E74C3C;margin-bottom:8px;">🚫 مدربين بلا حصة (${noSess.length})</div>`;
-      html += noSess.map(r=>`<div style="background:rgba(231,76,60,0.05);border-radius:10px;padding:10px 14px;margin-bottom:8px;">
-        <div style="font-size:12px;font-weight:700;">${r.trainer_name} <span style="background:rgba(231,76,60,0.12);color:#E74C3C;border-radius:6px;padding:1px 8px;font-size:10px;">زون ${r.zone||'—'}</span></div>
-        <div style="font-size:10px;color:var(--text-dim);margin-top:3px;">${r.report_time||''} · ${r.shift||''} · الحصة ${r.session_number||'—'} · ${r.observer||''}</div>
-        ${r.notes?`<div style="font-size:10px;color:var(--text-dim);margin-top:2px;">📝 ${r.notes}</div>`:''}
-      </div>`).join('');
+      html += noSess.map(r => recCard(r,'#E74C3C','rgba(231,76,60,0.05)')).join('');
     }
     if (backup.length) {
       html += `<div style="font-size:11px;font-weight:700;color:#F39C12;margin:12px 0 8px;">🔄 احتياطيين (${backup.length})</div>`;
-      html += backup.map(r=>`<div style="background:rgba(243,156,18,0.05);border-radius:10px;padding:10px 14px;margin-bottom:8px;">
-        <div style="font-size:12px;font-weight:700;">${r.trainer_name} <span style="background:rgba(243,156,18,0.12);color:#F39C12;border-radius:6px;padding:1px 8px;font-size:10px;">زون ${r.zone||'—'}</span></div>
-        ${r.notes?`<div style="font-size:10px;color:var(--text-dim);margin-top:2px;">📝 ${r.notes}</div>`:''}
-      </div>`).join('');
+      html += backup.map(r => recCard(r,'#F39C12','rgba(243,156,18,0.05)')).join('');
     }
     el.innerHTML = html;
   } catch(e) { el.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px;font-size:11px;">—</div>'; }
+}
+
+async function nsDeleteRecord(id) {
+  if (!confirm('هل تريد حذف هذا السجل؟')) return;
+  const el = document.getElementById('ns-rec-'+id);
+  if (el) el.style.opacity = '0.4';
+  const { error } = await db.from('no_session_reports').delete().eq('id', id);
+  if (error) { toast('❌ فشل الحذف'); if(el) el.style.opacity='1'; return; }
+  toast('✅ تم الحذف');
+  loadNSTodayList();
+}
+
+async function nsEditRecord(id) {
+  // جلب السجل
+  const { data } = await db.from('no_session_reports').select('*').eq('id', id).single();
+  if (!data) { toast('❌ لم يُعثر على السجل'); return; }
+
+  // بناء مودال تعديل
+  let m = document.getElementById('nsEditModal');
+  if (m) m.remove();
+  m = document.createElement('div');
+  m.id = 'nsEditModal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  m.innerHTML = `
+    <div style="background:var(--card,#fff);border-radius:16px;padding:24px;width:100%;max-width:420px;direction:rtl;font-family:Cairo,sans-serif;box-shadow:0 24px 60px rgba(0,0,0,0.3);">
+      <div style="font-size:15px;font-weight:900;margin-bottom:16px;color:var(--text,#0F172A);">تعديل السجل</div>
+      <div class="field" style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">اسم المدرب/ة</label>
+        <input id="nsEditName" class="inp" value="${data.trainer_name||''}" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border,#E2E8F0);font-family:Cairo,sans-serif;font-size:13px;background:var(--card2,#F8FAFC);">
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الزون</label>
+        <input id="nsEditZone" class="inp" value="${data.zone||''}" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border,#E2E8F0);font-family:Cairo,sans-serif;font-size:13px;background:var(--card2,#F8FAFC);">
+      </div>
+      ${data.report_type==='no_session'?`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الشفت</label>
+          <select id="nsEditShift" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border,#E2E8F0);font-family:Cairo,sans-serif;font-size:13px;background:var(--card2,#F8FAFC);">
+            <option ${data.shift==='صباحي'?'selected':''}>صباحي</option>
+            <option ${data.shift==='مسائي'?'selected':''}>مسائي</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الحصة</label>
+          <select id="nsEditSession" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border,#E2E8F0);font-family:Cairo,sans-serif;font-size:13px;background:var(--card2,#F8FAFC);">
+            <option ${data.session_number==='الأولى'?'selected':''}>الأولى</option>
+            <option ${data.session_number==='الثانية'?'selected':''}>الثانية</option>
+            <option ${data.session_number==='الثالثة'?'selected':''}>الثالثة</option>
+            <option ${data.session_number==='الرابعة'?'selected':''}>الرابعة</option>
+          </select>
+        </div>
+      </div>`:''}
+      <div class="field" style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">ملاحظات</label>
+        <textarea id="nsEditNotes" class="inp" rows="2" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border,#E2E8F0);font-family:Cairo,sans-serif;font-size:13px;background:var(--card2,#F8FAFC);resize:none;">${data.notes||''}</textarea>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="nsEditSave('${id}','${data.report_type}')" style="flex:1;padding:12px;background:linear-gradient(135deg,#00A896,#007B6E);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">✅ حفظ التعديل</button>
+        <button onclick="document.getElementById('nsEditModal').remove()" style="padding:12px 16px;background:rgba(0,0,0,0.06);color:var(--text);border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">إلغاء</button>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+  m.onclick = e => { if(e.target===m) m.remove(); };
+}
+
+async function nsEditSave(id, type) {
+  const name  = document.getElementById('nsEditName')?.value.trim();
+  const zone  = document.getElementById('nsEditZone')?.value.trim();
+  const notes = document.getElementById('nsEditNotes')?.value.trim();
+  const shift   = document.getElementById('nsEditShift')?.value;
+  const session = document.getElementById('nsEditSession')?.value;
+
+  if (!name) { toast('⚠️ أدخل اسم المدرب'); return; }
+
+  const updates = { trainer_name:name, zone, notes };
+  if (type==='no_session') { updates.shift=shift; updates.session_number=session; }
+
+  const { error } = await db.from('no_session_reports').update(updates).eq('id', id);
+  if (error) { toast('❌ فشل التعديل'); return; }
+  toast('✅ تم التعديل بنجاح');
+  document.getElementById('nsEditModal')?.remove();
+  loadNSTodayList();
 }
 
 async function exportNSExcel() {
