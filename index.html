@@ -2469,6 +2469,46 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 .dash-pulse-teal  {animation:kpiPulseTeal   3s ease infinite!important;}
 .dash-pulse-blue  {animation:kpiPulseBlue   3s ease infinite!important;}
 
+/* ── Glow Reveal ── */
+.dk-reveal-lines{
+  position:absolute;inset:0;
+  padding:12px 14px;
+  display:flex;flex-direction:column;
+  justify-content:center;
+  gap:0;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .3s ease;
+  background:#fff;
+  border-radius:14px;
+  z-index:2;
+}
+.dk.revealing .dk-reveal-lines{opacity:1;}
+.dk.revealing .dk-front-content{opacity:0;transition:opacity .3s ease;}
+
+.dk-reveal-line{
+  display:flex;align-items:flex-start;gap:7px;
+  padding:4px 0;
+  border-bottom:1px solid rgba(0,0,0,0.05);
+  opacity:0;transform:translateY(10px);
+  transition:opacity .35s ease, transform .35s ease;
+}
+.dk-reveal-line:last-child{border:none;}
+.dk-reveal-line.show{opacity:1;transform:translateY(0);}
+.drl-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.drl-label{font-size:7px;font-weight:700;color:#94A3B8;letter-spacing:.4px;text-transform:uppercase;margin-bottom:1px;}
+.drl-text{font-size:9.5px;color:#1E293B;line-height:1.5;font-weight:500;}
+
+/* Glow variants */
+.dk.glow-green {border-color:rgba(16,163,74,0.35)!important;box-shadow:0 0 0 1px rgba(16,163,74,0.15),0 0 28px rgba(16,163,74,0.18),inset 0 0 30px rgba(16,163,74,0.05)!important;}
+.dk.glow-blue  {border-color:rgba(37,99,235,0.35)!important;box-shadow:0 0 0 1px rgba(37,99,235,0.15),0 0 28px rgba(37,99,235,0.18),inset 0 0 30px rgba(37,99,235,0.05)!important;}
+.dk.glow-purple{border-color:rgba(124,58,237,0.35)!important;box-shadow:0 0 0 1px rgba(124,58,237,0.15),0 0 28px rgba(124,58,237,0.18),inset 0 0 30px rgba(124,58,237,0.05)!important;}
+.dk.glow-amber {border-color:rgba(217,119,6,0.35)!important;box-shadow:0 0 0 1px rgba(217,119,6,0.15),0 0 28px rgba(217,119,6,0.18),inset 0 0 30px rgba(217,119,6,0.05)!important;}
+.dk.glow-teal  {border-color:rgba(13,148,136,0.35)!important;box-shadow:0 0 0 1px rgba(13,148,136,0.15),0 0 28px rgba(13,148,136,0.18),inset 0 0 30px rgba(13,148,136,0.05)!important;}
+.dk.glow-rose  {border-color:rgba(225,29,72,0.35)!important;box-shadow:0 0 0 1px rgba(225,29,72,0.15),0 0 28px rgba(225,29,72,0.18),inset 0 0 30px rgba(225,29,72,0.05)!important;}
+.dk-reveal-prog{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(0,0,0,0.05);border-radius:0 0 14px 14px;overflow:hidden;z-index:3;}
+.dk-reveal-prog-f{height:100%;border-radius:2px;width:0%;}
+
 /* header text */
 .dash-hdr-title{font-size:14px;font-weight:900;color:#0F172A;}
 .dash-hdr-sub{font-size:9px;color:#94A3B8;margin-top:1px;}
@@ -2541,8 +2581,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="dash-row dash-row-3">
 
       <!-- ١. المخالفات (نسائي + رجالي) -->
-      <div class="dk" id="dash-kpi-viol">
-<div class="dk-head">
+      <div class="dk" id="dash-kpi-viol" style="position:relative;transition:border-color .5s ease,box-shadow .5s ease;">
+  <div class="dk-front-content" style="transition:opacity .3s ease;"><div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#F87171,#C0392B);"></div>
             <div>
@@ -2571,12 +2611,20 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashViolRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashViolRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>
+        </</div>
+  <div class="dk-reveal-lines" id="dash-kpi-viol_lines">
+    <div class="dk-reveal-line" id="dash-kpi-viol_l1"><div class="drl-dot" style="background:#2563EB;"></div><div><div class="drl-label">التحليل العميق</div><div class="drl-text" id="dash-kpi-viol_t1">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-viol_l2"><div class="drl-dot" style="background:#F59E0B;"></div><div><div class="drl-label">الفجوات</div><div class="drl-text" id="dash-kpi-viol_t2">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-viol_l3"><div class="drl-dot" style="background:#16A34A;"></div><div><div class="drl-label">التوصيات</div><div class="drl-text" id="dash-kpi-viol_t3">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-viol_l4"><div class="drl-dot" style="background:#DC2626;"></div><div><div class="drl-label">المخاطر المحتملة</div><div class="drl-text" id="dash-kpi-viol_t4">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-viol_l5"><div class="drl-dot" style="background:#7C3AED;"></div><div><div class="drl-label">الأولوية</div><div class="drl-text" id="dash-kpi-viol_t5">—</div></div></div>
+  </div>
+  <div class="dk-reveal-prog"><div class="dk-reveal-prog-f" id="dash-kpi-viol_rp" style="background:#16A34A;"></div></div>
+</div>/div>
 
       <!-- ٢. عملاء الاسترداد -->
-      <div class="dk" id="dash-kpi-sales">
-<div class="dk-head">
+      <div class="dk" id="dash-kpi-sales" style="position:relative;transition:border-color .5s ease,box-shadow .5s ease;">
+  <div class="dk-front-content" style="transition:opacity .3s ease;"><div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#A78BFA,#5B21B6);"></div>
             <div>
@@ -2606,12 +2654,20 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashSalesRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashSalesRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>
+        </</div>
+  <div class="dk-reveal-lines" id="dash-kpi-sales_lines">
+    <div class="dk-reveal-line" id="dash-kpi-sales_l1"><div class="drl-dot" style="background:#2563EB;"></div><div><div class="drl-label">التحليل العميق</div><div class="drl-text" id="dash-kpi-sales_t1">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-sales_l2"><div class="drl-dot" style="background:#F59E0B;"></div><div><div class="drl-label">الفجوات</div><div class="drl-text" id="dash-kpi-sales_t2">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-sales_l3"><div class="drl-dot" style="background:#16A34A;"></div><div><div class="drl-label">التوصيات</div><div class="drl-text" id="dash-kpi-sales_t3">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-sales_l4"><div class="drl-dot" style="background:#DC2626;"></div><div><div class="drl-label">المخاطر المحتملة</div><div class="drl-text" id="dash-kpi-sales_t4">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-sales_l5"><div class="drl-dot" style="background:#7C3AED;"></div><div><div class="drl-label">الأولوية</div><div class="drl-text" id="dash-kpi-sales_t5">—</div></div></div>
+  </div>
+  <div class="dk-reveal-prog"><div class="dk-reveal-prog-f" id="dash-kpi-sales_rp" style="background:#2563EB;"></div></div>
+</div>/div>
 
       <!-- ٣. كفاءة التشغيل -->
-      <div class="dk" id="dash-kpi-ops">
-<div class="dk-head">
+      <div class="dk" id="dash-kpi-ops" style="position:relative;transition:border-color .5s ease,box-shadow .5s ease;">
+  <div class="dk-front-content" style="transition:opacity .3s ease;"><div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#34D399,#0A7C59);"></div>
             <div>
@@ -2642,16 +2698,24 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashOpsRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashOpsRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>
+        </</div>
+  <div class="dk-reveal-lines" id="dash-kpi-ops_lines">
+    <div class="dk-reveal-line" id="dash-kpi-ops_l1"><div class="drl-dot" style="background:#2563EB;"></div><div><div class="drl-label">التحليل العميق</div><div class="drl-text" id="dash-kpi-ops_t1">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-ops_l2"><div class="drl-dot" style="background:#F59E0B;"></div><div><div class="drl-label">الفجوات</div><div class="drl-text" id="dash-kpi-ops_t2">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-ops_l3"><div class="drl-dot" style="background:#16A34A;"></div><div><div class="drl-label">التوصيات</div><div class="drl-text" id="dash-kpi-ops_t3">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-ops_l4"><div class="drl-dot" style="background:#DC2626;"></div><div><div class="drl-label">المخاطر المحتملة</div><div class="drl-text" id="dash-kpi-ops_t4">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-ops_l5"><div class="drl-dot" style="background:#7C3AED;"></div><div><div class="drl-label">الأولوية</div><div class="drl-text" id="dash-kpi-ops_t5">—</div></div></div>
+  </div>
+  <div class="dk-reveal-prog"><div class="dk-reveal-prog-f" id="dash-kpi-ops_rp" style="background:#7C3AED;"></div></div>
+</div>/div>
     </div>
 
     <!-- الصف الثاني: 4 كروت -->
     <div class="dash-row dash-row-4">
 
       <!-- ٤. استطلاع رضا العملاء -->
-      <div class="dk" id="dash-kpi-survey">
-<div class="dk-head">
+      <div class="dk" id="dash-kpi-survey" style="position:relative;transition:border-color .5s ease,box-shadow .5s ease;">
+  <div class="dk-front-content" style="transition:opacity .3s ease;"><div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#FCD34D,#B45309);"></div>
             <div>
@@ -2678,12 +2742,20 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashSurveyRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:4px;">المخاطر المحتملة</div>
           <div id="dashSurveyRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>
+        </</div>
+  <div class="dk-reveal-lines" id="dash-kpi-survey_lines">
+    <div class="dk-reveal-line" id="dash-kpi-survey_l1"><div class="drl-dot" style="background:#2563EB;"></div><div><div class="drl-label">التحليل العميق</div><div class="drl-text" id="dash-kpi-survey_t1">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-survey_l2"><div class="drl-dot" style="background:#F59E0B;"></div><div><div class="drl-label">الفجوات</div><div class="drl-text" id="dash-kpi-survey_t2">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-survey_l3"><div class="drl-dot" style="background:#16A34A;"></div><div><div class="drl-label">التوصيات</div><div class="drl-text" id="dash-kpi-survey_t3">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-survey_l4"><div class="drl-dot" style="background:#DC2626;"></div><div><div class="drl-label">المخاطر المحتملة</div><div class="drl-text" id="dash-kpi-survey_t4">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-survey_l5"><div class="drl-dot" style="background:#7C3AED;"></div><div><div class="drl-label">الأولوية</div><div class="drl-text" id="dash-kpi-survey_t5">—</div></div></div>
+  </div>
+  <div class="dk-reveal-prog"><div class="dk-reveal-prog-f" id="dash-kpi-survey_rp" style="background:#D97706;"></div></div>
+</div>/div>
 
       <!-- ٥. ملاحظات المرافق -->
-      <div class="dk" id="dash-kpi-facility">
-<div class="dk-head">
+      <div class="dk" id="dash-kpi-facility" style="position:relative;transition:border-color .5s ease,box-shadow .5s ease;">
+  <div class="dk-front-content" style="transition:opacity .3s ease;"><div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#6EE7B7,#0A7C59);"></div>
             <div>
@@ -2709,12 +2781,20 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashFacilRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashFacilRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>
+        </</div>
+  <div class="dk-reveal-lines" id="dash-kpi-facility_lines">
+    <div class="dk-reveal-line" id="dash-kpi-facility_l1"><div class="drl-dot" style="background:#2563EB;"></div><div><div class="drl-label">التحليل العميق</div><div class="drl-text" id="dash-kpi-facility_t1">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-facility_l2"><div class="drl-dot" style="background:#F59E0B;"></div><div><div class="drl-label">الفجوات</div><div class="drl-text" id="dash-kpi-facility_t2">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-facility_l3"><div class="drl-dot" style="background:#16A34A;"></div><div><div class="drl-label">التوصيات</div><div class="drl-text" id="dash-kpi-facility_t3">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-facility_l4"><div class="drl-dot" style="background:#DC2626;"></div><div><div class="drl-label">المخاطر المحتملة</div><div class="drl-text" id="dash-kpi-facility_t4">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-facility_l5"><div class="drl-dot" style="background:#7C3AED;"></div><div><div class="drl-label">الأولوية</div><div class="drl-text" id="dash-kpi-facility_t5">—</div></div></div>
+  </div>
+  <div class="dk-reveal-prog"><div class="dk-reveal-prog-f" id="dash-kpi-facility_rp" style="background:#0D9488;"></div></div>
+</div>/div>
 
       <!-- ٦. جدولة الحصص التدريبية -->
-      <div class="dk" id="dash-kpi-nosession">
-<div class="dk-head">
+      <div class="dk" id="dash-kpi-nosession" style="position:relative;transition:border-color .5s ease,box-shadow .5s ease;">
+  <div class="dk-front-content" style="transition:opacity .3s ease;"><div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#FB923C,#C2410C);"></div>
             <div>
@@ -2740,12 +2820,20 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashNSRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashNSRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>
+        </</div>
+  <div class="dk-reveal-lines" id="dash-kpi-nosession_lines">
+    <div class="dk-reveal-line" id="dash-kpi-nosession_l1"><div class="drl-dot" style="background:#2563EB;"></div><div><div class="drl-label">التحليل العميق</div><div class="drl-text" id="dash-kpi-nosession_t1">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-nosession_l2"><div class="drl-dot" style="background:#F59E0B;"></div><div><div class="drl-label">الفجوات</div><div class="drl-text" id="dash-kpi-nosession_t2">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-nosession_l3"><div class="drl-dot" style="background:#16A34A;"></div><div><div class="drl-label">التوصيات</div><div class="drl-text" id="dash-kpi-nosession_t3">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-nosession_l4"><div class="drl-dot" style="background:#DC2626;"></div><div><div class="drl-label">المخاطر المحتملة</div><div class="drl-text" id="dash-kpi-nosession_t4">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-nosession_l5"><div class="drl-dot" style="background:#7C3AED;"></div><div><div class="drl-label">الأولوية</div><div class="drl-text" id="dash-kpi-nosession_t5">—</div></div></div>
+  </div>
+  <div class="dk-reveal-prog"><div class="dk-reveal-prog-f" id="dash-kpi-nosession_rp" style="background:#E11D48;"></div></div>
+</div>/div>
 
       <!-- ٧. تقرير المبنى -->
-      <div class="dk" id="dash-kpi-building">
-<div class="dk-head">
+      <div class="dk" id="dash-kpi-building" style="position:relative;transition:border-color .5s ease,box-shadow .5s ease;">
+  <div class="dk-front-content" style="transition:opacity .3s ease;"><div class="dk-head">
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="dk-bar" style="background:linear-gradient(180deg,#93C5FD,#1D4ED8);"></div>
             <div>
@@ -2771,8 +2859,16 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
           <div id="dashBuildRec" class="dk-rec"><div class="dk-dot" style="background:#F59E0B;"></div>—</div>
           <div class="dk-rec-title" style="margin-top:6px;">المخاطر المحتملة</div>
           <div id="dashBuildRisk" class="dk-risk"><div class="dk-dot" style="background:#DC2626;"></div>—</div>
-        </div>
-</div>
+        </</div>
+  <div class="dk-reveal-lines" id="dash-kpi-building_lines">
+    <div class="dk-reveal-line" id="dash-kpi-building_l1"><div class="drl-dot" style="background:#2563EB;"></div><div><div class="drl-label">التحليل العميق</div><div class="drl-text" id="dash-kpi-building_t1">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-building_l2"><div class="drl-dot" style="background:#F59E0B;"></div><div><div class="drl-label">الفجوات</div><div class="drl-text" id="dash-kpi-building_t2">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-building_l3"><div class="drl-dot" style="background:#16A34A;"></div><div><div class="drl-label">التوصيات</div><div class="drl-text" id="dash-kpi-building_t3">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-building_l4"><div class="drl-dot" style="background:#DC2626;"></div><div><div class="drl-label">المخاطر المحتملة</div><div class="drl-text" id="dash-kpi-building_t4">—</div></div></div>
+    <div class="dk-reveal-line" id="dash-kpi-building_l5"><div class="drl-dot" style="background:#7C3AED;"></div><div><div class="drl-label">الأولوية</div><div class="drl-text" id="dash-kpi-building_t5">—</div></div></div>
+  </div>
+  <div class="dk-reveal-prog"><div class="dk-reveal-prog-f" id="dash-kpi-building_rp" style="background:#2563EB;"></div></div>
+</div>/div>
 
     </div>
   </div>
@@ -12238,82 +12334,167 @@ function _flipCard(id) {
 }
 
 function _startAutoFlip() {
-  const DURATION = 25000;
+  const DUR = 25000;
+  const GLOWS = ['glow-green','glow-blue','glow-purple','glow-amber','glow-teal','glow-rose'];
+  let glowIdx = 0;
+  let revealTimer = null;
 
-  // بيانات كل كارد — تُجلب من الـ DOM الحالي
-  function getCardData(id) {
-    const map = {
-      'dash-kpi-viol': {
-        color:'#C0392B', title:'المخالفات',
-        getDetails: () => [
-          {icon:'📊', k:'الفجوات',          v: document.getElementById('dashViolGap')?.textContent?.trim()||'—'},
-          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashViolRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashViolRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-        ]
-      },
-      'dash-kpi-sales': {
-        color:'#0E7490', title:'عملاء الاسترداد',
-        getDetails: () => [
-          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashSalesRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashSalesRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-        ]
-      },
-      'dash-kpi-ops': {
-        color:'#1D4ED8', title:'كفاءة التشغيل',
-        getDetails: () => [
-          {icon:'📊', k:'الفجوات',          v: document.getElementById('dashOpsGap')?.textContent?.trim()||'—'},
-          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashOpsRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashOpsRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-        ]
-      },
-      'dash-kpi-survey': {
-        color:'#B45309', title:'رضا العملاء',
-        getDetails: () => [
-          {icon:'📊', k:'الفجوات',          v: document.getElementById('dashSurveyGap')?.textContent?.trim()||'—'},
-          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashSurveyRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashSurveyRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-        ]
-      },
-      'dash-kpi-facility': {
-        color:'#0A7C59', title:'ملاحظات المرافق',
-        getDetails: () => [
-          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashFacilRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashFacilRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-        ]
-      },
-      'dash-kpi-nosession': {
-        color:'#C2410C', title:'جدولة الحصص',
-        getDetails: () => [
-          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashNSRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashNSRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-        ]
-      },
-      'dash-kpi-building': {
-        color:'#1D4ED8', title:'تقرير المبنى',
-        getDetails: () => [
-          {icon:'💡', k:'التوصيات',         v: document.getElementById('dashBuildRec')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-          {icon:'⚠️', k:'المخاطر المحتملة', v: document.getElementById('dashBuildRisk')?.textContent?.replace(/^\s*[•·]\s*/,'').trim()||'—'},
-        ]
-      },
-    };
-    return map[id];
-  }
+  const cardData = {
+    'dash-kpi-viol': () => {
+      const gap  = document.getElementById('dashViolGap')?.textContent?.trim()||'—';
+      const rec  = document.getElementById('dashViolRec')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const risk = document.getElementById('dashViolRisk')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const tot  = document.getElementById('dashViolTotal')?.textContent||'—';
+      const fem  = document.getElementById('dashViolFemCount')?.textContent||'—';
+      const mal  = document.getElementById('dashViolMalCount')?.textContent||'—';
+      return [
+        `إجمالي ${tot} مخالفة — رجالي ${mal} · نسائي ${fem} · قلة المخالفات هي الهدف`,
+        gap||'لا توجد فجوات مسجلة',
+        rec||'—', risk||'لا توجد مخاطر جسيمة',
+        'راجع الزونات الأعلى تكراراً وعزّز الرصد الميداني خلال ساعات الذروة'
+      ];
+    },
+    'dash-kpi-sales': () => {
+      const rec  = document.getElementById('dashSalesRec')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const risk = document.getElementById('dashSalesRisk')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const kept = document.getElementById('dashSalesKept')?.textContent||'—';
+      const recv = document.getElementById('dashSalesRecov')?.textContent||'—';
+      const rate = document.getElementById('dashSalesRate')?.textContent||'—';
+      return [
+        `احتفاظ ${kept} · استرداد ${recv} · معدل الاحتفاظ ${rate}`,
+        `فجوة عن الهدف 75% — ${rec}`,
+        rec||'—', risk||'—',
+        'ركّز على معالجة اعتراضات العميل خلال أول 48 ساعة من طلب الاسترداد'
+      ];
+    },
+    'dash-kpi-ops': () => {
+      const gap  = document.getElementById('dashOpsGap')?.textContent?.trim()||'—';
+      const rec  = document.getElementById('dashOpsRec')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const risk = document.getElementById('dashOpsRisk')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const avg  = document.getElementById('dashOpsAvg')?.textContent||'—';
+      const fem  = document.getElementById('dashOpsFem')?.textContent||'—';
+      const mal  = document.getElementById('dashOpsMal')?.textContent||'—';
+      const bike = document.getElementById('dashOpsBike')?.textContent||'—';
+      return [
+        `متوسط ${avg} — نسائي ${fem} · رجالي ${mal} · دراجات ${bike}`,
+        gap||'جميع الأقسام ضمن الهدف', rec||'—', risk||'—',
+        'الهدف 90% لكل الأقسام — أي قسم دونها يستوجب خطة تحسين فورية'
+      ];
+    },
+    'dash-kpi-survey': () => {
+      const gap  = document.getElementById('dashSurveyGap')?.textContent?.trim()||'—';
+      const rec  = document.getElementById('dashSurveyRec')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const risk = document.getElementById('dashSurveyRisk')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const avg  = document.getElementById('dashSurveyAvg')?.textContent||'—';
+      const fem  = document.getElementById('dashSurveyFem')?.textContent||'—';
+      const mal  = document.getElementById('dashSurveyMal')?.textContent||'—';
+      return [
+        `متوسط ${avg} — نسائي ${fem} · رجالي ${mal} · الهدف 90%`,
+        gap||'—', rec||'—', risk||'—',
+        'العملاء غير الراضين أولوية للمتابعة الشخصية قبل رفع الشكوى'
+      ];
+    },
+    'dash-kpi-facility': () => {
+      const rec  = document.getElementById('dashFacilRec')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const risk = document.getElementById('dashFacilRisk')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const tot  = document.getElementById('dashFacilTotal')?.textContent||'—';
+      const td   = document.getElementById('dashFacilToday')?.textContent||'—';
+      return [
+        `${tot} ملاحظة هذه الفترة · ${td} ملاحظة اليوم`,
+        `متوسط يومي — كل ملاحظة مفتوحة تراكم يستوجب الإغلاق`,
+        rec||'—', risk||'—',
+        'جدوِل جولة تفتيشية أسبوعية لإغلاق الملاحظات المتكررة'
+      ];
+    },
+    'dash-kpi-nosession': () => {
+      const rec  = document.getElementById('dashNSRec')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const risk = document.getElementById('dashNSRisk')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const no   = document.getElementById('dashNSNoSession')?.textContent||'0';
+      const bu   = document.getElementById('dashNSBackup')?.textContent||'0';
+      return [
+        `${no} مدرب/ة بلا حصة · ${bu} احتياطي متاح اليوم`,
+        `الفجوة: ${no} حصة شاغرة مقابل ${bu} احتياطي`,
+        rec||'—', risk||'—',
+        'فعّل الاحتياطيين فوراً لسد الفجوات وتجنب تعطل الحصص'
+      ];
+    },
+    'dash-kpi-building': () => {
+      const rec  = document.getElementById('dashBuildRec')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const risk = document.getElementById('dashBuildRisk')?.textContent?.replace(/[•·]/g,'').trim()||'—';
+      const tot  = document.getElementById('dashBuildTotal')?.textContent||'—';
+      const td   = document.getElementById('dashBuildToday')?.textContent||'—';
+      return [
+        `${tot} تقرير هذه الفترة · ${td} تقرير اليوم`,
+        `تقارير مفتوحة = مشاكل معلّقة تحتاج إغلاقاً`,
+        rec||'—', risk||'—',
+        'اعتمد نظام تتبع مفتوح/مغلق لكل ملاحظة مبنى ضمن 48 ساعة'
+      ];
+    },
+  };
 
   const ids = ['dash-kpi-viol','dash-kpi-sales','dash-kpi-ops','dash-kpi-survey','dash-kpi-facility','dash-kpi-nosession','dash-kpi-building'];
   let i = 0;
+  let curId = null;
 
-  function showNext() {
+  function doReveal() {
     if (!document.getElementById('page-dashboard')?.classList.contains('active')) return;
-    const id = ids[i];
-    const d  = getCardData(id);
-    if (d) {
-      _showMindMap({ kpiId: id, title: d.title, details: d.getDetails(), color: d.color });
+
+    // أخفِ الكارد السابق
+    if (curId) _hideReveal(curId);
+
+    curId = ids[i];
+    i = (i+1) % ids.length;
+    const glow = GLOWS[glowIdx % GLOWS.length];
+    glowIdx++;
+
+    const getData = cardData[curId];
+    if (!getData) return;
+    const [t1,t2,t3,t4,t5] = getData();
+
+    // ضع النصوص
+    ['t1','t2','t3','t4','t5'].forEach((t,idx) => {
+      const el = document.getElementById(curId+'_'+t);
+      if(el) el.textContent = [t1,t2,t3,t4,t5][idx]||'—';
+    });
+
+    const card  = document.getElementById(curId);
+    const front = card?.querySelector('.dk-front-content');
+    if (!card) return;
+
+    // أضف الـ Glow
+    card.classList.add('revealing', glow);
+    if (front) front.style.opacity = '0';
+
+    // أظهر الأسطر
+    for(let li=1;li<=5;li++){
+      setTimeout(() => {
+        document.getElementById(curId+'_l'+li)?.classList.add('show');
+      }, 200 + li*160);
     }
-    i = (i + 1) % ids.length;
+
+    // progress
+    const prog = document.getElementById(curId+'_rp');
+    if(prog){ prog.style.transition='none'; prog.style.width='0%'; setTimeout(()=>{ prog.style.transition=`width ${DUR/1000}s linear`; prog.style.width='100%'; },60); }
+
+    clearTimeout(revealTimer);
+    revealTimer = setTimeout(() => { _hideReveal(curId); curId=null; }, DUR);
   }
 
-  showNext();
-  setInterval(showNext, DURATION);
+  window._hideReveal = function(id) {
+    const card  = document.getElementById(id);
+    const front = card?.querySelector('.dk-front-content');
+    if(!card) return;
+    GLOWS.forEach(g => card.classList.remove(g));
+    card.classList.remove('revealing');
+    if(front) front.style.opacity='1';
+    for(let li=1;li<=5;li++) document.getElementById(id+'_l'+li)?.classList.remove('show');
+  };
+
+  // ابدأ بعد 4 ثوانٍ
+  setTimeout(() => {
+    doReveal();
+    setInterval(doReveal, DUR);
+  }, 4000);
 }
 
 function toggleDashDark() {
