@@ -12137,87 +12137,95 @@ function _showMindMap({kpiId, title, details, color}) {
   if (!card) { _mmActive = false; return; }
 
   const rect = card.getBoundingClientRect();
+  const W = window.innerWidth, H = window.innerHeight;
 
   let mm = document.getElementById('dashMindMap');
   if (mm) mm.remove();
   mm = document.createElement('div');
   mm.id = 'dashMindMap';
-  mm.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:8888;background:rgba(0,0,0,0.32);backdrop-filter:blur(3px);';
+  mm.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:8888;background:rgba(0,0,0,0.35);backdrop-filter:blur(3px);';
   document.body.appendChild(mm);
 
+  // ── SVG للخطوط الشبكية ──
   const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;';
   mm.appendChild(svg);
 
-  // ── ثوابت الأبعاد ──
-  const HUB_R  = 68;   // نصف قطر الدائرة الرئيسية
-  const CIRC_D = 56;   // قطر الدائرة الصغيرة
+  // ── ثوابت ──
+  const HUB_R  = 68;
+  const CIRC_D = 52;
   const CIRC_R = CIRC_D / 2;
-  const CARD_W = 280;  // عرض بطاقة النص
-  const CARD_H = 58;   // ارتفاع البطاقة
+  const CARD_MIN_W = 260;
+  const CARD_H_MIN = 56;
+  const colors = ['#1E3A5F','#1B4332','#3B1F6A','#7B1D1D','#1A3A4B','#4A1942'];
 
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-
-  // الدائرة الرئيسية: دائماً على يمين الشاشة (نفس جانب الكارد)
-  // البطاقات: تمتد يساراً دائماً
   const cardCX = rect.left + rect.width / 2;
   const cardCY = rect.top  + rect.height / 2;
-
-  // إذا الكارد في النصف الأيمن: الدائرة يمين الكارد → البطاقات تذهب يسار
-  // إذا الكارد في النصف الأيسر: الدائرة يسار الكارد → البطاقات تذهب يمين
   const onRight = cardCX > W / 2;
 
   // الدائرة الرئيسية بين الكارد والبطاقات
-  // onRight: الكارد يمين، الدائرة وسط-يمين، البطاقات يسار
-  const hubX = onRight ? cardCX - 140 : cardCX + 140;
+  const hubX = onRight ? cardCX - 150 : cardCX + 150;
   const hubY = cardCY;
 
-  // البطاقات تمتد في الاتجاه المعاكس للكارد
-  // الدائرة الصغيرة تبدأ من حافة الدائرة الرئيسية
-  const hubEdgeX = onRight ? hubX - HUB_R : hubX + HUB_R;
-
-  // توزيع البطاقات عمودياً
+  // البطاقات تمتد عكس الكارد
   const count   = details.length;
-  const spacing = Math.min(74, (H * 0.78) / count);
+  const spacing = Math.min(80, (H * 0.78) / count);
   const totalH  = spacing * (count - 1);
-  const startY  = Math.max(CARD_H, Math.min(hubY - totalH/2, H - totalH - CARD_H));
+  const startY  = Math.max(CARD_H_MIN, Math.min(hubY - totalH/2, H - totalH - CARD_H_MIN));
 
-  // ألوان البطاقات
-  const colors = ['#1E3A5F','#1B4332','#3B1F6A','#7B1D1D','#1A3A4B','#4A1942'];
+  // عمود الدوائر الصغيرة X
+  const colX = onRight ? hubX - HUB_R - 20 : hubX + HUB_R + 20;
 
   // ── الدائرة الرئيسية ──
   const hub = document.createElement('div');
   hub.style.cssText = `
-    position:fixed;
-    left:${hubX - HUB_R}px;top:${hubY - HUB_R}px;
+    position:fixed;left:${hubX-HUB_R}px;top:${hubY-HUB_R}px;
     width:${HUB_R*2}px;height:${HUB_R*2}px;border-radius:50%;
-    background:radial-gradient(circle at 35% 35%,${color}ff,${color}cc);
+    background:radial-gradient(circle at 35% 35%,${color}ff,${color}bb);
     border:3px solid rgba(255,255,255,0.4);
-    box-shadow:0 0 0 8px ${color}22,0 16px 48px ${color}55,0 4px 16px rgba(0,0,0,0.35);
+    box-shadow:0 0 0 8px ${color}22,0 16px 48px ${color}55;
     display:flex;align-items:center;justify-content:center;text-align:center;
     font-family:Cairo,sans-serif;direction:rtl;
     font-size:14px;font-weight:900;color:#fff;line-height:1.5;padding:12px;
-    pointer-events:none;
-    transform:scale(0);opacity:0;
+    pointer-events:none;transform:scale(0);opacity:0;
     transition:transform .6s cubic-bezier(.34,1.4,.64,1),opacity .35s ease;
   `;
   hub.textContent = title;
   mm.appendChild(hub);
 
-  // ── خط من الكارد للدائرة الرئيسية ──
-  const lh = document.createElementNS('http://www.w3.org/2000/svg','line');
-  // x1: حافة الكارد القريبة من الدائرة
+  // ── خط الكارد → الدائرة الرئيسية ──
   const lhX1 = onRight ? rect.left : rect.right;
-  // x2: حافة الدائرة الرئيسية القريبة من الكارد
   const lhX2 = onRight ? hubX + HUB_R : hubX - HUB_R;
-  lh.setAttribute('x1', lhX1); lh.setAttribute('y1', cardCY);
-  lh.setAttribute('x2', lhX2); lh.setAttribute('y2', hubY);
+  const lh = document.createElementNS('http://www.w3.org/2000/svg','line');
+  lh.setAttribute('x1',lhX1); lh.setAttribute('y1',cardCY);
+  lh.setAttribute('x2',lhX2); lh.setAttribute('y2',hubY);
   lh.setAttribute('stroke','rgba(255,255,255,0.5)'); lh.setAttribute('stroke-width','2.5');
   const lhLen = Math.hypot(lhX2-lhX1, hubY-cardCY)+2;
   lh.setAttribute('stroke-dasharray',lhLen); lh.setAttribute('stroke-dashoffset',lhLen);
-  lh.style.transition = 'stroke-dashoffset .5s ease';
+  lh.style.transition='stroke-dashoffset .5s ease';
   svg.appendChild(lh);
+
+  // ── خط عمودي رئيسي (شبكة) ──
+  const vLineX = onRight ? hubX - HUB_R - 44 : hubX + HUB_R + 44;
+  const vLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+  vLine.setAttribute('x1',vLineX); vLine.setAttribute('y1', startY);
+  vLine.setAttribute('x2',vLineX); vLine.setAttribute('y2', startY + totalH);
+  vLine.setAttribute('stroke','rgba(255,255,255,0.3)'); vLine.setAttribute('stroke-width','1.5');
+  const vLen = totalH + 2;
+  vLine.setAttribute('stroke-dasharray',vLen); vLine.setAttribute('stroke-dashoffset',vLen);
+  vLine.style.transition='stroke-dashoffset .6s ease .5s';
+  svg.appendChild(vLine);
+
+  // ── خط أفقي من الدائرة الرئيسية للخط العمودي ──
+  const hMainX1 = onRight ? hubX - HUB_R : hubX + HUB_R;
+  const hMain = document.createElementNS('http://www.w3.org/2000/svg','line');
+  hMain.setAttribute('x1',hMainX1); hMain.setAttribute('y1',hubY);
+  hMain.setAttribute('x2',vLineX);  hMain.setAttribute('y2',hubY);
+  hMain.setAttribute('stroke','rgba(255,255,255,0.3)'); hMain.setAttribute('stroke-width','1.5');
+  const hmLen = Math.abs(vLineX-hMainX1)+2;
+  hMain.setAttribute('stroke-dasharray',hmLen); hMain.setAttribute('stroke-dashoffset',hmLen);
+  hMain.style.transition='stroke-dashoffset .4s ease .4s';
+  svg.appendChild(hMain);
 
   // ── البطاقات ──
   const itemEls = [];
@@ -12226,128 +12234,109 @@ function _showMindMap({kpiId, title, details, color}) {
     const itemY = startY + i * spacing;
     const bg    = colors[i % colors.length];
 
-    // مركز الدائرة الصغيرة:
-    // onRight → الدائرة الصغيرة على يمين البطاقة (جهة الدائرة الرئيسية)
-    // الدائرة الصغيرة تكون ملاصقة لحافة الدائرة الرئيسية أفقياً
-    const circCX = hubEdgeX + (onRight ? -CIRC_R : CIRC_R);
-    // left للـ container: يبدأ من الدائرة الصغيرة ويمتد للبطاقة
-    const acLeft = onRight ? circCX - CIRC_R - CARD_W : circCX - CIRC_R;
+    // ── خط أفقي من العمود → الدائرة الصغيرة ──
+    const circEdgeX = onRight ? vLineX - CIRC_D : vLineX + CIRC_D;
+    const hSeg = document.createElementNS('http://www.w3.org/2000/svg','line');
+    hSeg.setAttribute('x1',vLineX);    hSeg.setAttribute('y1',itemY);
+    hSeg.setAttribute('x2',circEdgeX); hSeg.setAttribute('y2',itemY);
+    hSeg.setAttribute('stroke','rgba(255,255,255,0.35)'); hSeg.setAttribute('stroke-width','1.5');
+    const hLen = Math.abs(circEdgeX-vLineX)+2;
+    hSeg.setAttribute('stroke-dasharray',hLen); hSeg.setAttribute('stroke-dashoffset',hLen);
+    hSeg.style.transition=`stroke-dashoffset .35s ease ${0.9+i*0.12}s`;
+    svg.appendChild(hSeg);
 
-    // ── خط من حافة الدائرة الرئيسية → حافة الدائرة الصغيرة (الجانب المقابل) ──
-    // x1: حافة الدائرة الرئيسية
-    const lnX1 = hubEdgeX;
-    const lnY1 = hubY;
-    // x2: حافة الدائرة الصغيرة القريبة من الدائرة الرئيسية
-    const lnX2 = onRight ? circCX + CIRC_R : circCX - CIRC_R;
-    const lnY2 = itemY;
+    // نقطة على العمود العمودي
+    const dotV = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dotV.setAttribute('cx',vLineX); dotV.setAttribute('cy',itemY); dotV.setAttribute('r','4');
+    dotV.setAttribute('fill','rgba(255,255,255,0.8)');
+    dotV.style.cssText='opacity:0;transition:opacity .2s ease;';
+    svg.appendChild(dotV);
 
-    const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
-    ln.setAttribute('x1', lnX1); ln.setAttribute('y1', lnY1);
-    ln.setAttribute('x2', lnX2); ln.setAttribute('y2', lnY2);
-    ln.setAttribute('stroke','rgba(255,255,255,0.45)'); ln.setAttribute('stroke-width','2');
-    const segLen = Math.hypot(lnX2-lnX1, lnY2-lnY1)+2;
-    ln.setAttribute('stroke-dasharray',segLen); ln.setAttribute('stroke-dashoffset',segLen);
-    ln.style.transition = `stroke-dashoffset .5s ease ${i*0.13}s`;
-    svg.appendChild(ln);
-
-    // نقطة تقاطع الخط مع الدائرة الصغيرة
-    const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    dot.setAttribute('cx', lnX2); dot.setAttribute('cy', lnY2); dot.setAttribute('r','6');
-    dot.setAttribute('fill','rgba(255,255,255,0.9)');
-    dot.style.cssText = 'opacity:0;transition:opacity .2s ease;';
-    svg.appendChild(dot);
-
-    // ── البطاقة: [دائرة صغيرة] + [نص سهم] ──
-    // onRight: الدائرة على اليمين ← النص يمتد يساراً
-    // !onRight: الدائرة على اليسار → النص يمتد يميناً
+    // ── البطاقة ──
+    // الدائرة الصغيرة + بطاقة نص (بدون clip-path للسماح بالتمدد)
+    const acLeft = onRight ? circEdgeX - CIRC_D - CARD_MIN_W : circEdgeX;
     const ac = document.createElement('div');
     ac.style.cssText = `
-      position:fixed;
-      left:${acLeft}px;top:${itemY - CARD_H/2}px;
-      display:flex;align-items:center;
-      pointer-events:none;
-      opacity:0;transform:translateX(${onRight?'10px':'-10px'});
+      position:fixed;left:${acLeft}px;top:${itemY - CARD_H_MIN/2}px;
+      display:flex;align-items:stretch;gap:0;
+      pointer-events:none;direction:rtl;font-family:Cairo,sans-serif;
+      opacity:0;transform:translateX(${onRight?'8px':'-8px'});
       transition:opacity .4s ease,transform .45s cubic-bezier(.34,1.2,.64,1);
-      direction:rtl;font-family:Cairo,sans-serif;
     `;
 
     // الدائرة الصغيرة
     const circle = document.createElement('div');
     circle.style.cssText = `
-      width:${CIRC_D}px;height:${CIRC_D}px;border-radius:50%;
+      width:${CIRC_D}px;min-height:${CIRC_D}px;border-radius:50%;
       background:radial-gradient(circle at 35% 35%,${bg}ff,${bg}cc);
       border:2.5px solid rgba(255,255,255,0.35);
       box-shadow:0 4px 18px rgba(0,0,0,0.35),0 0 0 4px ${bg}33;
       display:flex;align-items:center;justify-content:center;
-      font-size:20px;flex-shrink:0;z-index:2;
+      font-size:20px;flex-shrink:0;z-index:2;align-self:center;
     `;
     circle.textContent = d.icon || '◆';
 
-    // بطاقة النص مع سهم
-    // onRight → السهم يشير يمين (نحو الدائرة), النص يسار
-    // !onRight → السهم يشير يسار, النص يمين
-    const arrowClip = onRight
-      ? `polygon(${CIRC_R}px 0,100% 0,100% 100%,${CIRC_R}px 100%,0 50%)`   // سهم يشير يسار
-      : `polygon(0 0,calc(100% - ${CIRC_R}px) 0,100% 50%,calc(100% - ${CIRC_R}px) 100%,0 100%)`; // سهم يشير يمين
-    const arrowMargin = onRight ? `margin-right:-${CIRC_R}px` : `margin-left:-${CIRC_R}px`;
-    const arrowPad    = onRight ? `0 24px 0 ${CIRC_R+16}px` : `0 ${CIRC_R+16}px 0 24px`;
-
-    const arrow = document.createElement('div');
-    arrow.style.cssText = `
-      min-height:${CARD_H}px;height:auto;min-width:${CARD_W}px;max-width:400px;
+    // بطاقة النص — بدون clip-path، border-radius فقط
+    const txtBox = document.createElement('div');
+    const br = onRight ? '0 10px 10px 0' : '10px 0 0 10px';
+    const marg = onRight ? `margin-left:-${CIRC_R}px` : `margin-right:-${CIRC_R}px`;
+    const pad  = onRight ? `10px 16px 10px ${CIRC_R+12}px` : `10px ${CIRC_R+12}px 10px 16px`;
+    txtBox.style.cssText = `
+      min-width:${CARD_MIN_W}px;max-width:420px;
+      min-height:${CARD_H_MIN}px;
       display:flex;align-items:center;
-      padding:${arrowPad};
-      padding-top:12px;padding-bottom:12px;
-      ${arrowMargin};
-      clip-path:${arrowClip};
+      padding:${pad};
+      ${marg};
       background:${bg};
+      border-radius:${br};
       box-shadow:0 6px 24px rgba(0,0,0,0.3);
       flex-shrink:0;
     `;
-    arrow.innerHTML = `
+    txtBox.innerHTML = `
       <div style="width:100%;">
         <div style="font-size:9px;color:rgba(255,255,255,.55);margin-bottom:4px;letter-spacing:.6px;text-transform:uppercase;">${d.k}</div>
         <div style="font-size:13px;font-weight:900;color:#fff;line-height:1.5;white-space:normal;word-break:break-word;">${d.v}</div>
       </div>
     `;
 
-    // onRight: دائرة يمين ثم بطاقة يسار (RTL)
     if (onRight) {
       ac.appendChild(circle);
-      ac.appendChild(arrow);
+      ac.appendChild(txtBox);
     } else {
-      ac.appendChild(arrow);
+      ac.appendChild(txtBox);
       ac.appendChild(circle);
     }
     mm.appendChild(ac);
-    itemEls.push({ac, dot, ln});
+    itemEls.push({ac, dotV, hSeg});
   });
 
   // ── Progress bar ──
   const progWrap = document.createElement('div');
-  progWrap.style.cssText = `
-    position:fixed;left:${hubX-HUB_R}px;top:${hubY+HUB_R+10}px;
+  progWrap.style.cssText = `position:fixed;left:${hubX-HUB_R}px;top:${hubY+HUB_R+10}px;
     width:${HUB_R*2}px;height:3px;background:rgba(255,255,255,0.12);
-    border-radius:2px;overflow:hidden;opacity:0;transition:opacity .3s ease;pointer-events:none;
-  `;
+    border-radius:2px;overflow:hidden;opacity:0;transition:opacity .3s ease;pointer-events:none;`;
   const progFill = document.createElement('div');
-  progFill.style.cssText = `height:100%;background:rgba(255,255,255,0.75);border-radius:2px;width:100%;`;
+  progFill.style.cssText = 'height:100%;background:rgba(255,255,255,0.75);border-radius:2px;width:100%;';
   progWrap.appendChild(progFill);
   mm.appendChild(progWrap);
 
   // ── تسلسل الظهور ──
-  setTimeout(() => { lh.style.strokeDashoffset = '0'; }, 60);
-  setTimeout(() => { hub.style.transform = 'scale(1)'; hub.style.opacity = '1'; }, 400);
-  itemEls.forEach(({ac, dot, ln}, i) => {
-    setTimeout(() => { ln.style.strokeDashoffset = '0'; },            700 + i*140);
-    setTimeout(() => { dot.style.opacity = '1'; },                    700 + i*140 + 320);
-    setTimeout(() => { ac.style.opacity='1'; ac.style.transform='translateX(0)'; }, 700 + i*140 + 380);
+  setTimeout(()=>{ lh.style.strokeDashoffset='0'; }, 60);
+  setTimeout(()=>{ hub.style.transform='scale(1)'; hub.style.opacity='1'; }, 400);
+  setTimeout(()=>{ hMain.style.strokeDashoffset='0'; }, 500);
+  setTimeout(()=>{ vLine.style.strokeDashoffset='0'; }, 600);
+
+  itemEls.forEach(({ac, dotV, hSeg}, i) => {
+    setTimeout(()=>{ hSeg.style.strokeDashoffset='0'; },          900+i*130);
+    setTimeout(()=>{ dotV.style.opacity='1'; },                   900+i*130+200);
+    setTimeout(()=>{ ac.style.opacity='1'; ac.style.transform='translateX(0)'; }, 900+i*130+260);
   });
-  setTimeout(() => {
-    progWrap.style.opacity = '1';
-    progFill.style.transition = `width 20s linear`;
-    progFill.style.width = '0%';
-  }, 700 + count*140 + 460);
+
+  setTimeout(()=>{
+    progWrap.style.opacity='1';
+    progFill.style.transition='width 20s linear';
+    progFill.style.width='0%';
+  }, 900+count*130+400);
 
   clearTimeout(_mmTimer);
   _mmTimer = setTimeout(_hideMindMap, 20000);
