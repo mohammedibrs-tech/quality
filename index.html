@@ -130,12 +130,24 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 .section-card.male:hover{border-color:rgba(82,153,224,0.4);}
 .section-card.survey:hover{border-color:rgba(0,200,180,0.4);}
 .section-card.facility:hover{border-color:rgba(82,200,122,0.4);}
-.s-icon{width:56px;height:64px;flex-shrink:0;border-radius:0;margin:0;
-  display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(0,0,0,0.15);}
-.section-card.female .s-icon{background:rgba(224,114,176,0.12);}
-.section-card.male .s-icon{background:rgba(82,153,224,0.12);}
-.section-card.survey .s-icon{background:rgba(0,200,180,0.12);}
-.section-card.facility .s-icon{background:rgba(82,200,122,0.12);}
+.s-icon{width:48px;height:48px;flex-shrink:0;border-radius:12px;margin:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,168,150,0.08);
+  color:var(--accent);
+  transition:background .2s ease;
+}
+.section-card.female .s-icon{background:rgba(224,114,176,0.1);color:#C84590;}
+.section-card.male .s-icon{background:rgba(82,153,224,0.1);color:#3070C0;}
+.section-card.survey .s-icon{background:rgba(0,200,180,0.1);color:var(--accent);}
+.section-card.facility .s-icon{background:rgba(82,200,122,0.1);color:#30A060;}
+.section-card.building .s-icon{background:rgba(37,99,235,0.1);color:#2563EB;}
+.section-card.ops .s-icon{background:rgba(102,126,234,0.1);color:#667EEA;}
+.section-card.attend .s-icon{background:rgba(231,76,60,0.08);color:#E74C3C;}
+.section-card.sales .s-icon{background:rgba(245,166,35,0.1);color:#F5A623;}
+.section-card.rating .s-icon{background:rgba(243,156,18,0.1);color:#F39C12;}
+.section-card.archive .s-icon{background:rgba(108,117,125,0.1);color:#6C757D;}
+.section-card:hover .s-icon{background:rgba(0,168,150,0.15);}
+.section-card.full-w .s-icon{background:rgba(255,255,255,0.12);color:#fff;}
 .s-title-ar{font-size:13px;font-weight:900;margin-bottom:2px;line-height:1.3;color:#fff;}
 .s-text{flex:1;padding:0 12px;display:flex;flex-direction:column;justify-content:center;}
 .s-arrow{font-size:16px;color:rgba(255,255,255,0.55);padding:0 12px 0 8px;flex-shrink:0;}
@@ -1331,44 +1343,44 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   <div class="home-sections">
 
     <!-- ══ الخدمات الإلكترونية لموظفي الجودة ══ -->
-    <div class="sec-group-label" style="font-size:12px;font-weight:900;color:var(--accent);background:rgba(0,168,150,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid var(--accent);">🛠️ الخدمات الإلكترونية لموظفي الجودة</div>
+    <div class="sec-group-label" style="font-size:12px;font-weight:900;color:var(--accent);background:rgba(0,168,150,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid var(--accent);">الخدمات الإلكترونية لموظفي الجودة</div>
 
     <div class="section-card full-w" onclick="showWeeklyTasks()" style="background:linear-gradient(to right,#00C8B4,#0D3040);">
-      <div class="s-icon">📋</div>
+      <div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="4" rx="1"/><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></div>
       <div class="s-text"><div class="s-title-ar" style="text-align:center;">جدول مهامي الأسبوعي</div><div class="s-title-en" style="text-align:center;">MY WEEKLY SCHEDULE</div></div>
       <div class="s-arrow">›</div>
     </div>
 
     <div class="cards-row-2">
       <div class="section-card male card-col" onclick="showSection('male')" style="position:relative;">
-        <div class="s-icon">👨</div>
+        <div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></div>
         <div class="s-text"><div class="s-title-ar">القسم الرجالي</div><div class="s-title-en">MALE</div></div>
         <span id="pendingBadgeMale" style="display:none;position:absolute;top:8px;left:8px;background:#E74C3C;color:#fff;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:900;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(231,76,60,0.5);">0</span>
       </div>
       <div class="section-card female card-col" onclick="showSection('female')" style="position:relative;">
-        <div class="s-icon">👩</div>
+        <div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M8 22c1 .7 2.5 1 4 1s3-.3 4-1"/></svg></div>
         <div class="s-text"><div class="s-title-ar">القسم النسائي</div><div class="s-title-en">FEMALE</div></div>
         <span id="pendingBadgeFemale" style="display:none;position:absolute;top:8px;left:8px;background:#E74C3C;color:#fff;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:900;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(231,76,60,0.5);">0</span>
       </div>
     </div>
 
-    <div class="section-card survey" onclick="showSection('survey')"><div class="s-icon">⭐</div><div class="s-text"><div class="s-title-ar">استطلاع رضا العملاء</div><div class="s-title-en">CUSTOMER SATISFACTION SURVEY</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card facility" onclick="showSection('facility')"><div class="s-icon">🔧</div><div class="s-text"><div class="s-title-ar">تقرير ملاحظات المرافق</div><div class="s-title-en">FACILITY REPORTS</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card building" onclick="showSection('building')"><div class="s-icon">🏢</div><div class="s-text"><div class="s-title-ar">تقرير المبنى الرئيسي والعملي</div><div class="s-title-en">MAIN BUILDING REPORT</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card" onclick="openSec('no-session')" style="background:linear-gradient(135deg,#7D3A10,#5C2A0A);border-right:4px solid #E8873A;"><div class="s-icon" style="color:#E8873A;">🚫</div><div class="s-text"><div class="s-title-ar" style="color:#fff;">تقرير جدولة الحصص التدريبية</div><div class="s-title-en" style="color:rgba(232,135,58,0.8);">TRAINING SESSIONS SCHEDULE</div></div><div class="s-arrow" style="color:#E8873A;">›</div></div>
+    <div class="section-card survey" onclick="showSection('survey')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><div class="s-text"><div class="s-title-ar">استطلاع رضا العملاء</div><div class="s-title-en">CUSTOMER SATISFACTION SURVEY</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card facility" onclick="showSection('facility')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><div class="s-text"><div class="s-title-ar">تقرير ملاحظات المرافق</div><div class="s-title-en">FACILITY REPORTS</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card building" onclick="showSection('building')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></div><div class="s-text"><div class="s-title-ar">تقرير المبنى الرئيسي والعملي</div><div class="s-title-en">MAIN BUILDING REPORT</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card" onclick="openSec('no-session')" style="background:linear-gradient(135deg,#7D3A10,#5C2A0A);border-right:4px solid #E8873A;"><div class="s-icon" style="color:#E8873A;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg></div><div class="s-text"><div class="s-title-ar" style="color:#fff;">تقرير جدولة الحصص التدريبية</div><div class="s-title-en" style="color:rgba(232,135,58,0.8);">TRAINING SESSIONS SCHEDULE</div></div><div class="s-arrow" style="color:#E8873A;">›</div></div>
 
     <!-- ══ التقارير الإدارية ══ -->
-    <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#7D3C98;background:rgba(125,60,152,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #7D3C98;">📊 التقارير الإدارية</div>
+    <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#7D3C98;background:rgba(125,60,152,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #7D3C98;">التقارير الإدارية</div>
 
-    <div class="section-card ops" onclick="showOpsMonthModal()"><div class="s-icon">⚙️</div><div class="s-text"><div class="s-title-ar">كفاءة التشغيل</div><div class="s-title-en">OPERATIONAL EFFICIENCY</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card attend" onclick="adminOnly('attend')"><div class="s-icon">🕐</div><div class="s-text"><div class="s-title-ar">الحضور والانصراف فريق الجودة</div><div class="s-title-en">ATTENDANCE & DEPARTURE</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card sales" onclick="adminOnly('sales')"><div class="s-icon">💼</div><div class="s-text"><div class="s-title-ar">تقرير فريق المبيعات</div><div class="s-title-en">SALES DEPARTMENT</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon">🌟</div><div class="s-text"><div class="s-title-ar">المدرب/ة الأعلى تقييم بالاستبيان</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon">🗂️</div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card" onclick="openQuarterlyPage()" style="background:linear-gradient(135deg,#0D1F2D,#1A3A5C);"><div class="s-icon" style="color:#00C8B4;">📋</div><div class="s-text"><div class="s-title-ar" style="color:#fff;">التقارير الربعية</div><div class="s-title-en" style="color:rgba(0,200,180,0.8);">QUARTERLY REPORTS</div></div><div class="s-arrow" style="color:#00C8B4;">›</div></div>
+    <div class="section-card ops" onclick="showOpsMonthModal()"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14M12 2v2M12 20v2M2 12H4M20 12h2"/></svg></div><div class="s-text"><div class="s-title-ar">كفاءة التشغيل</div><div class="s-title-en">OPERATIONAL EFFICIENCY</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card attend" onclick="adminOnly('attend')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="s-text"><div class="s-title-ar">الحضور والانصراف فريق الجودة</div><div class="s-title-en">ATTENDANCE & DEPARTURE</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card sales" onclick="adminOnly('sales')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div><div class="s-text"><div class="s-title-ar">تقرير فريق المبيعات</div><div class="s-title-en">SALES DEPARTMENT</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><div class="s-text"><div class="s-title-ar">المدرب/ة الأعلى تقييم بالاستبيان</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card" onclick="openQuarterlyPage()" style="background:linear-gradient(135deg,#0D1F2D,#1A3A5C);"><div class="s-icon" style="color:#00C8B4;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="4" rx="1"/><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></div><div class="s-text"><div class="s-title-ar" style="color:#fff;">التقارير الربعية</div><div class="s-title-en" style="color:rgba(0,200,180,0.8);">QUARTERLY REPORTS</div></div><div class="s-arrow" style="color:#00C8B4;">›</div></div>
 
     <!-- ══ الأنشطة والفعاليات ══ -->
-    <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#6A0DAD;background:rgba(106,13,173,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #6A0DAD;">🎯 الأنشطة والفعاليات</div>
+    <div class="sec-group-label" style="font-size:12px;font-weight:900;color:#6A0DAD;background:rgba(106,13,173,0.08);border-radius:12px;padding:6px 14px;border-right:3px solid #6A0DAD;">الأنشطة والفعاليات</div>
   </div>
 
   <!-- بنك الأفكار + لعبة اليوم في grid متناسق -->
@@ -1377,7 +1389,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
       <!-- بنك الأفكار -->
       <div class="section-card" onclick="openIdeasBank()" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);position:relative;border-radius:20px;min-height:80px;">
-        <div class="s-icon">💡</div>
+        <div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="22"/><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.5-1.3 4.7-3.3 6-.5.3-.7.9-.7 1.5V17H9v-.5c0-.6-.2-1.2-.7-1.5A7 7 0 0 1 12 2z"/></svg></div>
         <div class="s-text">
           <div class="s-title-ar">بنك الأفكار</div>
           <div class="s-title-en">IDEAS BANK</div>
@@ -1389,7 +1401,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   <!-- ══ لعبة اليوم ══ -->
       <div id="gameDayCard" onclick="openGameModal()" class="section-card" style="background:linear-gradient(135deg,#1A0533,#3D0B6B,#6A0DAD);position:relative;border-radius:20px;min-height:80px;overflow:hidden;cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
         <div style="position:absolute;inset:0;opacity:0.12;background:radial-gradient(circle at 20% 50%,#fff 1px,transparent 1px),radial-gradient(circle at 80% 20%,#fff 1px,transparent 1px);background-size:40px 40px,60px 60px;pointer-events:none;"></div>
-        <div class="s-icon" style="background:rgba(255,255,255,0.1);">🎮</div>
+        <div class="s-icon" style="background:rgba(255,255,255,0.1);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="2"/><path d="M7 12h4M9 10v4M17 12h.01M15 12h.01"/></svg></div>
         <div class="s-text" style="position:relative;z-index:1;">
           <div class="s-title-ar" style="color:#fff;">لعبة اليوم</div>
           <div class="s-title-en" style="color:rgba(255,255,255,0.6);">DAILY QUALITY QUIZ</div>
