@@ -1319,9 +1319,11 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <button class="nav-tab" id="navLoginBtn" onclick="showLM()" style="flex-shrink:0;">دخول</button>
   </div>
   <!-- ملف شخصي في الجوال -->
-  <div id="navProfileBtn" onclick="openProfileModal()" style="display:none;align-items:center;gap:5px;padding:4px 8px;border-radius:16px;border:1px solid var(--border);cursor:pointer;flex-shrink:0;margin-right:4px;">
+  <div id="navProfileBtn" onclick="openProfileModal()" style="display:none;align-items:center;gap:5px;padding:4px 8px;border-radius:16px;border:1px solid var(--border);cursor:pointer;flex-shrink:0;margin-right:2px;">
     <div id="navAvatarEl" style="width:24px;height:24px;border-radius:50%;background:rgba(0,168,150,0.15);border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--accent);overflow:hidden;flex-shrink:0;">م</div>
   </div>
+  <!-- زر الثيم في الجوال -->
+  <button onclick="toggleTheme();updateTopBarUser()" style="flex-shrink:0;width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;margin-right:4px;" id="navThemeBtn">🌙</button>
   <div class="nav-logo">
     <div id="navUser"></div>
     <div class="nav-logo-text"></div>
@@ -1449,7 +1451,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <span id="homeMonth" style="background:rgba(0,200,180,0.12);border:1px solid rgba(0,200,180,0.2);padding:2px 10px;border-radius:12px;font-size:9px;color:var(--accent);"></span>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div id="swFemale" onclick="showSection('female')" style="display:flex;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#E74C3C,#922B21);box-shadow:0 4px 16px rgba(231,76,60,0.35);transition:transform .15s;">
+      <div id="swFemale" onclick="showSection('female')" style="display:flex;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#4A1E6B,#2D1042);box-shadow:0 4px 16px rgba(74,30,107,0.45);transition:transform .15s;">
         <div style="flex:0 0 60px;height:70px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(0,0,0,0.15);">👩</div>
         <div style="flex:1;padding:0 10px;text-align:right;">
           <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:2px;">مخالفات النسائي</div>
@@ -1462,7 +1464,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
         <div style="flex:0 0 24px;text-align:center;font-size:16px;color:rgba(255,255,255,0.5);">›</div>
       </div>
-      <div id="swMale" onclick="showSection('male')" style="display:flex;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#00A896,#007B6E);box-shadow:0 4px 16px rgba(0,168,150,0.35);transition:transform .15s;">
+      <div id="swMale" onclick="showSection('male')" style="display:flex;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#1a3a5c,#0d1f2d);box-shadow:0 4px 16px rgba(26,58,92,0.45);transition:transform .15s;">
         <div style="flex:0 0 60px;height:70px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(0,0,0,0.15);">👨</div>
         <div style="flex:1;padding:0 10px;text-align:right;">
           <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:2px;">مخالفات الرجالي</div>
@@ -1475,17 +1477,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </div>
         <div style="flex:0 0 24px;text-align:center;font-size:16px;color:rgba(255,255,255,0.5);">›</div>
       </div>
-      <div id="swOps" onclick="showOpsMonthModal()" style="display:flex;align-items:center;overflow:hidden;border-radius:18px;cursor:pointer;min-height:70px;background:linear-gradient(to right,#7D3C98,#4A235A);box-shadow:0 4px 16px rgba(125,60,152,0.3);transition:transform .15s;grid-column:span 2;">
-        <div style="flex:0 0 60px;height:70px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(0,0,0,0.15);">⚙️</div>
-        <div style="flex:1;padding:0 10px;text-align:right;">
-          <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:2px;">كفاءة التشغيل</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.75);">OPERATIONAL EFFICIENCY</div>
-        </div>
-        <div style="flex:0 0 54px;text-align:center;">
-          <div id="swOpsNum" style="filter:blur(6px);transition:filter .3s;" style="font-size:20px;font-weight:900;color:#fff;">—</div>
-        </div>
-        <div style="flex:0 0 24px;text-align:center;font-size:16px;color:rgba(255,255,255,0.5);">›</div>
-      </div>
+
     </div>
   </div>
 </div>
@@ -3878,7 +3870,6 @@ function doLogin(){
     sbUpdateAuth();
     renderDailyBulletin().catch(()=>{});
     if(currentUser.role==='admin') loadPendingViolations();
-    // تسجيل Push Notifications للمدير
     if(currentUser.role==='admin') _registerPush();
     if(pendingSec){
       const s=pendingSec;pendingSec=null;
@@ -3889,8 +3880,110 @@ function doLogin(){
         openSec(s);
       }
     }
+    // إشعار الملف الشخصي
+    setTimeout(() => _showProfileHint(), 2000);
   }else{document.getElementById('lErr').style.display='block';}
 }
+// ── إشعار الملف الشخصي — 3 مرات يومياً ──
+function _showProfileHint() {
+  if (!currentUser) return;
+  const key = `nq_profile_hint_${currentUser.username}_${new Date().toISOString().slice(0,10)}`;
+  const count = parseInt(localStorage.getItem(key)||'0');
+  if (count >= 3) return;
+  localStorage.setItem(key, count+1);
+
+  // ابحث عن زر الملف الشخصي
+  const target = document.getElementById('navProfileBtn') || document.getElementById('tbUserArea');
+  if (!target) return;
+
+  // أنشئ الـ overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'profileHintOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9500;pointer-events:none;';
+  document.body.appendChild(overlay);
+
+  const rect = target.getBoundingClientRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top  + rect.height/2;
+
+  // SVG السهم المتحرك
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;overflow:visible;';
+  overlay.appendChild(svg);
+
+  // دائرة تنبض حول الزر
+  const pulse = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  pulse.setAttribute('cx',cx); pulse.setAttribute('cy',cy); pulse.setAttribute('r','0');
+  pulse.setAttribute('fill','none'); pulse.setAttribute('stroke','rgba(0,200,180,0.6)'); pulse.setAttribute('stroke-width','2');
+  svg.appendChild(pulse);
+
+  // رسم السهم
+  const arrowY = cy + 60;
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d',`M${cx} ${arrowY} L${cx} ${cy+18}`);
+  path.setAttribute('stroke','#00C8B4'); path.setAttribute('stroke-width','2.5');
+  path.setAttribute('stroke-dasharray','8 4'); path.setAttribute('marker-end','url(#arrowHead)');
+  path.style.cssText = 'opacity:0;transition:opacity .4s ease .3s;';
+  svg.appendChild(path);
+
+  // رأس السهم
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML = `<marker id="arrowHead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="#00C8B4"/>
+  </marker>`;
+  svg.insertBefore(defs, svg.firstChild);
+
+  // بطاقة النص
+  const card = document.createElement('div');
+  const cardW = 200;
+  const cardX = Math.min(Math.max(cx - cardW/2, 10), window.innerWidth - cardW - 10);
+  card.style.cssText = `
+    position:fixed;
+    left:${cardX}px;top:${arrowY + 10}px;
+    width:${cardW}px;
+    background:linear-gradient(135deg,#0D1F2D,#1a3a5c);
+    border:1.5px solid rgba(0,200,180,0.4);
+    border-radius:14px;padding:12px 14px;
+    font-family:Cairo,sans-serif;direction:rtl;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4),0 0 0 1px rgba(0,200,180,0.15);
+    opacity:0;transform:translateY(8px);
+    transition:opacity .4s ease .5s,transform .4s ease .5s;
+    pointer-events:auto;cursor:pointer;
+  `;
+  card.innerHTML = `
+    <div style="font-size:11px;font-weight:900;color:#00C8B4;margin-bottom:4px;">✨ جديد — الملف الشخصي</div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.8);line-height:1.5;">اطّلع على ملفك الشخصي الجديد لمتابعة إنجازك الأسبوعي وسجلاتك</div>
+    <div style="font-size:9px;color:rgba(0,200,180,0.6);margin-top:6px;text-align:center;">اضغط لفتح الملف الشخصي ›</div>
+  `;
+  card.onclick = () => { overlay.remove(); openProfileModal(); };
+  overlay.appendChild(card);
+
+  // أضف إمكانية الإغلاق بالضغط على الخلفية
+  overlay.style.pointerEvents = 'none';
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+
+  // أنيميشن النبضة
+  let r = 0;
+  const pAnim = setInterval(() => {
+    r += 1.5;
+    pulse.setAttribute('r', r);
+    pulse.setAttribute('stroke-opacity', Math.max(0, 1 - r/40));
+    if (r > 40) { r=0; pulse.setAttribute('r','0'); }
+  }, 30);
+
+  // أظهر العناصر
+  setTimeout(() => { path.style.opacity='1'; }, 300);
+  setTimeout(() => { card.style.opacity='1'; card.style.transform='translateY(0)'; }, 500);
+
+  // أغلق تلقائياً بعد 6 ثوانٍ
+  setTimeout(() => {
+    clearInterval(pAnim);
+    overlay.style.transition='opacity .4s ease';
+    overlay.style.opacity='0';
+    setTimeout(()=>overlay.remove(), 400);
+  }, 6000);
+}
+
 function doLogout(){
   currentUser=null;
   NQ._cache={};NQ._lastFetch=null; // مسح الكاش عند الخروج
@@ -14677,6 +14770,11 @@ function updateTopBarUser() {
   if(thIcon) {
     const isDark = document.documentElement.getAttribute('data-theme')==='dark';
     thIcon.textContent = isDark ? '☀️' : '🌙';
+  }
+  const navThemeBtn = document.getElementById('navThemeBtn');
+  if(navThemeBtn) {
+    const isDark2 = document.documentElement.getAttribute('data-theme')==='dark';
+    navThemeBtn.textContent = isDark2 ? '☀️' : '🌙';
   }
 }
 
