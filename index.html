@@ -1496,6 +1496,21 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div class="sub" id="vSub">VIOLATIONS — FEMALE SECTION</div>
     </div>
 
+    <!-- تبويبات الصفحة -->
+    <div style="display:flex;gap:0;background:var(--card2);border-radius:14px;padding:4px;margin-bottom:18px;border:1px solid var(--border);">
+      <button id="vTabViol" onclick="switchViolTab('viol')"
+        style="flex:1;padding:10px;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;background:var(--accent);color:#fff;">
+        📋 رصد المخالفات
+      </button>
+      <button id="vTabPhone" onclick="switchViolTab('phone')"
+        style="flex:1;padding:10px;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;background:transparent;color:var(--text-dim);">
+        📱 سجل استخدام الجوال
+      </button>
+    </div>
+
+    <!-- محتوى: رصد المخالفات -->
+    <div id="vPanelViol">
+
     <!-- زر مراجعة المعلقة (admin فقط) -->
     <div id="pendingReviewBanner" style="display:none;background:rgba(231,76,60,0.08);border:1.5px solid rgba(231,76,60,0.3);border-radius:14px;padding:12px 16px;margin-bottom:14px;cursor:pointer;" onclick="openPendingModal()">
       <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -1624,6 +1639,24 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         <button class="new-btn" onclick="resetV()">+ تسجيل جديد / New Entry</button>
       </div>
     </div>
+
+    </div><!-- end vPanelViol -->
+
+    <!-- محتوى: سجل استخدام الجوال -->
+    <div id="vPanelPhone" style="display:none;">
+      <div style="background:rgba(251,146,60,0.08);border:1.5px solid rgba(251,146,60,0.3);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:22px;flex-shrink:0;">📱</span>
+        <div>
+          <div style="font-size:12px;font-weight:900;color:#EA580C;">سجل المدربين الذين شوهدوا يستخدمون الجوال أثناء الحصة</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">مجمَّع من جميع مخالفات "استخدام الجوال" المرصودة في هذا القسم</div>
+        </div>
+      </div>
+      <!-- KPIs -->
+      <div id="vPhoneKpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:16px;"></div>
+      <!-- الجدول -->
+      <div id="vPhoneTable"></div>
+    </div>
+
   </div>
 </div>
 
@@ -4347,6 +4380,138 @@ function resetV(){
   const btn=document.getElementById('vBtn');btn.disabled=false;btn.textContent='✦ تسجيل المخالفة / Submit';
   document.getElementById('vForm').style.display='block';document.getElementById('vOk').style.display='none';
   autoObs('vObs');setDT();
+}
+
+// ── تبويبات صفحة المخالفات ──
+function switchViolTab(tab) {
+  const panelViol  = document.getElementById('vPanelViol');
+  const panelPhone = document.getElementById('vPanelPhone');
+  const btnViol    = document.getElementById('vTabViol');
+  const btnPhone   = document.getElementById('vTabPhone');
+  const accent = 'var(--accent)';
+  const none   = 'transparent';
+
+  if (tab === 'viol') {
+    panelViol.style.display  = '';
+    panelPhone.style.display = 'none';
+    btnViol.style.background  = accent;
+    btnViol.style.color       = '#fff';
+    btnPhone.style.background = none;
+    btnPhone.style.color      = 'var(--text-dim)';
+  } else {
+    panelViol.style.display  = 'none';
+    panelPhone.style.display = '';
+    btnPhone.style.background = accent;
+    btnPhone.style.color      = '#fff';
+    btnViol.style.background  = none;
+    btnViol.style.color       = 'var(--text-dim)';
+    loadPhoneTracker();
+  }
+}
+
+async function loadPhoneTracker() {
+  const kpiEl   = document.getElementById('vPhoneKpis');
+  const tableEl = document.getElementById('vPhoneTable');
+  if (!tableEl) return;
+
+  tableEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">جارٍ التحميل...</div>';
+
+  try {
+    // جلب مخالفات الجوال للقسم الحالي فقط
+    const section = curSec || 'female';
+    const { data, error } = await db
+      .from('violations')
+      .select('trainer_name,zone,date,time,observer,description,phone_obs_count')
+      .ilike('violation_type','%استخدام الجوال%')
+      .eq('section', section)
+      .order('date',{ascending:false});
+
+    if (error) throw error;
+    const all = data || [];
+
+    if (!all.length) {
+      if (kpiEl) kpiEl.innerHTML = '';
+      tableEl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-dim);font-size:12px;">لا توجد مخالفات جوال مرصودة في هذا القسم</div>';
+      return;
+    }
+
+    // تجميع بالمدرب
+    const byTrainer = {};
+    all.forEach(r => {
+      const name = r.trainer_name || '—';
+      if (!byTrainer[name]) byTrainer[name] = { name, zone:r.zone||'—', observations:[], totalCount:0 };
+      const phoneCount = parseInt(r.phone_obs_count)||1;
+      byTrainer[name].observations.push({
+        date:r.date||'—', time:r.time||'—',
+        observer:r.observer||'—', count:phoneCount
+      });
+      byTrainer[name].totalCount += phoneCount;
+    });
+
+    // ترتيب تنازلياً حسب عدد المرات
+    const sorted = Object.values(byTrainer).sort((a,b)=>b.totalCount-a.totalCount);
+    const totalIncidents = all.length;
+    const uniqueTrainers = sorted.length;
+    const maxCount = sorted[0]?.totalCount || 0;
+
+    // KPIs
+    if (kpiEl) {
+      const sectionLabel = section==='female'?'نسائي':'رجالي';
+      kpiEl.innerHTML = [
+        {label:'إجمالي المشاهدات', value:totalIncidents, color:'#EA580C'},
+        {label:'عدد المدربين',      value:uniqueTrainers, color:'#DC2626'},
+        {label:'الأعلى تكراراً',    value:maxCount+' مرة', color:'#7C3AED'},
+        {label:'القسم',             value:sectionLabel,   color:'#2563EB'},
+      ].map(k=>`
+        <div style="background:var(--card2);border-radius:12px;padding:12px;text-align:center;border-top:3px solid ${k.color};">
+          <div style="font-size:20px;font-weight:900;color:${k.color};">${k.value}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:3px;">${k.label}</div>
+        </div>`).join('');
+    }
+
+    // جدول المدربين
+    tableEl.innerHTML = sorted.map((t,idx) => {
+      const pct = maxCount>0 ? Math.round(t.totalCount/maxCount*100) : 0;
+      const c = t.totalCount>=5?'#DC2626':t.totalCount>=3?'#EA580C':'#D97706';
+      return `
+        <div style="background:var(--card);border-radius:14px;border:1px solid var(--border);margin-bottom:12px;overflow:hidden;">
+          <!-- رأس المدرب -->
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card2);border-bottom:1px solid var(--border);cursor:pointer;"
+            onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'">
+            <div style="width:36px;height:36px;border-radius:50%;background:${c}22;border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:${c};flex-shrink:0;">${idx+1}</div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:900;color:var(--text);">${t.name}</div>
+              <div style="font-size:10px;color:var(--text-dim);">زون ${t.zone}</div>
+            </div>
+            <div style="text-align:center;flex-shrink:0;">
+              <div style="font-size:22px;font-weight:900;color:${c};">${t.totalCount}</div>
+              <div style="font-size:9px;color:var(--text-dim);">مشاهدة</div>
+            </div>
+          </div>
+          <!-- شريط التكرار -->
+          <div style="padding:6px 16px 10px;">
+            <div style="background:var(--border);border-radius:3px;height:4px;overflow:hidden;margin-bottom:10px;">
+              <div style="height:100%;width:${pct}%;background:${c};border-radius:3px;transition:width .6s ease;"></div>
+            </div>
+            <!-- تفاصيل كل مشاهدة -->
+            <div style="display:none;">
+              ${t.observations.map(o=>`
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+                  <div style="flex:1;">
+                    <div style="font-size:11px;font-weight:700;color:var(--text);">📅 ${o.date} · 🕐 ${o.time}</div>
+                    <div style="font-size:10px;color:var(--text-dim);">👁 رصده: ${o.observer}</div>
+                  </div>
+                  <div style="background:${c}22;color:${c};border-radius:8px;padding:3px 10px;font-size:11px;font-weight:900;">${o.count}x</div>
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+  } catch(e) {
+    console.error(e);
+    tableEl.innerHTML = '<div style="text-align:center;padding:20px;color:#DC2626;font-size:12px;">خطأ في التحميل</div>';
+  }
 }
 
 // SURVEY SUBMIT
