@@ -4423,7 +4423,7 @@ async function loadPhoneTracker() {
     // جلب كل المخالفات التي تحتوي على "جوال" أو "هاتف" أو "phone"
     const { data, error } = await db
       .from('violations')
-      .select('trainer_name,zone,date,time,observer,description,phone_obs_count,violation_type,section')
+      .select('trainer_name,zone,date,time,observer,description,violation_type,section')
       .order('date',{ascending:false})
       .limit(1000);
 
@@ -4456,7 +4456,7 @@ async function loadPhoneTracker() {
     all.forEach(r => {
       const name = r.trainer_name || '—';
       if (!byTrainer[name]) byTrainer[name] = { name, zone:r.zone||'—', observations:[], totalCount:0 };
-      const phoneCount = parseInt(r.phone_obs_count)||1;
+      const phoneCount = 1; // كل سجل = مشاهدة واحدة
       byTrainer[name].observations.push({
         date:r.date||'—', time:r.time||'—',
         observer:r.observer||'—', count:phoneCount
