@@ -4417,21 +4417,37 @@ async function loadPhoneTracker() {
   tableEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">جارٍ التحميل...</div>';
 
   try {
-    // جلب مخالفات الجوال للقسم الحالي فقط
+    // القسم الحالي
     const section = curSec || 'female';
+
+    // جلب كل المخالفات التي تحتوي على "جوال" أو "هاتف" أو "phone"
     const { data, error } = await db
       .from('violations')
-      .select('trainer_name,zone,date,time,observer,description,phone_obs_count')
-      .ilike('violation_type','%استخدام الجوال%')
-      .eq('section', section)
-      .order('date',{ascending:false});
+      .select('trainer_name,zone,date,time,observer,description,phone_obs_count,violation_type,section')
+      .order('date',{ascending:false})
+      .limit(1000);
 
     if (error) throw error;
-    const all = data || [];
+
+    // فلترة محلية — أكثر مرونة
+    const all = (data||[]).filter(r => {
+      const vt = (r.violation_type||'').toLowerCase();
+      const matchPhone = vt.includes('جوال') || vt.includes('هاتف') || vt.includes('phone') || vt.includes('موبايل');
+      const matchSection = r.section === section;
+      return matchPhone && matchSection;
+    });
+
+    console.log('📱 Phone violations found:', all.length, '| Section:', section, '| Total records fetched:', (data||[]).length);
 
     if (!all.length) {
       if (kpiEl) kpiEl.innerHTML = '';
-      tableEl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-dim);font-size:12px;">لا توجد مخالفات جوال مرصودة في هذا القسم</div>';
+      // اطبع أنواع المخالفات الموجودة للتشخيص
+      const types = [...new Set((data||[]).filter(r=>r.section===section).map(r=>r.violation_type))].slice(0,5);
+      tableEl.innerHTML = `
+        <div style="text-align:center;padding:30px;color:var(--text-dim);font-size:12px;">
+          لا توجد مخالفات جوال مرصودة في هذا القسم
+          ${types.length?`<div style="margin-top:8px;font-size:10px;color:var(--text-dim);">أنواع المخالفات الموجودة: ${types.join(' · ')}</div>`:''}
+        </div>`;
       return;
     }
 
