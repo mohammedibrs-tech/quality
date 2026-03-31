@@ -1383,6 +1383,16 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="section-card sales" onclick="adminOnly('sales')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div><div class="s-text"><div class="s-title-ar">تقرير فريق المبيعات</div><div class="s-title-en">SALES DEPARTMENT</div></div><div class="s-arrow">›</div></div>
     <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><div class="s-text"><div class="s-title-ar">المدرب/ة الأعلى تقييم بالاستبيان</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
     <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card" onclick="adminOnly('user-management')" style="background:linear-gradient(135deg,#0F172A,#1E293B);border-right:4px solid #6366F1;">
+      <div class="s-icon" style="background:rgba(99,102,241,0.15);color:#6366F1;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="s-text">
+        <div class="s-title-ar" style="color:#fff;">إدارة المستخدمين</div>
+        <div class="s-title-en" style="color:rgba(99,102,241,0.7);">USER MANAGEMENT</div>
+      </div>
+      <div class="s-arrow" style="color:#6366F1;">›</div>
+    </div>
     <div class="section-card" onclick="adminOnly('task-completion')" style="background:linear-gradient(135deg,#1B4332,#0A2A1E);"><div class="s-icon" style="color:#34D399;background:rgba(52,211,153,0.15);">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
     </div><div class="s-text"><div class="s-title-ar" style="color:#fff;">إنجاز المهام الدوارة</div><div class="s-title-en" style="color:rgba(52,211,153,0.7);">ROTATING TASKS TRACKER</div></div><div class="s-arrow" style="color:#34D399;">›</div></div>
@@ -1958,6 +1968,90 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ══ إدارة المستخدمين ══ -->
+<div id="page-user-management" class="page">
+  <div class="container-wide">
+    <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
+    <div class="page-icon" style="background:linear-gradient(135deg,#0F172A,#1E293B);color:#6366F1;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <h1>إدارة المستخدمين</h1>
+    <div class="sub">USER MANAGEMENT</div>
+
+    <!-- إضافة مستخدم جديد -->
+    <div style="background:var(--card);border-radius:16px;padding:20px;border:1px solid var(--border);margin:20px 0;">
+      <div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        إضافة مستخدم جديد
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">اسم المستخدم (username)</label>
+          <input id="umNewUser" class="inp" placeholder="مثال: sarah" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;">
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">كلمة المرور</label>
+          <input id="umNewPass" class="inp" placeholder="مثال: 1122Sr" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;">
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الاسم الكامل</label>
+          <input id="umNewName" class="inp" placeholder="مثال: سارة العتيبي" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الصلاحية</label>
+          <select id="umNewRole" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
+            <option value="staff">موظف (Staff)</option>
+            <option value="admin">مدير (Admin)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">البريد الإلكتروني</label>
+          <input id="umNewEmail" class="inp" placeholder="example@nouradriving.sa" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;">
+        </div>
+      </div>
+      <button onclick="umAddUser()" style="padding:11px 24px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">+ إضافة المستخدم</button>
+    </div>
+
+    <!-- قائمة المستخدمين -->
+    <div style="font-size:13px;font-weight:900;color:var(--text);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+      <span>المستخدمون الحاليون</span>
+      <button onclick="umLoadUsers()" style="padding:6px 14px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--text-dim);">↻ تحديث</button>
+    </div>
+    <div id="umUserList"></div>
+  </div>
+</div>
+
+<!-- مودال تعديل مستخدم -->
+<div id="umEditModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:var(--card);border-radius:18px;padding:22px;width:100%;max-width:420px;direction:rtl;font-family:Cairo,sans-serif;box-shadow:0 24px 60px rgba(0,0,0,0.4);">
+    <div style="font-size:15px;font-weight:900;margin-bottom:16px;color:var(--text);">تعديل المستخدم</div>
+    <input type="hidden" id="umEditId">
+    <div style="margin-bottom:10px;">
+      <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الاسم الكامل</label>
+      <input id="umEditName" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">كلمة المرور الجديدة (اتركها فارغة للإبقاء)</label>
+      <input id="umEditPass" class="inp" placeholder="••••••" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الصلاحية</label>
+      <select id="umEditRole" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
+        <option value="staff">موظف (Staff)</option>
+        <option value="admin">مدير (Admin)</option>
+      </select>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">البريد الإلكتروني</label>
+      <input id="umEditEmail" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;">
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="umSaveEdit()" style="flex:1;padding:12px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">✅ حفظ</button>
+      <button onclick="document.getElementById('umEditModal').style.display='none'" style="padding:12px 16px;background:rgba(0,0,0,0.07);border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;cursor:pointer;color:var(--text-dim);">إلغاء</button>
+    </div>
   </div>
 </div>
 
@@ -3957,33 +4051,54 @@ function showLM(){
   setTimeout(()=>document.getElementById('lUser').focus(),100);
 }
 function hideLM(){document.getElementById('loginModal').style.display='none';}
-function doLogin(){
-  const u=document.getElementById('lUser').value.trim().toLowerCase();
-  const p=document.getElementById('lPass').value;
-  const usr=USERS[u];
-  if(usr&&usr.password===p){
-    currentUser={username:u,...usr};hideLM();updateNav();
-    // جلب كل البيانات فور تسجيل الدخول
-    NQ.fetchAll(true).then(()=>{
-      loadActiveStaffHome();
-      renderHomeWidgets();
-    });
-    sbUpdateAuth();
-    renderDailyBulletin().catch(()=>{});
-    if(currentUser.role==='admin') loadPendingViolations();
-    if(currentUser.role==='admin') _registerPush();
-    if(pendingSec){
-      const s=pendingSec;pendingSec=null;
-      if(s.startsWith('__admin_')){
-        const sec=s.replace('__admin_','');
-        adminOnly(sec);
-      }else{
-        openSec(s);
-      }
+async function doLogin(){
+  const u = document.getElementById('lUser').value.trim().toLowerCase();
+  const p = document.getElementById('lPass').value;
+  if (!u || !p) { document.getElementById('lErr').style.display='block'; return; }
+
+  // ١. جرّب Supabase أولاً
+  try {
+    const { data, error } = await db
+      .from('users')
+      .select('username,password,role,name,email,active')
+      .eq('username', u)
+      .eq('active', true)
+      .single();
+
+    if (!error && data && data.password === p) {
+      // ✅ تسجيل دخول من Supabase
+      currentUser = { username: data.username, password: data.password, role: data.role, name: data.name, email: data.email };
+      _afterLogin();
+      return;
     }
-    // إشعار الملف الشخصي
-    setTimeout(() => _showProfileHint(), 2000);
-  }else{document.getElementById('lErr').style.display='block';}
+  } catch(e) {
+    // الجدول غير موجود — استخدم USERS الاحتياطي
+  }
+
+  // ٢. احتياطي: USERS المدمج في الكود
+  const usr = USERS[u];
+  if (usr && usr.password === p) {
+    currentUser = { username: u, ...usr };
+    _afterLogin();
+  } else {
+    document.getElementById('lErr').style.display = 'block';
+  }
+}
+
+function _afterLogin() {
+  hideLM();
+  updateNav();
+  NQ.fetchAll(true).then(()=>{ loadActiveStaffHome(); renderHomeWidgets(); });
+  sbUpdateAuth();
+  renderDailyBulletin().catch(()=>{});
+  if(currentUser.role==='admin') loadPendingViolations();
+  if(currentUser.role==='admin') _registerPush();
+  if(pendingSec){
+    const s=pendingSec; pendingSec=null;
+    if(s.startsWith('__admin_')){ adminOnly(s.replace('__admin_','')); }
+    else { openSec(s); }
+  }
+  setTimeout(() => _showProfileHint(), 2000);
 }
 // ── إشعار الملف الشخصي — 3 مرات يومياً ──
 function _showProfileHint() {
@@ -4275,6 +4390,9 @@ function openSec(type){
   }else if(type==='task-completion'){
     document.getElementById('page-task-completion').classList.add('active');
     openTaskCompletionPage();
+  }else if(type==='user-management'){
+    document.getElementById('page-user-management').classList.add('active');
+    umLoadUsers();
   }else{
     document.getElementById('page-facility').classList.add('active');autoObs('fObs');
     setTimeout(initFacObs, 100);
@@ -4308,8 +4426,10 @@ function goHome(){
 function setDT(){
   const now=new Date(),d=now.toISOString().split('T')[0];
   const h=String(now.getHours()).padStart(2,'0'),m=String(now.getMinutes()).padStart(2,'0'),t=h+':'+m;
-  ['vDate','fDate','sDate','bDate'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=d;});
-  ['vTime','fTime','bTime'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=t;});
+  // التاريخ: عيّن دائماً (يوم اليوم الافتراضي)
+  ['vDate','fDate','sDate','bDate'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.value)el.value=d;});
+  // الوقت: عيّن فقط لو الحقل فارغ — لا تُلغي ما غيّره الموظف
+  ['vTime','fTime','bTime'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.value)el.value=t;});
 }
 function toast(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
@@ -4377,6 +4497,9 @@ function resetV(){
   document.getElementById('vAutoGrade0').textContent='—';
   document.getElementById('vAutoGrade0').className='auto-grade-display';
   document.getElementById('vObs').value='';
+  // فرّغ حقلي الوقت والتاريخ حتى setDT تُعيّنهما من جديد
+  const vTimeEl=document.getElementById('vTime'); if(vTimeEl) vTimeEl.value='';
+  const vDateEl=document.getElementById('vDate'); if(vDateEl) vDateEl.value='';
   const btn=document.getElementById('vBtn');btn.disabled=false;btn.textContent='✦ تسجيل المخالفة / Submit';
   document.getElementById('vForm').style.display='block';document.getElementById('vOk').style.display='none';
   autoObs('vObs');setDT();
@@ -6476,6 +6599,162 @@ async function exportTaskCompletion() {
 }
 
 // ════════════════════════════════════════════════
+// ════════════════════════════════════════════════
+// USER MANAGEMENT
+// ════════════════════════════════════════════════
+
+async function umLoadUsers() {
+  const el = document.getElementById('umUserList');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">جارٍ التحميل...</div>';
+
+  try {
+    const { data, error } = await db
+      .from('users')
+      .select('*')
+      .order('role', {ascending:false})
+      .order('name');
+
+    if (error) throw error;
+    const users = data || [];
+
+    if (!users.length) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">لا توجد مستخدمون — أضف أول مستخدم أعلاه</div>';
+      return;
+    }
+
+    const roleLabel = r => r === 'admin'
+      ? '<span style="background:rgba(99,102,241,0.15);color:#6366F1;border-radius:8px;padding:2px 10px;font-size:10px;font-weight:700;">مدير</span>'
+      : '<span style="background:rgba(0,168,150,0.12);color:var(--accent);border-radius:8px;padding:2px 10px;font-size:10px;font-weight:700;">موظف</span>';
+
+    const statusBadge = active => active
+      ? '<span style="background:rgba(22,163,74,0.12);color:#16A34A;border-radius:8px;padding:2px 8px;font-size:9px;font-weight:700;">نشط</span>'
+      : '<span style="background:rgba(220,38,38,0.1);color:#DC2626;border-radius:8px;padding:2px 8px;font-size:9px;font-weight:700;">معطّل</span>';
+
+    el.innerHTML = `
+      <div style="background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden;">
+        <!-- رأس الجدول -->
+        <div style="display:grid;grid-template-columns:2fr 2fr 1fr 1fr 1fr auto;gap:0;padding:10px 16px;background:linear-gradient(135deg,#0F172A,#1E293B);font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.5px;">
+          <div>الاسم</div><div>اسم المستخدم</div><div>الصلاحية</div><div>الحالة</div><div>البريد</div><div></div>
+        </div>
+        ${users.map(u => `
+          <div style="display:grid;grid-template-columns:2fr 2fr 1fr 1fr 1fr auto;align-items:center;gap:0;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s;" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background=''">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);">${u.name}</div>
+            </div>
+            <div style="font-size:12px;color:var(--text-dim);font-family:monospace;">${u.username}</div>
+            <div>${roleLabel(u.role)}</div>
+            <div>${statusBadge(u.active)}</div>
+            <div style="font-size:10px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${u.email||'—'}</div>
+            <div style="display:flex;gap:6px;flex-shrink:0;">
+              <button onclick="umToggleActive('${u.id}',${u.active})" title="${u.active?'تعطيل':'تفعيل'}"
+                style="padding:5px 8px;border-radius:8px;border:1px solid ${u.active?'rgba(220,38,38,0.2)':'rgba(22,163,74,0.2)'};background:${u.active?'rgba(220,38,38,0.06)':'rgba(22,163,74,0.06)'};color:${u.active?'#DC2626':'#16A34A'};cursor:pointer;font-size:11px;">
+                ${u.active?'تعطيل':'تفعيل'}
+              </button>
+              <button onclick="umOpenEdit('${u.id}','${u.name}','${u.role}','${u.email||''}')"
+                style="padding:5px 8px;border-radius:8px;border:1px solid rgba(99,102,241,0.2);background:rgba(99,102,241,0.06);color:#6366F1;cursor:pointer;font-size:11px;">
+                تعديل
+              </button>
+              <button onclick="umDeleteUser('${u.id}','${u.username}','${u.name}')"
+                style="padding:5px 8px;border-radius:8px;border:1px solid rgba(220,38,38,0.2);background:rgba(220,38,38,0.06);color:#DC2626;cursor:pointer;font-size:11px;">
+                حذف
+              </button>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div style="text-align:left;font-size:10px;color:var(--text-dim);margin-top:8px;padding:0 4px;">إجمالي: ${users.length} مستخدم · ${users.filter(u=>u.active).length} نشط · ${users.filter(u=>!u.active).length} معطّل</div>`;
+
+  } catch(e) {
+    el.innerHTML = `<div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);border-radius:12px;padding:16px;font-size:12px;color:#DC2626;">
+      ⚠️ جدول users غير موجود في Supabase — أنشئه أولاً من SQL Editor
+      <pre style="font-size:10px;margin-top:8px;background:#0D1F2D;color:#00C8B4;padding:10px;border-radius:8px;overflow-x:auto;direction:ltr;">create table users (
+  id uuid default gen_random_uuid() primary key,
+  username text unique not null,
+  password text not null,
+  role text not null default 'staff',
+  name text not null,
+  email text,
+  active boolean default true,
+  created_at timestamptz default now()
+);
+alter table users enable row level security;
+create policy "allow_all" on users for all using (true);</pre>
+    </div>`;
+  }
+}
+
+async function umAddUser() {
+  const username = document.getElementById('umNewUser')?.value.trim().toLowerCase();
+  const password = document.getElementById('umNewPass')?.value.trim();
+  const name     = document.getElementById('umNewName')?.value.trim();
+  const role     = document.getElementById('umNewRole')?.value;
+  const email    = document.getElementById('umNewEmail')?.value.trim();
+
+  if (!username || !password || !name) { toast('⚠️ يرجى تعبئة اسم المستخدم وكلمة المرور والاسم الكامل'); return; }
+  if (/\s/.test(username)) { toast('⚠️ اسم المستخدم يجب أن يكون بدون مسافات'); return; }
+
+  try {
+    const { error } = await db.from('users').insert({ username, password, name, role, email: email||null, active: true });
+    if (error) {
+      if (error.code === '23505') toast('❌ اسم المستخدم موجود بالفعل');
+      else throw error;
+      return;
+    }
+    toast('✅ تم إضافة المستخدم بنجاح');
+    // تفريغ الحقول
+    ['umNewUser','umNewPass','umNewName','umNewEmail'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('umNewRole').value = 'staff';
+    umLoadUsers();
+  } catch(e) {
+    toast('❌ خطأ: ' + (e.message||'تحقق من الكونسل'));
+  }
+}
+
+async function umDeleteUser(id, username, name) {
+  if (username === currentUser?.username) { toast('❌ لا يمكنك حذف حسابك الحالي'); return; }
+  if (!confirm(`حذف المستخدم "${name}" (${username}) نهائياً؟`)) return;
+  const { error } = await db.from('users').delete().eq('id', id);
+  if (error) { toast('❌ فشل الحذف'); return; }
+  toast('✅ تم الحذف');
+  umLoadUsers();
+}
+
+async function umToggleActive(id, currentActive) {
+  const { error } = await db.from('users').update({ active: !currentActive }).eq('id', id);
+  if (error) { toast('❌ فشل التحديث'); return; }
+  toast(currentActive ? '✅ تم تعطيل الحساب' : '✅ تم تفعيل الحساب');
+  umLoadUsers();
+}
+
+function umOpenEdit(id, name, role, email) {
+  document.getElementById('umEditId').value    = id;
+  document.getElementById('umEditName').value  = name;
+  document.getElementById('umEditRole').value  = role;
+  document.getElementById('umEditEmail').value = email;
+  document.getElementById('umEditPass').value  = '';
+  const modal = document.getElementById('umEditModal');
+  modal.style.display = 'flex';
+  modal.onclick = e => { if(e.target===modal) modal.style.display='none'; };
+}
+
+async function umSaveEdit() {
+  const id    = document.getElementById('umEditId')?.value;
+  const name  = document.getElementById('umEditName')?.value.trim();
+  const role  = document.getElementById('umEditRole')?.value;
+  const email = document.getElementById('umEditEmail')?.value.trim();
+  const pass  = document.getElementById('umEditPass')?.value.trim();
+
+  if (!name) { toast('⚠️ أدخل الاسم الكامل'); return; }
+  const updates = { name, role, email: email||null };
+  if (pass) updates.password = pass;
+
+  const { error } = await db.from('users').update(updates).eq('id', id);
+  if (error) { toast('❌ فشل التعديل'); return; }
+  toast('✅ تم التعديل بنجاح');
+  document.getElementById('umEditModal').style.display = 'none';
+  umLoadUsers();
+}
+
 // ARCHIVE SECTION
 // ════════════════════════════════════════════════
 let archCurTab = 'vt';
@@ -9420,45 +9699,62 @@ function showBulletinPopup(){
 
 // ── BUILDING SUBMIT ──
 async function submitBuilding(){
-  const obs=document.getElementById('bObs').value;
-  const date=document.getElementById('bDate').value;
-  if(!obs||!date){toast('يرجى تعبئة الحقول المطلوبة');return;}
-  const btn=document.getElementById('bBtn');
-  btn.disabled=true;btn.textContent='جاري الحفظ...';
-  const data={
-    observer:obs,date,time:document.getElementById('bTime').value,
-    recep_crowd:document.getElementById('bRecepCrowd').value,
-    recep_staff:document.getElementById('bRecepStaff').value,
-    wait_time:document.getElementById('bWaitTime').value,
-    counter_staff:document.getElementById('bCounterStaff').value,
-    info_given:document.getElementById('bInfoGiven').value,
-    exam_staff:document.getElementById('bExamStaff').value,
-    exam_halls:document.getElementById('bExamHalls').value,
-    exam_crowd:document.getElementById('bExamCrowd').value,
-    exam_notes:document.getElementById('bExamNotes').value,
-    general_notes:document.getElementById('bGeneralNotes').value,
+  const obs  = document.getElementById('bObs').value;
+  const date = document.getElementById('bDate').value;
+  const time = document.getElementById('bTime').value;
+  if(!obs)  { toast('⚠️ اختر الراصد');   return; }
+  if(!date) { toast('⚠️ أدخل التاريخ'); return; }
+
+  const btn = document.getElementById('bBtn');
+  btn.disabled = true; btn.textContent = 'جاري الحفظ...';
+
+  // أسماء الحقول تطابق جدول building_reports في Supabase
+  const payload = {
+    report_date:    date,
+    report_time:    time,
+    observer:       obs,
+    recep_crowd:    document.getElementById('bRecepCrowd')?.value    || '',
+    recep_staff:    document.getElementById('bRecepStaff')?.value    || '',
+    wait_time:      document.getElementById('bWaitTime')?.value      || '',
+    counter_staff:  document.getElementById('bCounterStaff')?.value  || '',
+    info_given:     document.getElementById('bInfoGiven')?.value     || '',
+    exam_staff:     document.getElementById('bExamStaff')?.value     || '',
+    exam_halls:     document.getElementById('bExamHalls')?.value     || '',
+    exam_crowd:     document.getElementById('bExamCrowd')?.value     || '',
+    exam_notes:     document.getElementById('bExamNotes')?.value     || '',
+    general_notes:  document.getElementById('bGeneralNotes')?.value  || '',
   };
-  try{
-    const{error}=await db.from('building_reports').insert([data]);
-    if(error)throw error;
+
+  try {
+    const { error } = await db.from('building_reports').insert([payload]);
+    if (error) throw error;
+
     // GS sync
-    sendToSheets('building',[[data.date,data.time||'',data.observer,data.recep_crowd||'',data.recep_staff||'',data.wait_time||'',data.counter_staff||'',data.info_given||'',data.exam_staff||'',data.exam_halls||'',data.general_notes||'']]);
-    // Build analysis
-    const analysis=buildingAnalysis(data);
-    document.getElementById('bAnalysis').innerHTML=analysis;
+    sendToSheets('building',[[date,time,obs,payload.recep_crowd,payload.recep_staff,payload.wait_time,payload.counter_staff,payload.info_given,payload.exam_staff,payload.exam_halls,payload.general_notes]]);
+
+    // تحليل فوري
+    const analysis = buildingAnalysis(payload);
+    const bAnalysisEl = document.getElementById('bAnalysis');
+    if (bAnalysisEl) bAnalysisEl.innerHTML = analysis;
+
     // تثبيت تلقائي
-    const _bKey = (data.date||new Date().toISOString().slice(0,10)).slice(0,7);
-    if(_bKey){
-      if(!PINNED_DATA.building[_bKey]) PINNED_DATA.building[_bKey]={data:[],label:_monthLabel(_bKey),pinnedAt:''};
-      PINNED_DATA.building[_bKey].data.push({...data}); addToAppData('buildings', data);
-      PINNED_DATA.building[_bKey].pinnedAt=new Date().toLocaleString('ar');
-    savePinnedToStorage();
+    const _bKey = date.slice(0,7);
+    if (_bKey) {
+      if (!PINNED_DATA.building[_bKey]) PINNED_DATA.building[_bKey] = {data:[],label:_monthLabel(_bKey),pinnedAt:''};
+      PINNED_DATA.building[_bKey].data.push({...payload});
+      addToAppData('buildings', payload);
+      PINNED_DATA.building[_bKey].pinnedAt = new Date().toLocaleString('ar');
+      savePinnedToStorage();
     }
-    document.getElementById('bForm').style.display='none';
-    document.getElementById('bOk').style.display='block';
-  }catch(e){
-    toast('خطأ في الحفظ: '+e.message);
-    btn.disabled=false;btn.textContent='✦ تسجيل التقرير / Submit Report';
+
+    document.getElementById('bForm').style.display = 'none';
+    document.getElementById('bOk').style.display   = 'block';
+
+  } catch(e) {
+    console.error('Building submit error:', e);
+    toast('❌ خطأ في الحفظ: ' + (e.message || JSON.stringify(e)));
+    btn.disabled = false;
+    btn.textContent = '✦ تسجيل التقرير / Submit Report';
   }
 }
 
