@@ -4314,6 +4314,19 @@ async function doLogin(){
 function _afterLogin() {
   hideLM();
   updateNav();
+  // جلب صلاحيات المستخدم من Supabase وحفظها في localStorage
+  if (currentUser && currentUser.role !== 'admin') {
+    db.from('users').select('permissions').eq('username', currentUser.username).single()
+      .then(({ data }) => {
+        if (data?.permissions) {
+          try {
+            const perms = JSON.parse(data.permissions);
+            localStorage.setItem('nq_perms_' + currentUser.username, JSON.stringify(perms));
+            updateNav(); // أعد رسم الكروت بعد تحميل الصلاحيات
+          } catch(e) {}
+        }
+      }).catch(() => {});
+  }
   NQ.fetchAll(true).then(()=>{ loadActiveStaffHome(); renderHomeWidgets(); });
   sbUpdateAuth();
   renderDailyBulletin().catch(()=>{});
@@ -4510,6 +4523,42 @@ function updateNav(){
     if(femaleCard){femaleCard.style.display='';femaleCard.style.opacity='';femaleCard.style.cursor='';femaleCard.querySelectorAll('.s-lock').forEach(e=>e.remove());}
     if(maleCard){maleCard.style.display='';maleCard.style.opacity='';maleCard.style.cursor='';maleCard.querySelectorAll('.s-lock').forEach(e=>e.remove());}
   }
+  // تطبيق الصلاحيات على كروت الرئيسية
+  if (currentUser && currentUser.role !== 'admin') {
+    document.querySelectorAll('.section-card[onclick]').forEach(card => {
+      const onclick = card.getAttribute('onclick') || '';
+      // استخرج اسم القسم من onclick
+      const match = onclick.match(/openSec\(['"]([^'"]+)['"]\)|adminOnly\(['"]([^'"]+)['"]\)|showSection\(['"]([^'"]+)['"]\)/);
+      if (!match) return;
+      const secKey = match[1] || match[2] || match[3];
+      if (!secKey) return;
+      const allowed = _hasPermission(secKey);
+      card.style.opacity = allowed ? '' : '0.35';
+      card.style.cursor  = allowed ? '' : 'not-allowed';
+      // أضف أيقونة القفل لو مو موجودة
+      const existingLock = card.querySelector('.perm-lock');
+      if (!allowed && !existingLock) {
+        const lk = document.createElement('div');
+        lk.className = 'perm-lock';
+        lk.style.cssText = 'position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;color:#E07070;background:rgba(224,82,82,0.15);padding:2px 7px;border-radius:20px;pointer-events:none;';
+        lk.textContent = '🔒';
+        card.style.position = 'relative';
+        card.appendChild(lk);
+      } else if (allowed && existingLock) {
+        existingLock.remove();
+        card.style.opacity = '';
+        card.style.cursor  = '';
+      }
+    });
+  } else if (currentUser?.role === 'admin') {
+    // المدير يشوف كل شيء
+    document.querySelectorAll('.perm-lock').forEach(e => e.remove());
+    document.querySelectorAll('.section-card[onclick]').forEach(card => {
+      card.style.opacity = '';
+      card.style.cursor  = '';
+    });
+  }
+
   // تبويب تسجيل الدخول دايم ظاهر
 
   if(currentUser){
@@ -4555,7 +4604,42 @@ function showSection(t){
   }
   openSec(t);
 }
+// ── التحقق من صلاحية المستخدم ──
+function _hasPermission(sectionKey) {
+  if (!currentUser) return false;
+  if (currentUser.role === 'admin') return true; // المدير يملك كل الصلاحيات دائماً
+
+  // جلب الصلاحيات من localStorage
+  const perms = JSON.parse(
+    localStorage.getItem('nq_perms_' + currentUser.username) || 'null'
+  );
+
+  // لو ما في صلاحيات محددة → الافتراضي: كل شيء مسموح ماعدا admin-only
+  if (!perms) {
+    const adminOnly = ['sales','dashboard','task-completion','attend','rating','archive','quarterly','user-management'];
+    return !adminOnly.includes(sectionKey);
+  }
+
+  // لو الصلاحية موجودة صراحةً
+  if (perms[sectionKey] !== undefined) return perms[sectionKey];
+
+  // الافتراضي: مسموح
+  return true;
+}
+
 function openSec(type){
+  // تحقق من الصلاحية
+  if (currentUser && currentUser.role !== 'admin' && !_hasPermission(type)) {
+    const msg = document.createElement('div');
+    msg.className = 'admin-lock-toast';
+    msg.innerHTML = `<div style="font-size:40px;margin-bottom:12px;">🔒</div>
+      <div style="font-size:16px;font-weight:900;margin-bottom:6px;">غير مصرح لك بهذا القسم</div>
+      <div style="font-size:12px;color:var(--text-dim);">تواصل مع المدير لتفعيل الصلاحية</div>`;
+    document.body.appendChild(msg);
+    setTimeout(()=>msg.remove(), 2200);
+    return;
+  }
+
   curSec=type;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   // تحديث banner المراجعة عند فتح صفحة المخالفات
