@@ -3999,14 +3999,13 @@ violations, surveys, facility_reports, building_reports, sales_reports, ops_repo
 أجب بالعربية دائماً. إذا المستخدم أراد تعديل كود، اعطه الكود الجاهز مع شرح أين يضعه.
 إذا واجه خطأ تقني، شخّصه واعطه الحل.`;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
         system: siteContext,
-        messages: _qbotHistory.slice(-12) // آخر 12 رسالة
+        messages: _qbotHistory.slice(-12),
+        max_tokens: 1000,
       })
     });
 
