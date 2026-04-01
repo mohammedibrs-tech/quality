@@ -3874,6 +3874,201 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- ══ QUALITY BOT — Admin Only ══ -->
+<div id="qbotBubble" onclick="qbotToggle()" style="display:none;position:fixed;bottom:24px;left:24px;z-index:9400;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#4F46E5);box-shadow:0 4px 20px rgba(99,102,241,0.5);cursor:pointer;align-items:center;justify-content:center;transition:transform .2s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 1 8 8c0 5-8 13-8 13S4 15 4 10a8 8 0 0 1 8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+  <div id="qbotDot" style="display:none;position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#34D399;border:2px solid #fff;animation:pulse2 2s infinite;"></div>
+</div>
+
+<div id="qbotPanel" style="display:none;position:fixed;bottom:86px;left:24px;z-index:9400;width:380px;max-width:calc(100vw - 32px);background:var(--card);border-radius:20px;box-shadow:0 16px 60px rgba(0,0,0,0.3);border:1px solid var(--border);flex-direction:column;overflow:hidden;max-height:70vh;">
+  <!-- رأس البوت -->
+  <div style="background:linear-gradient(135deg,#0F172A,#1E293B);padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;">
+    <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#4F46E5);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:13px;font-weight:900;color:#fff;">Quality Bot</div>
+      <div id="qbotStatus" style="font-size:10px;color:rgba(99,102,241,0.8);">جاهز للمساعدة</div>
+    </div>
+    <button onclick="qbotToggle()" style="background:rgba(255,255,255,0.08);border:none;border-radius:8px;width:28px;height:28px;color:rgba(255,255,255,0.6);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+  </div>
+
+  <!-- المحادثة -->
+  <div id="qbotMessages" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:200px;max-height:400px;">
+    <div style="background:rgba(99,102,241,0.08);border-radius:12px 12px 12px 0;padding:10px 12px;max-width:85%;border-right:3px solid #6366F1;">
+      <div style="font-size:12px;color:var(--text);line-height:1.6;">مرحباً! أنا Quality Bot 👋<br>أقدر أساعدك في:<br>• تعديل الكود وإضافة ميزات<br>• تشخيص الأخطاء التقنية<br>• شرح أي جزء من الموقع<br><br>اكتب طلبك وأنا أنفذه.</div>
+    </div>
+  </div>
+
+  <!-- اقتراحات سريعة -->
+  <div id="qbotSuggestions" style="padding:0 12px 8px;display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;">
+    <button onclick="qbotSend('شرح لي بنية الكود الحالية')" style="padding:5px 10px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:20px;font-family:Cairo,sans-serif;font-size:10px;color:#6366F1;cursor:pointer;">📋 بنية الكود</button>
+    <button onclick="qbotSend('وش المشاكل التقنية الحالية بالموقع؟')" style="padding:5px 10px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:20px;font-family:Cairo,sans-serif;font-size:10px;color:#6366F1;cursor:pointer;">🔍 فحص المشاكل</button>
+    <button onclick="qbotSend('كيف أضيف ميزة جديدة؟')" style="padding:5px 10px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:20px;font-family:Cairo,sans-serif;font-size:10px;color:#6366F1;cursor:pointer;">✨ ميزة جديدة</button>
+  </div>
+
+  <!-- حقل الإدخال -->
+  <div style="padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end;flex-shrink:0;">
+    <textarea id="qbotInput" placeholder="اكتب طلبك هنا..." rows="1"
+      style="flex:1;border:1.5px solid var(--border);border-radius:12px;padding:9px 12px;font-family:Cairo,sans-serif;font-size:12px;resize:none;background:var(--card2);color:var(--text);outline:none;max-height:80px;overflow-y:auto;transition:border-color .2s;"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();qbotSend();}"
+      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+      onfocus="this.style.borderColor='#6366F1'" onblur="this.style.borderColor='var(--border)'"></textarea>
+    <button onclick="qbotSend()" id="qbotSendBtn"
+      style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#6366F1,#4F46E5);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<style>
+@keyframes pulse2{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.6;transform:scale(1.2);}}
+</style>
+
+<script>
+// ── Quality Bot ──
+let _qbotOpen = false;
+let _qbotHistory = [];
+const QBOT_KEY = 'qbot_history_' + new Date().toISOString().slice(0,10);
+
+function qbotInit() {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  const bubble = document.getElementById('qbotBubble');
+  if (bubble) bubble.style.display = 'flex';
+  // استرجع المحادثات القديمة
+  try {
+    const saved = JSON.parse(localStorage.getItem(QBOT_KEY)||'[]');
+    if (saved.length) {
+      _qbotHistory = saved;
+      saved.forEach(m => _qbotRenderMsg(m.role, m.content, false));
+    }
+  } catch(e) {}
+}
+
+function qbotToggle() {
+  _qbotOpen = !_qbotOpen;
+  const panel = document.getElementById('qbotPanel');
+  if (panel) panel.style.display = _qbotOpen ? 'flex' : 'none';
+  if (_qbotOpen) {
+    setTimeout(() => document.getElementById('qbotInput')?.focus(), 100);
+    document.getElementById('qbotDot').style.display = 'none';
+  }
+}
+
+async function qbotSend(presetMsg) {
+  const input = document.getElementById('qbotInput');
+  const msg = presetMsg || input?.value?.trim();
+  if (!msg) return;
+  if (input) { input.value = ''; input.style.height = 'auto'; }
+
+  // اخفِ الاقتراحات بعد أول رسالة
+  document.getElementById('qbotSuggestions').style.display = 'none';
+
+  _qbotRenderMsg('user', msg);
+  _qbotHistory.push({role:'user', content: msg});
+
+  // حالة التحميل
+  const statusEl = document.getElementById('qbotStatus');
+  if (statusEl) statusEl.textContent = 'يفكر...';
+  const sendBtn = document.getElementById('qbotSendBtn');
+  if (sendBtn) sendBtn.style.opacity = '.4';
+
+  // أضف رسالة loading
+  const loadId = 'qbot_load_' + Date.now();
+  _qbotRenderMsg('bot', '...', false, loadId);
+
+  try {
+    // سياق الموقع للبوت
+    const siteContext = `أنت مساعد تقني متخصص في منصة "نورة لإدارة الجودة" — موقع ويب لمدرسة قيادة.
+الموقع:
+- ملف واحد index.html (~17000 سطر)
+- Supabase backend
+- مرفوع على Vercel: noura-quality.vercel.app
+- GitHub: mohammedibrs-tech/quality
+
+الجداول في Supabase:
+violations, surveys, facility_reports, building_reports, sales_reports, ops_reports, no_session_reports, task_completions, users
+
+الموظفون: shahad, amjad, sumayah (نسائي) — alhamad, ibrahim, ahmed (رجالي) — admin (المدير: محمد)
+
+الصفحات الرئيسية: page-home, page-violations, page-survey, page-facility, page-building, page-no-session, page-task-completion, page-user-management, page-dashboard, page-archive, page-quarterly
+
+الدوال المهمة: openSec(), adminOnly(), showDashboard(), loadDashboard(), _showMindMap(), _startAutoFlip(), openProfileModal(), loadNSTodayList(), submitViolation(), submitFacility(), submitBuilding(), doLogin()
+
+أجب بالعربية دائماً. إذا المستخدم أراد تعديل كود، اعطه الكود الجاهز مع شرح أين يضعه.
+إذا واجه خطأ تقني، شخّصه واعطه الحل.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: siteContext,
+        messages: _qbotHistory.slice(-12) // آخر 12 رسالة
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || 'عذراً، لم أتمكن من المعالجة.';
+
+    // احذف loading
+    document.getElementById(loadId)?.remove();
+
+    _qbotRenderMsg('bot', reply);
+    _qbotHistory.push({role:'assistant', content: reply});
+
+    // احفظ المحادثة
+    try { localStorage.setItem(QBOT_KEY, JSON.stringify(_qbotHistory.slice(-20))); } catch(e) {}
+
+    if (statusEl) statusEl.textContent = 'جاهز للمساعدة';
+
+  } catch(e) {
+    document.getElementById(loadId)?.remove();
+    _qbotRenderMsg('bot', '❌ خطأ في الاتصال. تحقق من الشبكة وحاول مرة أخرى.');
+    if (statusEl) statusEl.textContent = 'خطأ في الاتصال';
+  }
+
+  if (sendBtn) sendBtn.style.opacity = '1';
+}
+
+function _qbotRenderMsg(role, text, scroll=true, id='') {
+  const container = document.getElementById('qbotMessages');
+  if (!container) return;
+
+  const isBot = role === 'bot' || role === 'assistant';
+  const div = document.createElement('div');
+  if (id) div.id = id;
+
+  // تحويل Markdown بسيط للعرض
+  const formatted = text
+    .replace(/```([\s\S]*?)```/g, '<pre style="background:#0D1F2D;color:#34D399;padding:8px;border-radius:8px;font-size:10px;overflow-x:auto;direction:ltr;margin:4px 0;">$1</pre>')
+    .replace(/`([^`]+)`/g, '<code style="background:rgba(99,102,241,0.1);color:#6366F1;padding:1px 5px;border-radius:4px;font-size:11px;">$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+
+  div.style.cssText = `
+    max-width:88%;align-self:${isBot?'flex-start':'flex-end'};
+    background:${isBot?'rgba(99,102,241,0.08)':'linear-gradient(135deg,#6366F1,#4F46E5)'};
+    border-radius:${isBot?'12px 12px 12px 0':'12px 12px 0 12px'};
+    padding:10px 12px;
+    border-${isBot?'right':'left'}:${isBot?'3px solid #6366F1':'none'};
+  `;
+  div.innerHTML = `<div style="font-size:11.5px;color:${isBot?'var(--text)':'#fff'};line-height:1.7;">${formatted}</div>`;
+  container.appendChild(div);
+
+  if (scroll) container.scrollTop = container.scrollHeight;
+  // أظهر الدوت لو البانل مغلق
+  if (!_qbotOpen && isBot) {
+    const dot = document.getElementById('qbotDot');
+    if (dot) dot.style.display = 'block';
+  }
+}
+
+// تهيئة البوت بعد اللوجن
+const _origAfterLogin = typeof _afterLogin === 'function' ? _afterLogin : null;
+</script>
 <div id="loginModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(10px);z-index:9998;align-items:center;justify-content:center;">
   <div style="background:#FFFFFF;border:1px solid rgba(0,168,150,0.25);border-radius:18px;padding:32px;width:100%;max-width:350px;margin:18px;animation:fadeUp .3s ease;box-shadow:0 30px 60px rgba(0,0,0,0.6);">
     <div style="text-align:center;margin-bottom:22px;">
@@ -4093,6 +4288,7 @@ function _afterLogin() {
   renderDailyBulletin().catch(()=>{});
   if(currentUser.role==='admin') loadPendingViolations();
   if(currentUser.role==='admin') _registerPush();
+  if(currentUser.role==='admin') setTimeout(qbotInit, 500);
   if(pendingSec){
     const s=pendingSec; pendingSec=null;
     if(s.startsWith('__admin_')){ adminOnly(s.replace('__admin_','')); }
