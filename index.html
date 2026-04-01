@@ -1925,6 +1925,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     </div>
 
     <!-- ملخص عام -->
+    <!-- Chart تاريخي -->
+    <div id="tcHistoryChart" style="margin-bottom:20px;"></div>
+
+    <!-- ملخص الشهر المحدد -->
     <div id="tcSummaryRow" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px;"></div>
 
     <!-- جدول الموظفين -->
@@ -5978,11 +5982,11 @@ const STAFF_SCHEDULES = {
     rotating:[
       {task:"🔧 ملاحظات المرافق والنظافة",       days:["أنا","امجاد","سمية","أنا","امجاد"]},
       {task:"⭐ استطلاع رضا العملاء",             days:["سمية","أنا","امجاد","سمية","أنا"]},
-      {task:"🏫 متابعة مبنى التدريب العملي (50د)",days:["امجاد","أنا","سمية","امجاد","أنا"]},
+      {task:"🏫 متابعة مبنى التدريب العملي (25د — بداية الحصة الثالثة)",days:["امجاد","أنا","سمية","امجاد","أنا"]},
     ]
   },
   'amjad': {
-    name:"امجاد ابانمي", shift:"7:00 ص — 3:00 م",
+    name:"امجاد ابانمي", shift:"6:00 ص — 2:00 م",
     fixed:[
       {time:"7:00 ص",        task:"🏢 جولة على المبنى (داخل وخارج)"},
       {time:"7:00–7:30 ص",   task:"✅ متابعة خروج المدربات والعملاء — بداية الحصة الأولى"},
@@ -6005,9 +6009,8 @@ const STAFF_SCHEDULES = {
     ],
     rotating:[
       {task:"🔧 ملاحظات المرافق والنظافة",       days:["شهد","أنا","سمية","شهد","أنا"]},
-      {task:"🏢 تقرير المبنى الرئيسي",           days:["أنا","سمية","شهد","أنا","سمية"]},
       {task:"⭐ استطلاع رضا العملاء",             days:["سمية","شهد","أنا","سمية","شهد"]},
-      {task:"🏫 متابعة مبنى التدريب العملي (50د)",days:["أنا","شهد","سمية","أنا","شهد"]},
+      {task:"🏫 متابعة مبنى التدريب العملي (25د — بداية الحصة الثالثة)",days:["أنا","شهد","سمية","أنا","شهد"]},
     ]
   },
   'sumayah': {
@@ -6035,7 +6038,7 @@ const STAFF_SCHEDULES = {
     rotating:[
       {task:"🔧 ملاحظات المرافق والنظافة",       days:["شهد","امجاد","أنا","شهد","امجاد"]},
       {task:"⭐ استطلاع رضا العملاء",             days:["أنا","شهد","امجاد","أنا","شهد"]},
-      {task:"🏫 متابعة مبنى التدريب العملي (50د)",days:["امجاد","شهد","أنا","امجاد","شهد"]},
+      {task:"🏫 متابعة مبنى التدريب العملي (25د — بداية الحصة الثالثة)",days:["امجاد","شهد","أنا","امجاد","شهد"]},
     ]
   },
   'alhamad': {
@@ -6064,11 +6067,11 @@ const STAFF_SCHEDULES = {
       {task:"🔧 ملاحظات المرافق والنظافة",       days:["أنا","ابراهيم","أحمد سحاب","أنا","ابراهيم"]},
       {task:"🏢 تقرير المبنى الرئيسي",           days:["ابراهيم","أحمد سحاب","أنا","ابراهيم","أحمد سحاب"]},
       {task:"⭐ استطلاع رضا العملاء",             days:["أحمد سحاب","أنا","ابراهيم","أحمد سحاب","أنا"]},
-      {task:"🏫 متابعة مبنى التدريب العملي (50د)",days:["أنا","ابراهيم","أحمد سحاب","أنا","ابراهيم"]},
+      {task:"🏫 متابعة مبنى التدريب العملي (25د — بداية الحصة الثالثة)",days:["أنا","ابراهيم","أحمد سحاب","أنا","ابراهيم"]},
     ]
   },
   'ibrahim': {
-    name:"ابراهيم الحمد", shift:"4:00 م — 12:00 ص",
+    name:"ابراهيم الحمد", shift:"2:00 م — 10:00 م",
     fixed:[
       {time:"4:00 م",        task:"🏢 جولة على المبنى (داخل وخارج)"},
       {time:"4:00–4:30 م",   task:"✅ متابعة خروج المدربين — الحصة الأولى"},
@@ -6093,7 +6096,7 @@ const STAFF_SCHEDULES = {
       {task:"🔧 ملاحظات المرافق والنظافة",       days:["أحمد الحماد","أنا","أحمد سحاب","أحمد الحماد","أنا"]},
       {task:"🏢 تقرير المبنى الرئيسي",           days:["أنا","أحمد سحاب","أحمد الحماد","أنا","أحمد سحاب"]},
       {task:"⭐ استطلاع رضا العملاء",             days:["أحمد سحاب","أحمد الحماد","أنا","أحمد سحاب","أحمد الحماد"]},
-      {task:"🏫 متابعة مبنى التدريب العملي (50د)",days:["أحمد الحماد","أنا","أحمد سحاب","أحمد الحماد","أنا"]},
+      {task:"🏫 متابعة مبنى التدريب العملي (25د — بداية الحصة الثالثة)",days:["أحمد الحماد","أنا","أحمد سحاب","أحمد الحماد","أنا"]},
     ]
   },
   'ahmed': {
@@ -6122,7 +6125,7 @@ const STAFF_SCHEDULES = {
       {task:"🔧 ملاحظات المرافق والنظافة",       days:["أحمد الحماد","ابراهيم","أنا","أحمد الحماد","ابراهيم"]},
       {task:"🏢 تقرير المبنى الرئيسي",           days:["ابراهيم","أنا","أحمد الحماد","ابراهيم","أنا"]},
       {task:"⭐ استطلاع رضا العملاء",             days:["أنا","أحمد الحماد","ابراهيم","أنا","أحمد الحماد"]},
-      {task:"🏫 متابعة مبنى التدريب العملي (50د)",days:["أحمد الحماد","ابراهيم","أنا","أحمد الحماد","ابراهيم"]},
+      {task:"🏫 متابعة مبنى التدريب العملي (25د — بداية الحصة الثالثة)",days:["أحمد الحماد","ابراهيم","أنا","أحمد الحماد","ابراهيم"]},
     ]
   },
 };
@@ -6369,15 +6372,74 @@ function adminOnly(sec){
 // ════════════════════════════════════════════════
 
 function openTaskCompletionPage() {
-  // تعيين الشهر الحالي
   const now = new Date();
   const monthStr = now.toISOString().slice(0,7);
   const monthEl = document.getElementById('tcMonth');
   if (monthEl && !monthEl.value) monthEl.value = monthStr;
-  // تعيين التاريخ اليوم
   const dateEl = document.getElementById('tcDate');
   if (dateEl && !dateEl.value) dateEl.value = now.toISOString().slice(0,10);
   loadTaskCompletion();
+  _loadTcHistoryChart();
+}
+
+// ── Chart تاريخي لكل الأشهر في صفحة الإنجاز ──
+async function _loadTcHistoryChart() {
+  const chartEl = document.getElementById('tcHistoryChart');
+  if (!chartEl) return;
+  chartEl.innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-dim);font-size:11px;">جارٍ تحميل المخطط...</div>';
+
+  // الأشهر من مارس 2026 حتى اليوم
+  const months = [];
+  let d = new Date(2026,2,1);
+  while (d <= new Date()) {
+    months.push(d.toISOString().slice(0,7));
+    d = new Date(d.getFullYear(), d.getMonth()+1, 1);
+  }
+
+  const safe = async p => { try { const r=await p; return r.data||[]; } catch(e){ return []; } };
+
+  // جلب البيانات كلها مرة واحدة
+  const [surveys, facility, building, manual] = await Promise.all([
+    safe(db.from('surveys').select('observer,date').gte('date','2026-03-01')),
+    safe(db.from('facility_reports').select('observer,report_date').gte('report_date','2026-03-01')),
+    safe(db.from('building_reports').select('observer,report_date').gte('report_date','2026-03-01')),
+    safe(db.from('task_completions').select('*').gte('task_date','2026-03-01')).catch(()=>[]),
+  ]);
+
+  // احسب نسبة كل شهر لكل موظفين
+  const staffColors = {
+    shahad:'#E072B0', amjad:'#00A896', sumayah:'#F39C12',
+    alhamad:'#2563EB', ibrahim:'#7C3AED', ahmed:'#16A34A'
+  };
+
+  // نسبة إجمالية لكل شهر
+  const monthTotals = await Promise.all(months.map(async ym => {
+    let totalDone=0, totalExp=0;
+    for (const [uname] of Object.entries(STAFF_SCHEDULES)) {
+      const prog = await calcMonthlyProgress(uname, ym);
+      totalDone += prog.done;
+      totalExp  += prog.total;
+    }
+    return { ym, pct: totalExp>0?Math.round(totalDone/totalExp*100):0, done:totalDone, exp:totalExp };
+  }));
+
+  const curYm = new Date().toISOString().slice(0,7);
+  const bars = monthTotals.map(m => {
+    const c = m.pct>=80?'#16A34A':m.pct>=60?'#D97706':'#DC2626';
+    const isCur = m.ym === curYm;
+    const mName = new Date(m.ym+'-01').toLocaleString('ar',{month:'short'});
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;" onclick="document.getElementById('tcMonth').value='${m.ym}';loadTaskCompletion()">
+      <div style="font-size:10px;font-weight:700;color:${c};">${m.pct}%</div>
+      <div style="width:100%;background:${c}${isCur?'':'55'};border-radius:4px 4px 0 0;height:${Math.max(3,m.pct*0.7)}px;transition:height .5s;${isCur?'box-shadow:0 0 8px '+c+'88;':''}" title="${m.done}/${m.exp} مهمة — ${mName}"></div>
+      <div style="font-size:9px;color:${isCur?'var(--accent)':'var(--text-dim)'};font-weight:${isCur?'700':'400'};">${mName}</div>
+    </div>`;
+  }).join('');
+
+  chartEl.innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:10px;">📊 الإنجاز الكلي شهر بشهر — اضغط على أي شهر لعرض تفاصيله</div>
+    <div style="background:var(--card2);border-radius:12px;padding:12px;display:flex;align-items:flex-end;gap:8px;height:90px;">
+      ${bars}
+    </div>`;
 }
 
 // حساب المهام الدوارة المتوقعة لكل موظف في شهر معين
@@ -6391,7 +6453,7 @@ function calcExpectedTasks(uname, yearMonth) {
   const taskMap = {
     '🔧 ملاحظات المرافق والنظافة':        'facility',
     '⭐ استطلاع رضا العملاء':              'survey',
-    '🏫 متابعة مبنى التدريب العملي (50د)': 'building_practical',
+    '🏫 متابعة مبنى التدريب العملي (25د — بداية الحصة الثالثة)': 'building_practical',
     '🏢 تقرير المبنى الرئيسي':             'building_main',
   };
 
@@ -15599,64 +15661,79 @@ function updateSbUserCard() {
 // ── Profile functions above ──
 
 // ── حساب نسبة إنجاز المهام الدوارة للأسبوع الحالي ──
-async function calcWeeklyProgress(uname) {
+// ── حساب إنجاز المهام الدوارة لشهر معين ──
+async function calcMonthlyProgress(uname, yearMonth) {
   const data = STAFF_SCHEDULES[uname];
   if (!data || !data.rotating) return { done: 0, total: 0, pct: 0, tasks: [] };
 
-  const today = new Date();
-  const jsDay = today.getDay(); // 0=أحد ... 4=خميس
-  const weekDays = [0,1,2,3,4]; // أيام العمل
-  const weekStr = today.toISOString().slice(0,10).slice(0,8); // YYYY-MM-
+  const [year, month] = yearMonth.split('-').map(Number);
+  const monthStart = `${yearMonth}-01`;
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const monthEnd = `${yearMonth}-${String(daysInMonth).padStart(2,'0')}`;
 
-  // المهام الدوارة المرتبطة بقاعدة البيانات
   const taskMap = {
-    '⭐ استطلاع رضا العملاء':      { table:'surveys',         col:'created_at' },
-    '🔧 ملاحظات المرافق والنظافة': { table:'facility_reports', col:'report_date' },
-    '🏢 تقرير المبنى الرئيسي':     { table:'building_reports', col:'report_date' },
-    '🏫 متابعة مبنى التدريب العملي (50د)': { table:'building_reports', col:'report_date' },
+    '⭐ استطلاع رضا العملاء':      { tableKey:'surveys',  col:'date',        taskType:'survey' },
+    '🔧 ملاحظات المرافق والنظافة': { tableKey:'facility', col:'report_date',  taskType:'facility' },
+    '🏢 تقرير المبنى الرئيسي':     { tableKey:'building', col:'report_date',  taskType:'building_main' },
+    '🏫 متابعة مبنى التدريب العملي (25د — بداية الحصة الثالثة)': { tableKey:'manual', taskType:'building_practical' },
   };
 
   const maleUsers = ['alhamad','ibrahim','ahmed'];
   const rotOffset = maleUsers.includes(uname) ? 4 : 0;
+  const name = data.name || uname;
+
+  // جلب البيانات
+  const safe = async p => { try { const r=await p; return r.data||[]; } catch(e){ return []; } };
+  const [surveys, facility, building, manual] = await Promise.all([
+    safe(db.from('surveys').select('observer,date').gte('date',monthStart).lte('date',monthEnd)),
+    safe(db.from('facility_reports').select('observer,report_date').gte('report_date',monthStart).lte('report_date',monthEnd)),
+    safe(db.from('building_reports').select('observer,report_date').gte('report_date',monthStart).lte('report_date',monthEnd)),
+    safe(db.from('task_completions').select('*').eq('username',uname).gte('task_date',monthStart).lte('task_date',monthEnd)).catch(()=>[]),
+  ]);
+
+  const findMe = (obs) => obs && (obs.includes(name) || obs.includes(uname));
 
   let totalExpected = 0, totalDone = 0;
   const taskResults = [];
 
-  // جلب البيانات من الكاش
-  const cache = await NQ.fetchAll().catch(()=>({}));
-
   for (const r of data.rotating) {
-    const dbInfo = taskMap[r.task];
-    // كم يوم في الأسبوع هذه المهمة لـ "أنا"
-    let myDaysThisWeek = [];
-    r.days.forEach((name, i) => {
-      const actualIdx = (i + rotOffset) % 5;
-      const displayName = r.days[actualIdx];
-      if (displayName === 'أنا' && weekDays[i] <= jsDay) {
-        myDaysThisWeek.push(weekDays[i]);
-      }
-    });
-
-    if (myDaysThisWeek.length === 0) continue;
-    totalExpected += myDaysThisWeek.length;
-
-    if (dbInfo && cache[dbInfo.table === 'surveys' ? 'surveys' : dbInfo.table === 'facility_reports' ? 'facility' : 'building']) {
-      const arr = cache[dbInfo.table === 'surveys' ? 'surveys' : dbInfo.table === 'facility_reports' ? 'facility' : 'building'] || [];
-      // عد السجلات التي رفعها هذا المستخدم هذا الأسبوع
-      const thisWeekRecords = arr.filter(rec => {
-        const d = (rec[dbInfo.col]||'').slice(0,10);
-        return d.startsWith(weekStr.slice(0,7)) && (rec.observer||rec.username||'').includes(uname);
-      });
-      const doneDays = Math.min(myDaysThisWeek.length, thisWeekRecords.length);
-      totalDone += doneDays;
-      taskResults.push({ task: r.task.replace(/^[^ ]+ /, ''), expected: myDaysThisWeek.length, done: doneDays });
-    } else {
-      taskResults.push({ task: r.task.replace(/^[^ ]+ /, ''), expected: myDaysThisWeek.length, done: 0 });
+    // كم يوم هذا الشهر هذه المهمة لـ "أنا"
+    let myDays = 0;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month-1, d);
+      const jsDay = date.getDay();
+      if (jsDay < 0 || jsDay > 4) continue;
+      const actualIdx = (jsDay + rotOffset) % 5;
+      if (r.days[actualIdx] === 'أنا') myDays++;
     }
+    if (myDays === 0) continue;
+
+    const info = taskMap[r.task];
+    let done = 0;
+    if (info) {
+      if (info.tableKey === 'surveys')  done = surveys.filter(rec=>findMe(rec.observer)).length;
+      else if (info.tableKey === 'facility') done = facility.filter(rec=>findMe(rec.observer)).length;
+      else if (info.tableKey === 'building') done = building.filter(rec=>findMe(rec.observer)).length;
+      else done = manual.filter(rec=>rec.task_type===info.taskType).length;
+    }
+    done = Math.min(done, myDays);
+    totalExpected += myDays;
+    totalDone += done;
+    taskResults.push({
+      task: r.task.replace(/^[^ ]+ /, ''),
+      expected: myDays, done,
+      pct: myDays > 0 ? Math.round(done/myDays*100) : 0
+    });
   }
 
-  const pct = totalExpected > 0 ? Math.round(totalDone / totalExpected * 100) : 0;
-  return { done: totalDone, total: totalExpected, pct, tasks: taskResults };
+  const pct = totalExpected > 0 ? Math.round(totalDone/totalExpected*100) : 0;
+  return { done: totalDone, total: totalExpected, pct, tasks: taskResults, yearMonth };
+}
+
+// ── الدالة القديمة للتوافق (تستخدم الشهر الحالي) ──
+async function calcWeeklyProgress(uname) {
+  const ym = new Date().toISOString().slice(0,7);
+  return await calcMonthlyProgress(uname, ym);
 }
 
 // ── الملف الشخصي ──
@@ -15738,38 +15815,98 @@ async function openProfileModal(tab = 'main') {
   modal.style.display = 'block';
 
   if (tab === 'records') _loadMyRecords();
+  if (tab === 'main') {
+    _pmMainAsync(currentUser.username).then(html => {
+      const el = document.getElementById('_pmMainContent');
+      if (el) el.outerHTML = html;
+    });
+  }
+}
+
+async function _pmMainAsync(uname) {
+  // جلب آخر 6 أشهر من مارس 2026
+  const months = [];
+  let d = new Date(2026, 2, 1); // مارس 2026
+  const now = new Date();
+  while (d <= now) {
+    months.push(d.toISOString().slice(0,7));
+    d = new Date(d.getFullYear(), d.getMonth()+1, 1);
+  }
+
+  // جلب بيانات كل الأشهر
+  const monthData = [];
+  for (const ym of months) {
+    const prog = await calcMonthlyProgress(uname, ym);
+    monthData.push({ ym, ...prog });
+  }
+
+  const curYm = now.toISOString().slice(0,7);
+  const curProg = monthData.find(m=>m.ym===curYm) || { done:0, total:0, pct:0, tasks:[] };
+  const progColor = curProg.pct>=80?'#16A34A':curProg.pct>=50?'#D97706':'#DC2626';
+
+  // Chart bars
+  const maxPct = 100;
+  const chartBars = monthData.map(m => {
+    const c = m.pct>=80?'#16A34A':m.pct>=50?'#D97706':'#DC2626';
+    const mName = new Date(m.ym+'-01').toLocaleString('ar',{month:'short'});
+    const isCur = m.ym === curYm;
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+      <div style="font-size:10px;font-weight:700;color:${c};">${m.pct}%</div>
+      <div style="width:100%;display:flex;align-items:flex-end;height:60px;">
+        <div style="width:100%;background:${c}${isCur?'':'66'};border-radius:4px 4px 0 0;height:${Math.max(4,m.pct)}%;min-height:4px;transition:height .5s ease;${isCur?'box-shadow:0 0 8px '+c+'66;':''}"></div>
+      </div>
+      <div style="font-size:9px;color:${isCur?'var(--text)':'var(--text-dim)'};font-weight:${isCur?'700':'400'};">${mName}</div>
+    </div>`;
+  }).join('');
+
+  // المهام الحالية
+  const taskRows = curProg.tasks.map(t => {
+    const c = t.pct===100?'#16A34A':t.pct>0?'#D97706':'#94A3B8';
+    return `<div style="background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:5px;display:flex;align-items:center;gap:10px;">
+      <div style="flex:1;">
+        <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px;">${t.task}</div>
+        <div style="background:var(--border);border-radius:3px;height:4px;overflow:hidden;">
+          <div style="height:100%;width:${t.pct}%;background:${c};border-radius:3px;transition:width .6s ease;"></div>
+        </div>
+      </div>
+      <div style="font-size:13px;font-weight:900;color:${c};flex-shrink:0;">${t.done}/${t.expected}</div>
+    </div>`;
+  }).join('');
+
+  return `
+    <!-- Chart الأشهر -->
+    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:10px;">📊 إنجاز المهام الدوارة — من مارس 2026</div>
+    <div style="background:var(--card2);border-radius:12px;padding:14px;margin-bottom:14px;">
+      <div style="display:flex;align-items:flex-end;gap:6px;height:80px;">
+        ${chartBars}
+      </div>
+    </div>
+
+    <!-- ملخص الشهر الحالي -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+      <div style="background:var(--card2);border-radius:12px;padding:10px;text-align:center;border-top:3px solid ${progColor};">
+        <div style="font-size:22px;font-weight:900;color:${progColor};">${curProg.pct}%</div>
+        <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">نسبة الشهر</div>
+      </div>
+      <div style="background:var(--card2);border-radius:12px;padding:10px;text-align:center;border-top:3px solid #16A34A;">
+        <div style="font-size:22px;font-weight:900;color:#16A34A;">${curProg.done}</div>
+        <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">مكتملة</div>
+      </div>
+      <div style="background:var(--card2);border-radius:12px;padding:10px;text-align:center;border-top:3px solid #D97706;">
+        <div style="font-size:22px;font-weight:900;color:#D97706;">${curProg.total-curProg.done}</div>
+        <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">متبقية</div>
+      </div>
+    </div>
+
+    <!-- تفاصيل المهام -->
+    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;">مهامك هذا الشهر</div>
+    ${taskRows || '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">لا توجد مهام دوارة مخصصة</div>'}`;
 }
 
 function _pmMain(prog) {
-  const d = new Date();
-  const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'];
-  const todayName = d.getDay() <= 4 ? days[d.getDay()] : 'إجازة';
-  return `
-    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:.5px;">ملخص الأسبوع</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-      <div style="background:var(--card2);border-radius:12px;padding:12px;text-align:center;border-top:3px solid #16A34A;">
-        <div style="font-size:22px;font-weight:900;color:#16A34A;">${prog.done}</div>
-        <div style="font-size:10px;color:var(--text-dim);margin-top:3px;">مهام مكتملة</div>
-      </div>
-      <div style="background:var(--card2);border-radius:12px;padding:12px;text-align:center;border-top:3px solid #D97706;">
-        <div style="font-size:22px;font-weight:900;color:#D97706;">${prog.total - prog.done}</div>
-        <div style="font-size:10px;color:var(--text-dim);margin-top:3px;">مهام متبقية</div>
-      </div>
-    </div>
-    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;">اليوم: ${todayName}</div>
-    ${prog.tasks.map(t=>{
-      const pct = t.expected > 0 ? Math.round(t.done/t.expected*100) : 0;
-      const c = pct===100?'#16A34A':pct>0?'#D97706':'#94A3B8';
-      return `<div style="background:var(--card2);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;">
-        <div style="flex:1;">
-          <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px;">${t.task}</div>
-          <div style="background:var(--border);border-radius:3px;height:4px;overflow:hidden;">
-            <div style="height:100%;width:${pct}%;background:${c};border-radius:3px;"></div>
-          </div>
-        </div>
-        <div style="font-size:13px;font-weight:900;color:${c};flex-shrink:0;">${t.done}/${t.expected}</div>
-      </div>`;
-    }).join('')}`;
+  // placeholder — يُستبدل بـ async version
+  const progColor = prog.pct>=80?'#16A34A':prog.pct>=50?'#D97706':'#DC2626';
+  return `<div id="_pmMainContent" style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">جارٍ تحميل البيانات...</div>`;
 }
 
 function _pmInfo(info) {
