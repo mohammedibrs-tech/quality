@@ -1282,6 +1282,9 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   <button class="tb-btn active" id="tb-home" onclick="tbNav('home')">🏠 الرئيسية</button>
   <button class="tb-btn" id="tb-records" onclick="tbNavRecords()">📋 السجلات</button>
   <button class="tb-btn" id="tb-dashboard" onclick="tbNavDash()" style="display:none;">📈 Dashboard</button>
+  <button class="tb-btn" id="tb-users" onclick="tbNavUsers()" style="display:none;">👥 المستخدمون</button>
+  <button class="tb-btn" id="tb-usermgmt" onclick="tbNavUserMgmt()" style="display:none;">👥 إدارة</button>
+  
 
   <!-- مساحة مرنة -->
   <div style="flex:1;"></div>
@@ -1316,6 +1319,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <button class="nav-tab active" onclick="showPage('home',this)" style="flex-shrink:0;">🏠 الرئيسية</button>
     <button class="nav-tab" onclick="showPage('records',this)" style="flex-shrink:0;">📋 السجلات</button>
     <button class="nav-tab" id="dashNavBtn" onclick="showDashboard(this)" style="display:none;flex-shrink:0;">📈 Dashboard</button>
+    <button class="nav-tab" id="userMgmtNavBtn" onclick="tbNavUserMgmt()" style="display:none;flex-shrink:0;">👥 إدارة</button>
     <button class="nav-tab" id="navLoginBtn" onclick="showLM()" style="flex-shrink:0;">دخول</button>
   </div>
   <!-- ملف شخصي في الجوال -->
@@ -1383,19 +1387,10 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="section-card sales" onclick="adminOnly('sales')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div><div class="s-text"><div class="s-title-ar">تقرير فريق المبيعات</div><div class="s-title-en">SALES DEPARTMENT</div></div><div class="s-arrow">›</div></div>
     <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><div class="s-text"><div class="s-title-ar">المدرب/ة الأعلى تقييم بالاستبيان</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
     <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
-    <div class="section-card" onclick="adminOnly('user-management')" style="background:linear-gradient(135deg,#0F172A,#1E293B);border-right:4px solid #6366F1;">
-      <div class="s-icon" style="background:rgba(99,102,241,0.15);color:#6366F1;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      </div>
-      <div class="s-text">
-        <div class="s-title-ar" style="color:#fff;">إدارة المستخدمين</div>
-        <div class="s-title-en" style="color:rgba(99,102,241,0.7);">USER MANAGEMENT</div>
-      </div>
-      <div class="s-arrow" style="color:#6366F1;">›</div>
-    </div>
+
     <div class="section-card" onclick="adminOnly('task-completion')" style="background:linear-gradient(135deg,#1B4332,#0A2A1E);"><div class="s-icon" style="color:#34D399;background:rgba(52,211,153,0.15);">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-    </div><div class="s-text"><div class="s-title-ar" style="color:#fff;">إنجاز المهام الدوارة</div><div class="s-title-en" style="color:rgba(52,211,153,0.7);">ROTATING TASKS TRACKER</div></div><div class="s-arrow" style="color:#34D399;">›</div></div>
+    </div><div class="s-text"><div class="s-title-ar" style="color:#fff;">إنجازات المهام المتغيرة أسبوعياً</div><div class="s-title-en" style="color:rgba(52,211,153,0.7);">ROTATING TASKS TRACKER</div></div><div class="s-arrow" style="color:#34D399;">›</div></div>
 
     <div class="section-card" onclick="openQuarterlyPage()" style="background:linear-gradient(135deg,#0D1F2D,#1A3A5C);"><div class="s-icon" style="color:#00C8B4;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="4" rx="1"/><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></div><div class="s-text"><div class="s-title-ar" style="color:#fff;">التقارير الربعية</div><div class="s-title-en" style="color:rgba(0,200,180,0.8);">QUARTERLY REPORTS</div></div><div class="s-arrow" style="color:#00C8B4;">›</div></div>
 
@@ -1912,7 +1907,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   <div class="container-wide">
     <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
     <div class="page-icon" style="background:linear-gradient(135deg,#1B4332,#0A2A1E);color:#34D399;">✓</div>
-    <h1>إنجاز المهام الدوارة</h1>
+    <h1>إنجازات المهام المتغيرة أسبوعياً</h1>
     <div class="sub">ROTATING TASKS PERFORMANCE TRACKER</div>
 
     <!-- فلتر الشهر -->
@@ -1979,83 +1974,99 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 <div id="page-user-management" class="page">
   <div class="container-wide">
     <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
-    <div class="page-icon" style="background:linear-gradient(135deg,#0F172A,#1E293B);color:#6366F1;">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    </div>
-    <h1>إدارة المستخدمين</h1>
-    <div class="sub">USER MANAGEMENT</div>
-
-    <!-- إضافة مستخدم جديد -->
-    <div style="background:var(--card);border-radius:16px;padding:20px;border:1px solid var(--border);margin:20px 0;">
-      <div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:8px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        إضافة مستخدم جديد
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#6366F1,#4F46E5);display:flex;align-items:center;justify-content:center;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">اسم المستخدم (username)</label>
-          <input id="umNewUser" class="inp" placeholder="مثال: sarah" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;">
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">كلمة المرور</label>
-          <input id="umNewPass" class="inp" placeholder="مثال: 1122Sr" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;">
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الاسم الكامل</label>
-          <input id="umNewName" class="inp" placeholder="مثال: سارة العتيبي" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الصلاحية</label>
-          <select id="umNewRole" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
-            <option value="staff">موظف (Staff)</option>
-            <option value="admin">مدير (Admin)</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">البريد الإلكتروني</label>
-          <input id="umNewEmail" class="inp" placeholder="example@nouradriving.sa" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;">
-        </div>
+      <div>
+        <h1 style="margin:0;font-size:20px;">إدارة المستخدمين</h1>
+        <div style="font-size:11px;color:var(--text-dim);">USER MANAGEMENT</div>
       </div>
-      <button onclick="umAddUser()" style="padding:11px 24px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">+ إضافة المستخدم</button>
     </div>
 
-    <!-- قائمة المستخدمين -->
-    <div style="font-size:13px;font-weight:900;color:var(--text);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
-      <span>المستخدمون الحاليون</span>
-      <button onclick="umLoadUsers()" style="padding:6px 14px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--text-dim);">↻ تحديث</button>
+    <!-- تبويبات داخلية -->
+    <div style="display:flex;gap:0;background:var(--card2);border-radius:14px;padding:4px;margin-bottom:20px;border:1px solid var(--border);flex-wrap:wrap;">
+      <button id="umTab_list" onclick="umSwitchTab('list')"
+        style="flex:1;min-width:80px;padding:9px 8px;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;transition:all .2s;">
+        👥 المستخدمون
+      </button>
+      <button id="umTab_add" onclick="umSwitchTab('add')"
+        style="flex:1;min-width:80px;padding:9px 8px;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .2s;">
+        ➕ إضافة
+      </button>
+      <button id="umTab_perms" onclick="umSwitchTab('perms')" id="umTabPerms"
+        style="flex:1;min-width:80px;padding:9px 8px;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .2s;">
+        🔑 الصلاحيات
+      </button>
+      <button id="umTab_schedule" onclick="umSwitchTab('schedule')"
+        style="flex:1;min-width:80px;padding:9px 8px;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .2s;">
+        📅 الجدول
+      </button>
     </div>
-    <div id="umUserList"></div>
-  </div>
-</div>
 
-<!-- مودال تعديل مستخدم -->
-<div id="umEditModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:var(--card);border-radius:18px;padding:22px;width:100%;max-width:420px;direction:rtl;font-family:Cairo,sans-serif;box-shadow:0 24px 60px rgba(0,0,0,0.4);">
-    <div style="font-size:15px;font-weight:900;margin-bottom:16px;color:var(--text);">تعديل المستخدم</div>
-    <input type="hidden" id="umEditId">
-    <div style="margin-bottom:10px;">
-      <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الاسم الكامل</label>
-      <input id="umEditName" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
+    <!-- Panel: قائمة المستخدمين -->
+    <div id="umPanel_list">
+      <div id="umUserList"></div>
     </div>
-    <div style="margin-bottom:10px;">
-      <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">كلمة المرور الجديدة (اتركها فارغة للإبقاء)</label>
-      <input id="umEditPass" class="inp" placeholder="••••••" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;">
+
+    <!-- Panel: إضافة مستخدم -->
+    <div id="umPanel_add" style="display:none;">
+      <div style="background:var(--card);border-radius:16px;padding:20px;border:1px solid var(--border);">
+        <div style="font-size:13px;font-weight:900;color:#6366F1;margin-bottom:16px;">إضافة مستخدم جديد</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px;">
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">اسم المستخدم (بالإنجليزي)</label>
+            <input id="umNewUser" class="inp" placeholder="مثال: sarah" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">كلمة المرور</label>
+            <input id="umNewPass" class="inp" placeholder="مثال: 1122Sr" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الاسم الكامل</label>
+            <input id="umNewName" class="inp" placeholder="مثال: سارة العتيبي" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الصلاحية</label>
+            <select id="umNewRole" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;box-sizing:border-box;">
+              <option value="staff">موظف (Staff)</option>
+              <option value="admin">مدير (Admin)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">البريد الإلكتروني</label>
+            <input id="umNewEmail" class="inp" placeholder="example@nouradriving.sa" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;box-sizing:border-box;">
+          </div>
+        </div>
+        <button onclick="umAddUser()" style="padding:11px 28px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">+ إضافة المستخدم</button>
+      </div>
     </div>
-    <div style="margin-bottom:10px;">
-      <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الصلاحية</label>
-      <select id="umEditRole" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
-        <option value="staff">موظف (Staff)</option>
-        <option value="admin">مدير (Admin)</option>
-      </select>
+
+    <!-- Panel: الصلاحيات -->
+    <div id="umPanel_perms" style="display:none;">
+      <div style="background:var(--card2);border-radius:12px;padding:14px;margin-bottom:16px;border:1px solid var(--border);">
+        <label style="font-size:11px;font-weight:700;color:var(--text-dim);margin-left:10px;">اختر المستخدم:</label>
+        <select id="umPermsUserSel" onchange="umLoadPerms()" style="padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);font-family:Cairo,sans-serif;font-size:13px;">
+          <option value="">— اختر —</option>
+        </select>
+      </div>
+      <div id="umPermsGrid"></div>
+      <div id="umPermsSaveArea" style="display:none;margin-top:16px;">
+        <button onclick="umSavePerms()" style="padding:11px 28px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">💾 حفظ الصلاحيات</button>
+      </div>
     </div>
-    <div style="margin-bottom:16px;">
-      <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">البريد الإلكتروني</label>
-      <input id="umEditEmail" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;">
+
+    <!-- Panel: الجدول الدوري -->
+    <div id="umPanel_schedule" style="display:none;">
+      <div style="background:var(--card2);border-radius:12px;padding:14px;margin-bottom:16px;border:1px solid var(--border);">
+        <label style="font-size:11px;font-weight:700;color:var(--text-dim);margin-left:10px;">اختر الموظف:</label>
+        <select id="umSchedUserSel" onchange="umLoadSchedule()" style="padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);font-family:Cairo,sans-serif;font-size:13px;">
+          <option value="">— اختر —</option>
+        </select>
+      </div>
+      <div id="umScheduleEditor"></div>
     </div>
-    <div style="display:flex;gap:10px;">
-      <button onclick="umSaveEdit()" style="flex:1;padding:12px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">✅ حفظ</button>
-      <button onclick="document.getElementById('umEditModal').style.display='none'" style="padding:12px 16px;background:rgba(0,0,0,0.07);border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;cursor:pointer;color:var(--text-dim);">إلغاء</button>
-    </div>
+
   </div>
 </div>
 
@@ -4607,7 +4618,7 @@ function openSec(type){
     openTaskCompletionPage();
   }else if(type==='user-management'){
     document.getElementById('page-user-management').classList.add('active');
-    umLoadUsers();
+    umInitPage();
   }else{
     document.getElementById('page-facility').classList.add('active');autoObs('fObs');
     setTimeout(initFacObs, 100);
@@ -7000,14 +7011,160 @@ async function umToggleActive(id, currentActive) {
 }
 
 function umOpenEdit(id, name, role, email) {
-  document.getElementById('umEditId').value    = id;
-  document.getElementById('umEditName').value  = name;
-  document.getElementById('umEditRole').value  = role;
-  document.getElementById('umEditEmail').value = email;
-  document.getElementById('umEditPass').value  = '';
-  const modal = document.getElementById('umEditModal');
-  modal.style.display = 'flex';
-  modal.onclick = e => { if(e.target===modal) modal.style.display='none'; };
+  // الكروت المتاحة في الرئيسية
+  const ALL_SECTIONS = [
+    { key:'female',       label:'القسم النسائي — رصد المخالفات',   icon:'👩' },
+    { key:'male',         label:'القسم الرجالي — رصد المخالفات',   icon:'👨' },
+    { key:'survey',       label:'استطلاع رضا العملاء',              icon:'⭐' },
+    { key:'facility',     label:'تقرير ملاحظات المرافق',            icon:'🔧' },
+    { key:'building',     label:'تقرير المبنى الرئيسي والعملي',     icon:'🏢' },
+    { key:'no-session',   label:'تقرير جدولة الحصص التدريبية',      icon:'🚫' },
+    { key:'ops',          label:'كفاءة التشغيل',                    icon:'⚙️' },
+    { key:'attend',       label:'الحضور والانصراف',                 icon:'🕐' },
+    { key:'sales',        label:'تقرير فريق المبيعات',               icon:'💼' },
+    { key:'task-completion', label:'إنجازات المهام المتغيرة',        icon:'✓' },
+  ];
+
+  // جلب صلاحيات المستخدم المحفوظة
+  const savedPerms = JSON.parse(localStorage.getItem('nq_perms_'+id)||'{}');
+  // الجدول والمهام
+  const scheduleKey = Object.keys(STAFF_SCHEDULES).find(u => {
+    return STAFF_SCHEDULES[u].name === name;
+  }) || '';
+  const sched = STAFF_SCHEDULES[scheduleKey];
+
+  let m = document.getElementById('umEditModal');
+  if (m) m.remove();
+  m = document.createElement('div');
+  m.id = 'umEditModal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9999;display:flex;align-items:center;justify-content:center;padding:12px;overflow-y:auto;';
+
+  m.innerHTML = `
+    <div style="background:var(--card);border-radius:20px;width:100%;max-width:560px;direction:rtl;font-family:Cairo,sans-serif;box-shadow:0 24px 60px rgba(0,0,0,0.4);overflow:hidden;max-height:95vh;display:flex;flex-direction:column;">
+      
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#0F172A,#1E293B);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+        <div style="font-size:15px;font-weight:900;color:#fff;">تعديل: ${name}</div>
+        <button onclick="document.getElementById('umEditModal').remove()" style="background:rgba(255,255,255,0.1);border:none;border-radius:8px;width:28px;height:28px;color:rgba(255,255,255,0.7);font-size:14px;cursor:pointer;">✕</button>
+      </div>
+
+      <!-- تبويبات داخلية -->
+      <div style="display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--card);">
+        <button onclick="umEditTab('basic')" id="uet-basic" style="flex:1;padding:10px;border:none;background:rgba(99,102,241,0.1);color:#6366F1;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-bottom:2px solid #6366F1;">المعلومات</button>
+        <button onclick="umEditTab('perms')" id="uet-perms" style="flex:1;padding:10px;border:none;background:transparent;color:var(--text-dim);font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;">الصلاحيات</button>
+        <button onclick="umEditTab('sched')" id="uet-sched" style="flex:1;padding:10px;border:none;background:transparent;color:var(--text-dim);font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;">الجدول والمهام</button>
+      </div>
+
+      <div style="overflow-y:auto;flex:1;padding:18px;" id="umEditBody">
+      
+        <!-- تبويب: المعلومات الأساسية -->
+        <div id="uep-basic">
+          <input type="hidden" id="umEditId" value="${id}">
+          <div style="margin-bottom:10px;">
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الاسم الكامل</label>
+            <input id="umEditName" class="inp" value="${name}" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">كلمة المرور الجديدة (اتركها فارغة للإبقاء)</label>
+            <input id="umEditPass" class="inp" placeholder="••••••" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;box-sizing:border-box;">
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الصلاحية العامة</label>
+            <select id="umEditRole" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
+              <option value="staff" ${role==='staff'?'selected':''}>موظف (Staff)</option>
+              <option value="admin" ${role==='admin'?'selected':''}>مدير (Admin)</option>
+            </select>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">البريد الإلكتروني</label>
+            <input id="umEditEmail" class="inp" value="${email||''}" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;box-sizing:border-box;">
+          </div>
+          <button onclick="umSaveEdit()" style="width:100%;padding:12px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">✅ حفظ المعلومات</button>
+        </div>
+
+        <!-- تبويب: الصلاحيات -->
+        <div id="uep-perms" style="display:none;">
+          <div style="font-size:11px;color:var(--text-dim);margin-bottom:14px;">حدد الكروت والصفحات التي يستطيع هذا المستخدم الوصول إليها:</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+            ${ALL_SECTIONS.map(s => {
+              const checked = savedPerms[s.key] !== false; // افتراضي: مسموح
+              return `<label style="display:flex;align-items:center;gap:8px;background:var(--card2);border-radius:10px;padding:10px 12px;cursor:pointer;border:1.5px solid ${checked?'rgba(99,102,241,0.3)':'var(--border)'};" id="perm_lbl_${s.key}">
+                <input type="checkbox" id="perm_${s.key}" ${checked?'checked':''} onchange="document.getElementById('perm_lbl_${s.key}').style.borderColor=this.checked?'rgba(99,102,241,0.3)':'var(--border)'">
+                <span style="font-size:13px;">${s.icon}</span>
+                <span style="font-size:11px;font-weight:700;color:var(--text);">${s.label}</span>
+              </label>`;
+            }).join('')}
+          </div>
+          <button onclick="umSavePerms('${id}')" style="width:100%;padding:12px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">✅ حفظ الصلاحيات</button>
+        </div>
+
+        <!-- تبويب: الجدول والمهام -->
+        <div id="uep-sched" style="display:none;">
+          ${sched ? `
+          <div style="margin-bottom:14px;">
+            <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;">وقت الدوام</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">بداية الدوام</label>
+                <input id="umSchedStart" class="inp" value="${sched.shift.split('—')[0].trim()}" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;box-sizing:border-box;">
+              </div>
+              <div>
+                <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">نهاية الدوام</label>
+                <input id="umSchedEnd" class="inp" value="${sched.shift.split('—')[1]?.trim()||''}" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;direction:ltr;box-sizing:border-box;">
+              </div>
+            </div>
+          </div>
+          <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;">المهام المتغيرة</div>
+          <div style="background:var(--card2);border-radius:12px;padding:12px;margin-bottom:14px;">
+            ${sched.rotating.map((r,i)=>`
+              <div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;color:var(--text);">${r.task}</div>
+            `).join('')}
+            <div style="font-size:10px;color:var(--text-dim);margin-top:8px;">* لتعديل المهام الدوارة يرجى التواصل مع مطور المنصة</div>
+          </div>
+          <button onclick="umSaveSched('${scheduleKey}')" style="width:100%;padding:12px;background:linear-gradient(135deg,#00A896,#007B6E);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">✅ حفظ وقت الدوام</button>
+          ` : '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">لا يوجد جدول مرتبط بهذا المستخدم في STAFF_SCHEDULES</div>'}
+        </div>
+
+      </div>
+    </div>`;
+
+  document.body.appendChild(m);
+  m.onclick = e => { if(e.target===m) m.remove(); };
+}
+
+function umEditTab(tab) {
+  ['basic','perms','sched'].forEach(t => {
+    const panel = document.getElementById('uep-'+t);
+    const btn   = document.getElementById('uet-'+t);
+    if (panel) panel.style.display = t===tab ? '' : 'none';
+    if (btn) {
+      btn.style.background = t===tab ? 'rgba(99,102,241,0.1)' : 'transparent';
+      btn.style.color = t===tab ? '#6366F1' : 'var(--text-dim)';
+      btn.style.borderBottom = t===tab ? '2px solid #6366F1' : '2px solid transparent';
+    }
+  });
+}
+
+function umSavePerms(userId) {
+  const ALL_KEYS = ['female','male','survey','facility','building','no-session','ops','attend','sales','task-completion'];
+  const perms = {};
+  ALL_KEYS.forEach(k => {
+    const el = document.getElementById('perm_'+k);
+    if (el) perms[k] = el.checked;
+  });
+  localStorage.setItem('nq_perms_'+userId, JSON.stringify(perms));
+  toast('✅ تم حفظ الصلاحيات');
+}
+
+function umSaveSched(schedKey) {
+  const start = document.getElementById('umSchedStart')?.value.trim();
+  const end   = document.getElementById('umSchedEnd')?.value.trim();
+  if (!schedKey || !STAFF_SCHEDULES[schedKey]) { toast('⚠️ مستخدم غير مرتبط بجدول'); return; }
+  if (!start || !end) { toast('⚠️ أدخل وقت البداية والنهاية'); return; }
+  STAFF_SCHEDULES[schedKey].shift = `${start} — ${end}`;
+  toast('✅ تم تحديث وقت الدوام (مؤقتاً حتى رفع الكود)');
+  document.getElementById('umEditModal')?.remove();
+  umLoadUsers();
 }
 
 async function umSaveEdit() {
@@ -7024,7 +7181,7 @@ async function umSaveEdit() {
   const { error } = await db.from('users').update(updates).eq('id', id);
   if (error) { toast('❌ فشل التعديل'); return; }
   toast('✅ تم التعديل بنجاح');
-  document.getElementById('umEditModal').style.display = 'none';
+  document.getElementById('umEditModal')?.remove();
   umLoadUsers();
 }
 
@@ -16246,6 +16403,12 @@ function updateTopBarUser() {
     if(loginBtn)  loginBtn.style.display  = 'none';
     if(nameEl)    nameEl.textContent = currentUser.name || '—';
     if(dashBtn)   dashBtn.style.display = currentUser.role==='admin' ? '' : 'none';
+    const umBtn = document.getElementById('tb-usermgmt');
+    if(umBtn) umBtn.style.display = currentUser.role==='admin' ? '' : 'none';
+    const umNavBtn = document.getElementById('userMgmtNavBtn');
+    if(umNavBtn) umNavBtn.style.display = currentUser.role==='admin' ? '' : 'none';
+    const usersBtn = document.getElementById('tb-users');
+    if(usersBtn)  usersBtn.style.display = currentUser.role==='admin' ? '' : 'none';
     if(avatarEl) {
       avatarEl.innerHTML = savedImg
         ? `<img src="${savedImg}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
@@ -16293,9 +16456,227 @@ function tbNavRecords() {
   tbNav('records');
 }
 
+function tbNavUsers() {
+  if(!currentUser || currentUser.role !== 'admin') return;
+  ['home','records','dashboard','users'].forEach(p => {
+    document.getElementById('tb-'+p)?.classList.remove('active');
+  });
+  document.getElementById('tb-users')?.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-user-management')?.classList.add('active');
+  umLoadUsers();
+}
+
+function tbNavUserMgmt() {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  // Desktop
+  ['home','records','dashboard','usermgmt'].forEach(p => {
+    document.getElementById('tb-'+p)?.classList.remove('active');
+  });
+  document.getElementById('tb-usermgmt')?.classList.add('active');
+  // Mobile
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('userMgmtNavBtn')?.classList.add('active');
+  // Show page
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-user-management')?.classList.add('active');
+  umInitPage();
+}
+
+function umInitPage() {
+  umLoadUsers();
+  // ملأ قوائم الاختيار
+  _umFillUserSelects();
+}
+
+function _umFillUserSelects() {
+  const permsEl = document.getElementById('umPermsUserSel');
+  const schedEl = document.getElementById('umSchedUserSel');
+  if (!permsEl || !schedEl) return;
+
+  // من Supabase
+  db.from('users').select('username,name,active').eq('active',true).order('name').then(({data}) => {
+    const opts = (data||[]).map(u=>`<option value="${u.username}">${u.name}</option>`).join('');
+    if (permsEl) permsEl.innerHTML = '<option value="">— اختر —</option>' + opts;
+    if (schedEl) schedEl.innerHTML = '<option value="">— اختر —</option>' + opts;
+  }).catch(() => {
+    // fallback من USERS
+    const opts = Object.entries(USERS).filter(([u])=>u!=='admin').map(([u,d])=>`<option value="${u}">${d.name}</option>`).join('');
+    if (permsEl) permsEl.innerHTML = '<option value="">— اختر —</option>' + opts;
+    if (schedEl) schedEl.innerHTML = '<option value="">— اختر —</option>' + opts;
+  });
+}
+
+function umSwitchTab(tab) {
+  ['list','add','perms','schedule'].forEach(t => {
+    const panel = document.getElementById('umPanel_'+t);
+    const btn   = document.getElementById('umTab_'+t);
+    if (panel) panel.style.display = t===tab ? '' : 'none';
+    if (btn) {
+      btn.style.background = t===tab ? 'var(--accent)' : 'transparent';
+      btn.style.color      = t===tab ? '#fff' : 'var(--text-dim)';
+    }
+  });
+  if (tab === 'list') umLoadUsers();
+  if (tab === 'perms') {
+    document.getElementById('umPermsGrid').innerHTML = '';
+    document.getElementById('umPermsSaveArea').style.display = 'none';
+    // جلب المستخدمين وملء القائمة
+    db.from('users').select('username,name').order('name').then(({data}) => {
+      const sel = document.getElementById('umPermsUserSel');
+      if (sel && data) {
+        sel.innerHTML = '<option value="">— اختر مستخدماً —</option>' +
+          data.map(u=>`<option value="${u.username}">${u.name} (${u.username})</option>`).join('');
+      }
+    }).catch(()=>{
+      // fallback من STAFF_SCHEDULES
+      const sel = document.getElementById('umPermsUserSel');
+      if (sel) sel.innerHTML = '<option value="">— اختر مستخدماً —</option>' +
+        Object.entries(STAFF_SCHEDULES).map(([u,s])=>`<option value="${u}">${s.name}</option>`).join('');
+    });
+  }
+  if (tab === 'schedule') {
+    document.getElementById('umScheduleEditor').innerHTML = '';
+    const sel = document.getElementById('umSchedUserSel');
+    if (sel) sel.innerHTML = '<option value="">— اختر موظفاً —</option>' +
+      Object.entries(STAFF_SCHEDULES).map(([u,s])=>`<option value="${u}">${s.name}</option>`).join('');
+  }
+}
+
+// ── الصلاحيات ──
+const UM_SECTIONS = [
+  { key:'female',         label:'القسم النسائي',              desc:'رصد المخالفات نسائي',     icon:'👩', color:'#C84590' },
+  { key:'male',           label:'القسم الرجالي',              desc:'رصد المخالفات رجالي',     icon:'👨', color:'#3070C0' },
+  { key:'survey',         label:'استطلاع رضا العملاء',        desc:'رفع الاستطلاع',           icon:'⭐', color:'#D97706' },
+  { key:'facility',       label:'تقرير المرافق',              desc:'ملاحظات المرافق',         icon:'🔧', color:'#16A34A' },
+  { key:'building',       label:'تقرير المبنى الرئيسي',       desc:'تقرير المبنى',            icon:'🏢', color:'#2563EB' },
+  { key:'no-session',     label:'جدولة الحصص',               desc:'رفع تقرير الجدول',        icon:'📋', color:'#C2410C' },
+  { key:'task-completion',label:'إنجاز المهام المتغيرة',      desc:'متابعة الإنجاز',          icon:'✅', color:'#059669' },
+  { key:'ops',            label:'كفاءة التشغيل',              desc:'تقرير التشغيل',           icon:'⚙️', color:'#667EEA' },
+  { key:'sales',          label:'تقرير المبيعات',             desc:'للمدير فقط افتراضياً',    icon:'💼', color:'#F5A623', adminOnly:true },
+  { key:'dashboard',      label:'Dashboard',                  desc:'للمدير فقط افتراضياً',    icon:'📊', color:'#6366F1', adminOnly:true },
+];
+
+async function umLoadPerms() {
+  const uname = document.getElementById('umPermsUserSel')?.value;
+  if (!uname) return;
+  const grid  = document.getElementById('umPermsGrid');
+  const save  = document.getElementById('umPermsSaveArea');
+  if (!grid) return;
+  grid.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-dim);font-size:12px;">جارٍ التحميل...</div>';
+
+  // جلب الصلاحيات المحفوظة
+  let savedPerms = {};
+  try {
+    const { data } = await db.from('users').select('permissions').eq('username',uname).single();
+    savedPerms = JSON.parse(data?.permissions || '{}');
+  } catch(e) {
+    savedPerms = {};
+  }
+
+  // الافتراضي: موظف لديه صلاحية كل شيء ماعدا adminOnly
+  grid.innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:12px;">الكروت المتاحة للمستخدم — فعّل أو أوقف كل كارت:</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;">
+      ${UM_SECTIONS.map(sec => {
+        const isOn = savedPerms[sec.key] !== undefined ? savedPerms[sec.key] : !sec.adminOnly;
+        return `<label style="display:flex;align-items:center;gap:10px;background:var(--card);border-radius:12px;padding:12px;cursor:pointer;border:1.5px solid ${isOn?sec.color+'55':'var(--border)'};transition:all .2s;">
+          <div style="width:36px;height:36px;border-radius:10px;background:${sec.color}22;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${sec.icon}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:11px;font-weight:700;color:var(--text);">${sec.label}</div>
+            <div style="font-size:9px;color:var(--text-dim);">${sec.desc}</div>
+          </div>
+          <input type="checkbox" data-sec="${sec.key}" ${isOn?'checked':''} style="width:18px;height:18px;accent-color:${sec.color};flex-shrink:0;">
+        </label>`;
+      }).join('')}
+    </div>`;
+
+  if (save) save.style.display = '';
+}
+
+async function umSavePerms() {
+  const uname = document.getElementById('umPermsUserSel')?.value;
+  if (!uname) { toast('⚠️ اختر مستخدماً أولاً'); return; }
+
+  const checks = document.querySelectorAll('#umPermsGrid input[data-sec]');
+  const perms = {};
+  checks.forEach(cb => { perms[cb.dataset.sec] = cb.checked; });
+
+  try {
+    // حاول تحديث جدول users
+    const { error } = await db.from('users').update({ permissions: JSON.stringify(perms) }).eq('username', uname);
+    if (error && error.code === '42703') {
+      // العمود غير موجود — احفظ في localStorage
+      localStorage.setItem('nq_perms_' + uname, JSON.stringify(perms));
+      toast('✅ تم الحفظ (localStorage) — لإضافة عمود permissions في Supabase: ALTER TABLE users ADD COLUMN permissions text;');
+    } else if (error) {
+      throw error;
+    } else {
+      toast('✅ تم حفظ صلاحيات ' + uname);
+    }
+  } catch(e) {
+    localStorage.setItem('nq_perms_' + uname, JSON.stringify(perms));
+    toast('✅ تم الحفظ محلياً');
+  }
+}
+
+// ── تعديل الجدول ──
+function umLoadSchedule() {
+  const uname = document.getElementById('umSchedUserSel')?.value;
+  const el    = document.getElementById('umScheduleEditor');
+  if (!uname || !el) return;
+
+  const data = STAFF_SCHEDULES[uname];
+  if (!data) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">لا يوجد جدول لهذا الموظف</div>';
+    return;
+  }
+
+  el.innerHTML = `
+    <!-- بداية ونهاية الدوام -->
+    <div style="background:var(--card);border-radius:14px;padding:16px;border:1px solid var(--border);margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:900;color:var(--accent);margin-bottom:12px;">⏰ أوقات الدوام</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الشفت الحالي</label>
+          <input id="umSchedShift" class="inp" value="${data.shift||''}" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;">
+        </div>
+        <div style="display:flex;align-items:flex-end;">
+          <button onclick="umSaveShift('${uname}')" style="width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">💾 حفظ الشفت</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- المهام الدوارة -->
+    <div style="background:var(--card);border-radius:14px;padding:16px;border:1px solid var(--border);">
+      <div style="font-size:12px;font-weight:900;color:var(--accent);margin-bottom:12px;">🔄 المهام المتغيرة</div>
+      ${data.rotating.map((r,i) => `
+        <div style="background:var(--card2);border-radius:10px;padding:10px 12px;margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px;">${r.task}</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;">
+            ${['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'].map((day,di) => {
+              const actualIdx = (di + ((['alhamad','ibrahim','ahmed'].includes(uname))?4:0)) % 5;
+              const isMe = r.days[actualIdx] === 'أنا';
+              return `<span style="padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;background:${isMe?'var(--accent)':'var(--border)'};color:${isMe?'#fff':'var(--text-dim)'};">${day}: ${isMe?'أنا':r.days[actualIdx]}</span>`;
+            }).join('')}
+          </div>
+        </div>`).join('')}
+      <div style="font-size:10px;color:var(--text-dim);margin-top:8px;">لتعديل المهام الدوارة تواصل مع المطور</div>
+    </div>`;
+}
+
+function umSaveShift(uname) {
+  const newShift = document.getElementById('umSchedShift')?.value.trim();
+  if (!newShift) { toast('⚠️ أدخل الشفت'); return; }
+  if (STAFF_SCHEDULES[uname]) {
+    STAFF_SCHEDULES[uname].shift = newShift;
+    toast('✅ تم تحديث الشفت (مؤقت — يحتاج تحديث الكود للحفظ الدائم)');
+  }
+}
+
 function tbNavDash() {
   if(!currentUser || currentUser.role !== 'admin') return;
-  ['home','records','dashboard'].forEach(p => {
+  ['home','records','dashboard','users'].forEach(p => {
     const btn = document.getElementById('tb-'+p);
     if(btn) btn.classList.remove('active');
   });
