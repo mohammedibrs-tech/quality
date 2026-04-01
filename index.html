@@ -10727,21 +10727,33 @@ function getOpsAnalysis(){
       const leaveU  = att.leaveU||0;
       const permHours= att.permHours||0;
 
-      // الحصص المفترضة = ساعات الإجمالية ÷ 2
-      const expSess = hrsTot>0 ? Math.round(hrsTot/HOURS_PER_SESSION) : workDays*SESSIONS_PER_DAY;
+      // ── الحساب الصحيح للكفاءة ──
+      // أيام الحضور الفعلية = أيام العمل - أيام الغياب الكاملة
+      const actualWorkDays = Math.max(0, workDays - absDays);
+
+      // الحصص المفترضة = أيام الحضور الفعلية × 4 حصص يومياً
+      // (لا نعاقب المدرب على الغياب مرتين — نحذفه من المقام والبسط)
+      const expSess = actualWorkDays * SESSIONS_PER_DAY;
+
+      // الحصص الفعلية التي أنجزها = من الملف
       const actSess = sessions;
-      const unusedSess = Math.max(0, expSess-actSess);
-      const absSess = absDays * SESSIONS_PER_DAY;
-      const eff = expSess>0 ? actSess/expSess : 0;
+
+      // لو في استئذان بالساعات — نحوّله لكسر حصة (حصة = 2 ساعة)
+      const permSessLost = permHours > 0 ? permHours / HOURS_PER_SESSION : 0;
+
+      // الكفاءة = الفعلي ÷ المتوقع (بعد خصم الغياب)
+      const unusedSess = Math.max(0, expSess - actSess);
+      const absSess = absDays * SESSIONS_PER_DAY; // للعرض فقط
+      const eff = expSess > 0 ? Math.min(1, actSess / expSess) : 0;
 
       // توصية تفصيلية
       let recommendation='';
       if(eff>=TARGET_EFF){
         const reasons=[];
         if(absDays===0) reasons.push('لا غياب هذا الشهر');
-        else if(absDays<=2) reasons.push(`غياب ${absDays} يوم فقط`);
-        if(unusedSess<=5) reasons.push(`حصص مهدرة منخفضة (${unusedSess.toFixed(0)})`);
-        reasons.push(`أنجز ${actSess} من ${expSess} حصة`);
+        else if(absDays<=2) reasons.push(`غياب ${absDays} يوم (محسوب)، أنجز المتوقع منه`);
+        if(permHours>0) reasons.push(`استئذان ${permHours} ساعة`);
+        reasons.push(`أنجز ${actSess} من ${expSess} حصة متوقعة`);
         recommendation='✅ أداء ممتاز — '+reasons.join('، ');
       } else {
         const reasons=[];
@@ -10750,18 +10762,18 @@ function getOpsAnalysis(){
           if(absence>0) parts.push(`${absence} غياب`);
           if(leaveP>0)  parts.push(`${leaveP} إجازة`);
           if(leaveU>0)  parts.push(`${leaveU} غير مدفوعة`);
-          reasons.push(`غياب ${absDays} يوم (${parts.join(' + ')||absDays+' يوم'})`);
+          reasons.push(`غياب ${absDays} يوم (${parts.join(' + ')||absDays+' يوم'}) — تم استبعادها من الحساب`);
         }
-        if(permHours>0) reasons.push(`استئذان ${permHours} ساعة`);
+        if(permHours>0) reasons.push(`استئذان ${permHours} ساعة (≈ ${permSessLost.toFixed(1)} حصة)`);
         const missed=Math.round(unusedSess);
-        if(missed>0) reasons.push(`${missed} حصة لم تُنجز من أصل ${expSess}`);
+        if(missed>0) reasons.push(`${missed} حصة لم تُنجز من أصل ${expSess} حصة متوقعة (${actualWorkDays} يوم حضور × 4)`);
         if(!reasons.length) reasons.push(`أنجز ${actSess} من ${expSess} حصة`);
         recommendation=`⚠️ كفاءة ${(eff*100).toFixed(1)}% — `+reasons.join(' | ');
       }
 
       all.push({
         name, section:sec, sessions:actSess, hrsTot, hrsAct, trainees,
-        absDays, absence, leaveP, leaveU, permHours, workDays,
+        absDays, absence, leaveP, leaveU, permHours, workDays, actualWorkDays,
         effSource,
         expectedSessions: expSess,
         actualSessions:   actSess,
@@ -11062,17 +11074,17 @@ async function exportOpsExcelFull(){
   wh.mergeCells(1,1,1,4);ht.getCell(1).font={name:'Arial',bold:true,size:13,color:{argb:CLR.white}};ht.getCell(1).fill={type:'pattern',pattern:'solid',fgColor:{argb:CLR.dark}};ht.getCell(1).alignment={horizontal:'center'};ht.height=36;
   const hh=wh.addRow(['اسم العمود','المصدر','الشرح','مثال']);hh.height=24;hh.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',bold:true,size:10,color:{argb:CLR.white}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:CLR.teal}};});
   [['حصص منجزة','ملف التشغيل','الحصص التي نفّذها المدرب فعلياً','80 حصة'],
-   ['الحصص المفترضة','محسوب','ساعات إجمالية ÷ 2','320÷2=160'],
-   ['الحصص الغير مجدولة','محسوب','المفترضة − المنجزة','80 حصة'],
-   ['الحصص المهدرة بسبب الغياب','محسوب','أيام الغياب × 4','2×4=8'],
+   ['الحصص المفترضة','محسوب','(أيام العمل − أيام الغياب) × 4 حصص يومياً','(22-2)×4=80'],
+   ['الحصص الغير مجدولة','محسوب','المفترضة − المنجزة','80-70=10 حصة'],
+   ['الحصص المهدرة بسبب الغياب','محسوب','أيام الغياب × 4 (للعرض فقط)','2×4=8'],
    ['غياب','كشف الحضور','رمز: غ، غع، غياب','3 أيام'],
    ['إجازة','كشف الحضور','رمز: إجازة، اجازة','2 أيام'],
    ['استئذان (س)','كشف الحضور','رمز: 2hr, 4hr','4 ساعات'],
    ['ساعات إجمالية','ملف التشغيل','إجمالي ساعات العمل المتاحة','320 ساعة'],
    ['ساعات فعلية','ملف التشغيل','ساعات العمل الفعلية','290 ساعة'],
    ['نسبة المنصة','ملف التشغيل','فعلية÷إجمالية للمقارنة','90.6%'],
-   ['كفاءة %','محسوب','حصص منجزة ÷ مفترضة × 100','80÷160=50%'],
-   ['التوصية','محسوب','شرح السبب بناءً على الغياب والحصص','غياب 5 يوم | 80 حصة لم تُنجز'],
+   ['كفاءة %','محسوب','منجزة ÷ مفترضة (بعد خصم الغياب) × 100','70÷80=87.5%'],
+   ['التوصية','محسوب','شرح السبب بناءً على الغياب والحصص','غياب 2 يوم (محسوب) | 10 حصة لم تُنجز'],
   ].forEach((row,i)=>{const r=wh.addRow(row);r.height=22;r.eachCell({includeEmpty:true},c=>{c.font={name:'Arial',size:10};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:i%2===0?'FFE8F5F3':CLR.white}};});r.getCell(1).font={name:'Arial',bold:true,size:10};});
   // تنزيل
   const buf=await wb.xlsx.writeBuffer();
