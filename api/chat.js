@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -10,23 +9,37 @@ export default async function handler(req, res) {
   try {
     const { system, messages, max_tokens = 1000 } = req.body;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens,
-        system,
-        messages,
-      }),
-    });
+    // حوّل messages من صيغة Anthropic إلى صيغة Gemini
+    const geminiMessages = messages.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system || '' }] },
+          contents: geminiMessages,
+          generationConfig: { maxOutputTokens: max_tokens }
+        })
+      }
+    );
 
     const data = await response.json();
-    return res.status(response.status).json(data);
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: data.error?.message || 'Gemini API error' });
+    }
+
+    // حوّل الرد من صيغة Gemini إلى صيغة Anthropic (عشان الكود في الموقع ما يتغير)
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'لم أتمكن من المعالجة.';
+    return res.status(200).json({
+      content: [{ type: 'text', text }]
+    });
+
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
