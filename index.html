@@ -4010,7 +4010,17 @@ violations, surveys, facility_reports, building_reports, sales_reports, ops_repo
     });
 
     const data = await response.json();
-    const reply = data.content?.[0]?.text || 'عذراً، لم أتمكن من المعالجة.';
+    
+    // تشخيص لو في خطأ
+    if (!response.ok) {
+      console.error('QBot API error:', data);
+      throw new Error(data.error?.message || data.error || 'API error ' + response.status);
+    }
+    
+    const reply = data?.content?.[0]?.text 
+               || data?.choices?.[0]?.message?.content
+               || JSON.stringify(data)
+               || 'لم أستلم رداً من الخادم.';
 
     // احذف loading
     document.getElementById(loadId)?.remove();
@@ -4025,7 +4035,13 @@ violations, surveys, facility_reports, building_reports, sales_reports, ops_repo
 
   } catch(e) {
     document.getElementById(loadId)?.remove();
-    _qbotRenderMsg('bot', '❌ خطأ في الاتصال. تحقق من الشبكة وحاول مرة أخرى.');
+    console.error('QBot error:', e);
+    _qbotRenderMsg('bot', `❌ خطأ: ${e.message || 'تحقق من الكونسل (F12)'}
+    
+💡 تأكد من:
+• إضافة ANTHROPIC_API_KEY في Vercel Environment Variables
+• رفع ملف api/chat.js على GitHub
+• إعادة نشر المشروع في Vercel`);
     if (statusEl) statusEl.textContent = 'خطأ في الاتصال';
   }
 
