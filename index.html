@@ -2185,6 +2185,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
       <div id="qDetails"></div>
       <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
         <button onclick="exportQuarterlyExcel()" style="flex:1;min-width:200px;padding:16px;background:linear-gradient(135deg,#00A896,#007B6E);color:#fff;border:none;border-radius:16px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">⬇ تصدير Excel الربعي الكامل</button>
+        <button onclick="qSyncOpsToSupabase()" style="flex:1;min-width:200px;padding:16px;background:linear-gradient(135deg,#1DA9BD,#0D7A8A);color:#fff;border:none;border-radius:16px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">☁ مزامنة كفاءة التشغيل مع Supabase</button>
         <button onclick="saveQuarterAsRef()" style="flex:1;min-width:200px;padding:16px;background:linear-gradient(135deg,#0D1F2D,#1A3A5C);color:#fff;border:none;border-radius:16px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">📌 حفظ كمرجع دائم</button>
       </div>
     </div>
@@ -11909,6 +11910,46 @@ async function qFetchCard(cardLabel, q, year) {
     }
     renderQuarterlyResults();
   }catch(e){toast('❌ '+e.message);}
+}
+
+async function qSyncOpsToSupabase() {
+  if(!OPS_MONTHS || !Object.keys(OPS_MONTHS).length) {
+    toast('⚠️ لا توجد بيانات تشغيل محلية — افتح كرت كفاءة التشغيل وحلّل الملف أولاً'); return;
+  }
+  toast('⏳ جارٍ المزامنة...');
+  let total = 0;
+  try {
+    for (const [ym, mo] of Object.entries(OPS_MONTHS)) {
+      const [yr, mn] = ym.split('-');
+      const trainers = mo.analysis?.length ? mo.analysis :
+        ['female','male','bike'].flatMap(sec => (mo.ops?.[sec]||[]).map(r => ({
+          name: r.name||r.trainer_name, section: sec,
+          efficiency: r.efficiency||r.efficiency_pct||0,
+          sessions: r.sessions||r.actualSessions||0,
+          trainees: r.trainees||0,
+          hrsTot: r.hrsTot||r.available_hours||0
+        })));
+      if (!trainers.length) continue;
+      const rows = trainers.map(t => ({
+        report_month: String(parseInt(mn)),
+        report_year:  String(yr),
+        trainer_name: t.name||t.trainer_name||'—',
+        zone:         t.section||'female',
+        available_hours: t.hrsTot||t.available_hours||0,
+        sessions:     t.sessions||t.actualSessions||0,
+        trainees:     t.trainees||0,
+        efficiency_pct: Math.round(t.efficiency||t.efficiency_pct||0),
+        uploaded_by:  currentUser?.name||'admin'
+      }));
+      await db.from('ops_reports').upsert(rows, {onConflict:'trainer_name,report_month,report_year'});
+      total += rows.length;
+    }
+    toast('✅ تمت المزامنة — '+total+' سجل محفوظ في Supabase');
+    // أعد تحميل التقرير الربعي
+    if (_qQuarter && _qYear) loadQuarterlyData(_qQuarter, _qYear);
+  } catch(e) {
+    toast('❌ خطأ: '+e.message);
+  }
 }
 
 async function exportQuarterlyExcel() {
