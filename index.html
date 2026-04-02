@@ -1259,13 +1259,68 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   },80);
   setTimeout(()=>{
     const s=document.getElementById('splashScreen');
-    if(s){s.style.transition='opacity 0.7s ease,transform 0.7s ease';s.style.opacity='0';s.style.transform='scale(1.04)';setTimeout(()=>{if(s)s.remove();},700);}
+    if(s){s.style.transition='opacity 0.7s ease,transform 0.7s ease';s.style.opacity='0';s.style.transform='scale(1.04)';setTimeout(()=>{if(s)s.remove(); _showLoginScreen();},700);}
   },2800);
 })();
 </script>
 
 
-<div id="app">
+<!-- ══ LOGIN SCREEN ══ -->
+<div id="loginScreen" style="display:none;position:fixed;inset:0;z-index:9990;background:radial-gradient(ellipse at 50% 30%, #0D2E3A 0%, #061520 60%, #030D14 100%);align-items:center;justify-content:center;flex-direction:column;padding:20px;">
+
+  <!-- خلفية دوائر -->
+  <div style="position:absolute;width:600px;height:600px;border-radius:50%;border:1px solid rgba(0,200,180,0.05);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;"></div>
+  <div style="position:absolute;width:400px;height:400px;border-radius:50%;border:1px solid rgba(0,200,180,0.08);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;"></div>
+
+  <!-- البطاقة -->
+  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(0,200,180,0.2);border-radius:24px;padding:40px 36px;width:100%;max-width:420px;backdrop-filter:blur(20px);position:relative;z-index:1;direction:rtl;">
+
+    <!-- اللوقو والعنوان -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#00A896,#007B6E);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;box-shadow:0 8px 24px rgba(0,168,150,0.3);">⚙️</div>
+      <div style="font-size:22px;font-weight:900;color:#fff;margin-bottom:6px;font-family:Cairo,sans-serif;">منصة إدارة الجودة</div>
+      <div style="font-size:12px;color:rgba(0,200,180,0.7);font-family:Cairo,sans-serif;letter-spacing:1px;">QUALITY MANAGEMENT PLATFORM</div>
+    </div>
+
+    <!-- الحقول -->
+    <div style="margin-bottom:16px;">
+      <label style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);display:block;margin-bottom:8px;font-family:Cairo,sans-serif;">اسم المستخدم</label>
+      <input id="ls_user" type="text" placeholder="أدخل اسم المستخدم" autocomplete="username"
+        style="width:100%;padding:13px 16px;border-radius:12px;border:1.5px solid rgba(0,200,180,0.2);background:rgba(255,255,255,0.06);color:#fff;font-family:Cairo,sans-serif;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .2s;"
+        onfocus="this.style.borderColor='rgba(0,200,180,0.6)'" onblur="this.style.borderColor='rgba(0,200,180,0.2)'"
+        onkeydown="if(event.key==='Enter')document.getElementById('ls_pass').focus()">
+    </div>
+    <div style="margin-bottom:8px;">
+      <label style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);display:block;margin-bottom:8px;font-family:Cairo,sans-serif;">كلمة المرور</label>
+      <div style="position:relative;">
+        <input id="ls_pass" type="password" placeholder="أدخل كلمة المرور" autocomplete="current-password"
+          style="width:100%;padding:13px 16px;border-radius:12px;border:1.5px solid rgba(0,200,180,0.2);background:rgba(255,255,255,0.06);color:#fff;font-family:Cairo,sans-serif;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .2s;"
+          onfocus="this.style.borderColor='rgba(0,200,180,0.6)'" onblur="this.style.borderColor='rgba(0,200,180,0.2)'"
+          onkeydown="if(event.key==='Enter')_lsLogin()">
+        <button onclick="const p=document.getElementById('ls_pass');p.type=p.type==='password'?'text':'password'"
+          style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;">👁</button>
+      </div>
+    </div>
+
+    <!-- رسالة الخطأ -->
+    <div id="ls_err" style="display:none;color:#FF6B6B;font-size:12px;font-family:Cairo,sans-serif;margin-bottom:12px;text-align:center;background:rgba(255,107,107,0.1);padding:8px;border-radius:8px;">
+      اسم المستخدم أو كلمة المرور غير صحيحة
+    </div>
+
+    <!-- زر الدخول -->
+    <button onclick="_lsLogin()" id="ls_btn"
+      style="width:100%;padding:14px;background:linear-gradient(135deg,#00A896,#007B6E);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:15px;font-weight:900;cursor:pointer;margin-top:8px;transition:opacity .2s;box-shadow:0 4px 20px rgba(0,168,150,0.3);">
+      تسجيل الدخول
+    </button>
+
+    <!-- Footer -->
+    <div style="text-align:center;margin-top:24px;font-size:10px;color:rgba(255,255,255,0.2);font-family:Cairo,sans-serif;">
+      نورة لتعليم القيادة © 2026
+    </div>
+  </div>
+</div>
+
+<div id="app" style="display:none;">
 
 <!-- ══ DESKTOP TOP BAR ══ -->
 <div id="desktopTopBar" style="display:none;position:fixed;top:0;right:0;left:0;height:52px;background:var(--card);border-bottom:1px solid var(--border);z-index:8000;box-shadow:0 2px 12px rgba(0,0,0,0.07);box-sizing:border-box;padding:0 20px;align-items:center;gap:6px;direction:rtl;">
@@ -4103,32 +4158,9 @@ async function doLogin(){
 }
 
 function _afterLogin() {
+  _hideLoginScreen();
   hideLM();
-  updateNav();
-  // جلب صلاحيات المستخدم من Supabase وحفظها في localStorage
-  if (currentUser && currentUser.role !== 'admin') {
-    db.from('users').select('permissions').eq('username', currentUser.username).single()
-      .then(({ data }) => {
-        if (data?.permissions) {
-          try {
-            const perms = JSON.parse(data.permissions);
-            localStorage.setItem('nq_perms_' + currentUser.username, JSON.stringify(perms));
-            updateNav(); // أعد رسم الكروت بعد تحميل الصلاحيات
-          } catch(e) {}
-        }
-      }).catch(() => {});
-  }
-  NQ.fetchAll(true).then(()=>{ loadActiveStaffHome(); renderHomeWidgets(); });
-  sbUpdateAuth();
-  renderDailyBulletin().catch(()=>{});
-  if(currentUser.role==='admin') loadPendingViolations();
-  if(currentUser.role==='admin') _registerPush();
-  if(pendingSec){
-    const s=pendingSec; pendingSec=null;
-    if(s.startsWith('__admin_')){ adminOnly(s.replace('__admin_','')); }
-    else { openSec(s); }
-  }
-  setTimeout(() => _showProfileHint(), 2000);
+  _afterLoginSuccess();
 }
 // ── إشعار الملف الشخصي — 3 مرات يومياً ──
 function _showProfileHint() {
@@ -4232,8 +4264,22 @@ function _showProfileHint() {
 
 function doLogout(){
   currentUser=null;
-  NQ._cache={};NQ._lastFetch=null; // مسح الكاش عند الخروج
-  updateNav();goHome();
+  NQ._cache={};NQ._lastFetch=null;
+  updateNav();
+  // إخفاء الـ app وإظهار شاشة Login
+  const app = document.getElementById('app');
+  if (app) app.style.display = 'none';
+  const ls = document.getElementById('loginScreen');
+  if (ls) {
+    ls.style.display = 'flex';
+    ls.style.opacity = '1';
+    document.getElementById('ls_user').value = '';
+    document.getElementById('ls_pass').value = '';
+    document.getElementById('ls_err').style.display = 'none';
+    document.getElementById('ls_btn').textContent = 'تسجيل الدخول';
+    document.getElementById('ls_btn').style.opacity = '1';
+    setTimeout(()=>document.getElementById('ls_user')?.focus(), 300);
+  }
 }
 
 // ── THEME TOGGLE ──
@@ -4394,7 +4440,77 @@ function showSection(t){
   }
   openSec(t);
 }
-// ── التحقق من صلاحية المستخدم ──
+// ── شاشة تسجيل الدخول الكاملة ──
+function _showLoginScreen() {
+  const ls = document.getElementById('loginScreen');
+  if (ls) { ls.style.display = 'flex'; setTimeout(()=>document.getElementById('ls_user')?.focus(), 300); }
+}
+
+function _hideLoginScreen() {
+  const ls = document.getElementById('loginScreen');
+  const app = document.getElementById('app');
+  if (ls) { ls.style.transition='opacity .4s ease'; ls.style.opacity='0'; setTimeout(()=>{ ls.style.display='none'; ls.style.opacity=''; },400); }
+  if (app) { app.style.display=''; }
+}
+
+async function _lsLogin() {
+  const u = document.getElementById('ls_user')?.value.trim().toLowerCase();
+  const p = document.getElementById('ls_pass')?.value;
+  const err = document.getElementById('ls_err');
+  const btn = document.getElementById('ls_btn');
+  if (!u || !p) { if(err) err.style.display='block'; return; }
+
+  if(btn) { btn.textContent = 'جارٍ التحقق...'; btn.style.opacity='.7'; }
+  if(err) err.style.display = 'none';
+
+  // جرّب Supabase أولاً
+  try {
+    const { data, error } = await db.from('users').select('username,password,role,name,email,active').eq('username',u).eq('active',true).single();
+    if (!error && data && data.password === p) {
+      currentUser = { username:data.username, password:data.password, role:data.role, name:data.name, email:data.email };
+      _hideLoginScreen();
+      _afterLoginSuccess();
+      return;
+    }
+  } catch(e) {}
+
+  // احتياطي USERS
+  const usr = USERS[u];
+  if (usr && usr.password === p) {
+    currentUser = { username:u, ...usr };
+    _hideLoginScreen();
+    _afterLoginSuccess();
+    return;
+  }
+
+  // فشل
+  if(err) err.style.display = 'block';
+  if(btn) { btn.textContent = 'تسجيل الدخول'; btn.style.opacity='1'; }
+}
+
+function _afterLoginSuccess() {
+  updateNav();
+  if (currentUser && currentUser.role !== 'admin') {
+    db.from('users').select('permissions').eq('username', currentUser.username).single()
+      .then(({ data }) => {
+        if (data?.permissions) {
+          try { localStorage.setItem('nq_perms_' + currentUser.username, JSON.stringify(JSON.parse(data.permissions))); updateNav(); } catch(e) {}
+        }
+      }).catch(() => {});
+  }
+  NQ.fetchAll(true).then(()=>{ loadActiveStaffHome(); renderHomeWidgets(); });
+  sbUpdateAuth();
+  renderDailyBulletin().catch(()=>{});
+  if(currentUser.role==='admin') loadPendingViolations();
+  if(currentUser.role==='admin') _registerPush();
+  if(currentUser.role==='admin') setTimeout(qbotInit, 500);
+  if(pendingSec){
+    const s=pendingSec; pendingSec=null;
+    if(s.startsWith('__admin_')){ adminOnly(s.replace('__admin_','')); }
+    else { openSec(s); }
+  }
+  setTimeout(() => _showProfileHint(), 2000);
+}
 function _hasPermission(sectionKey) {
   if (!currentUser) return false;
   if (currentUser.role === 'admin') return true; // المدير يملك كل الصلاحيات دائماً
@@ -16585,9 +16701,8 @@ function tbLogout() {
     currentUser = null;
     localStorage.removeItem('nq_user');
     updateNav();
-    goHome();
     updateTopBarUser();
-    toast('👋 تم تسجيل الخروج');
+    doLogout();
   }
 }
 
