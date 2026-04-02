@@ -1,4 +1,44 @@
 <!DOCTYPE html>
+<!--
+╔══════════════════════════════════════════════════════════════════╗
+║         NOURA QUALITY PLATFORM — دليل الكود                     ║
+║         للبحث السريع: Ctrl+F ثم ابحث عن رقم القسم               ║
+╠══════════════════════════════════════════════════════════════════╣
+║  §01 · CSS & المتغيرات العامة              سطر ~16              ║
+║  §02 · HTML: الصفحات                       سطر ~1338            ║
+║         §02a · الرئيسية (page-home)        سطر ~1338            ║
+║         §02b · المخالفات (page-violations) سطر ~1495            ║
+║         §02c · الاستطلاع (page-survey)     سطر ~1669            ║
+║         §02d · المرافق (page-facility)     سطر ~1732            ║
+║         §02e · إنجاز المهام                سطر ~1906            ║
+║         §02f · إدارة المستخدمين            سطر ~1973            ║
+║         §02g · التقارير الربعية            سطر ~2073            ║
+║         §02h · السجلات (page-records)      سطر ~2124            ║
+║         §02i · المبيعات (page-sales)       سطر ~2344            ║
+║         §02j · كفاءة التشغيل (page-ops)   سطر ~2516            ║
+║         §02k · الداشبورد (page-dashboard)  سطر ~2626            ║
+║         §02l · المبنى (page-building)      سطر ~3220            ║
+║         §02m · الحضور (page-attend)        سطر ~3644            ║
+║  §03 · الـ Splash Screen & التهيئة         سطر ~1206            ║
+║  §04 · JS Core: المتغيرات والثوابت         سطر ~4126            ║
+║  §05 · Auth: تسجيل الدخول/الخروج          سطر ~4200            ║
+║  §06 · Navigation: التنقل بين الصفحات     سطر ~4453            ║
+║  §07 · المخالفات — Submit & Logic          سطر ~4800            ║
+║  §08 · الاستطلاع — Submit & Logic          سطر ~5500            ║
+║  §09 · المرافق — Submit & Logic            سطر ~5600            ║
+║  §10 · جدول المهام الأسبوعية (SCHEDULES)  سطر ~5970            ║
+║  §11 · إنجاز المهام الدوارة               سطر ~6466            ║
+║  §12 · إدارة المستخدمين (User Mgmt)       سطر ~6970            ║
+║  §13 · الأرشيف — Archive                   سطر ~7441            ║
+║  §14 · كشف الحضور — Attendance            سطر ~7618            ║
+║  §15 · كفاءة التشغيل — Ops Efficiency     سطر ~8094            ║
+║  §16 · الداشبورد — Dashboard & MindMap    سطر ~11900           ║
+║  §17 · جدولة الحصص — No Session           سطر ~15000           ║
+║  §18 · الملف الشخصي — Profile Modal       سطر ~15500           ║
+║  §19 · Quality Bot                         سطر ~3945            ║
+║  §20 · Utilities (toast, setDT, exports)  سطر ~4100            ║
+╚══════════════════════════════════════════════════════════════════╝
+-->
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -1259,70 +1299,46 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   },80);
   setTimeout(()=>{
     const s=document.getElementById('splashScreen');
-    if(s){s.style.transition='opacity 0.7s ease,transform 0.7s ease';s.style.opacity='0';s.style.transform='scale(1.04)';setTimeout(()=>{if(s)s.remove(); _showLoginScreen();},700);}
+    if(s){s.style.transition='opacity 0.7s ease,transform 0.7s ease';s.style.opacity='0';s.style.transform='scale(1.04)';setTimeout(()=>{if(s)s.remove();_showLoginScreen();},700);}
   },2800);
 })();
 </script>
 
 
 <!-- ══ LOGIN SCREEN ══ -->
-<div id="loginScreen" style="display:none;position:fixed;inset:0;z-index:9990;background:radial-gradient(ellipse at 50% 30%, #0D2E3A 0%, #061520 60%, #030D14 100%);align-items:center;justify-content:center;flex-direction:column;padding:20px;">
-
-  <!-- خلفية دوائر -->
+<div id="loginScreen" style="display:none;position:fixed;inset:0;z-index:9990;background:radial-gradient(ellipse at 50% 30%,#0D2E3A 0%,#061520 60%,#030D14 100%);align-items:center;justify-content:center;flex-direction:column;padding:20px;">
   <div style="position:absolute;width:600px;height:600px;border-radius:50%;border:1px solid rgba(0,200,180,0.05);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;"></div>
   <div style="position:absolute;width:400px;height:400px;border-radius:50%;border:1px solid rgba(0,200,180,0.08);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;"></div>
-
-  <!-- البطاقة -->
   <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(0,200,180,0.2);border-radius:24px;padding:40px 36px;width:100%;max-width:420px;backdrop-filter:blur(20px);position:relative;z-index:1;direction:rtl;">
-
-    <!-- اللوقو والعنوان -->
     <div style="text-align:center;margin-bottom:32px;">
-      <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#00A896,#007B6E);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;box-shadow:0 8px 24px rgba(0,168,150,0.3);">⚙️</div>
+      <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#1DA9BD,#0D7A8A);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;box-shadow:0 8px 24px rgba(29,169,189,0.3);">⚙️</div>
       <div style="font-size:22px;font-weight:900;color:#fff;margin-bottom:6px;font-family:Cairo,sans-serif;">منصة إدارة الجودة</div>
       <div style="font-size:12px;color:rgba(0,200,180,0.7);font-family:Cairo,sans-serif;letter-spacing:1px;">QUALITY MANAGEMENT PLATFORM</div>
     </div>
-
-    <!-- الحقول -->
     <div style="margin-bottom:16px;">
       <label style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);display:block;margin-bottom:8px;font-family:Cairo,sans-serif;">اسم المستخدم</label>
-      <input id="ls_user" type="text" placeholder="أدخل اسم المستخدم" autocomplete="username"
-        style="width:100%;padding:13px 16px;border-radius:12px;border:1.5px solid rgba(0,200,180,0.2);background:rgba(255,255,255,0.06);color:#fff;font-family:Cairo,sans-serif;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .2s;"
-        onfocus="this.style.borderColor='rgba(0,200,180,0.6)'" onblur="this.style.borderColor='rgba(0,200,180,0.2)'"
-        onkeydown="if(event.key==='Enter')document.getElementById('ls_pass').focus()">
+      <input id="ls_user" type="text" placeholder="أدخل اسم المستخدم" autocomplete="username" style="width:100%;padding:13px 16px;border-radius:12px;border:1.5px solid rgba(0,200,180,0.2);background:rgba(255,255,255,0.06);color:#fff;font-family:Cairo,sans-serif;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .2s;" onfocus="this.style.borderColor='rgba(0,200,180,0.6)'" onblur="this.style.borderColor='rgba(0,200,180,0.2)'" onkeydown="if(event.key==='Enter')document.getElementById('ls_pass').focus()">
     </div>
     <div style="margin-bottom:8px;">
       <label style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);display:block;margin-bottom:8px;font-family:Cairo,sans-serif;">كلمة المرور</label>
       <div style="position:relative;">
-        <input id="ls_pass" type="password" placeholder="أدخل كلمة المرور" autocomplete="current-password"
-          style="width:100%;padding:13px 16px;border-radius:12px;border:1.5px solid rgba(0,200,180,0.2);background:rgba(255,255,255,0.06);color:#fff;font-family:Cairo,sans-serif;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .2s;"
-          onfocus="this.style.borderColor='rgba(0,200,180,0.6)'" onblur="this.style.borderColor='rgba(0,200,180,0.2)'"
-          onkeydown="if(event.key==='Enter')_lsLogin()">
-        <button onclick="const p=document.getElementById('ls_pass');p.type=p.type==='password'?'text':'password'"
-          style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;">👁</button>
+        <input id="ls_pass" type="password" placeholder="أدخل كلمة المرور" autocomplete="current-password" style="width:100%;padding:13px 16px;border-radius:12px;border:1.5px solid rgba(0,200,180,0.2);background:rgba(255,255,255,0.06);color:#fff;font-family:Cairo,sans-serif;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .2s;" onfocus="this.style.borderColor='rgba(0,200,180,0.6)'" onblur="this.style.borderColor='rgba(0,200,180,0.2)'" onkeydown="if(event.key==='Enter')_lsLogin()">
+        <button onclick="var p=document.getElementById('ls_pass');p.type=p.type==='password'?'text':'password'" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;">👁</button>
       </div>
     </div>
-
-    <!-- رسالة الخطأ -->
-    <div id="ls_err" style="display:none;color:#FF6B6B;font-size:12px;font-family:Cairo,sans-serif;margin-bottom:12px;text-align:center;background:rgba(255,107,107,0.1);padding:8px;border-radius:8px;">
-      اسم المستخدم أو كلمة المرور غير صحيحة
-    </div>
-
-    <!-- زر الدخول -->
-    <button onclick="_lsLogin()" id="ls_btn"
-      style="width:100%;padding:14px;background:linear-gradient(135deg,#00A896,#007B6E);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:15px;font-weight:900;cursor:pointer;margin-top:8px;transition:opacity .2s;box-shadow:0 4px 20px rgba(0,168,150,0.3);">
-      تسجيل الدخول
-    </button>
-
-    <!-- Footer -->
-    <div style="text-align:center;margin-top:24px;font-size:10px;color:rgba(255,255,255,0.2);font-family:Cairo,sans-serif;">
-      نورة لتعليم القيادة © 2026
-    </div>
+    <div id="ls_err" style="display:none;color:#FF6B6B;font-size:12px;font-family:Cairo,sans-serif;margin-bottom:12px;text-align:center;background:rgba(255,107,107,0.1);padding:8px;border-radius:8px;">اسم المستخدم أو كلمة المرور غير صحيحة</div>
+    <button onclick="_lsLogin()" id="ls_btn" style="width:100%;padding:14px;background:linear-gradient(135deg,#1DA9BD,#0D7A8A);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:15px;font-weight:900;cursor:pointer;margin-top:8px;transition:opacity .2s;box-shadow:0 4px 20px rgba(29,169,189,0.3);">تسجيل الدخول</button>
+    <div style="text-align:center;margin-top:24px;font-size:10px;color:rgba(255,255,255,0.2);font-family:Cairo,sans-serif;">نورة لتعليم القيادة © 2026</div>
   </div>
 </div>
 
 <div id="app" style="display:none;">
 
-<!-- ══ DESKTOP TOP BAR ══ -->
+
+
+<!-- ════════════════════════════════════════
+     §02 · HTML PAGES
+     ════════════════════════════════════════ -->
 <div id="desktopTopBar" style="display:none;position:fixed;top:0;right:0;left:0;height:52px;background:var(--card);border-bottom:1px solid var(--border);z-index:8000;box-shadow:0 2px 12px rgba(0,0,0,0.07);box-sizing:border-box;padding:0 20px;align-items:center;gap:6px;direction:rtl;">
 
   <!-- لوقو -->
@@ -1390,6 +1406,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 </nav>
 
 <!-- HOME -->
+
+<!-- §02a · HOME PAGE ══════════════════════ -->
 <div id="page-home" class="page active" style="position:relative;">
   <canvas id="qualityCanvas" style="position:absolute;inset:0;width:100%;height:100%;opacity:0.15;pointer-events:none;z-index:0;"></canvas>
   <div class="home-hero">
@@ -1547,6 +1565,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 </div>
 
 <!-- VIOLATIONS -->
+
+<!-- §02b · VIOLATIONS PAGE ════════════════ -->
 <div id="page-violations" class="page">
   <div class="container">
     <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
@@ -1721,6 +1741,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 </div>
 
 <!-- SURVEY -->
+
+<!-- §02c · SURVEY PAGE ════════════════════ -->
 <div id="page-survey" class="page">
   <div class="container">
     <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
@@ -1784,6 +1806,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 </div>
 
 <!-- FACILITY -->
+
+<!-- §02d · FACILITY PAGE ══════════════════ -->
 <div id="page-facility" class="page">
   <div class="container">
     <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
@@ -2678,6 +2702,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
 
 
 <!-- ══ PAGE: DASHBOARD ══ -->
+
+<!-- §02k · DASHBOARD PAGE ═════════════════ -->
 <div id="page-dashboard" class="page">
 <style>
 /* ── Arcade Dashboard ── */
@@ -3272,6 +3298,8 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
   </div>
 </div>
 
+
+<!-- §02l · BUILDING PAGE ══════════════════ -->
 <div id="page-building" class="page">
   <div class="container">
     <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
@@ -4157,12 +4185,35 @@ async function doLogin(){
   }
 }
 
-function _afterLogin() {
-  _hideLoginScreen();
-  hideLM();
-  _afterLoginSuccess();
+function _showLoginScreen(){var ls=document.getElementById('loginScreen');if(ls){ls.style.display='flex';setTimeout(function(){var u=document.getElementById('ls_user');if(u)u.focus();},300);}}
+function _hideLoginScreen(){var ls=document.getElementById('loginScreen');var app=document.getElementById('app');if(ls){ls.style.transition='opacity .4s ease';ls.style.opacity='0';setTimeout(function(){ls.style.display='none';ls.style.opacity='';},400);}if(app)app.style.display='';}
+async function _lsLogin(){
+  var u=document.getElementById('ls_user')&&document.getElementById('ls_user').value.trim().toLowerCase();
+  var p=document.getElementById('ls_pass')&&document.getElementById('ls_pass').value;
+  var err=document.getElementById('ls_err');var btn=document.getElementById('ls_btn');
+  if(!u||!p){if(err)err.style.display='block';return;}
+  if(btn){btn.textContent='جارٍ التحقق...';btn.style.opacity='.7';}
+  if(err)err.style.display='none';
+  try{var res=await db.from('users').select('username,password,role,name,email,active').eq('username',u).eq('active',true).single();
+    if(!res.error&&res.data&&res.data.password===p){currentUser={username:res.data.username,password:res.data.password,role:res.data.role,name:res.data.name,email:res.data.email};_hideLoginScreen();_afterLoginSuccess();return;}}catch(e){}
+  var usr=USERS[u];
+  if(usr&&usr.password===p){currentUser=Object.assign({username:u},usr);_hideLoginScreen();_afterLoginSuccess();return;}
+  if(err)err.style.display='block';
+  if(btn){btn.textContent='تسجيل الدخول';btn.style.opacity='1';}
 }
-// ── إشعار الملف الشخصي — 3 مرات يومياً ──
+function _afterLoginSuccess(){
+  updateNav();
+  if(currentUser&&currentUser.role!=='admin'){db.from('users').select('permissions').eq('username',currentUser.username).single().then(function(r){if(r.data&&r.data.permissions){try{localStorage.setItem('nq_perms_'+currentUser.username,r.data.permissions);updateNav();}catch(e){}}}).catch(function(){});}
+  NQ.fetchAll(true).then(function(){loadActiveStaffHome();renderHomeWidgets();});
+  sbUpdateAuth();renderDailyBulletin().catch(function(){});
+  if(currentUser.role==='admin'){loadPendingViolations();_registerPush();}
+  if(pendingSec){var s=pendingSec;pendingSec=null;if(s.startsWith('__admin_'))adminOnly(s.replace('__admin_',''));else openSec(s);}
+  setTimeout(function(){_showProfileHint();},2000);
+}
+function _afterLogin() {
+  _hideLoginScreen();hideLM();_afterLoginSuccess();
+}
+
 function _showProfileHint() {
   if (!currentUser) return;
   const key = `nq_profile_hint_${currentUser.username}_${new Date().toISOString().slice(0,10)}`;
@@ -4263,22 +4314,15 @@ function _showProfileHint() {
 }
 
 function doLogout(){
-  currentUser=null;
-  NQ._cache={};NQ._lastFetch=null;
-  updateNav();
-  // إخفاء الـ app وإظهار شاشة Login
-  const app = document.getElementById('app');
-  if (app) app.style.display = 'none';
-  const ls = document.getElementById('loginScreen');
-  if (ls) {
-    ls.style.display = 'flex';
-    ls.style.opacity = '1';
-    document.getElementById('ls_user').value = '';
-    document.getElementById('ls_pass').value = '';
-    document.getElementById('ls_err').style.display = 'none';
-    document.getElementById('ls_btn').textContent = 'تسجيل الدخول';
-    document.getElementById('ls_btn').style.opacity = '1';
-    setTimeout(()=>document.getElementById('ls_user')?.focus(), 300);
+  currentUser=null;NQ._cache={};NQ._lastFetch=null;updateNav();
+  var app=document.getElementById('app');if(app)app.style.display='none';
+  var ls=document.getElementById('loginScreen');
+  if(ls){ls.style.display='flex';ls.style.opacity='1';
+    var u=document.getElementById('ls_user');var pw=document.getElementById('ls_pass');
+    var er=document.getElementById('ls_err');var bt=document.getElementById('ls_btn');
+    if(u)u.value='';if(pw)pw.value='';if(er)er.style.display='none';
+    if(bt){bt.textContent='تسجيل الدخول';bt.style.opacity='1';}
+    setTimeout(function(){if(u)u.focus();},300);
   }
 }
 
@@ -4440,77 +4484,7 @@ function showSection(t){
   }
   openSec(t);
 }
-// ── شاشة تسجيل الدخول الكاملة ──
-function _showLoginScreen() {
-  const ls = document.getElementById('loginScreen');
-  if (ls) { ls.style.display = 'flex'; setTimeout(()=>document.getElementById('ls_user')?.focus(), 300); }
-}
-
-function _hideLoginScreen() {
-  const ls = document.getElementById('loginScreen');
-  const app = document.getElementById('app');
-  if (ls) { ls.style.transition='opacity .4s ease'; ls.style.opacity='0'; setTimeout(()=>{ ls.style.display='none'; ls.style.opacity=''; },400); }
-  if (app) { app.style.display=''; }
-}
-
-async function _lsLogin() {
-  const u = document.getElementById('ls_user')?.value.trim().toLowerCase();
-  const p = document.getElementById('ls_pass')?.value;
-  const err = document.getElementById('ls_err');
-  const btn = document.getElementById('ls_btn');
-  if (!u || !p) { if(err) err.style.display='block'; return; }
-
-  if(btn) { btn.textContent = 'جارٍ التحقق...'; btn.style.opacity='.7'; }
-  if(err) err.style.display = 'none';
-
-  // جرّب Supabase أولاً
-  try {
-    const { data, error } = await db.from('users').select('username,password,role,name,email,active').eq('username',u).eq('active',true).single();
-    if (!error && data && data.password === p) {
-      currentUser = { username:data.username, password:data.password, role:data.role, name:data.name, email:data.email };
-      _hideLoginScreen();
-      _afterLoginSuccess();
-      return;
-    }
-  } catch(e) {}
-
-  // احتياطي USERS
-  const usr = USERS[u];
-  if (usr && usr.password === p) {
-    currentUser = { username:u, ...usr };
-    _hideLoginScreen();
-    _afterLoginSuccess();
-    return;
-  }
-
-  // فشل
-  if(err) err.style.display = 'block';
-  if(btn) { btn.textContent = 'تسجيل الدخول'; btn.style.opacity='1'; }
-}
-
-function _afterLoginSuccess() {
-  updateNav();
-  if (currentUser && currentUser.role !== 'admin') {
-    db.from('users').select('permissions').eq('username', currentUser.username).single()
-      .then(({ data }) => {
-        if (data?.permissions) {
-          try { localStorage.setItem('nq_perms_' + currentUser.username, JSON.stringify(JSON.parse(data.permissions))); updateNav(); } catch(e) {}
-        }
-      }).catch(() => {});
-  }
-  NQ.fetchAll(true).then(()=>{ loadActiveStaffHome(); renderHomeWidgets(); });
-  sbUpdateAuth();
-  renderDailyBulletin().catch(()=>{});
-  if(currentUser.role==='admin') loadPendingViolations();
-  if(currentUser.role==='admin') _registerPush();
-  if(currentUser.role==='admin') setTimeout(qbotInit, 500);
-  if(pendingSec){
-    const s=pendingSec; pendingSec=null;
-    if(s.startsWith('__admin_')){ adminOnly(s.replace('__admin_','')); }
-    else { openSec(s); }
-  }
-  setTimeout(() => _showProfileHint(), 2000);
-}
+// ── التحقق من صلاحية المستخدم ──
 function _hasPermission(sectionKey) {
   if (!currentUser) return false;
   if (currentUser.role === 'admin') return true; // المدير يملك كل الصلاحيات دائماً
@@ -11699,9 +11673,16 @@ function renderQuarterlyResults() {
 
   // ── ٤ المبيعات والاسترداد ──
   if(sales.length){
-    const kept=retSales.filter(r=>(r.outcome||'').includes('احتفاظ'));
-    const freeze=retSales.filter(r=>(r.outcome||'').includes('تجميد'));
-    const refund=retSales.filter(r=>(r.outcome||'').includes('استرداد'));
+    const kept=sales.filter(r=>(r.outcome||r.request_type||'').includes('احتفاظ'));
+    const freeze=sales.filter(r=>(r.outcome||'').includes('تجميد'));
+    const refund=sales.filter(r=>(r.outcome||r.request_type||'').includes('استرداد'));
+    // أسباب الاسترداد
+    const reasonMap={};refund.forEach(r=>{const rs=(r.client_reason||r.cancellation_reason||r.notes||'').slice(0,40);if(rs)reasonMap[rs]=(reasonMap[rs]||0)+1;});
+    const topReasons=Object.entries(reasonMap).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    // تحليل شهري
+    const byMonthSales={};months.forEach(m=>{const ms=String(m).padStart(2,'0');const mS=sales.filter(r=>{const d=r.request_date||r.report_date||r.created_at||'';return d.includes('-'+ms+'-');});const mR=mS.filter(r=>(r.outcome||r.request_type||'').includes('استرداد'));byMonthSales[m]={total:mS.length,refund:mR.length};});
+    const worstSalesM=months.reduce((a,b)=>byMonthSales[a].refund>=byMonthSales[b].refund?a:b);
+    const bestSalesM=months.reduce((a,b)=>byMonthSales[a].refund<=byMonthSales[b].refund?a:b);
     // تقييم الموظفين
     const staffPerf={};
     sales.filter(r=>r.staff_name&&r.total_score).forEach(r=>{
@@ -11715,8 +11696,9 @@ function renderQuarterlyResults() {
       retRate:v.total>0?Math.round(v.kept/v.total*100):0,count:v.total
     })).sort((a,b)=>b.retRate-a.retRate);
     const recs=[];
-    if(retRate<60)recs.push(`⚠️ معدل الاحتفاظ ${retRate}% دون الهدف 60% — مراجعة أسباب الاسترداد مطلوبة`);
-    if(staffRows.length&&staffRows[staffRows.length-1].retRate<40)recs.push(`🔴 ${staffRows[staffRows.length-1].name}: ${staffRows[staffRows.length-1].retRate}% — تحتاج جلسة تدريبية`);
+    if(retRate<60)recs.push('معدل الاحتفاظ '+retRate+'% دون الهدف 60%');
+    if(byMonthSales[worstSalesM].refund>0)recs.push('أعلى استرداد: '+MN[worstSalesM]+' ('+byMonthSales[worstSalesM].refund+' حالة)');
+    if(staffRows.length&&staffRows[staffRows.length-1].retRate<40)recs.push(staffRows[staffRows.length-1].name+': '+staffRows[staffRows.length-1].retRate+'% — تحتاج تدريباً');
     html+=`<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
       <div style="font-size:14px;font-weight:900;margin-bottom:12px;">💼 المبيعات وعملاء الاسترداد</div>
       <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
@@ -11753,66 +11735,39 @@ function renderQuarterlyResults() {
 
   // ── ٥ المرافق ──
   if(facilities.length){
-    const withScore=facilities.filter(r=>r.total_score);
-    const byType={};facilities.forEach(f=>{const t=f.section_title||f.report_type||'عام';byType[t]=(byType[t]||0)+1;});
-    const avgByType={};['clean','maint','safe','sec'].forEach(t=>{
-      const items=facilities.filter(r=>r.report_type===t&&r.total_score);
-      avgByType[t]=items.length?Math.round(items.reduce((s,r)=>s+(r.total_score||0),0)/items.length):0;
-    });
-    const TYPE_L={clean:'المرافق والنظافة',maint:'الصيانة',safe:'السلامة',sec:'الأمن'};
-    const recs=[];
-    if(avgFacil>0&&avgFacil<70)recs.push(`⚠️ متوسط نماذج الرصد ${avgFacil}% — دون الهدف 70%`);
-    Object.entries(avgByType).forEach(([t,v])=>{if(v>0&&v<60)recs.push(`🔴 ${TYPE_L[t]||t}: ${v}% — يحتاج تدخلاً فورياً`);});
-    html+=`<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
-      <div style="font-size:14px;font-weight:900;margin-bottom:12px;">🔧 ملاحظات المرافق</div>
-      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-        <div style="flex:1;min-width:70px;text-align:center;background:rgba(22,160,133,0.08);border-radius:14px;padding:12px;">
-          <div style="font-size:20px;font-weight:900;color:${ec(avgFacil)};">${avgFacil||facilities.length}</div>
-          <div style="font-size:9px;color:var(--text-dim);">${avgFacil?'متوسط الدرجة':'إجمالي التقارير'}</div>
-        </div>
-        ${Object.entries(avgByType).filter(([,v])=>v>0).map(([t,v])=>`<div style="flex:1;min-width:60px;text-align:center;background:rgba(0,168,150,0.05);border-radius:14px;padding:8px;">
-          <div style="font-size:16px;font-weight:900;color:${ec(v)};">${v}%</div>
-          <div style="font-size:8px;color:var(--text-dim);">${TYPE_L[t]||t}</div>
-        </div>`).join('')}
-      </div>
-      ${recs.length?`<div style="padding:10px;background:rgba(0,168,150,0.05);border-radius:12px;border-right:3px solid var(--accent);">
-        <div style="font-size:10px;font-weight:800;color:var(--accent);margin-bottom:5px;">التوصيات والفجوات</div>
-        ${recs.map(r=>`<div style="font-size:11px;color:var(--text);padding:2px 0;">${r}</div>`).join('')}
-      </div>`:''}
-    </div>`;
+    const facTypeMap={};facilities.forEach(function(f){const t=f.problem_type||f.report_type||f.section_title||'ملاحظة';if(!facTypeMap[t])facTypeMap[t]=[];facTypeMap[t].push(f);});
+    const topFacTypes=Object.entries(facTypeMap).sort(function(a,b){return b[1].length-a[1].length;});
+    const recentFacNotes=facilities.filter(function(f){return f.description||f.notes||f.observation||f.problem_description;}).sort(function(a,b){return new Date(b.report_date||0)-new Date(a.report_date||0);}).slice(0,4);
+    const facRecs=[];
+    if(topFacTypes.length&&topFacTypes[0][1].length>=3)facRecs.push('الأكثر تكراراً: '+topFacTypes[0][0]+' ('+topFacTypes[0][1].length+' مرة)');
+    if(topFacTypes.length>2)facRecs.push('إجمالي '+topFacTypes.length+' نوع مشكلة هذا الربع');
+    html+='<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;border-right:4px solid #16A085;">'
+      +'<div style="font-size:14px;font-weight:900;margin-bottom:12px;color:#16A085;">ملاحظات المرافق <span style="background:rgba(22,160,133,0.1);color:#16A085;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;">'+facilities.length+' تقرير</span></div>'
+      +'<div style="font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:8px;">الأعطال الأكثر تكراراً:</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">'+topFacTypes.slice(0,6).map(function(e){return '<span style="background:'+(e[1].length>=3?'rgba(231,76,60,0.1)':'rgba(22,160,133,0.08)')+';color:'+(e[1].length>=3?'#E74C3C':'#16A085')+';border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;">'+e[0].slice(0,25)+' ('+e[1].length+')</span>';}).join('')+'</div>'
+      +(recentFacNotes.length?'<div style="font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:8px;">أبرز الملاحظات:</div>'+recentFacNotes.map(function(f){const note=(f.description||f.notes||f.observation||f.problem_description||'').slice(0,120);return '<div style="padding:8px 10px;background:rgba(22,160,133,0.04);border-radius:10px;margin-bottom:6px;border-right:3px solid rgba(22,160,133,0.3);"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:10px;font-weight:700;color:#16A085;">'+(f.problem_type||f.report_type||'ملاحظة')+'</span><span style="font-size:9px;color:var(--text-dim);">'+(f.report_date||'')+'</span></div><div style="font-size:11px;color:var(--text);">'+note+'</div><div style="font-size:9px;color:var(--text-dim);margin-top:2px;">الموقع: '+(f.location||f.zone||'—')+' · الراصد: '+(f.observer||'—')+'</div></div>';}).join(''):'')
+      +(facRecs.length?'<div style="margin-top:10px;padding:10px;background:rgba(22,160,133,0.05);border-radius:12px;border-right:3px solid #16A085;"><div style="font-size:10px;font-weight:800;color:#16A085;margin-bottom:5px;">ملخص الفجوات</div>'+facRecs.map(function(r){return '<div style="font-size:11px;color:var(--text);padding:2px 0;">'+r+'</div>';}).join('')+'</div>':'')
+      +'</div>';
   }
 
-  // ── ٦ المبنى ──
+    // ── ٦ المبنى ──
   if(buildings.length){
-    const withScore=buildings.filter(r=>r.total_score);
-    const avgByType={};['cust','counter','exam','super'].forEach(t=>{
-      const items=buildings.filter(r=>r.report_type===t&&r.total_score);
-      avgByType[t]=items.length?Math.round(items.reduce((s,r)=>s+(r.total_score||0),0)/items.length):0;
-    });
-    const TYPE_L={cust:'خدمة العملاء',counter:'الكاونتر',exam:'قاعات الاختبار',super:'الإشراف'};
-    const recs=[];
-    if(avgBuild>0&&avgBuild<70)recs.push(`⚠️ متوسط تقييم المبنى ${avgBuild}% — دون الهدف 70%`);
-    Object.entries(avgByType).forEach(([t,v])=>{if(v>0&&v<60)recs.push(`🔴 ${TYPE_L[t]||t}: ${v}% — يحتاج خطة تحسين عاجلة`);});
-    html+=`<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;">
-      <div style="font-size:14px;font-weight:900;margin-bottom:12px;">🏢 تقرير المبنى الرئيسي</div>
-      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-        <div style="flex:1;min-width:70px;text-align:center;background:rgba(46,134,193,0.08);border-radius:14px;padding:12px;">
-          <div style="font-size:20px;font-weight:900;color:${ec(avgBuild)};">${avgBuild||buildings.length}</div>
-          <div style="font-size:9px;color:var(--text-dim);">${avgBuild?'متوسط الدرجة':'إجمالي التقارير'}</div>
-        </div>
-        ${Object.entries(avgByType).filter(([,v])=>v>0).map(([t,v])=>`<div style="flex:1;min-width:60px;text-align:center;background:rgba(46,134,193,0.05);border-radius:14px;padding:8px;">
-          <div style="font-size:16px;font-weight:900;color:${ec(v)};">${v}%</div>
-          <div style="font-size:8px;color:var(--text-dim);">${TYPE_L[t]||t}</div>
-        </div>`).join('')}
-      </div>
-      ${recs.length?`<div style="padding:10px;background:rgba(0,168,150,0.05);border-radius:12px;border-right:3px solid var(--accent);">
-        <div style="font-size:10px;font-weight:800;color:var(--accent);margin-bottom:5px;">التوصيات والفجوات</div>
-        ${recs.map(r=>`<div style="font-size:11px;color:var(--text);padding:2px 0;">${r}</div>`).join('')}
-      </div>`:''}
-    </div>`;
+    const crowdMap={};buildings.forEach(function(b){const c=b.recep_crowd||'غير محدد';crowdMap[c]=(crowdMap[c]||0)+1;});
+    const bldNotes=buildings.filter(function(b){return b.general_notes||b.exam_notes||b.notes;}).sort(function(a,b){return new Date(b.report_date||0)-new Date(a.report_date||0);}).slice(0,4);
+    const heavyCrowd=buildings.filter(function(b){return b.recep_crowd==='شديد';});
+    const bldRecs=[];
+    if(heavyCrowd.length>0)bldRecs.push('ازدحام شديد في '+heavyCrowd.length+' تقرير — مراجعة إجراءات الاستقبال');
+    if(buildings.filter(function(b){return (b.wait_time||'').includes('أكثر من');}).length>0)bldRecs.push('انتظار طويل في '+buildings.filter(function(b){return (b.wait_time||'').includes('أكثر من');}).length+' حالة');
+    html+='<div style="background:var(--card2);border-radius:18px;padding:18px;margin-bottom:14px;border-right:4px solid #2E86C1;">'
+      +'<div style="font-size:14px;font-weight:900;margin-bottom:12px;color:#2E86C1;">تقرير المبنى الرئيسي والعملي <span style="background:rgba(46,134,193,0.1);color:#2E86C1;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;">'+buildings.length+' تقرير</span></div>'
+      +'<div style="font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:8px;">حالة الازدحام:</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">'+Object.entries(crowdMap).map(function(e){const clr=e[0]==='شديد'?'#E74C3C':e[0]==='متوسط'?'#F39C12':'#27AE60';const bg=e[0]==='شديد'?'rgba(231,76,60,0.1)':e[0]==='متوسط'?'rgba(243,156,18,0.1)':'rgba(39,174,96,0.1)';return '<span style="background:'+bg+';color:'+clr+';border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;">'+e[0]+': '+e[1]+' مرة</span>';}).join('')+'</div>'
+      +(bldNotes.length?'<div style="font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:8px;">أبرز الملاحظات:</div>'+bldNotes.map(function(b){const note=(b.general_notes||b.exam_notes||b.notes||'').slice(0,120);const cc=b.recep_crowd==='شديد'?'#E74C3C':b.recep_crowd==='متوسط'?'#F39C12':'var(--text-dim)';return '<div style="padding:8px 10px;background:rgba(46,134,193,0.04);border-radius:10px;margin-bottom:6px;border-right:3px solid rgba(46,134,193,0.3);"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:10px;font-weight:700;color:#2E86C1;">'+(b.report_date||'—')+' '+(b.report_time||'')+'</span><span style="font-size:9px;color:'+cc+';">'+(b.recep_crowd||'—')+'</span></div><div style="font-size:11px;color:var(--text);">'+note+'</div><div style="font-size:9px;color:var(--text-dim);margin-top:2px;">انتظار: '+(b.wait_time||'—')+' · الراصد: '+(b.observer||'—')+'</div></div>';}).join(''):'')
+      +(bldRecs.length?'<div style="margin-top:10px;padding:10px;background:rgba(46,134,193,0.05);border-radius:12px;border-right:3px solid #2E86C1;"><div style="font-size:10px;font-weight:800;color:#2E86C1;margin-bottom:5px;">ملخص الفجوات</div>'+bldRecs.map(function(r){return '<div style="font-size:11px;color:var(--text);padding:2px 0;">'+r+'</div>';}).join('')+'</div>':'')
+      +'</div>';
   }
 
-  // ── ٧ تقييم المدربين ──
+    // ── ٧ تقييم المدربين ──
   if(ratings&&ratings.length){
     const renderRatSec=(list,label,color)=>{
       if(!list.length)return'';
@@ -16696,15 +16651,7 @@ function tbToggleTheme() {
   }
 }
 
-function tbLogout() {
-  if(confirm('تسجيل الخروج؟')) {
-    currentUser = null;
-    localStorage.removeItem('nq_user');
-    updateNav();
-    updateTopBarUser();
-    doLogout();
-  }
-}
+function tbLogout(){if(confirm('تسجيل الخروج؟')){doLogout();updateTopBarUser();}}
 
 function tbAuthAction() {
   if(currentUser) tbLogout();
