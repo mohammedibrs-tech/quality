@@ -7853,19 +7853,50 @@ function selectPhoneObs(idx, n){
     // سجّل المشاهدة مع اسم الموظف
     data[key] = { count: n, lastUpdate: Date.now(), observers: (data[key]?.observers||[]).concat([{n, by:obsBy, time:new Date().toLocaleTimeString('ar-SA')}]) };
     savePhoneObs(data);
-    // أغلق الخانة وأعد select
     document.getElementById('phoneObsField'+idx).style.display = 'none';
     document.getElementById('vType'+idx).value = '';
     document.getElementById('vAutoGrade'+idx).textContent = '—';
     document.getElementById('vAutoGrade'+idx).className = 'auto-grade-display';
-    // إظهار رسالة واضحة مع زر حسناً
     showPhoneObsToast(trainerName, n, false);
   } else {
-    // مخالفة رسمية
+    // ── المشاهدة الثالثة = مخالفة رسمية ──
     const prevObs = data[key]?.observers || [];
     delete data[key];
     savePhoneObs(data);
     document.getElementById('phoneObsField'+idx).style.display = 'none';
+
+    // بناء سجل المخالفة
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const timeStr = now.toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
+    const zoneEl = document.getElementById('vZone'+idx);
+    const zone = zoneEl ? zoneEl.value.replace('ZONE ','') : '';
+    const obsEl = document.getElementById('vObs');
+    const observer = obsEl ? obsEl.value : (currentUser?.name || '');
+
+    const violRow = {
+      trainer_name: trainerName,
+      zone: zone,
+      date: dateStr,
+      time: timeStr,
+      violation_type: 'استخدام الجوال أثناء الحصة',
+      grade: 'B',
+      observer: observer || obsBy,
+      description: 'رُصدت 3 مشاهدات متراكمة — المشاهدات: ' + prevObs.map(o=>'م'+o.n+' ('+o.by+')').join('، '),
+      section: curSec || 'female'
+    };
+
+    const pendingId = 'phone_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+    const pendingRecord = {
+      id: pendingId,
+      rows: [violRow],
+      section: curSec || 'female',
+      submittedBy: currentUser?.name || currentUser?.username || 'موظف',
+      submittedAt: now.toISOString(),
+      status: 'pending'
+    };
+
+    addPendingViolation(pendingRecord);
     showPhoneObsToast(trainerName, 3, true);
   }
 }
@@ -7881,7 +7912,7 @@ function showPhoneObsToast(trainerName, n, isViolation){
   const icon = isViolation ? '⚠️' : '👁';
   const title = isViolation ? 'تم تسجيل المخالفة' : `تم تسجيل مشاهدة استخدام الهاتف للمرة ${n}`;
   const sub = isViolation 
-    ? `سُجِّلت مخالفة رسمية على ${trainerName} — اضغط تسجيل لإتمامها`
+    ? `سُجِّلت مخالفة رسمية على ${trainerName} — بانتظار موافقة الإدارة`
     : `المدرب: ${trainerName}<br>للرغبة في التعديل أو الحذف يرجى زيارة <b>السجل الشهري</b>`;
   const remaining = !isViolation ? `<div style="font-size:11px;color:var(--text-dim);margin-top:6px;">متبقي ${3-n} مشاهدة للمخالفة الرسمية</div>` : '';
 
