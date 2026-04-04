@@ -4086,13 +4086,13 @@ const NQ = {
 // ══════════════════════════════════════════════════
 
 const USERS={
-  'admin':{password:'1133Md',role:'admin',name:'محمد'},
-  'shahad':{password:'1122SH',role:'staff',name:'شهد المقرن'},
-  'sumayah':{password:'1122Sm',role:'staff',name:'سمية الخضيري'},
-  'amjad':{password:'1122AJ',role:'staff',name:'امجاد ابانمي'},
-  'ahmed':{password:'1122AJ',role:'staff',name:'أحمد سحاب'},
-  'ibrahim':{password:'1122im',role:'staff',name:'ابراهيم الحمد'},
-  'alhamad':{password:'1122Hd',role:'staff',name:'احمد الحماد'},
+  'admin':{password:'00eef6545e71068cf7874ff31a08ccab21e3dcb0da1685bc131317f9504ad357',role:'admin',name:'محمد'},
+  'shahad':{password:'b0640e01f8e895878c0801948c0e836b1b7de611e043456c62c62ed958e33562',role:'staff',name:'شهد المقرن'},
+  'sumayah':{password:'b9992760b72264b605d3472c1ff880444031ed739de49492583712f6ceca6307',role:'staff',name:'سمية الخضيري'},
+  'amjad':{password:'3eabed4b1818a0a091607bb820de0c04a716b98088e6ef9c6e91191f9cc95646',role:'staff',name:'امجاد ابانمي'},
+  'ahmed':{password:'3eabed4b1818a0a091607bb820de0c04a716b98088e6ef9c6e91191f9cc95646',role:'staff',name:'أحمد سحاب'},
+  'ibrahim':{password:'e5d96809b77f9058f310b23153a6ad9dddb25117a75b7a989b96990f2e5da546',role:'staff',name:'ابراهيم الحمد'},
+  'alhamad':{password:'7570f7c05e85e416ebdb4e81ca69d0bc51ef83219d5408af0e144929fb0c36ad',role:'staff',name:'احمد الحماد'},
 };
 
 
@@ -4186,6 +4186,26 @@ async function doLogin(){
   }
 }
 
+
+// ── تشفير كلمة المرور ──
+async function _hashPass(password){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── Session Timeout: 8 ساعات ──
+const SESSION_HOURS = 8;
+let _sessionTimer = null;
+function _startSessionTimer(){
+  if(_sessionTimer) clearTimeout(_sessionTimer);
+  _sessionTimer = setTimeout(function(){
+    toast('انتهت جلستك — يرجى تسجيل الدخول مجدداً');
+    setTimeout(doLogout, 2000);
+  }, SESSION_HOURS * 60 * 60 * 1000);
+}
+// تجديد الجلسة عند أي نشاط
+document.addEventListener('click', function(){ if(currentUser) _startSessionTimer(); });
+
 function _showLoginScreen(){var ls=document.getElementById('loginScreen');if(ls){ls.style.display='flex';setTimeout(function(){var u=document.getElementById('ls_user');if(u)u.focus();},300);}}
 function _hideLoginScreen(){var ls=document.getElementById('loginScreen');var app=document.getElementById('app');if(ls){ls.style.transition='opacity .4s ease';ls.style.opacity='0';setTimeout(function(){ls.style.display='none';ls.style.opacity='';},400);}if(app)app.style.display='';}
 async function _lsLogin(){
@@ -4195,10 +4215,19 @@ async function _lsLogin(){
   if(!u||!p){if(err)err.style.display='block';return;}
   if(btn){btn.textContent='جارٍ التحقق...';btn.style.opacity='.7';}
   if(err)err.style.display='none';
+  // تشفير كلمة المرور قبل المقارنة
+  var hashed = await _hashPass(p);
   try{var res=await db.from('users').select('username,password,role,name,email,active').eq('username',u).eq('active',true).single();
-    if(!res.error&&res.data&&res.data.password===p){currentUser={username:res.data.username,password:res.data.password,role:res.data.role,name:res.data.name,email:res.data.email};_hideLoginScreen();_afterLoginSuccess();return;}}catch(e){}
+    if(!res.error&&res.data&&(res.data.password===hashed||res.data.password===p)){
+      currentUser={username:res.data.username,role:res.data.role,name:res.data.name,email:res.data.email};
+      _hideLoginScreen();_startSessionTimer();_afterLoginSuccess();return;
+    }
+  }catch(e){}
   var usr=USERS[u];
-  if(usr&&usr.password===p){currentUser=Object.assign({username:u},usr);_hideLoginScreen();_afterLoginSuccess();return;}
+  if(usr&&(usr.password===hashed||usr.password===p)){
+    currentUser=Object.assign({username:u},usr);
+    _hideLoginScreen();_startSessionTimer();_afterLoginSuccess();return;
+  }
   if(err)err.style.display='block';
   if(btn){btn.textContent='تسجيل الدخول';btn.style.opacity='1';}
 }
