@@ -6972,15 +6972,17 @@ async function umAddUser() {
   if (!username || !password || !name) { toast('⚠️ يرجى تعبئة اسم المستخدم وكلمة المرور والاسم الكامل'); return; }
   if (/\s/.test(username)) { toast('⚠️ اسم المستخدم يجب أن يكون بدون مسافات'); return; }
 
+  // تشفير كلمة المرور قبل الحفظ
+  const hashedPass = await _hashPass(password);
+
   try {
-    const { error } = await db.from('users').insert({ username, password, name, role, email: email||null, active: true });
+    const { error } = await db.from('users').insert({ username, password: hashedPass, name, role, email: email||null, active: true });
     if (error) {
       if (error.code === '23505') toast('❌ اسم المستخدم موجود بالفعل');
       else throw error;
       return;
     }
     toast('✅ تم إضافة المستخدم بنجاح');
-    // تفريغ الحقول
     ['umNewUser','umNewPass','umNewName','umNewEmail'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
     document.getElementById('umNewRole').value = 'staff';
     umLoadUsers();
@@ -7171,7 +7173,8 @@ async function umSaveEdit() {
 
   if (!name) { toast('⚠️ أدخل الاسم الكامل'); return; }
   const updates = { name, role, email: email||null };
-  if (pass) updates.password = pass;
+  // تشفير كلمة المرور الجديدة إذا أُدخلت
+  if (pass) updates.password = await _hashPass(pass);
 
   const { error } = await db.from('users').update(updates).eq('id', id);
   if (error) { toast('❌ فشل التعديل'); return; }
