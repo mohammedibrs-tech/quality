@@ -7959,6 +7959,17 @@ function selectPhoneObs(idx, n){
   const obsBy = currentUser ? currentUser.name : '';
 
   if(n < 3){
+    // ── تحقق أن العداد الحالي = n-1 (منع التسجيل المزدوج أو التخطي) ──
+    const currentCount = data[key] && Date.now() - data[key].lastUpdate <= 7*24*60*60*1000 ? (data[key].count||0) : 0;
+    if(n !== currentCount + 1){
+      renderPhoneObsButtons(idx);
+      if(n <= currentCount){
+        toast('⚠️ هذه المشاهدة سبق تسجيلها من قِبل زميل');
+      } else {
+        toast('⚠️ يجب تسجيل المشاهدة ' + (currentCount+1) + ' أولاً');
+      }
+      return;
+    }
     // سجّل المشاهدة مع اسم الموظف
     data[key] = { count: n, lastUpdate: Date.now(), observers: (data[key]?.observers||[]).concat([{n, by:obsBy, time:new Date().toLocaleTimeString('ar-SA')}]) };
     savePhoneObs(data);
@@ -7969,6 +7980,16 @@ function selectPhoneObs(idx, n){
     showPhoneObsToast(trainerName, n, false);
   } else {
     // ── المشاهدة الثالثة = مخالفة رسمية ──
+    const currentCount3 = data[key] && Date.now() - data[key].lastUpdate <= 7*24*60*60*1000 ? (data[key].count||0) : 0;
+    if(currentCount3 !== 2){
+      renderPhoneObsButtons(idx);
+      if(currentCount3 >= 3){
+        toast('⚠️ المخالفة سبق تسجيلها على هذا المدرب');
+      } else {
+        toast('⚠️ يجب إكمال المشاهدتين الأوليين أولاً (الحالي: ' + currentCount3 + '/2)');
+      }
+      return;
+    }
     const prevObs = data[key]?.observers || [];
     delete data[key];
     savePhoneObs(data);
