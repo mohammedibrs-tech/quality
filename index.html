@@ -1535,6 +1535,7 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
     <div class="section-card attend" onclick="adminOnly('attend')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="s-text"><div class="s-title-ar">الحضور والانصراف فريق الجودة</div><div class="s-title-en">ATTENDANCE & DEPARTURE</div></div><div class="s-arrow">›</div></div>
     <div class="section-card sales" onclick="adminOnly('sales')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div><div class="s-text"><div class="s-title-ar">تقرير فريق المبيعات</div><div class="s-title-en">SALES DEPARTMENT</div></div><div class="s-arrow">›</div></div>
     <div class="section-card rating" onclick="adminOnly('rating')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><div class="s-text"><div class="s-title-ar">المدرب/ة الأعلى تقييم بالاستبيان</div><div class="s-title-en">TOP RATED TRAINERS</div></div><div class="s-arrow">›</div></div>
+    <div class="section-card" onclick="adminOnly('trainer-management')" style="background:linear-gradient(135deg,#0C4A45,#083330);border-right:4px solid #0EA5A0;"><div class="s-icon" style="color:#0EA5A0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="s-text"><div class="s-title-ar" style="color:#fff;">إضافة/حذف أسماء مدربين</div><div class="s-title-en" style="color:rgba(14,165,160,0.8);">MANAGE TRAINERS</div></div><div class="s-arrow" style="color:#0EA5A0;">›</div></div>
     <div class="section-card archive" onclick="adminOnly('archive')"><div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></div><div class="s-text"><div class="s-title-ar">الأرشيف</div><div class="s-title-en">ARCHIVE</div></div><div class="s-arrow">›</div></div>
 
     <div class="section-card" onclick="adminOnly('task-completion')" style="background:linear-gradient(135deg,#1B4332,#0A2A1E);"><div class="s-icon" style="color:#34D399;background:rgba(52,211,153,0.15);">
@@ -2220,6 +2221,106 @@ body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:60
         </select>
       </div>
       <div id="umScheduleEditor"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TRAINER & VIOLATIONS CATALOG MANAGEMENT -->
+<div id="page-trainer-management" class="page">
+  <div class="container-wide">
+    <button class="back-btn" onclick="goHome()">الرئيسية / Home</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#0EA5A0,#0C7A76);display:flex;align-items:center;justify-content:center;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <h1 style="margin:0;font-size:20px;">إضافة/حذف أسماء مدربين</h1>
+        <div style="font-size:11px;color:var(--text-dim);">TRAINERS &amp; VIOLATIONS CATALOG</div>
+      </div>
+    </div>
+
+    <!-- تبويبات داخلية -->
+    <div style="display:flex;gap:0;background:var(--card2);border-radius:14px;padding:4px;margin-bottom:20px;border:1px solid var(--border);flex-wrap:wrap;">
+      <button id="tmTab_list" onclick="tmSwitchTab('list')"
+        style="flex:1;min-width:90px;padding:9px 8px;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;transition:all .2s;">
+        👥 المدربون
+      </button>
+      <button id="tmTab_add" onclick="tmSwitchTab('add')"
+        style="flex:1;min-width:90px;padding:9px 8px;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .2s;">
+        ➕ إضافة مدرب
+      </button>
+      <button id="tmTab_vlist" onclick="tmSwitchTab('vlist')"
+        style="flex:1;min-width:90px;padding:9px 8px;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .2s;">
+        📋 المخالفات
+      </button>
+      <button id="tmTab_vadd" onclick="tmSwitchTab('vadd')"
+        style="flex:1;min-width:90px;padding:9px 8px;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .2s;">
+        ➕ إضافة مخالفة
+      </button>
+    </div>
+
+    <!-- Panel: قائمة المدربين -->
+    <div id="tmPanel_list">
+      <div style="margin-bottom:12px;">
+        <input type="text" id="tmSearchTrainer" oninput="tmRenderTrainerList()" placeholder="🔍 ابحث عن مدرب/ة..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;box-sizing:border-box;">
+      </div>
+      <div id="tmTrainerCount" style="font-size:11px;color:var(--text-dim);margin-bottom:10px;"></div>
+      <div id="tmTrainerList"></div>
+    </div>
+
+    <!-- Panel: إضافة مدرب -->
+    <div id="tmPanel_add" style="display:none;">
+      <div style="background:var(--card);border-radius:16px;padding:20px;border:1px solid var(--border);">
+        <div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:16px;">إضافة مدرب/ة جديد</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px;">
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الاسم الكامل</label>
+            <input id="tmNewName" class="inp" placeholder="مثال: محمد عبدالله" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">الزون / ZONE</label>
+            <select id="tmNewZone" class="inp" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;box-sizing:border-box;">
+              <option value="A">A — نسائي</option>
+              <option value="B">B — نسائي</option>
+              <option value="D">D — نسائي</option>
+              <option value="E">E — نسائي</option>
+              <option value="L">L — نسائي</option>
+              <option value="O">O — رجالي</option>
+              <option value="H">H — رجالي</option>
+              <option value="دراجات">دراجات</option>
+            </select>
+          </div>
+        </div>
+        <button onclick="tmAddTrainer()" style="padding:11px 28px;background:linear-gradient(135deg,#0EA5A0,#0C7A76);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">+ إضافة المدرب/ة</button>
+        <div id="tmAddMsg" style="font-size:11px;margin-top:10px;color:var(--text-dim);"></div>
+      </div>
+    </div>
+
+    <!-- Panel: قائمة المخالفات -->
+    <div id="tmPanel_vlist" style="display:none;">
+      <div id="tmViolationList"></div>
+    </div>
+
+    <!-- Panel: إضافة مخالفة -->
+    <div id="tmPanel_vadd" style="display:none;">
+      <div style="background:var(--card);border-radius:16px;padding:20px;border:1px solid var(--border);">
+        <div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:16px;">إضافة مخالفة جديدة</div>
+        <div style="margin-bottom:14px;">
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">نص المخالفة</label>
+          <textarea id="tmNewViolText" placeholder="صياغة المخالفة..." style="width:100%;min-height:70px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;box-sizing:border-box;"></textarea>
+        </div>
+        <div style="margin-bottom:14px;max-width:220px;">
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);display:block;margin-bottom:4px;">درجة المخالفة</label>
+          <select id="tmNewViolGrade" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;box-sizing:border-box;">
+            <option value="A">A — جسيمة</option>
+            <option value="B">B — متوسطة</option>
+            <option value="C">C — بسيطة</option>
+          </select>
+        </div>
+        <button onclick="tmAddViolation()" style="padding:11px 28px;background:linear-gradient(135deg,#0EA5A0,#0C7A76);color:#fff;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">+ إضافة المخالفة</button>
+        <div id="tmAddVMsg" style="font-size:11px;margin-top:10px;color:var(--text-dim);"></div>
+      </div>
     </div>
 
   </div>
@@ -4309,6 +4410,7 @@ async function _lsLogin(){
 }
 function _afterLoginSuccess(){
   updateNav();
+  initTrainersAndViolations();
   if(currentUser&&currentUser.role!=='admin'){db.from('users').select('permissions').eq('username',currentUser.username).single().then(function(r){if(r.data&&r.data.permissions){try{localStorage.setItem('nq_perms_'+currentUser.username,r.data.permissions);updateNav();}catch(e){}}}).catch(function(){});}
   NQ.fetchAll(true).then(function(){loadActiveStaffHome();renderHomeWidgets();});
   sbUpdateAuth();renderDailyBulletin().catch(function(){});
@@ -4603,7 +4705,7 @@ function _hasPermission(sectionKey) {
 
   // لو ما في صلاحيات محددة → الافتراضي: كل شيء مسموح ماعدا admin-only
   if (!perms) {
-    const adminOnly = ['sales','dashboard','task-completion','attend','rating','archive','quarterly','user-management'];
+    const adminOnly = ['sales','dashboard','task-completion','attend','rating','archive','quarterly','user-management','trainer-management'];
     return !adminOnly.includes(sectionKey);
   }
 
@@ -4691,6 +4793,9 @@ function openSec(type){
   }else if(type==='user-management'){
     document.getElementById('page-user-management').classList.add('active');
     umInitPage();
+  }else if(type==='trainer-management'){
+    document.getElementById('page-trainer-management').classList.add('active');
+    tmInitPage();
   }else{
     document.getElementById('page-facility').classList.add('active');autoObs('fObs');
     setTimeout(initFacObs, 100);
@@ -5461,6 +5566,7 @@ function openEditModal(id){
   document.getElementById('editDesc').value=r.description||'';
   // Set violation type
   const sel=document.getElementById('editType');
+  sel.innerHTML=VIOLATIONS_DB.map(v=>`<option value="${v.v.replace(/"/g,'&quot;')}">${v.v}</option>`).join('');
   for(let i=0;i<sel.options.length;i++){
     if(sel.options[i].value===r.violation_type){sel.selectedIndex=i;break;}
   }
@@ -5868,7 +5974,7 @@ function renderActiveStaff(){
 // ══════════════════════════════════
 // DATA: VIOLATIONS & TRAINERS
 // ══════════════════════════════════
-const VIOLATIONS_DB=[
+let VIOLATIONS_DB=[
   {v:"تلفظ المدرب/ة امام العملاء بخصوص التدريب",g:"A"},
   {v:"التجاوز على العميل بأي طريقة كانت (لفظي-جسدي)",g:"A"},
   {v:"الخروج عن سياق التدريب (بمواضيع سياسية - دينية)",g:"A"},
@@ -5893,10 +5999,258 @@ const VIOLATIONS_DB=[
   {v:"عدم تبليغ المنسق/ة بالذهاب الى المحطة",g:"C"},
   {v:"الذهاب الى اماكن محظورة",g:"B"},
 ];
+VIOLATIONS_DB.forEach((v,i)=>{ v.id = 'seed_'+i; });
 
 const TRAINERS_DB={"ابراهيم محمد ابراهيم حكمي":"O","أمجد سعد احمد مرعي":"O","بدر مسفر عواض الشلوي":"O","بسام علي محمد ال عيدان":"O","تركي عبدالله دخيل العتيبي":"O","خالد عبدالله دويرج الدويرج":"O","سعد حسن سعد العبلان":"O","سعد سعود غازي الحربي":"O","سعد فضل عبدالرحمن السبيعي":"O","سعود خالد سعود العليوه":"O","سعود محمد عبدالرحمن الشهري":"O","سلطان عبدالعزيز فهد الصليطين":"O","سلطان محمد سلطان البقمي":"O","شهاب مساعد نور  العتيبي":"O","عبدالرحمن خلف عوض الحربي":"O","عبدالرحمن عبدالله عبدالرحمن الطريفي":"O","عبدالعزيز صالح عبدالله الأحمري":"O","عبداللّٰه سفر مسفر البقمي":"O","عبدالله عبدالاله عبدالله الحمود":"O","عبدالله عبدالعزيز محمد المحسن":"O","عبدالله مبارك سالم الدوسري":"O","عبدالله محمد عبدالله البقمي":"O","عبدالواحد عبدالعزيز احمد المليفي":"O","عمر راشد مقبل الحربي":"O","فهد مطلق قدهان الشلوي":"O","فيصل ضيف الله مضحي الحربي":"O","ماجد سعود مذاحل البقمي":"O","ماجد ظافر ماجد الدوسري":"O","محمد سالم عبدالله الدوسري":"O","محمد سعد محمد المنصور":"O","محمد شالح معتق المطيري":"O","محمد شنار شبيب القحطاني":"O","محمد ضيف الله مضحي الحربي":"O","محمد عبدالاله محمد الشريمي":"O","محمد عبدالله قدهان الشلوي":"O","محمد عبدالله مطر البلوشي":"O","محمد ناصر سعد الدوسري":"O","مشاري محمد غازي النفيعي":"O","مشعل خلف هزاع العتيبي":"O","موسى يحيي محمد زيد":"O","نشمي مسعد عايض العتيبي":"O","نواف عبدالله مسفر الغامدي":"O","نواف عبدالله مطلق المقاطي":"O","هشام عبدالله سليمان العواد":"O","ياسر عبدالقادر بن صالح يوسف":"O","يزيد بن نواف بن عبدالرحمن العتيبي":"O","يزيد عبدالعزيز عبدالكريم الزويد":"O","يوسف سلطان منير المطيري":"O","عادل محمد بهكلي":"O","احمد عبدالله البيضاني":"H","إبراهيم خالد الزويد":"H","بدر صالح الزهراني":"H","بندر زعيم بندر الشيباني":"H","بندر غويزي عواض العتيبي":"H","حمد هلال حمد آل هليل":"H","حمزه احمد عواجي":"H","خالد حسين ال جامش":"H","خالد ضعافي عبده شراحيلي":"H","خالد محمد البقمي":"H","راكان مقبول البقمي":"H","رائد ثواب فارس الجهمي":"H","زايد خلف العنزي":"H","سامي فواز حواس الشمري":"H","سعد ناصر سعد العمار":"H","سعود بن صالح جريس":"H","سعود عبدالرحمن العمير":"H","سعيد علي سعد الحوطي":"H","سليمان تركي السكران":"H","سليمان حسن الدوسري":"H","صقر علي الدوشان":"H","طلال خالد الحميد":"H","طلال مبارك العصيمي":"H","عبدالرحمن محمد ناصر الجهمي":"H","عبدالرزاق عيد الخيبري":"H","عبدالعزيز ابراهيم ال جابر":"H","عبدالقادر محمد باصهي":"H","عبدالله حمد الركيان":"H","عبدالله علي محمد البيشي":"H","علوش عبدالعزيز الرشيدي":"H","عناد سليمان مسلم البلوي":"H","فهد ابراهيم السلمان":"H","فهد محمد زايد الشهري":"H","فهد مشجع المطيري":"H","مبارك عليان الرشيدي":"H","محمد حمد المرشود":"H","محمد حمود المطيري":"H","محمد عبدالله عبده الشهري":"H","نايف امين ابراهيم الجيزاني":"H","هشام علي محمد آل عيدان":"H","وليد عيد  الحربي":"H","سلمان محمد سفيران":"دراجات","عبدالعزيز محمد الحميد":"دراجات","علي احمد بن ابو طالب قيسي":"دراجات","محمد تركي الدوسري":"دراجات","اثير علي حسين الشريف":"L","أسماء صالح عبدالرحمن الشبل":"L","الاء ناصر سعد الصبي":"L","امجاد محمد علي العبيوي":"L","امامه عبدالعزيز عبدالله المقيطيب":"L","اماني عويد نزال العنزي":"L","انوار منصور بن وديد بن نجم":"L","ايمان حمدى سليمان الاشتف":"L","ايمان محمد عبدالله الجعفري الشمري":"L","بشرى عبدالله فايع القحطاني":"L","تغريد محمد عبدالله الغامدي":"L","روان عنزي مسفر البيشي":"L","رهف اذيب محمد لقحطاني":"L","ريمه محمد معيض القحطاني":"L","زهره فهد راشد بن جوير":"L","ساره رفيدي عبدالرحمن الاسمري":"L","ساره خالد محمد بن عبيد":"L","سعاد بكر عمر هوساوي":"L","عهود سالم عبدالله الدوسري":"L","عواطف مسعود حسن مسلبي":"L","غدير أحمد سعيد الغامدي":"L","فاطمه سليمان إبراهيم اللهيدي":"L","لمى سعود عايد المطيري":"L","مرام عبدالعالي هزاع الحربي":"L","نورة حمود علي بن عصفور":"L","نورة عبدالله ردعان الدوسري":"L","هاجر عبدالله مبيريك ال مبيريك":"L","هنوف عبدالمحسن ابراهيم العبدالواحد":"L","هياء عبدالمحسن علي بن محيسن":"L","هيفاء سعود ناصر عبيدان":"L","وجود ابراهيم بن سويل السويل":"L","وسام منصور عبداللطيف العديل":"L","وضحى راشد سعد القحطاني":"L","ابتسام عفتان مضحي الظفيري":"E","البندري علي هندي بن عبدالسلام":"E","امل عبدالله احمد الزهراني":"E","بسمه مشلي حمود منصر":"E","بشاير غانم محمد الحسين":"E","بيان خالد علي الصقير":"E","تهاني صالح مصلح الغامدي":"E","تهاني معزي مطلق العنزي":"E","جواهر دخيل عيد المطيري":"E","حليمه احمد محمد شنيمر":"E","حنان معتق سعد الزهراني":"E","خديجه يحي محمد حكمي":"E","رفعه سند رشيد آل ركبان":"E","رنيم صالح سليمان العريني":"E","ساره ابراهيم عبدالرحمن العمار":"E","ساره خالد عبدالعزيز العجيب":"E","ساره محمد زبير الجاوي":"E","سحر سلطان ابراهيم العيدان":"E","شروق حمد عبدالله آل شريد":"E","عزه ناصر بديع المعاوي":"E","غاده سالم عباد العتيبي":"E","غزيل بخيت ابراهيم الدوسري":"E","كامله رجاء بن شطي العنزي":"E","ليلى احمد مهدي حدادي":"E","مرام سويلم سعيد اليوسف":"E","منى  عبدالله حمد الاحيمر":"E","منال ابراهيم عبدالله اليوسف":"E","منال فهد صالح القرزعي":"E","منيرة سليمان حمد الرميح":"E","مها لافي عوض المطيري":"E","نجود عبدالرحمن محمد الباتلي":"E","نجلاء عبدالرحمن بن رويبخ العتيبي":"E","ندى محمد راشد الصفيان":"E","نوره ابراهيم صالح الخضير":"E","نورة سلطان عايض العتيبي":"E","نورة عيد علي الحربي":"E","هناء خلوفه عبدالله الاحمري":"E","هناء موسى بن عوض العنزي":"E","ابتسام منصور عبدالرحمن الربيع":"D","اروى محمد عبدالله الصقر":"D","اريج موسى حسن العمري":"D","اشواق عبدالله محمد الغاشم":"D","العنود خالد محمد النواش":"D","الهام جندل بشير السعود":"D","أماني محمد مبارك الحيدر":"D","امجاد عبيدالله كليب الحربي":"D","امجاد محمد موسى البارقي":"D","أمل عائض مانع القحطاني":"D","امل مقبول هضبان البقمي":"D","بدور عتيق حمدان الشمري":"D","بسمه عبدالرحمن محمد بن كريديس":"D","بشاير حسن حمزه الشهري":"D","تهاني احمد عيظه الكبير":"D","حربيه محمد علي مغفوري":"D","حنان عبدالله يحي الغامدي":"D","خلود ناصر سعيد الدامر":"D","خلود محسن مقبول السفياني":"D","رنا مسحل منجي المطيري":"D","روان رزقان ناصر العبسي":"D","شروق عبدالغني احمد حزام":"D","صفاء ناصر علي المري":"D","عبير محمد عبدالله العتيبي":"D","غاده علي بن حسين المالكي":"D","فاطمه عبدالهادي محمد احمد":"D","فاطمه عبدالله محمد القحطاني":"D","فضه مطارد معيوف العنزي":"D","لطيفه محسن عبادل المساعد":"D","مشاعل شامان فهيد المليحي":"D","منى ظافر محمد الشهري":"D","منيره عواد حمود العنزي":"D","نجوى ناهض بن عبيد الدوسري":"D","نوف خلف قفال العنزي":"D","نورة صالح عثمان الحقباني":"D","نوره فهد إبراهيم بن جديد":"D","هديل عبدالله سلمان الجردان":"D","هند يوسف حزاب اليوسف":"D","وديان فواز بشير بن ظافر":"D","وعد عواض منير العتيبي":"D","وفاء محمد حماد الحماد":"D","احلام الشهراني":"D","ابتسام احمد يحيى الفيفي":"B","ابتسام خلف مريقيب الرويلي":"B","اروى على محمد آل عبدالمتعالي عسيري":"B","احلام فلاح عائض الشهراني":"B","اماني عمر محمد العمري":"B","أمنه عبده حسن شوكاني":"B","اميره محمد عبدالرحمن الدبيس":"B","ايمان محمد موسى مشهور":"B","باسمه محمد احمد سفياني":"B","بنان سمير أحمد اسماعيل":"B","تهاني فلاج خليف شويرد":"B","جميله محمد حسين مسرحي":"B","دانيه سعد صالح الطويل":"B","رحمه سعد محمد الشهراني":"B","رفعه فرج منصور الدوسري":"B","رنا احمد محمد الغامدي":"B","رناد فؤاد محمد الخليفه":"B","رهام عبدالعزيز عبدالله العجلان":"B","ريم علي عبدالرحمن آل الصعيدي الشهري":"B","زينب عاطف ابوطالب جدعاني الغبيشي":"B","شذى عبدالله  ناصر الرعيدان":"B","شروق عبدالرحمن عبدالحكيم بن دايل":"B","عبير جارالله ناصر القحطاني":"B","فاطمه عبدالعزيز محمد الشهري":"B","فاطمه خلف مطر الحريري الزهراني":"B","فداء محمد سعد التميمي":"B","لطيفه سامي صالح الجمعان":"B","لينا عبيد سيف السكران التميمي":"B","مرام رسمي لافي الهيري":"B","ملاك مسعد خريص العتيبي":"B","مريم مسعود ماطر المالكي":"B","مها غرم الله محزم الغامدي":"B","نوره سعد عبدالله الحريشي":"B","نوف سعود عبدالعزيز العثمان":"B","نوف ناصر محمد المساعد":"B","هاجر اسماعيل سعد العتيق":"B","هاجر محمد عبدالعزيز المنيعي":"B","هديل علي راشد العيسى":"B","هند عبدالعزيز محمد بن خضير":"B","هيام حسين حمد الفرشان":"B","وجد علي محمد السحيباني":"B","وجدان خالد ناصر الدريهم":"B","وعد سحيم ناصر آل شاهر الأسمري":"B","نورة محمد صالح التميمي":"B","اباء منصور ناصر الصعيدي":"A","أروى فهد مشاري الراشد":"A","اروى نايف حبيب العريعر":"A","اريج عبدالله مصلح الغامدي":"A","اعتزاز محمد ابن حديجان البراق":"A","أماني سعود بسيس العتيبي":"A","أمل شايع الربع ابورميه":"A","أمل هادي علي حدادي":"A","ايمان عبدالله محمد الشهري":"A","بشاير سعيد علي الباشه الزهراني":"A","تركيه قطيم مطر العتيبي":"A","تغريد سليمان زيد الغانم":"A","تغريد عيد علي الحربي":"A","دليل فالح ناصر العتيبي":"A","ذكرى محمد مساعد البيشى":"A","رنا محمد عبدالعزيز الطويل":"A","روان ابراهيم عبدالعزيز الصائغ":"A","ساره مرزوق شافي العصيمي":"A","صفيه علي صالح الغامدي":"A","عبير علي محمد القرني":"A","علا علي حسين الفريحي":"A","غاده عوض شائع ال غائب القحطاني":"A","فلوه سعد حسين الشوقبي المالكي":"A","لطيفه حسن ابراهيم العييناء":"A","لطيفة عليوي صلبي العنزي":"A","لينه عبدالله بدر البدر":"A","مريم مطارد معيوف العنزي":"A","منى ابراهيم ناصر الحيدري":"A","منى شبيب عثمان العتيبي":"A","منى عناد العياط العنزي":"A","منيره بدر ناصر الحميضان":"A","منيرة عبدالله هاجس الدوسري":"A","مها جبران محمد القحطاني":"A","مها صالح عبدالعزيز الرشيد":"A","نجود فيصل محمد المريبض":"A","ندى سالم الماص مبروك":"A","ندى فرج جابر المبخوت":"A","ندى منصور حسين السبعان":"A","نوره مستور احمد السهيمي":"A","هيا سعيد عايض الشهراني":"A","هيله منصور عثمان الموسى":"A","وضحاء سعود خلف نزال الخمشي":"A","خلود فيصل ابن محمد احمد":"A","هيفاء صالح عبدالله السعود":"A"};
 
 let trainerCount=1;
+let TRAINERS_LOADED_FROM_DB=false;
+let VIOLATIONS_LOADED_FROM_DB=false;
+
+// ══════════════════════════════════
+// SYNC TRAINERS & VIOLATION TYPES WITH SUPABASE
+// (الأسماء الثابتة أعلاه تُستخدم كبذرة أولى فقط — بعدها المرجع الحقيقي هو القاعدة)
+// ══════════════════════════════════
+async function loadTrainersFromDB(){
+  try{
+    const {data,error}=await db.from('trainers').select('*');
+    if(error) throw error;
+    if(!data||!data.length){
+      // أول تشغيل — نزرع القاعدة من القائمة الثابتة
+      const seedRows=Object.entries(TRAINERS_DB).map(([name,zone])=>({name,zone}));
+      for(let i=0;i<seedRows.length;i+=200){
+        await db.from('trainers').insert(seedRows.slice(i,i+200));
+      }
+      TRAINERS_LOADED_FROM_DB=true;
+      return;
+    }
+    const fresh={};
+    data.forEach(r=>{ fresh[r.name]=r.zone; });
+    Object.keys(TRAINERS_DB).forEach(k=>delete TRAINERS_DB[k]);
+    Object.assign(TRAINERS_DB,fresh);
+    TRAINERS_LOADED_FROM_DB=true;
+  }catch(e){
+    console.error('تعذّر تحميل المدربين من القاعدة — سيتم الاعتماد على القائمة المحلية',e);
+  }
+}
+
+async function loadViolationTypesFromDB(){
+  try{
+    const {data,error}=await db.from('violation_types').select('*').order('id',{ascending:true});
+    if(error) throw error;
+    if(!data||!data.length){
+      const seedRows=VIOLATIONS_DB.map(v=>({text:v.v,grade:v.g}));
+      await db.from('violation_types').insert(seedRows);
+      const {data:data2}=await db.from('violation_types').select('*').order('id',{ascending:true});
+      if(data2&&data2.length){ VIOLATIONS_DB=data2.map(r=>({id:r.id,v:r.text,g:r.grade})); }
+      VIOLATIONS_LOADED_FROM_DB=true;
+      refreshViolationSelects();
+      return;
+    }
+    VIOLATIONS_DB=data.map(r=>({id:r.id,v:r.text,g:r.grade}));
+    VIOLATIONS_LOADED_FROM_DB=true;
+    refreshViolationSelects();
+  }catch(e){
+    console.error('تعذّر تحميل قائمة المخالفات من القاعدة — سيتم الاعتماد على القائمة المحلية',e);
+  }
+}
+
+function violationOptionsHTML(){
+  return VIOLATIONS_DB.map(v=>`<option value="${v.v.replace(/"/g,'&quot;')}|${v.g}">${v.v}</option>`).join('');
+}
+
+// يعيد بناء كل قوائم اختيار "نوع المخالفة" الموجودة حالياً في الصفحة مع الحفاظ على القيمة المختارة إن كانت لا تزال موجودة
+function refreshViolationSelects(){
+  document.querySelectorAll('select[id^="vType"]').forEach(sel=>{
+    const cur=sel.value;
+    sel.innerHTML='<option value="">اختر / Select</option>'+violationOptionsHTML();
+    if(cur && [...sel.options].some(o=>o.value===cur)) sel.value=cur;
+  });
+}
+
+async function initTrainersAndViolations(){
+  await Promise.all([loadTrainersFromDB(), loadViolationTypesFromDB()]);
+}
+
+// ══════════════════════════════════
+// صفحة إدارة المدربين والمخالفات (tm = Trainer Management)
+// ══════════════════════════════════
+async function tmInitPage(){
+  if(!TRAINERS_LOADED_FROM_DB || !VIOLATIONS_LOADED_FROM_DB){
+    await initTrainersAndViolations();
+  }
+  tmSwitchTab('list');
+}
+
+function tmSwitchTab(tab){
+  ['list','add','vlist','vadd'].forEach(t=>{
+    const panel=document.getElementById('tmPanel_'+t);
+    const btn=document.getElementById('tmTab_'+t);
+    if(panel) panel.style.display = t===tab ? '' : 'none';
+    if(btn){
+      btn.style.background = t===tab ? 'var(--accent)' : 'transparent';
+      btn.style.color = t===tab ? '#fff' : 'var(--text-dim)';
+    }
+  });
+  if(tab==='list') tmRenderTrainerList();
+  if(tab==='vlist') tmRenderViolationList();
+}
+
+function tmZoneLabel(z){
+  const map={A:'A — نسائي',B:'B — نسائي',D:'D — نسائي',E:'E — نسائي',L:'L — نسائي',O:'O — رجالي',H:'H — رجالي','دراجات':'دراجات'};
+  return map[z]||z||'—';
+}
+
+function tmRenderTrainerList(){
+  const listEl=document.getElementById('tmTrainerList');
+  const countEl=document.getElementById('tmTrainerCount');
+  if(!listEl) return;
+  const q=(document.getElementById('tmSearchTrainer')?.value||'').trim();
+  const names=Object.keys(TRAINERS_DB).filter(n=>!q||n.includes(q)).sort((a,b)=>a.localeCompare(b,'ar'));
+  countEl.textContent=`عدد المدربين: ${Object.keys(TRAINERS_DB).length}${q?` — نتائج البحث: ${names.length}`:''}`;
+  if(!names.length){ listEl.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">لا توجد نتائج</div>'; return; }
+  const zoneOptions=['A','B','D','E','L','O','H','دراجات'];
+  listEl.innerHTML=names.map(name=>{
+    const zone=TRAINERS_DB[name]||'';
+    const safeName=name.replace(/'/g,"\\'");
+    return `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:160px;font-size:13px;font-weight:700;color:var(--text);">${name}</div>
+      <select onchange="tmEditZone('${safeName}',this.value)" style="padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:12px;">
+        ${zoneOptions.map(z=>`<option value="${z}" ${z===zone?'selected':''}>${tmZoneLabel(z)}</option>`).join('')}
+      </select>
+      <button onclick="tmDeleteTrainer('${safeName}')" style="background:rgba(217,79,79,0.1);border:1px solid rgba(217,79,79,0.3);color:var(--red);padding:7px 12px;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;">🗑️ حذف</button>
+    </div>`;
+  }).join('');
+}
+
+async function tmAddTrainer(){
+  const nameEl=document.getElementById('tmNewName');
+  const zoneEl=document.getElementById('tmNewZone');
+  const msgEl=document.getElementById('tmAddMsg');
+  const name=nameEl.value.trim();
+  const zone=zoneEl.value;
+  if(!name){ msgEl.textContent='⚠️ أدخل اسم المدرب/ة'; msgEl.style.color='var(--red)'; return; }
+  if(TRAINERS_DB[name]){ msgEl.textContent='⚠️ هذا الاسم موجود بالفعل'; msgEl.style.color='var(--red)'; return; }
+  msgEl.textContent='⏳ جاري الإضافة...'; msgEl.style.color='var(--text-dim)';
+  try{
+    const {error}=await db.from('trainers').insert({name,zone});
+    if(error) throw error;
+    TRAINERS_DB[name]=zone;
+    nameEl.value='';
+    msgEl.textContent='✅ تمت إضافة المدرب/ة بنجاح';
+    msgEl.style.color='var(--accent)';
+    toast('✅ تمت إضافة المدرب/ة');
+  }catch(e){
+    console.error(e);
+    msgEl.textContent='❌ تعذّرت الإضافة — تأكد من وجود جدول trainers في القاعدة';
+    msgEl.style.color='var(--red)';
+  }
+}
+
+async function tmDeleteTrainer(name){
+  if(!confirm(`هل تريد حذف "${name}" من قائمة المدربين؟`)) return;
+  try{
+    const {error}=await db.from('trainers').delete().eq('name',name);
+    if(error) throw error;
+    delete TRAINERS_DB[name];
+    tmRenderTrainerList();
+    toast('🗑️ تم حذف المدرب/ة');
+  }catch(e){
+    console.error(e);
+    toast('❌ تعذّر الحذف');
+  }
+}
+
+async function tmEditZone(name,newZone){
+  try{
+    const {error}=await db.from('trainers').update({zone:newZone}).eq('name',name);
+    if(error) throw error;
+    TRAINERS_DB[name]=newZone;
+    toast(`✅ تم تحديث زون ${name} إلى ${newZone}`);
+  }catch(e){
+    console.error(e);
+    toast('❌ تعذّر تحديث الزون');
+    tmRenderTrainerList();
+  }
+}
+
+function tmGradeColor(g){ return g==='A'?'var(--red)':g==='B'?'var(--orange)':'var(--accent)'; }
+function tmGradeLabel(g){ return g==='A'?'A — جسيمة':g==='B'?'B — متوسطة':'C — بسيطة'; }
+
+function tmRenderViolationList(){
+  const listEl=document.getElementById('tmViolationList');
+  if(!listEl) return;
+  if(!VIOLATIONS_DB.length){ listEl.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">لا توجد مخالفات مسجلة</div>'; return; }
+  listEl.innerHTML=VIOLATIONS_DB.map(v=>`
+    <div id="tmVRow_${v.id}" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+        <div style="background:${tmGradeColor(v.g)};color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;flex-shrink:0;">${v.g}</div>
+        <div id="tmVText_${v.id}" style="flex:1;min-width:200px;font-size:13px;font-weight:600;color:var(--text);line-height:1.6;">${v.v}</div>
+        <button onclick="tmStartEditViolation('${v.id}')" style="background:rgba(0,168,150,0.08);border:1px solid rgba(0,168,150,0.25);color:var(--accent);padding:6px 12px;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">✏️ تعديل الصياغة</button>
+      </div>
+      <div id="tmVEdit_${v.id}" style="display:none;margin-top:10px;"></div>
+    </div>`).join('');
+}
+
+function tmStartEditViolation(id){
+  const v=VIOLATIONS_DB.find(x=>String(x.id)===String(id));
+  if(!v) return;
+  const editEl=document.getElementById('tmVEdit_'+id);
+  editEl.style.display='block';
+  editEl.innerHTML=`
+    <textarea id="tmVTextArea_${id}" style="width:100%;min-height:60px;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:12px;box-sizing:border-box;">${v.v}</textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <select id="tmVGradeSel_${id}" style="padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:12px;">
+        <option value="A" ${v.g==='A'?'selected':''}>A — جسيمة</option>
+        <option value="B" ${v.g==='B'?'selected':''}>B — متوسطة</option>
+        <option value="C" ${v.g==='C'?'selected':''}>C — بسيطة</option>
+      </select>
+      <button onclick="tmSaveEditViolation('${id}')" style="background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">💾 حفظ</button>
+      <button onclick="document.getElementById('tmVEdit_${id}').style.display='none'" style="background:rgba(0,0,0,0.05);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">إلغاء</button>
+    </div>`;
+}
+
+async function tmSaveEditViolation(id){
+  const newText=document.getElementById('tmVTextArea_'+id).value.trim();
+  const newGrade=document.getElementById('tmVGradeSel_'+id).value;
+  if(!newText){ toast('⚠️ لا يمكن ترك نص المخالفة فارغاً'); return; }
+  try{
+    const {error}=await db.from('violation_types').update({text:newText,grade:newGrade}).eq('id',id);
+    if(error) throw error;
+    const v=VIOLATIONS_DB.find(x=>String(x.id)===String(id));
+    if(v){ v.v=newText; v.g=newGrade; }
+    tmRenderViolationList();
+    refreshViolationSelects();
+    toast('✅ تم تحديث صياغة المخالفة');
+  }catch(e){
+    console.error(e);
+    toast('❌ تعذّر حفظ التعديل — تأكد من وجود جدول violation_types في القاعدة');
+  }
+}
+
+async function tmAddViolation(){
+  const textEl=document.getElementById('tmNewViolText');
+  const gradeEl=document.getElementById('tmNewViolGrade');
+  const msgEl=document.getElementById('tmAddVMsg');
+  const text=textEl.value.trim();
+  const grade=gradeEl.value;
+  if(!text){ msgEl.textContent='⚠️ أدخل نص المخالفة'; msgEl.style.color='var(--red)'; return; }
+  msgEl.textContent='⏳ جاري الإضافة...'; msgEl.style.color='var(--text-dim)';
+  try{
+    const {data,error}=await db.from('violation_types').insert({text,grade}).select().single();
+    if(error) throw error;
+    VIOLATIONS_DB.push({id:data.id,v:text,g:grade});
+    textEl.value='';
+    refreshViolationSelects();
+    msgEl.textContent='✅ تمت إضافة المخالفة بنجاح';
+    msgEl.style.color='var(--accent)';
+    toast('✅ تمت إضافة المخالفة');
+  }catch(e){
+    console.error(e);
+    msgEl.textContent='❌ تعذّرت الإضافة — تأكد من وجود جدول violation_types في القاعدة';
+    msgEl.style.color='var(--red)';
+  }
+}
 
 // ── TRAINER SEARCH ──
 function trainerSearch(inp,idx){
@@ -5920,6 +6274,8 @@ function selectTrainer(idx,name){
   const zone=TRAINERS_DB[name]||'';
   document.getElementById('vZone'+idx).value=zone?'ZONE '+zone:'غير محدد';
   document.getElementById('td'+idx).classList.remove('show');
+  const phoneField=document.getElementById('phoneObsField'+idx);
+  if(phoneField && phoneField.style.display!=='none'){ renderPhoneObsButtons(idx); }
 }
 function hideDropdown(idx){setTimeout(()=>{const d=document.getElementById('td'+idx);if(d)d.classList.remove('show');},200);}
 
@@ -5977,25 +6333,7 @@ function addTrainerEntry(){
         <label>نوع المخالفة / Violation Type</label>
         <select id="vType${idx}" onchange="autoGrade(${idx})">
           <option value="">اختر / Select</option>
-          <option value="تلفظ المدرب/ة امام العملاء بخصوص التدريب|A">تلفظ المدرب/ة امام العملاء بخصوص التدريب</option>
-          <option value="التجاوز على العميل بأي طريقة كانت (لفظي-جسدي)|A">التجاوز على العميل بأي طريقة كانت (لفظي-جسدي)</option>
-          <option value="الخروج عن سياق التدريب (بمواضيع سياسية - دينية)|A">الخروج عن سياق التدريب (بمواضيع سياسية - دينية)</option>
-          <option value="الخروج بمركبة التدريب والذهاب بها لأغراض شخصية|A">الخروج بمركبة التدريب والذهاب بها لأغراض شخصية</option>
-          <option value="التدخين داخل المركبة أثناء الحصة التدريبية|B">التدخين داخل المركبة أثناء الحصة التدريبية</option>
-          <option value="استخدام الجوال اثناء الحصة التدريبية|B">استخدام الجوال اثناء الحصة التدريبية</option>
-          <option value="قيادة المدرب/ة بشكل متهور مع العميل|B">قيادة المدرب/ة بشكل متهور مع العميل</option>
-          <option value="ترك العميل بالمركبة وهي تعمل أثناء الحصة التدريبية|B">ترك العميل بالمركبة وهي تعمل أثناء الحصة التدريبية</option>
-          <option value="السرعة الزائده داخل الميدان او اثناء الحصة (تتجاوز 35 كم/س)|B">السرعة الزائده داخل الميدان او اثناء الحصة (تتجاوز 35 كم/س)</option>
-          <option value="وضع كرسي المدرب/ة على وضعية الاسترخاء اثناء الحصة|B">وضع كرسي المدرب/ة على وضعية الاسترخاء اثناء الحصة</option>
-          <option value="العودة للمواقف قبل نهاية الحصه التدريبية باكثر من 10 دقائق|C">العودة للمواقف قبل نهاية الحصه التدريبية باكثر من 10 دقائق</option>
-          <option value="تجاوز داخل المواقف في الاتجاه المعاكس|C">تجاوز داخل المواقف في الاتجاه المعاكس</option>
-          <option value="انهاء الحصة التدريبية مبكرا دون وجود مبرر|C">انهاء الحصة التدريبية مبكرا دون وجود مبرر</option>
-          <option value="التدريب في مكان ممنوع (بين السيارات الخاصة)|C">التدريب في مكان ممنوع (بين السيارات الخاصة)</option>
-          <option value="عدم ربط حزام الأمان (الراكب-السائق)|C">عدم ربط حزام الأمان (الراكب-السائق)</option>
-          <option value="وضع تظليل ثقيل يحد من رؤية الطريق من النوافذ الجانبية|C">وضع تظليل ثقيل يحد من رؤية الطريق من النوافذ الجانبية</option>
-          <option value="عدم ارتداء الزي الرسمي اثناء الحصة التدريبية|C">عدم ارتداء الزي الرسمي اثناء الحصة التدريبية</option>
-          <option value="عدم تبليغ المنسق/ة بالذهاب الى المحطة|C">عدم تبليغ المنسق/ة بالذهاب الى المحطة</option>
-          <option value="الذهاب الى اماكن محظورة|B">الذهاب الى اماكن محظورة</option>
+          ${violationOptionsHTML()}
         </select>
       </div>
       <div class="field">
@@ -7872,42 +8210,80 @@ function resetSales(){
 
 // ════════════════════════════════════════════════
 // PHONE VIOLATION TRACKER — نظام رصد استخدام الجوال
+// (مخزّن على Supabase حتى يراه كل موظفي الجودة من أي جهاز/حساب)
 // ════════════════════════════════════════════════
-const PHONE_KEY = 'nq_phone_obs_v1';
+const PHONE_KEY = 'nq_phone_obs_v1'; // احتياطي محلي فقط في حال تعذر الاتصال بالقاعدة
 
-function getPhoneObs(){
+function getPhoneObsLocalFallback(){
   try{ return JSON.parse(localStorage.getItem(PHONE_KEY)||'{}'); }
   catch(e){ return {}; }
 }
-function savePhoneObs(data){ localStorage.setItem(PHONE_KEY, JSON.stringify(data)); }
+function savePhoneObsLocalFallback(data){ localStorage.setItem(PHONE_KEY, JSON.stringify(data)); }
 
-function getTrainerPhoneCount(name){
-  const data = getPhoneObs();
-  const rec = data[name.trim()];
-  if(!rec) return 0;
-  if(Date.now() - rec.lastUpdate > 7*24*60*60*1000){
-    delete data[name.trim()];
-    savePhoneObs(data);
-    return 0;
+async function getPhoneObsRemote(name){
+  const key=name.trim();
+  try{
+    const {data,error}=await db.from('phone_watch').select('*').eq('trainer_name',key).maybeSingle();
+    if(error) throw error;
+    if(!data) return null;
+    const lastUpdate=new Date(data.last_update).getTime();
+    if(Date.now()-lastUpdate>7*24*60*60*1000){
+      await db.from('phone_watch').delete().eq('trainer_name',key);
+      return null;
+    }
+    return {count:data.count||0, observers:data.observers||[], lastUpdate};
+  }catch(e){
+    console.error('تعذّر الاتصال بجدول phone_watch — سيتم استخدام التخزين المحلي مؤقتاً',e);
+    const local=getPhoneObsLocalFallback();
+    const rec=local[key];
+    if(!rec) return null;
+    if(Date.now()-rec.lastUpdate>7*24*60*60*1000){ delete local[key]; savePhoneObsLocalFallback(local); return null; }
+    return rec;
   }
-  return rec.count || 0;
 }
 
-function renderPhoneObsButtons(idx){
+async function savePhoneObsRemote(name,count,observers){
+  const key=name.trim();
+  try{
+    const {error}=await db.from('phone_watch').upsert({trainer_name:key,count,observers,last_update:new Date().toISOString()});
+    if(error) throw error;
+  }catch(e){
+    console.error('تعذّر الحفظ على جدول phone_watch — سيتم الحفظ محلياً مؤقتاً',e);
+    const local=getPhoneObsLocalFallback();
+    local[key]={count,observers,lastUpdate:Date.now()};
+    savePhoneObsLocalFallback(local);
+  }
+}
+
+async function deletePhoneObsRemote(name){
+  const key=name.trim();
+  try{
+    const {error}=await db.from('phone_watch').delete().eq('trainer_name',key);
+    if(error) throw error;
+  }catch(e){
+    console.error('تعذّر حذف سجل phone_watch',e);
+  }
+  const local=getPhoneObsLocalFallback();
+  delete local[key];
+  savePhoneObsLocalFallback(local);
+}
+
+async function getTrainerPhoneCount(name){
+  const rec=await getPhoneObsRemote(name);
+  return rec?.count||0;
+}
+
+async function renderPhoneObsButtons(idx){
   const trainerEl = document.getElementById('vTrainer'+idx);
   const btnsEl = document.getElementById('phoneObsBtns'+idx);
   const msgEl = document.getElementById('phoneObsMsg'+idx);
   if(!btnsEl) return;
 
   const trainerName = trainerEl ? trainerEl.value.trim() : '';
-  const data = getPhoneObs();
-  const rec = trainerName ? data[trainerName.trim()] : null;
-  // تحقق انتهاء الصلاحية
-  if(rec && Date.now() - rec.lastUpdate > 7*24*60*60*1000){
-    delete data[trainerName.trim()];
-    savePhoneObs(data);
-  }
-  const count = rec && Date.now() - rec.lastUpdate <= 7*24*60*60*1000 ? (rec.count||0) : 0;
+  if(!trainerName){ btnsEl.innerHTML=''; if(msgEl) msgEl.innerHTML='أدخل اسم المدرب أولاً'; return; }
+  btnsEl.innerHTML = '<div style="font-size:11px;color:var(--text-dim);">⏳ جاري التحقق من عدد المشاهدات السابقة...</div>';
+  const rec = await getPhoneObsRemote(trainerName);
+  const count = rec ? (rec.count||0) : 0;
   const observers = rec?.observers || [];
   const next = count + 1;
 
@@ -7949,30 +8325,30 @@ function renderPhoneObsButtons(idx){
   else if(count === 2) msgEl.innerHTML = '⚠️ مشاهدتان مسجلتان — اضغط <b>3</b> للمخالفة' + prevInfo;
 }
 
-function selectPhoneObs(idx, n){
+async function selectPhoneObs(idx, n){
   const trainerEl = document.getElementById('vTrainer'+idx);
   const trainerName = trainerEl ? trainerEl.value.trim() : '';
   if(!trainerName){ toast('⚠️ أدخل اسم المدرب أولاً'); return; }
 
-  const data = getPhoneObs();
   const key = trainerName.trim();
   const obsBy = currentUser ? currentUser.name : '';
+  const rec = await getPhoneObsRemote(key);
 
   if(n < 3){
     // ── تحقق أن العداد الحالي = n-1 (منع التسجيل المزدوج أو التخطي) ──
-    const currentCount = data[key] && Date.now() - data[key].lastUpdate <= 7*24*60*60*1000 ? (data[key].count||0) : 0;
+    const currentCount = rec ? (rec.count||0) : 0;
     if(n !== currentCount + 1){
       renderPhoneObsButtons(idx);
       if(n <= currentCount){
-        toast('⚠️ هذه المشاهدة سبق تسجيلها من قِبل زميل');
+        toast('⚠️ هذه المشاهدة سبق تسجيلها من قِبل زميل — آخر من رصدها: ' + (rec?.observers?.slice(-1)[0]?.by || '—'));
       } else {
         toast('⚠️ يجب تسجيل المشاهدة ' + (currentCount+1) + ' أولاً');
       }
       return;
     }
     // سجّل المشاهدة مع اسم الموظف
-    data[key] = { count: n, lastUpdate: Date.now(), observers: (data[key]?.observers||[]).concat([{n, by:obsBy, time:new Date().toLocaleTimeString('ar-SA')}]) };
-    savePhoneObs(data);
+    const observers = (rec?.observers||[]).concat([{n, by:obsBy, time:new Date().toLocaleTimeString('ar-SA')}]);
+    await savePhoneObsRemote(key, n, observers);
     document.getElementById('phoneObsField'+idx).style.display = 'none';
     document.getElementById('vType'+idx).value = '';
     document.getElementById('vAutoGrade'+idx).textContent = '—';
@@ -7980,7 +8356,7 @@ function selectPhoneObs(idx, n){
     showPhoneObsToast(trainerName, n, false);
   } else {
     // ── المشاهدة الثالثة = مخالفة رسمية ──
-    const currentCount3 = data[key] && Date.now() - data[key].lastUpdate <= 7*24*60*60*1000 ? (data[key].count||0) : 0;
+    const currentCount3 = rec ? (rec.count||0) : 0;
     if(currentCount3 !== 2){
       renderPhoneObsButtons(idx);
       if(currentCount3 >= 3){
@@ -7990,9 +8366,8 @@ function selectPhoneObs(idx, n){
       }
       return;
     }
-    const prevObs = data[key]?.observers || [];
-    delete data[key];
-    savePhoneObs(data);
+    const prevObs = rec?.observers || [];
+    await deletePhoneObsRemote(key);
     document.getElementById('phoneObsField'+idx).style.display = 'none';
 
     // بناء سجل المخالفة
@@ -8933,7 +9308,7 @@ async function doExportViolations(choice){
   if(btn){btn.disabled=true;btn.textContent='⏳ جاري البناء...';}
   try{
     const {data:all} = await db.from('violations').select('*').gte('date','2026-02-01').order('date',{ascending:false});
-    const recs = all||[];
+    const recs = applyCtoBUpgrade(all||[]);
     const female = recs.filter(r=>r.section==='female');
     const male = recs.filter(r=>r.section==='male');
 
@@ -9040,6 +9415,33 @@ function ws_kpi_row(ws, r, label, val, vbg){
   vc.font=exFont(true,12,'FFFFFF'); vc.fill=exFill(vbg);
   vc.alignment=exAlign(); vc.border=exBd('FFFFFF');
   ws.getRow(r).height=26;
+}
+
+// عند تكرار مخالفة من تصنيف C لنفس المدرب/ة 3 مرات أو أكثر (بنفس نوع المخالفة)
+// تتحول تلقائياً إلى تصنيف B، مع توضيح ذلك وعدد مرات التكرار في عمود الشرح بالإكسل
+function applyCtoBUpgrade(recs){
+  const list = recs.map(r=>({...r}));
+  const groups = {};
+  list.forEach((r,i)=>{
+    if((r.grade||'')!=='C') return;
+    const key = (r.trainer_name||'—')+'|'+(r.violation_type||'—').split('|')[0].trim();
+    if(!groups[key]) groups[key]=[];
+    groups[key].push(i);
+  });
+  Object.values(groups).forEach(idxArr=>{
+    if(idxArr.length>=3){
+      idxArr.sort((a,b)=> new Date(list[a].date||0) - new Date(list[b].date||0));
+      idxArr.forEach((i,order)=>{
+        const occurrence = order+1;
+        const originalDesc = list[i].description||'';
+        list[i].grade='B';
+        list[i].description = originalDesc
+          + (originalDesc?' — ':'')
+          + `⚠ تكررت هذه المخالفة ${idxArr.length} مرات لنفس المدرب/ة (تصنيف C) — تحوّلت تلقائياً إلى تصنيف B [تكرار رقم ${occurrence}]`;
+      });
+    }
+  });
+  return list;
 }
 
 function addViolationsSheet(wb, recs, title, year){
@@ -9760,8 +10162,8 @@ function mergeIncManualToData(){
 let ratingRawData = [];
 let ratingHeaders = [];
 
-// قائمة المدربين — يستخدمها التطبيق لمطابقة الأسماء في الملاحظات
-const TRAINER_NAMES_LIST = typeof TRAINERS_DB==='object' ? Object.keys(TRAINERS_DB) : [];
+// قائمة المدربين — يستخدمها التطبيق لمطابقة الأسماء في الملاحظات (تُقرأ حياً من TRAINERS_DB حتى تعكس أي إضافة/حذف لاحق)
+function getTrainerNamesList(){ return typeof TRAINERS_DB==='object' ? Object.keys(TRAINERS_DB) : []; }
 
 function handleRatingFile(input){
   const file=input.files[0];
@@ -9813,6 +10215,7 @@ function extractTrainerMentions(notes){
   if(!notes) return mentions;
   const text=String(notes);
   // أولاً: جرب مطابقة مع قائمة المدربين المعروفين
+  const TRAINER_NAMES_LIST=getTrainerNamesList();
   if(TRAINER_NAMES_LIST.length){
     TRAINER_NAMES_LIST.forEach(name=>{
       if(name&&text.includes(name)) mentions.push(name);
