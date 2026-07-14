@@ -6110,17 +6110,52 @@ function tmRenderTrainerList(){
   countEl.textContent=`عدد المدربين: ${Object.keys(TRAINERS_DB).length}${q?` — نتائج البحث: ${names.length}`:''}`;
   if(!names.length){ listEl.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">لا توجد نتائج</div>'; return; }
   const zoneOptions=['A','B','D','E','L','O','H','دراجات'];
-  listEl.innerHTML=names.map(name=>{
+  listEl.innerHTML=names.map((name,ri)=>{
     const zone=TRAINERS_DB[name]||'';
     const safeName=name.replace(/'/g,"\\'");
-    return `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;flex-wrap:wrap;">
-      <div style="flex:1;min-width:160px;font-size:13px;font-weight:700;color:var(--text);">${name}</div>
-      <select onchange="tmEditZone('${safeName}',this.value)" style="padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:12px;">
-        ${zoneOptions.map(z=>`<option value="${z}" ${z===zone?'selected':''}>${tmZoneLabel(z)}</option>`).join('')}
-      </select>
-      <button onclick="tmDeleteTrainer('${safeName}')" style="background:rgba(217,79,79,0.1);border:1px solid rgba(217,79,79,0.3);color:var(--red);padding:7px 12px;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;">🗑️ حذف</button>
+    return `<div id="tmTRow_${ri}" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div id="tmTName_${ri}" style="flex:1;min-width:160px;font-size:13px;font-weight:700;color:var(--text);">${name}</div>
+        <select onchange="tmEditZone('${safeName}',this.value)" style="padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:12px;">
+          ${zoneOptions.map(z=>`<option value="${z}" ${z===zone?'selected':''}>${tmZoneLabel(z)}</option>`).join('')}
+        </select>
+        <button onclick="tmStartEditTrainerName(${ri},'${safeName}')" style="background:rgba(0,168,150,0.08);border:1px solid rgba(0,168,150,0.25);color:var(--accent);padding:7px 12px;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✏️ تعديل الاسم</button>
+        <button onclick="tmDeleteTrainer('${safeName}')" style="background:rgba(217,79,79,0.1);border:1px solid rgba(217,79,79,0.3);color:var(--red);padding:7px 12px;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;">🗑️ حذف</button>
+      </div>
+      <div id="tmTEdit_${ri}" style="display:none;margin-top:10px;"></div>
     </div>`;
   }).join('');
+}
+
+function tmStartEditTrainerName(ri,name){
+  const editEl=document.getElementById('tmTEdit_'+ri);
+  editEl.style.display='block';
+  editEl.innerHTML=`
+    <input type="text" id="tmTNameInput_${ri}" value="${name.replace(/"/g,'&quot;')}" style="width:100%;max-width:320px;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);font-family:Cairo,sans-serif;font-size:13px;box-sizing:border-box;">
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button onclick="tmSaveTrainerName(${ri},'${name.replace(/'/g,"\\'")}')" style="background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">💾 حفظ</button>
+      <button onclick="document.getElementById('tmTEdit_${ri}').style.display='none'" style="background:rgba(0,0,0,0.05);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">إلغاء</button>
+    </div>`;
+}
+
+async function tmSaveTrainerName(ri,oldName){
+  const input=document.getElementById('tmTNameInput_'+ri);
+  const newName=input.value.trim();
+  if(!newName){ toast('⚠️ لا يمكن ترك الاسم فارغاً'); return; }
+  if(newName===oldName){ document.getElementById('tmTEdit_'+ri).style.display='none'; return; }
+  if(TRAINERS_DB[newName]){ toast('⚠️ يوجد مدرب/ة آخر بنفس الاسم بالفعل'); return; }
+  try{
+    const {error}=await db.from('trainers').update({name:newName}).eq('name',oldName);
+    if(error) throw error;
+    const zone=TRAINERS_DB[oldName];
+    delete TRAINERS_DB[oldName];
+    TRAINERS_DB[newName]=zone;
+    tmRenderTrainerList();
+    toast('✅ تم تحديث اسم المدرب/ة');
+  }catch(e){
+    console.error(e);
+    toast('❌ تعذّر تحديث الاسم — تأكد من وجود جدول trainers في القاعدة');
+  }
 }
 
 async function tmAddTrainer(){
@@ -6187,9 +6222,27 @@ function tmRenderViolationList(){
         <div style="background:${tmGradeColor(v.g)};color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;flex-shrink:0;">${v.g}</div>
         <div id="tmVText_${v.id}" style="flex:1;min-width:200px;font-size:13px;font-weight:600;color:var(--text);line-height:1.6;">${v.v}</div>
         <button onclick="tmStartEditViolation('${v.id}')" style="background:rgba(0,168,150,0.08);border:1px solid rgba(0,168,150,0.25);color:var(--accent);padding:6px 12px;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">✏️ تعديل الصياغة</button>
+        <button onclick="tmDeleteViolation('${v.id}')" style="background:rgba(217,79,79,0.08);border:1px solid rgba(217,79,79,0.25);color:var(--red);padding:6px 12px;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">🗑️ حذف</button>
       </div>
       <div id="tmVEdit_${v.id}" style="display:none;margin-top:10px;"></div>
     </div>`).join('');
+}
+
+async function tmDeleteViolation(id){
+  const v=VIOLATIONS_DB.find(x=>String(x.id)===String(id));
+  if(!v) return;
+  if(!confirm(`هل تريد حذف هذه المخالفة من القائمة؟\n\n"${v.v}"`)) return;
+  try{
+    const {error}=await db.from('violation_types').delete().eq('id',id);
+    if(error) throw error;
+    VIOLATIONS_DB=VIOLATIONS_DB.filter(x=>String(x.id)!==String(id));
+    tmRenderViolationList();
+    refreshViolationSelects();
+    toast('🗑️ تم حذف المخالفة من القائمة');
+  }catch(e){
+    console.error(e);
+    toast('❌ تعذّر الحذف — تأكد من وجود جدول violation_types في القاعدة');
+  }
 }
 
 function tmStartEditViolation(id){
@@ -8227,7 +8280,7 @@ async function getPhoneObsRemote(name){
     if(error) throw error;
     if(!data) return null;
     const lastUpdate=new Date(data.last_update).getTime();
-    if(Date.now()-lastUpdate>7*24*60*60*1000){
+    if(Date.now()-lastUpdate>30*24*60*60*1000){
       await db.from('phone_watch').delete().eq('trainer_name',key);
       return null;
     }
@@ -8237,7 +8290,7 @@ async function getPhoneObsRemote(name){
     const local=getPhoneObsLocalFallback();
     const rec=local[key];
     if(!rec) return null;
-    if(Date.now()-rec.lastUpdate>7*24*60*60*1000){ delete local[key]; savePhoneObsLocalFallback(local); return null; }
+    if(Date.now()-rec.lastUpdate>30*24*60*60*1000){ delete local[key]; savePhoneObsLocalFallback(local); return null; }
     return rec;
   }
 }
